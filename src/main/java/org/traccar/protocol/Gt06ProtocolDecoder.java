@@ -914,6 +914,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int moduleLength = buf.readUnsignedByte();
                     switch (moduleType) {
                         case 0x0018 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                        case 0x0027 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
                         case 0x0032 -> position.set("startupStatus", buf.readUnsignedByte());
                         case 0x006A -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         default -> buf.skipBytes(moduleLength);
