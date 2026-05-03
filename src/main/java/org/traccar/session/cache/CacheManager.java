@@ -330,10 +330,13 @@ public class CacheManager implements BroadcastInterface {
                 }
 
                 for (Class<? extends BaseModel> clazz : GROUPED_CLASSES) {
-                    for (Permission permission : storage.getPermissions(object.getClass(), clazz)) {
-                        if (permission.getOwnerId() == object.getId()) {
-                            invalidatePermission(
-                                    object.getClass(), object.getId(), clazz, permission.getPropertyId(), true);
+                    if (!clazz.equals(Device.class) || object.getClass().equals(Device.class)) {
+                        for (Permission permission : storage.getPermissions(object.getClass(), clazz)) {
+                            if (permission.getOwnerId() == object.getId()) {
+                                invalidatePermission(
+                                        object.getClass(), object.getId(),
+                                        clazz, permission.getPropertyId(), true);
+                            }
                         }
                     }
                 }
