@@ -23,8 +23,15 @@
     </createTable>
 
     <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="deviceid" constraintName="fk_device_device_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
-    <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
 
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.13.0-fk-linkeddeviceid" dbms="!mssql">
+    <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.13.0-fk-linkeddeviceid-mssql" dbms="mssql">
+    <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" referencedColumnNames="id" referencedTableName="tc_devices" />
   </changeSet>
 
 </databaseChangeLog>
