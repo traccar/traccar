@@ -36,6 +36,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -44,8 +45,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class OidcResource extends BaseResource {
             @QueryParam("response_type") String responseType,
             @QueryParam("code_challenge") String codeChallenge,
             @QueryParam("code_challenge_method") String codeChallengeMethod,
-            @QueryParam("nonce") String nonce) {
+            @QueryParam("nonce") String nonce) throws GeneralSecurityException, JOSEException, StorageException {
 
         ClientConfig client = getClients().get(clientId);
         if (client == null) {
@@ -89,6 +90,28 @@ public class OidcResource extends BaseResource {
         URI target = URI.create(redirectUri);
         if (!client.redirectUris().contains(target)) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
+        if (getUserId() == 0) {
+            UriBuilder returnUrl = UriBuilder.fromPath("/api/oidc/authorize")
+                    .queryParam("client_id", clientId)
+                    .queryParam("redirect_uri", redirectUri)
+                    .queryParam("response_type", responseType)
+                    .queryParam("scope", scope);
+            if (state != null) {
+                returnUrl.queryParam("state", state);
+            }
+            if (nonce != null) {
+                returnUrl.queryParam("nonce", nonce);
+            }
+            if (codeChallenge != null) {
+                returnUrl.queryParam("code_challenge", codeChallenge);
+            }
+            if (codeChallengeMethod != null) {
+                returnUrl.queryParam("code_challenge_method", codeChallengeMethod);
+            }
+            return Response.seeOther(UriBuilder.fromPath("/")
+                    .queryParam("return", returnUrl.build().toString()).build()).build();
         }
 
         String code = sessionManager.issueCode(
