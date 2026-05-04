@@ -27,10 +27,20 @@
   </changeSet>
 
   <changeSet author="author" id="changelog-6.13.0-fk-linkeddeviceid" dbms="!mssql">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_device_device_linkeddeviceid" />
+      </not>
+    </preConditions>
     <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
   </changeSet>
 
   <changeSet author="author" id="changelog-6.13.0-fk-linkeddeviceid-mssql" dbms="mssql">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="fk_device_device_linkeddeviceid" />
+      </not>
+    </preConditions>
     <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" referencedColumnNames="id" referencedTableName="tc_devices" />
   </changeSet>
 
