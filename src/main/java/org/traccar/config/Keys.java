@@ -2171,4 +2171,18 @@ public final class Keys {
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
+    /**
+     * The Things Network Downlink API key.
+     */
+    public static final ConfigKey<String> COMMAND_TTNHTTP_APIKEY = new StringConfigKey(
+            "command.ttnhttp.apiKey",
+            List.of(KeyType.DEVICE));
+
+    /**
+     * The Things Network Downlink push URL.
+     */
+    public static final ConfigKey<String> COMMAND_TTNHTTP_PUSHURL = new StringConfigKey(
+            "command.ttnhttp.pushUrl",
+            List.of(KeyType.DEVICE));
+
 }
