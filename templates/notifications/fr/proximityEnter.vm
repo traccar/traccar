@@ -1,0 +1,13 @@
+#set($subject = "$esc.html($device.name): a atteint la proximité")
+#set($digest = "$device.name a atteint la proximité de l'appareil lié à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Appareil: $esc.html($device.name)<br>
+A atteint la proximité de l'appareil lié<br>
+Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+</body>
+</html>
