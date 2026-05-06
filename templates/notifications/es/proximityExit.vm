@@ -1,0 +1,13 @@
+#set($subject = "$esc.html($device.name): fuera de alcance")
+#set($digest = "$device.name dispositivo conectado fuera de alcance $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $esc.html($device.name)<br>
+Dispositivo conectado fuera de alcance<br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Punto: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar suscripción</a>
+</body>
+</html>
