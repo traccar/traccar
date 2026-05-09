@@ -483,6 +483,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
         boolean modelNT = model != null && NT_MODELS.contains(model.toUpperCase());
         boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512", "G18").contains(model.toUpperCase());
+        boolean modelVL842 = "VL842".equalsIgnoreCase(model);
 
         if (type == MSG_LOGIN) {
 
@@ -891,7 +892,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
                         int extension = buf.readUnsignedByte();
-                        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
+                        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI && modelVL842) {
                             extension += (buf.getUnsignedByte(buf.readerIndex()) & 0xf) << 8;
                         }
                         if (type == MSG_STATUS && modelSW) {
