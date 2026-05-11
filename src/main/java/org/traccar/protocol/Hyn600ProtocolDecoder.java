@@ -257,17 +257,30 @@ public class Hyn600ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setYear(buf.readUnsignedShort())
-                .setMonth(buf.readUnsignedByte())
-                .setDay(buf.readUnsignedByte())
-                .setHour(buf.readUnsignedByte())
-                .setMinute(buf.readUnsignedByte())
-                .setSecond(buf.readUnsignedByte());
-        position.setDeviceTime(dateBuilder.getDate());
+        // Generated Time is only valid for event type 7 (crash/event reports)
+        int eventType = buf.getUnsignedByte(buf.readerIndex() - 3);
+        if (eventType == 7 && buf.isReadable(7)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setYear(buf.readUnsignedShort())
+                    .setMonth(buf.readUnsignedByte())
+                    .setDay(buf.readUnsignedByte())
+                    .setHour(buf.readUnsignedByte())
+                    .setMinute(buf.readUnsignedByte())
+                    .setSecond(buf.readUnsignedByte());
+            position.setDeviceTime(dateBuilder.getDate());
+        }
 
-        buf.readUnsignedShort(); // index
-        buf.readUnsignedByte(); // tail
+        if (buf.isReadable(3)) {
+            buf.readUnsignedShort(); // index
+            buf.readUnsignedByte(); // tail
+        }
+
+        // ensure deviceTime is always set
+        for (Position p : positions) {
+            if (p.getDeviceTime() == null && p.getFixTime() != null) {
+                p.setDeviceTime(p.getFixTime());
+            }
+        }
 
         return positions;
     }
