@@ -64,10 +64,7 @@ def resolveTransitiveVersion = { String root, String group, String name ->
     artifact.moduleVersion.id.version
 }
 
-ext.jacksonVersion = resolveTransitiveVersion(
-        "org.glassfish.jersey.media:jersey-media-json-jackson:${jerseyVersion}",
-        "com.fasterxml.jackson.core",
-        "jackson-databind")
+ext.jacksonVersion = "2.21.2"
 
 ext.hk2Version = resolveTransitiveVersion(
         "org.glassfish.jersey.inject:jersey-hk2:${jerseyVersion}",
