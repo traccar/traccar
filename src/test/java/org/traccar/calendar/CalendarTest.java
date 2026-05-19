@@ -130,6 +130,31 @@ public class CalendarTest {
     }
 
     @Test
+    public void testTokyoDailyOccurrence() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                PRODID:-//Traccar//NONSGML Traccar//EN
+                BEGIN:VEVENT
+                UID:00000000-0000-0000-0000-000000000000
+                DTSTART;TZID=Asia/Tokyo:20260518T000000
+                DTEND;TZID=Asia/Tokyo:20260518T060000
+                RRULE:FREQ=DAILY
+                SUMMARY:Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        var periods = calendar.findPeriods(format.parse("2026-05-18 18:00:00+00"));
+        assertEquals(1, periods.size());
+        var period = periods.iterator().next();
+        assertEquals(java.time.Instant.parse("2026-05-18T15:00:00Z"), period.getStart());
+        assertEquals(java.time.Instant.parse("2026-05-18T21:00:00Z"), period.getEnd());
+    }
+
+    @Test
     public void testFloatingDateTime() throws IOException, ParserException, ParseException {
         String calendarString = """
                 BEGIN:VCALENDAR

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
@@ -79,9 +80,12 @@ public class Calendar extends ExtendedModel {
                     .flatMap(event -> {
                         Temporal sample = event.getDateTimeStart().getDate();
                         var period = new Period<>(convertToMatchingTemporal(instant, sample), Duration.ZERO);
-                        return event.calculateRecurrenceSet(period).stream();
+                        ZoneId overrideZone = resolveOverrideZone(event);
+                        return event.calculateRecurrenceSet(period).stream()
+                                .map(p -> new Period<>(
+                                        temporalToInstant(p.getStart(), overrideZone),
+                                        temporalToInstant(p.getEnd(), overrideZone)));
                     })
-                    .map(p -> new Period<>(temporalToInstant(p.getStart()), temporalToInstant(p.getEnd())))
                     .collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of();
@@ -102,9 +106,19 @@ public class Calendar extends ExtendedModel {
         };
     }
 
-    private static Instant temporalToInstant(Temporal temporal) {
+    private static ZoneId resolveOverrideZone(VEvent event) {
+        return event.getDateTimeStart().getParameter("TZID")
+                .map(parameter -> parameter.getValue())
+                .filter(ZoneId.getAvailableZoneIds()::contains)
+                .map(ZoneId::of)
+                .orElse(null);
+    }
+
+    private static Instant temporalToInstant(Temporal temporal, ZoneId overrideZone) {
         return switch (temporal) {
-            case ZonedDateTime zonedDateTime -> zonedDateTime.toInstant();
+            case ZonedDateTime zonedDateTime -> overrideZone != null
+                    ? zonedDateTime.toLocalDateTime().atZone(overrideZone).toInstant()
+                    : zonedDateTime.toInstant();
             case OffsetDateTime offsetDateTime -> offsetDateTime.toInstant();
             case LocalDateTime localDateTime -> localDateTime.toInstant(ZoneOffset.UTC);
             case LocalDate localDate -> localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
