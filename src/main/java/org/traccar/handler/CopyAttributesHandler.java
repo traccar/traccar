@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package org.traccar.handler;
 
 import jakarta.inject.Inject;
-import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
@@ -28,7 +27,7 @@ public class CopyAttributesHandler extends BasePositionHandler {
     private final CacheManager cacheManager;
 
     @Inject
-    public CopyAttributesHandler(Config config, CacheManager cacheManager) {
+    public CopyAttributesHandler(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
