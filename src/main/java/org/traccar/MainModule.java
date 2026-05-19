@@ -338,7 +338,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CopyAttributesHandler provideCopyAttributesHandler(Config config, CacheManager cacheManager) {
         if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
-            return new CopyAttributesHandler(config, cacheManager);
+            return new CopyAttributesHandler(cacheManager);
         }
         return null;
     }
