@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Content;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.VEvent;
 import org.traccar.storage.QueryIgnore;
@@ -79,8 +80,9 @@ public class Calendar extends ExtendedModel {
             return calendar.<VEvent>getComponents(Component.VEVENT).stream()
                     .flatMap(event -> {
                         Temporal sample = event.getDateTimeStart().getDate();
-                        var period = new Period<>(convertToMatchingTemporal(instant, sample), Duration.ZERO);
                         ZoneId overrideZone = resolveOverrideZone(event);
+                        var period = new Period<>(
+                                convertToMatchingTemporal(instant, sample, overrideZone), Duration.ZERO);
                         return event.calculateRecurrenceSet(period).stream()
                                 .map(p -> new Period<>(
                                         temporalToInstant(p.getStart(), overrideZone),
@@ -96,11 +98,13 @@ public class Calendar extends ExtendedModel {
         return !findPeriods(date).isEmpty();
     }
 
-    private static Temporal convertToMatchingTemporal(Instant instant, Temporal sample) {
+    private static Temporal convertToMatchingTemporal(Instant instant, Temporal sample, ZoneId overrideZone) {
         return switch (sample) {
             case LocalDate ignored -> instant.atZone(ZoneOffset.UTC).toLocalDate();
             case LocalDateTime ignored -> instant.atZone(ZoneOffset.UTC).toLocalDateTime();
-            case ZonedDateTime zonedDateTime -> instant.atZone(zonedDateTime.getZone());
+            case ZonedDateTime zonedDateTime -> overrideZone != null
+                    ? instant.atZone(overrideZone).toLocalDateTime().atZone(zonedDateTime.getZone())
+                    : instant.atZone(zonedDateTime.getZone());
             case OffsetDateTime offsetDateTime -> instant.atOffset(offsetDateTime.getOffset());
             default -> instant;
         };
@@ -108,7 +112,7 @@ public class Calendar extends ExtendedModel {
 
     private static ZoneId resolveOverrideZone(VEvent event) {
         return event.getDateTimeStart().getParameter("TZID")
-                .map(parameter -> parameter.getValue())
+                .map(Content::getValue)
                 .filter(ZoneId.getAvailableZoneIds()::contains)
                 .map(ZoneId::of)
                 .orElse(null);

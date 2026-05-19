@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -150,8 +151,11 @@ public class CalendarTest {
         var periods = calendar.findPeriods(format.parse("2026-05-18 18:00:00+00"));
         assertEquals(1, periods.size());
         var period = periods.iterator().next();
-        assertEquals(java.time.Instant.parse("2026-05-18T15:00:00Z"), period.getStart());
-        assertEquals(java.time.Instant.parse("2026-05-18T21:00:00Z"), period.getEnd());
+        assertEquals(Instant.parse("2026-05-18T15:00:00Z"), period.getStart());
+        assertEquals(Instant.parse("2026-05-18T21:00:00Z"), period.getEnd());
+        assertFalse(calendar.checkMoment(format.parse("2026-05-18 14:00:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2026-05-18 18:00:00+00")));
+        assertFalse(calendar.checkMoment(format.parse("2026-05-18 22:00:00+00")));
     }
 
     @Test
