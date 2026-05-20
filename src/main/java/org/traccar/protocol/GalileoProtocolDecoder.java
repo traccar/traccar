@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         addTagLength(1,
                 0x01, 0x02, 0x35, 0x43, 0xc4, 0xc5, 0xc6, 0xc7,
                 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf,
-                0xd0, 0xd1, 0xd2, 0xd5, 0x88, 0x8a, 0x8b, 0x8c,
+                0xd0, 0xd1, 0xd2, 0xd5, 0x88, 0x89, 0x8a, 0x8b, 0x8c,
                 0xa0, 0xaf, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6,
                 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae);
         addTagLength(2,
@@ -84,7 +84,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 0xb7, 0xb8, 0xb9, 0xd6, 0xd7, 0xd8, 0xd9, 0xda);
         addTagLength(3,
                 0x63, 0x64, 0x6f, 0x5d, 0x65, 0x66, 0x67, 0x68,
-                0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0xfa);
+                0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0xfa,
+                0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87);
         addTagLength(4,
                 0x20, 0x33, 0x44, 0x90, 0xc0, 0xc2, 0xc3, 0xd3,
                 0xd4, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xf0, 0xf9,
@@ -93,7 +94,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         TAG_LENGTH_MAP.put(0x5b, 7); // variable length
         TAG_LENGTH_MAP.put(0x5c, 68);
         TAG_LENGTH_MAP.put(0xfd, 8);
-        TAG_LENGTH_MAP.put(0xfe, 8); // TODO this is probably incorrect
     }
 
     private static int getTagLength(int tag) {
@@ -174,6 +174,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0xe1 -> position.set(Position.KEY_RESULT,
                     buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
             case 0xea -> position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
+            case 0xfe -> buf.skipBytes(buf.readUnsignedShortLE());
             default -> buf.skipBytes(getTagLength(tag));
         }
     }
