@@ -29,7 +29,7 @@ public class R16hProtocol extends BaseProtocol {
 
     @Inject
     public R16hProtocol(Config config) {
-        addServer(new TrackerServer(config, getName(), true) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(MAX_FRAME_LENGTH, "$"));
