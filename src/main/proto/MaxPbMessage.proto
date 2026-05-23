@@ -1,0 +1,106 @@
+syntax = "proto2";
+
+package org.traccar.protobuf.maxpb;
+
+message Ack {
+    optional uint64 deviceID = 1;
+    optional uint64 commandID = 2;
+}
+
+message IDPack {
+    optional string imei = 1;
+}
+
+message PositionInfo {
+    optional uint32 positionSource = 1;
+    optional uint32 positionFormat = 2;
+    optional sfixed32 latitude = 3;
+    optional sfixed32 longitude = 4;
+    optional sint32 altitude = 5;
+    optional uint32 estimatedPositionError = 6;
+    optional uint32 directionDegrees = 7;
+}
+
+message GpsInfo {
+    optional uint32 fixState = 2;
+    optional uint32 svn = 3;
+    optional uint32 hdop = 5;
+    optional uint32 vdop = 6;
+    optional uint32 pdop = 7;
+    optional uint32 age = 8;
+    optional uint32 filter = 9;
+    optional uint32 fixQuality = 10;
+    optional uint32 averageSnr = 11;
+}
+
+message InputInfo {
+    optional uint32 input1State = 1;
+    optional uint32 input2State = 4;
+    optional uint32 input3State = 7;
+}
+
+message OutputInfo {
+    optional uint32 output1State = 1;
+    optional uint32 output2State = 3;
+}
+
+message IosInfo {
+    optional uint32 ignitionState = 1;
+    optional InputInfo inputInfo = 2;
+    optional OutputInfo outputInfo = 3;
+}
+
+message DeviceInfo {
+    optional uint32 extPowerState = 1;
+    optional uint32 extPowerValue = 2;
+    optional uint32 battState = 3;
+    optional uint32 battPercent = 4;
+    optional uint32 battValue = 5;
+    optional uint32 powerState = 6;
+    optional bool primarySimCard = 7;
+    optional uint32 temperature = 9;
+    optional uint32 uptime = 10;
+    optional uint32 lifeTime = 11;
+}
+
+message ConnectionInfo {
+    optional uint32 connectionType = 1;
+    optional bool jamming = 2;
+    optional uint32 csq = 4;
+}
+
+message OperationalInfo {
+    optional bool panic = 1;
+    optional uint32 alarm = 2;
+}
+
+message Flags {
+    optional DeviceInfo deviceInfo = 1;
+    optional ConnectionInfo connectionInfo = 2;
+    optional OperationalInfo operationalInfo = 3;
+}
+
+message ReportData {
+    optional uint64 sequenceNumber = 1;
+    optional uint32 reason = 2;
+    optional uint64 dateTime = 3;
+    optional PositionInfo positionInfo = 4;
+    optional GpsInfo gps = 5;
+    optional IosInfo ios = 6;
+    optional Flags flags = 7;
+}
+
+message MultipleReportData {
+    optional uint64 deviceID = 1;
+    optional uint64 packetID = 2;
+    optional IDPack identificationPack = 3;
+    optional ReportData newReportData = 4;
+    repeated ReportData oldReportData = 5;
+}
+
+message ReportStatus {
+    optional uint64 deviceID = 1;
+    optional uint64 commandID = 2;
+    optional IDPack identificationPack = 3;
+    optional uint64 datetime = 4;
+}
