@@ -22,7 +22,8 @@ public final class Keys {
     private Keys() {}
 
     /**
-     * Network interface for the protocol. If not specified, the server will bind to all interfaces.
+     * Network interface for the protocol. If not specified, the server will bind to all interfaces. Multiple addresses
+     * (for example, one IPv4 and one IPv6) can be supplied as a comma-separated list.
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new StringConfigSuffix(
             ".address",
