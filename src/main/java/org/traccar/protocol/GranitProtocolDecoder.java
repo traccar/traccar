@@ -52,7 +52,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf response = Unpooled.buffer();
         response.writeBytes("BB+UGRC~".getBytes(StandardCharsets.US_ASCII));
         response.writeShortLE(6); // length
-        response.writeInt((int) time);
+        response.writeIntLE((int) time);
         response.writeShortLE(deviceId);
         appendChecksum(response, 16);
         channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
