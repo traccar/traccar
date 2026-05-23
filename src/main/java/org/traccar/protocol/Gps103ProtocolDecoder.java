@@ -135,6 +135,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_HANDSHAKE = Pattern.compile("imei:(\\d+),");
+
     private String decodeAlarm(String value) {
         if (value.startsWith("T:")) {
             return Position.ALARM_TEMPERATURE;
@@ -374,7 +376,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.contains("imei:") && sentence.length() <= 30) {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage("LOAD", remoteAddress));
-                Matcher matcher = Pattern.compile("imei:(\\d+),").matcher(sentence);
+                Matcher matcher = PATTERN_HANDSHAKE.matcher(sentence);
                 if (matcher.find()) {
                     getDeviceSession(channel, remoteAddress, matcher.group(1));
                 }

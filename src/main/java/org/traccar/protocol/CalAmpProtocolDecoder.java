@@ -77,10 +77,10 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         if (type != MSG_MINI_EVENT_REPORT) {
             buf.readUnsignedInt(); // fix time
         }
-        position.setLatitude(buf.readInt() * 0.0000001);
-        position.setLongitude(buf.readInt() * 0.0000001);
+        position.setLatitude(buf.readInt() / 10000000.0);
+        position.setLongitude(buf.readInt() / 10000000.0);
         if (type != MSG_MINI_EVENT_REPORT) {
-            position.setAltitude(buf.readInt() * 0.01);
+            position.setAltitude(buf.readInt() / 100.0);
             position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedInt()));
         }
         position.setCourse(buf.readShort());

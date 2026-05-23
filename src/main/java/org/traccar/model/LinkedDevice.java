@@ -18,5 +18,4 @@ package org.traccar.model;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_devices")
-public class LinkedDevice extends Device {
-}
+public class LinkedDevice extends Device {}

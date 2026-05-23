@@ -24,8 +24,7 @@ import java.util.List;
 
 public final class GeofenceUtil {
 
-    private GeofenceUtil() {
-    }
+    private GeofenceUtil() {}
 
     public static List<Long> getCurrentGeofences(CacheManager cacheManager, Position position) {
         List<Long> result = new ArrayList<>();

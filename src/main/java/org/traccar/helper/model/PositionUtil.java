@@ -34,8 +34,7 @@ import java.util.stream.Stream;
 
 public final class PositionUtil {
 
-    private PositionUtil() {
-    }
+    private PositionUtil() {}
 
     public static boolean isLatest(CacheManager cacheManager, Position position) {
         Position lastPosition = cacheManager.getPosition(position.getDeviceId());

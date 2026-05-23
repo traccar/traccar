@@ -19,6 +19,7 @@ package org.traccar.geocoder;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
+import java.util.Locale;
 
 public class OpenCageGeocoder extends JsonGeocoder {
 
@@ -74,7 +75,7 @@ public class OpenCageGeocoder extends JsonGeocoder {
                     address.setState(location.getString("state"));
                 }
                 if (location.containsKey("country_code")) {
-                    address.setCountry(location.getString("country_code").toUpperCase());
+                    address.setCountry(location.getString("country_code").toUpperCase(Locale.ROOT));
                 }
                 if (location.containsKey("postcode")) {
                     address.setPostcode(location.getString("postcode"));

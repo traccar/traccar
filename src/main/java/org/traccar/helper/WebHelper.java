@@ -29,8 +29,7 @@ public final class WebHelper {
 
     private static final List<String> PROXY_HEADERS = List.of("CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For");
 
-    private WebHelper() {
-    }
+    private WebHelper() {}
 
     public static String retrieveRemoteAddress(HttpServletRequest request) {
         if (request != null) {

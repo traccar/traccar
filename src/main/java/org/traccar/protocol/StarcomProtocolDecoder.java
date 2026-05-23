@@ -18,13 +18,18 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class StarcomProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public StarcomProtocolDecoder(StarcomProtocol protocol) {
         super(protocol);
@@ -52,7 +57,7 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
                 case "gps_valid" -> position.setValid(Integer.parseInt(value) != 0);
-                case "datetime_actual" -> position.setTime(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(value));
+                case "datetime_actual" -> position.setTime(DateUtil.parse(DATE_FORMAT, value));
                 case "latitude" -> position.setLatitude(Double.parseDouble(value));
                 case "longitude" -> position.setLongitude(Double.parseDouble(value));
                 case "altitude" -> position.setAltitude(Double.parseDouble(value));

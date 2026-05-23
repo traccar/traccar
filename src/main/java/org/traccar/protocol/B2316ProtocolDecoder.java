@@ -73,14 +73,13 @@ public class B2316ProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
         JsonArray data = root.getJsonArray("data");
-        for (int i = 0; i < data.size(); i++) {
+        for (JsonObject item : data.getValuesAs(JsonObject.class)) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             Network network = new Network();
 
-            JsonObject item = data.getJsonObject(i);
             Date time = new Date(item.getJsonNumber("tm").longValue() * 1000);
 
             if (item.containsKey("gp")) {
@@ -123,7 +122,7 @@ public class B2316ProtocolDecoder extends BaseProtocolDecoder {
             if (item.containsKey("te")) {
                 String[] temperatures = item.getString("te").split(",");
                 for (int j = 0; j < temperatures.length; j++) {
-                    position.set(Position.PREFIX_TEMP + (j + 1), Integer.parseInt(temperatures[j]) * 0.1);
+                    position.set(Position.PREFIX_TEMP + (j + 1), Integer.parseInt(temperatures[j]) / 10.0);
                 }
             }
             if (item.containsKey("st")) {

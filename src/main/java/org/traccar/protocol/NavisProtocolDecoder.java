@@ -155,8 +155,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
-        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
 
         if (isFormat(format, F10, F20, F30)) {
             position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
@@ -220,7 +220,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             if (isFormat(format, F60)) {
                 position.setLatitude(buf.readIntLE() / 600000.0);
                 position.setLongitude(buf.readIntLE() / 600000.0);
-                position.setAltitude(buf.readIntLE() * 0.1);
+                position.setAltitude(buf.readIntLE() / 10.0);
             } else {
                 position.setLatitude(buf.readFloatLE() / Math.PI * 180);
                 position.setLongitude(buf.readFloatLE() / Math.PI * 180);
@@ -343,13 +343,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 case 8 -> position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
                 case 9 -> position.setLatitude(buf.readIntLE() / 600000.0);
                 case 10 -> position.setLongitude(buf.readIntLE() / 600000.0);
-                case 11 -> position.setAltitude(buf.readIntLE() * 0.1);
+                case 11 -> position.setAltitude(buf.readIntLE() / 10.0);
                 case 12 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
                 case 13 -> position.setCourse(buf.readUnsignedShortLE());
                 case 14 -> position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
                 case 15 -> position.set(Position.KEY_DISTANCE, buf.readFloatLE() * 1000);
-                case 18 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
-                case 19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                case 18 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
+                case 19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
                 case 20, 21, 22, 23, 24, 25, 26, 27 ->
                         position.set(Position.PREFIX_ADC + (i - 19), buf.readUnsignedShortLE());
                 case 28 -> {
@@ -393,8 +393,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES_VISIBLE, satVisible);
                 }
                 case 70 -> {
-                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-                    position.set(Position.KEY_PDOP, buf.readUnsignedByte() * 0.1);
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                    position.set(Position.KEY_PDOP, buf.readUnsignedByte() / 10.0);
                 }
                 default -> {
                     if (i < FLEX_FIELDS_SIZES.length) {
@@ -429,7 +429,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new DateBuilder(new Date(buf.readUnsignedIntLE() * 1000)).getDate());
             position.setLatitude(buf.readIntLE() / 600000.0);
             position.setLongitude(buf.readIntLE() / 600000.0);
-            position.setAltitude(buf.readIntLE() * 0.1);
+            position.setAltitude(buf.readIntLE() / 10.0);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
             position.setCourse(buf.readUnsignedShortLE());
             position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);

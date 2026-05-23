@@ -83,8 +83,7 @@ public class MulticastBroadcastService extends BaseBroadcastService {
     }
 
     @Override
-    public void stop() {
-    }
+    public void stop() {}
 
     private final Runnable receiver = new Runnable() {
         @Override

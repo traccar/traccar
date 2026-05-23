@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -26,11 +27,13 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class S168ProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyMMddHHmmss").withZone(ZoneOffset.UTC);
 
     public S168ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -69,9 +72,7 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
                 case "GDATA":
                     position.setValid(values[index++].equals("A"));
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(values[index++]));
-                    DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    position.setTime(dateFormat.parse(values[index++]));
+                    position.setTime(DateUtil.parse(DATE_FORMAT, values[index++]));
                     position.setLatitude(Double.parseDouble(values[index++]));
                     position.setLongitude(Double.parseDouble(values[index++]));
                     position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[index++])));

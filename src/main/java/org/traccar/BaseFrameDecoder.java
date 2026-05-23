@@ -19,16 +19,29 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.TooLongFrameException;
 
 import java.util.List;
 
 public abstract class BaseFrameDecoder extends ByteToMessageDecoder {
+
+    private final int maxFrameLength;
+
+    protected BaseFrameDecoder() {
+        this(BaseProtocol.MAX_FRAME_LENGTH);
+    }
+
+    protected BaseFrameDecoder(int maxFrameLength) {
+        this.maxFrameLength = maxFrameLength;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         Object decoded = decode(ctx, ctx != null ? ctx.channel() : null, in);
         if (decoded != null) {
             out.add(decoded);
+        } else if (in.readableBytes() > maxFrameLength) {
+            throw new TooLongFrameException("Frame exceeds " + maxFrameLength + " bytes");
         }
     }
 

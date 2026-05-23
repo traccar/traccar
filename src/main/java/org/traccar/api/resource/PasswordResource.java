@@ -37,6 +37,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 
 @Path("password")
 @Produces(MediaType.APPLICATION_JSON)
@@ -59,7 +60,7 @@ public class PasswordResource extends BaseResource {
             throws StorageException, MessagingException, GeneralSecurityException, IOException {
 
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("LOWER(email)", email.toLowerCase())));
+                new Columns.All(), new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
         if (user != null) {
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
             var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", false);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,13 +68,11 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String readImei(ByteBuf buf) {
-        return String.format("%08d", buf.readUnsignedInt()) + String.format("%07d", buf.readUnsignedMedium());
+        return String.format("%08d%07d", buf.readUnsignedInt(), buf.readUnsignedMedium());
     }
 
     private Date readTime(ByteBuf buf) {
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(1980, 1, 6).addMillis(buf.readUnsignedInt() * 1000L);
-        return dateBuilder.getDate();
+        return new DateBuilder().setDate(1980, 1, 6).addMillis(buf.readUnsignedInt() * 1000L).getDate();
     }
 
     private Object decodeK(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
@@ -94,8 +92,8 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // index
 
             position.setValid(true);
-            position.setLatitude(buf.readInt() * 0.000001);
-            position.setLongitude(buf.readInt() * 0.000001);
+            position.setLatitude(buf.readInt() / 1000000.0);
+            position.setLongitude(buf.readInt() / 1000000.0);
             position.setTime(readTime(buf));
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte() * 2));
             position.setCourse(buf.readUnsignedByte() * 2);
@@ -164,15 +162,15 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 
             if ((mask & 1L) > 0) {
-                position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.2);
+                position.set(Position.KEY_POWER, buf.readUnsignedByte() / 5.0);
                 position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
             }
 
             if ((mask & 2L) > 0) {
                 position.setValid(true);
                 position.setFixTime(readTime(buf));
-                position.setLatitude(buf.readInt() * 0.000001);
-                position.setLongitude(buf.readInt() * 0.000001);
+                position.setLatitude(buf.readInt() / 1000000.0);
+                position.setLongitude(buf.readInt() / 1000000.0);
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte() * 2));
                 buf.readUnsignedByte(); // max speed since last report
                 position.setCourse(buf.readUnsignedByte() * 2);
@@ -268,7 +266,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
                 position.set("obdStatus", buf.readUnsignedShort());
                 position.set("obdEvents", buf.readUnsignedShort());
                 position.set(Position.KEY_FUEL, buf.readUnsignedByte());
-                position.set(Position.KEY_FUEL_USED, buf.readUnsignedShort() * 0.1);
+                position.set(Position.KEY_FUEL_USED, buf.readUnsignedShort() / 10.0);
             }
 
             if ((mask & 16384L) > 0) {
@@ -281,7 +279,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 1000);
                 position.set(Position.KEY_HOURS, buf.readUnsignedShort() * 3_600_000);
                 position.set("axleWeight", buf.readUnsignedShort());
-                position.set("tripFuelUsed", buf.readUnsignedShort() * 0.1);
+                position.set("tripFuelUsed", buf.readUnsignedShort() / 10.0);
                 position.set("tripCruise", buf.readUnsignedShort());
                 position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShort() * 5);
             }
@@ -295,7 +293,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             if ((mask & 131072L) > 0) {
                 for (int j = 1; j <= 6; j++) {
-                    position.set(Position.PREFIX_TEMP + j, buf.readShort() * 0.1);
+                    position.set(Position.PREFIX_TEMP + j, buf.readShort() / 10.0);
                 }
                 for (int j = 1; j <= 3; j++) {
                     position.set("setpoint" + j, buf.readByte() * 0.5);
@@ -309,7 +307,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             if ((mask & 262144L) > 0) {
                 for (int j = 1; j <= 4; j++) {
-                    position.set(Position.PREFIX_TEMP + j, (buf.readUnsignedShort() - 550) * 0.1);
+                    position.set(Position.PREFIX_TEMP + j, (buf.readUnsignedShort() - 550) / 10.0);
                 }
             }
 

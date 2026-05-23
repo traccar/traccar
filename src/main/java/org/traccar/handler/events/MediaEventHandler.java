@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 public class MediaEventHandler extends BaseEventHandler {
 
     @Inject
-    public MediaEventHandler() {
-    }
+    public MediaEventHandler() {}
 
     @Override
     public void onPosition(Position position, Callback callback) {

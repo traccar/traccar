@@ -128,7 +128,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(parser.nextInt(0));
 
-            position.set(Position.KEY_HDOP, parser.nextInt(0) * 0.1);
+            position.set(Position.KEY_HDOP, parser.nextInt(0) / 10.0);
 
             position.setNetwork(new Network(CellTower.from(
                     mcc, mnc, parser.nextHexInt(0), parser.nextHexInt(0), rssi)));

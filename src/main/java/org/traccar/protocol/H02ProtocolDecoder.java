@@ -34,13 +34,18 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter
+            .ofPattern("HHmmss").withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
     public H02ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -63,7 +68,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             length = 5;
         }
 
-        result = result * 10 + BcdUtil.readInteger(buf, length) * 0.0001;
+        result = result * 10 + BcdUtil.readInteger(buf, length) / 10000.0;
 
         result /= 60;
         result += degrees;
@@ -311,9 +316,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
-            DateFormat dateFormat = new SimpleDateFormat(type.equals("R12") ? "HHmmss" : "yyyyMMddHHmmss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String time = dateFormat.format(new Date());
+            String time = (type.equals("R12") ? TIME_FORMAT : DATE_FORMAT).format(Instant.now());
             if (type.equals("R12")) {
                 response = String.format("*HQ,%s,%s,%s#", id, type, time);
             } else {

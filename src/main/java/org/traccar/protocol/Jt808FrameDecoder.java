@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,33 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BaseProtocol;
 
 public class Jt808FrameDecoder extends BaseFrameDecoder {
+
+    public Jt808FrameDecoder() {
+        super(BaseProtocol.MAX_FRAME_LENGTH_LARGE);
+    }
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
+        while (buf.isReadable()) {
+            int b = buf.getUnsignedByte(buf.readerIndex());
+            if (b == '(' || b == 0x7e || b == 0xe7) {
+                break;
+            }
+            buf.skipBytes(1);
+        }
+
         if (buf.readableBytes() < 2) {
             return null;
         }
 
-        if (buf.getByte(buf.readerIndex()) == '(') {
+        int first = buf.getUnsignedByte(buf.readerIndex());
+
+        if (first == '(') {
 
             int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) ')');
             if (index >= 0) {
@@ -40,7 +55,7 @@ public class Jt808FrameDecoder extends BaseFrameDecoder {
 
         } else {
 
-            int delimiter = buf.getUnsignedByte(buf.readerIndex());
+            int delimiter = first;
             boolean alternative = delimiter == 0xe7;
 
             int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) delimiter);

@@ -153,7 +153,12 @@ public class CacheManager implements BroadcastInterface {
                         var to = position.getFixTime();
                         try (var positionsStream =
                                 PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
-                            positionsStream.forEach(positions::add);
+                            positionsStream.forEach(loaded -> {
+                                Position previous = positions.peekLast();
+                                if (previous == null || loaded.getFixTime().after(previous.getFixTime())) {
+                                    positions.add(loaded);
+                                }
+                            });
                         }
                     } else {
                         positions.add(position);
@@ -179,20 +184,23 @@ public class CacheManager implements BroadcastInterface {
     public void updatePosition(Position position) {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
             var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
+            Position previous = positions.peekLast();
+            if (previous != null && !position.getFixTime().after(previous.getFixTime())) {
+                return oldValue;
+            }
             positions.add(position);
             if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
                 long minDuration = AttributeUtil.lookup(
                         this, Keys.REPORT_TRIP_MIN_DURATION, key) * 1000;
-                while (positions.size() > 1) {
-                    var iterator = positions.iterator();
-                    iterator.next();
-                    Position second = iterator.next();
-                    Position last = positions.peekLast();
-                    if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
-                        positions.poll();
-                    } else {
-                        break;
-                    }
+                long lastTime = position.getFixTime().getTime();
+                var iterator = positions.iterator();
+                iterator.next();
+                int toPrune = 0;
+                while (iterator.hasNext() && lastTime - iterator.next().getFixTime().getTime() >= minDuration) {
+                    toPrune += 1;
+                }
+                while (toPrune-- > 0) {
+                    positions.poll();
                 }
             } else {
                 while (positions.size() > 1) {
@@ -233,29 +241,32 @@ public class CacheManager implements BroadcastInterface {
                 return;
             }
 
-            if (after instanceof GroupedModel) {
-                long beforeGroupId = ((GroupedModel) before).getGroupId();
-                long afterGroupId = ((GroupedModel) after).getGroupId();
-                if (beforeGroupId != afterGroupId) {
-                    if (beforeGroupId > 0) {
-                        invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
-                    }
-                    if (afterGroupId > 0) {
-                        invalidatePermission(clazz, id, Group.class, afterGroupId, true);
-                    }
-                }
-            } else if (after instanceof Schedulable) {
-                long beforeCalendarId = ((Schedulable) before).getCalendarId();
-                long afterCalendarId = ((Schedulable) after).getCalendarId();
-                if (beforeCalendarId != afterCalendarId) {
-                    if (beforeCalendarId > 0) {
-                        invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
-                    }
-                    if (afterCalendarId > 0) {
-                        invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+            switch (after) {
+                case GroupedModel afterGrouped -> {
+                    long beforeGroupId = ((GroupedModel) before).getGroupId();
+                    long afterGroupId = afterGrouped.getGroupId();
+                    if (beforeGroupId != afterGroupId) {
+                        if (beforeGroupId > 0) {
+                            invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                        }
+                        if (afterGroupId > 0) {
+                            invalidatePermission(clazz, id, Group.class, afterGroupId, true);
+                        }
                     }
                 }
-                // TODO handle notification always change
+                case Schedulable afterSchedulable -> {
+                    long beforeCalendarId = ((Schedulable) before).getCalendarId();
+                    long afterCalendarId = afterSchedulable.getCalendarId();
+                    if (beforeCalendarId != afterCalendarId) {
+                        if (beforeCalendarId > 0) {
+                            invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                        }
+                        if (afterCalendarId > 0) {
+                            invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+                        }
+                    }
+                }
+                default -> {}
             }
 
             graph.updateObject(after);

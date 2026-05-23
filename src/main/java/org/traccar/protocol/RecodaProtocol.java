@@ -31,7 +31,8 @@ public class RecodaProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 4, 4, -8, 0, true));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(
+                        ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, -8, 0, true));
                 pipeline.addLast(new RecodaProtocolDecoder(RecodaProtocol.this));
             }
         });

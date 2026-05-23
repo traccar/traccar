@@ -68,7 +68,8 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
         int payloadType = buf.readUnsignedByte() & 0x7F; // M/PT
         buf.readUnsignedShort(); // index
 
-        String uniqueId = Jt808ProtocolDecoder.decodeId(buf.readSlice(6));
+        int idLength = buf.getUnsignedShort(buf.readerIndex()) == 0 ? 10 : 6;
+        String uniqueId = Jt808ProtocolDecoder.decodeId(buf.readSlice(idLength));
         int videoChannel = buf.readUnsignedByte();
         int rawType = buf.readUnsignedByte();
         int dataType = BitUtil.from(rawType, 4);
@@ -125,6 +126,8 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 body.release();
             }
+        } else {
+            body.release();
         }
 
         return null;

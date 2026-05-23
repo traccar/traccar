@@ -167,7 +167,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(longitude);
                     break;
                 case '3':
-                    position.setLongitude(Double.parseDouble(value) * 0.000001);
+                    position.setLongitude(Double.parseDouble(value) / 1000000.0);
                     break;
                 case '6':
                     double latitude = Double.parseDouble(value.substring(1));
@@ -185,7 +185,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setLatitude(latitude);
                     break;
                 case '8':
-                    position.setLatitude(Double.parseDouble(value) * 0.000001);
+                    position.setLatitude(Double.parseDouble(value) / 1000000.0);
                     break;
                 case 'G':
                     position.setAltitude(Double.parseDouble(value));

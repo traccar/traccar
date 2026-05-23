@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -41,11 +40,20 @@ import java.util.regex.Pattern;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final DateTimeFormatter DATE_FORMAT_WITH_SECONDS = DateTimeFormatter
+            .ofPattern("HH:mm:ss MMM d yyyy", Locale.ENGLISH).withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter DATE_FORMAT_NO_SECONDS = DateTimeFormatter
+            .ofPattern("HH:mm MMM d yyyy", Locale.ENGLISH).withZone(ZoneId.systemDefault());
+
     public TramigoProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+
+    private static final Pattern PATTERN_COORDINATES = Pattern.compile("(-?\\d+\\.\\d+), (-?\\d+\\.\\d+)");
+    private static final Pattern PATTERN_DIRECTION = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
+    private static final Pattern PATTERN_TIME = Pattern.compile("(\\d{1,2}:\\d{2}(:\\d{2})? \\w{3} \\d{1,2})");
 
     @Override
     protected Object decode(
@@ -95,8 +103,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE(); // state flag
 
             position.setValid(true);
-            position.setLatitude(buf.readUnsignedIntLE() * 0.0000001);
-            position.setLongitude(buf.readUnsignedIntLE() * 0.0000001);
+            position.setLatitude(buf.readUnsignedIntLE() / 10000000.0);
+            position.setLongitude(buf.readUnsignedIntLE() / 10000000.0);
 
             position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
             position.set(Position.KEY_SATELLITES, buf.readUnsignedShortLE());
@@ -176,8 +184,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_STATUS, status);
 
                     position.setValid(true);
-                    position.setLatitude(buf.readIntLE() * 0.00001);
-                    position.setLongitude(buf.readIntLE() * 0.00001);
+                    position.setLatitude(buf.readIntLE() / 100000.0);
+                    position.setLongitude(buf.readIntLE() / 100000.0);
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                     position.setCourse(buf.readUnsignedShortLE());
 
@@ -185,8 +193,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_GPS, buf.readUnsignedByte());
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShortLE());
-                    position.set("maxAcceleration", buf.readUnsignedShortLE() * 0.001);
-                    position.set("maxDeceleration", buf.readUnsignedShortLE() * 0.001);
+                    position.set("maxAcceleration", buf.readUnsignedShortLE() / 1000.0);
+                    position.set("maxDeceleration", buf.readUnsignedShortLE() / 1000.0);
                     buf.readUnsignedShortLE(); // bearing to landmark
                     buf.readUnsignedIntLE(); // distance to landmark
 
@@ -213,7 +221,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private Position decode80(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws ParseException {
+    private Position decode80(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedByte(); // version id
         int index = buf.readUnsignedShort();
@@ -241,8 +249,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = buf.toString(StandardCharsets.US_ASCII);
 
-        Pattern pattern = Pattern.compile("(-?\\d+\\.\\d+), (-?\\d+\\.\\d+)");
-        Matcher matcher = pattern.matcher(sentence);
+        Matcher matcher = PATTERN_COORDINATES.matcher(sentence);
         if (!matcher.find()) {
             return null;
         }
@@ -250,8 +257,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(Double.parseDouble(matcher.group(2)));
         position.setValid(true);
 
-        pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
-        matcher = pattern.matcher(sentence);
+        matcher = PATTERN_DIRECTION.matcher(sentence);
         if (matcher.find()) {
             for (int i = 0; i < DIRECTIONS.length; i++) {
                 if (matcher.group(1).equals(DIRECTIONS[i])) {
@@ -262,15 +268,13 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(matcher.group(2))));
         }
 
-        pattern = Pattern.compile("(\\d{1,2}:\\d{2}(:\\d{2})? \\w{3} \\d{1,2})");
-        matcher = pattern.matcher(sentence);
+        matcher = PATTERN_TIME.matcher(sentence);
         if (!matcher.find()) {
             return null;
         }
-        DateFormat dateFormat = new SimpleDateFormat(
-                matcher.group(2) != null ? "HH:mm:ss MMM d yyyy" : "HH:mm MMM d yyyy", Locale.ENGLISH);
-        position.setTime(DateUtil.correctYear(
-                dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
+        DateTimeFormatter dateFormat = matcher.group(2) != null ? DATE_FORMAT_WITH_SECONDS : DATE_FORMAT_NO_SECONDS;
+        position.setTime(DateUtil.correctYear(DateUtil.parse(
+                dateFormat, matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
 
         if (sentence.contains("Ignition on detected")) {
             position.set(Position.KEY_IGNITION, true);

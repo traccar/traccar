@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,36 +18,34 @@ package org.traccar.handler;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.PositionBatchWriter;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Position;
-import org.traccar.storage.Storage;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Request;
 
 public class DatabaseHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
 
-    private final Storage storage;
+    private final PositionBatchWriter batchWriter;
     private final StatisticsManager statisticsManager;
 
     @Inject
-    public DatabaseHandler(Storage storage, StatisticsManager statisticsManager) {
-        this.storage = storage;
+    public DatabaseHandler(PositionBatchWriter batchWriter, StatisticsManager statisticsManager) {
+        this.batchWriter = batchWriter;
         this.statisticsManager = statisticsManager;
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
-
-        try {
-            position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
-            statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
-        } catch (Exception error) {
-            LOGGER.warn("Failed to store position", error);
-        }
-
-        callback.processed(false);
+        batchWriter.submit(position).whenComplete((id, error) -> {
+            if (error == null) {
+                position.setId(id);
+                statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
+            } else {
+                LOGGER.warn("Failed to store position", error);
+            }
+            callback.processed(false);
+        });
     }
 
 }

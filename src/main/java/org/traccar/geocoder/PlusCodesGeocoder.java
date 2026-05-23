@@ -21,8 +21,7 @@ import org.traccar.database.StatisticsManager;
 public class PlusCodesGeocoder implements Geocoder {
 
     @Override
-    public void setStatisticsManager(StatisticsManager statisticsManager) {
-    }
+    public void setStatisticsManager(StatisticsManager statisticsManager) {}
 
     @Override
     public String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback) {

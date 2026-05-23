@@ -28,6 +28,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
@@ -401,7 +402,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String value) {
-        value = value.toLowerCase();
+        value = value.toLowerCase(Locale.ROOT);
         if (value.startsWith("geo")) {
             if (value.endsWith("in")) {
                 return Position.ALARM_GEOFENCE_ENTER;

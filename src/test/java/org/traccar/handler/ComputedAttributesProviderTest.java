@@ -9,12 +9,12 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ComputedAttributesTest {
+public class ComputedAttributesProviderTest {
 
     @Test
     public void testComputedAttributes() {
 
-        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null, false);
+        ComputedAttributesProvider provider = new ComputedAttributesProvider(new Config(), null);
 
         Date date = new Date();
         Position position = new Position();
@@ -30,40 +30,40 @@ public class ComputedAttributesTest {
         Attribute attribute = new Attribute();
 
         attribute.setExpression("adc1");
-        assertEquals(128, handler.computeAttribute(attribute, position));
+        assertEquals(128, provider.compute(attribute, position));
 
         attribute.setExpression("!booleanFlag");
-        assertEquals(false, handler.computeAttribute(attribute, position));
+        assertEquals(false, provider.compute(attribute, position));
 
         attribute.setExpression("adc2 * 2 + 50");
-        assertEquals(250, handler.computeAttribute(attribute, position));
+        assertEquals(250, provider.compute(attribute, position));
 
         attribute.setExpression("(bitFlag & 4) != 0");
-        assertEquals(true, handler.computeAttribute(attribute, position));
+        assertEquals(true, provider.compute(attribute, position));
 
         attribute.setExpression("event == 42 ? \"lowBattery\" : null");
-        assertEquals("lowBattery", handler.computeAttribute(attribute, position));
+        assertEquals("lowBattery", provider.compute(attribute, position));
 
         attribute.setExpression("speed > 5 && valid");
-        assertEquals(false, handler.computeAttribute(attribute, position));
+        assertEquals(false, provider.compute(attribute, position));
 
         attribute.setExpression("fixTime");
-        assertEquals(date, handler.computeAttribute(attribute, position));
+        assertEquals(date, provider.compute(attribute, position));
 
         attribute.setExpression("math:pow(adc1, 2)");
-        assertEquals(16384.0, handler.computeAttribute(attribute, position));
+        assertEquals(16384.0, provider.compute(attribute, position));
 
         // modification tests
         attribute.setExpression("adc1 = 256");
-        handler.computeAttribute(attribute, position);
+        provider.compute(attribute, position);
         assertEquals(128, position.getInteger("adc1"));
 
         attribute.setExpression("result = \"fail\"");
-        handler.computeAttribute(attribute, position);
+        provider.compute(attribute, position);
         assertEquals("success", position.getString("result"));
 
         attribute.setExpression("fixTime = \"2017-10-18 10:00:01\"");
-        handler.computeAttribute(attribute, position);
+        provider.compute(attribute, position);
         assertEquals(date, position.getFixTime());
 
     }

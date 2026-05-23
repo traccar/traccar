@@ -43,8 +43,8 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -104,7 +104,7 @@ public class McpServerHolder implements AutoCloseable {
     private McpServerFeatures.AsyncToolSpecification createVersionTool() {
 
         var inputSchema = new McpSchema.JsonSchema(
-                "object", Collections.emptyMap(), null, null, null, null);
+                "object", Map.of(), null, null, null, null);
 
         var toolSchema = McpSchema.Tool.builder()
                 .name("traccar-version")
@@ -126,12 +126,12 @@ public class McpServerHolder implements AutoCloseable {
     private McpServerFeatures.AsyncToolSpecification createDevicePositionTool() {
 
         var deviceIdSchema = new McpSchema.JsonSchema(
-                "number", Collections.emptyMap(), null, null, null, null);
+                "number", Map.of(), null, null, null, null);
 
         var inputSchema = new McpSchema.JsonSchema(
                 "object",
                 Map.of("deviceId", deviceIdSchema),
-                Collections.singletonList("deviceId"),
+                List.of("deviceId"),
                 null, null, null);
 
         var toolSchema = McpSchema.Tool.builder()

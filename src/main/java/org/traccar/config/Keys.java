@@ -19,8 +19,7 @@ import java.util.List;
 
 public final class Keys {
 
-    private Keys() {
-    }
+    private Keys() {}
 
     /**
      * Network interface for the protocol. If not specified, the server will bind to all interfaces.
@@ -359,7 +358,8 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new IntegerConfigKey(
             "server.timeout",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            1800);
 
     /**
      * Send device responses immediately before writing it in the database.
@@ -504,6 +504,14 @@ public final class Keys {
             true);
 
     /**
+     * Generate device connection status events (deviceOnline, deviceOffline, deviceUnknown) on status changes.
+     */
+    public static final ConfigKey<Boolean> EVENT_STATUS_ENABLE = new BooleanConfigKey(
+            "event.status.enable",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
@@ -563,11 +571,12 @@ public final class Keys {
             "./schema/changelog-master.xml");
 
     /**
-     * Database connection pool size. Default value is defined by the HikariCP library.
+     * Database connection pool size.
      */
     public static final ConfigKey<Integer> DATABASE_MAX_POOL_SIZE = new IntegerConfigKey(
             "database.maxPoolSize",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            20);
 
     /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
@@ -634,6 +643,33 @@ public final class Keys {
     public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new BooleanConfigKey(
             "database.saveEmpty",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum lifetime in milliseconds of a connection in the pool.
+     */
+    public static final ConfigKey<Integer> DATABASE_MAX_LIFETIME = new IntegerConfigKey(
+            "database.maxLifetime",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * If not zero, enable batching of position inserts. The value is the flush interval in milliseconds; positions
+     * accumulated during this window are written as a single JDBC batch. Trades up to this much latency for
+     * higher throughput on busy servers.
+     */
+    public static final ConfigKey<Long> DATABASE_POSITION_BATCH_INTERVAL = new LongConfigKey(
+            "database.positionBatchInterval",
+            List.of(KeyType.CONFIG),
+            0L);
+
+    /**
+     * Maximum number of positions written in a single batch. Default value is 100, which is safe across all supported
+     * databases including SQL Server (with its 2100 parameter limit). Postgres and MySQL can typically handle much
+     * larger batches; raise this for higher drain rate on busy servers.
+     */
+    public static final ConfigKey<Integer> DATABASE_POSITION_BATCH_SIZE = new IntegerConfigKey(
+            "database.positionBatchSize",
+            List.of(KeyType.CONFIG),
+            100);
 
     /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
@@ -1864,6 +1900,36 @@ public final class Keys {
             "geocoder.onRequest",
             List.of(KeyType.CONFIG),
             true);
+
+    /**
+     * Boolean flag to enable map matcher. When enabled, position coordinates are aligned to the nearest road segment
+     * before further processing.
+     */
+    public static final ConfigKey<Boolean> MAP_MATCHER_ENABLE = new BooleanConfigKey(
+            "mapMatcher.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Map matcher provider type. Currently only "traccar" is supported.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_TYPE = new StringConfigKey(
+            "mapMatcher.type",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Map matcher service URL.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_URL = new StringConfigKey(
+            "mapMatcher.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Map matcher provider API key.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_KEY = new StringConfigKey(
+            "mapMatcher.key",
+            List.of(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable LBS location resolution. Some devices send cell tower information and Wi-Fi points when

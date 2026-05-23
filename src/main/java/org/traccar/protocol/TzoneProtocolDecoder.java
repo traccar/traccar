@@ -34,23 +34,22 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
 
     public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int index) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
         String ack = String.format("@ACK,%d#", index);
-        String time = String.format("@UTC time:%s", dateFormat.format(new Date()));
+        String time = String.format("@UTC time:%s", DATE_FORMAT.format(Instant.now()));
 
         ByteBuf response = Unpooled.copiedBuffer(ack + time, StandardCharsets.US_ASCII);
 
@@ -107,11 +106,11 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (hardware == 0x413) {
 
-            position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
 
             position.setAltitude(buf.readUnsignedShort());
             position.setCourse(buf.readUnsignedShort());
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
@@ -121,7 +120,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
 
-            position.setSpeed(buf.readUnsignedShort() * 0.01);
+            position.setSpeed(buf.readUnsignedShort() / 100.0);
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
 
@@ -215,7 +214,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // status
                     buf.readUnsignedShortLE(); // battery voltage
 
-                    position.set(Position.PREFIX_TEMP + i, (buf.readShortLE() & 0x3fff) * 0.1);
+                    position.set(Position.PREFIX_TEMP + i, (buf.readShortLE() & 0x3fff) / 10.0);
 
                     buf.readUnsignedByte(); // humidity
                     buf.readUnsignedByte(); // rssi
@@ -327,7 +326,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             position.set("gsmStatus", buf.readUnsignedByte());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
 
             if (hardware != 0x407) {
                 position.set(Position.KEY_POWER, buf.readUnsignedShort());
@@ -336,12 +335,12 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 int temperature = buf.readUnsignedShort();
                 if (!BitUtil.check(temperature, 15)) {
-                    double value = BitUtil.to(temperature, 14) * 0.1;
+                    double value = BitUtil.to(temperature, 14) / 10.0;
                     position.set(Position.PREFIX_TEMP + 1, BitUtil.check(temperature, 14) ? -value : value);
                 }
                 int humidity = buf.readUnsignedShort();
                 if (!BitUtil.check(humidity, 15)) {
-                    position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) * 0.1);
+                    position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) / 10.0);
                 }
                 position.set("lightSensor", buf.readUnsignedByte() == 0);
             }

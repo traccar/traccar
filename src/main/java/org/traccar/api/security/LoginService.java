@@ -35,6 +35,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 import java.util.Objects;
 
 @Singleton
@@ -63,7 +64,7 @@ public class LoginService {
 
     public LoginResult login(
             String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
-        switch (scheme.toLowerCase()) {
+        switch (scheme.toLowerCase(Locale.ROOT)) {
             case "bearer":
                 return login(credentials);
             case "basic":
@@ -93,7 +94,7 @@ public class LoginService {
             return null;
         }
 
-        email = email.trim().toLowerCase();
+        email = email.trim().toLowerCase(Locale.ROOT);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
@@ -121,7 +122,7 @@ public class LoginService {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("LOWER(email)", email.toLowerCase())));
+                new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
 
         if (user == null) {
 

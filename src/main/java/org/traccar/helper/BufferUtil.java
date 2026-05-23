@@ -24,8 +24,7 @@ import io.netty.buffer.Unpooled;
 
 public final class BufferUtil {
 
-    private BufferUtil() {
-    }
+    private BufferUtil() {}
 
     public static int readSignedMagnitudeInt(ByteBuf buffer) {
         long value = buffer.readUnsignedInt();

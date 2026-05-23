@@ -44,39 +44,29 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Map<Integer, Integer> ITEM_LENGTH_MAP = new HashMap<>();
 
+    private static void addItemLength(int length, int... ids) {
+        for (int id : ids) {
+            ITEM_LENGTH_MAP.put(id, length);
+        }
+    }
+
     static {
-        int[] l1 = {
+        addItemLength(1,
                 4, 5, 6, 7, 8, 29, 30, 31, 32, 45, 46, 47, 48, 49, 50, 51, 52, 56, 63, 64, 65, 69, 72, 78, 79, 80, 81,
                 82, 83, 98, 99, 101, 104, 118, 122, 123, 124, 125, 126, 139, 140, 144, 145, 167, 168, 169, 170, 199,
-                202, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222
-        };
-        int[] l2 = {
+                202, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222);
+        addItemLength(2,
                 2, 14, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 35, 36, 38, 39, 40, 41, 42, 43, 44, 53, 55, 58,
                 59, 60, 61, 62, 66, 68, 71, 75, 100, 106, 108, 110, 111, 112, 113, 114, 115, 116, 117, 119, 120, 121,
                 133, 134, 135, 136, 137, 138, 141, 143, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
                 160, 161, 162, 163, 164, 165, 166, 171, 175, 177, 178, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189,
-                190, 191, 192, 200, 201, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237
-        };
-        int[] l3 = {
-                84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 142, 146, 198
-        };
-        int[] l4 = {
+                190, 191, 192, 200, 201, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237);
+        addItemLength(3,
+                84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 142, 146, 198);
+        addItemLength(4,
                 1, 3, 9, 10, 11, 12, 13, 15, 16, 33, 34, 37, 54, 57, 67, 74, 76, 102, 103, 105, 127, 128, 129, 130, 131,
                 132, 172, 173, 174, 176, 179, 193, 194, 195, 196, 203, 205, 206, 238, 239, 240, 241, 242, 243, 244, 245,
-                246, 247, 248, 249, 250, 251, 252
-        };
-        for (int i : l1) {
-            ITEM_LENGTH_MAP.put(i, 1);
-        }
-        for (int i : l2) {
-            ITEM_LENGTH_MAP.put(i, 2);
-        }
-        for (int i : l3) {
-            ITEM_LENGTH_MAP.put(i, 3);
-        }
-        for (int i : l4) {
-            ITEM_LENGTH_MAP.put(i, 4);
-        }
+                246, 247, 248, 249, 250, 251, 252);
         ITEM_LENGTH_MAP.put(70, 8);
         ITEM_LENGTH_MAP.put(73, 16);
         ITEM_LENGTH_MAP.put(77, 37);
@@ -186,6 +176,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, null);
                 position.set(Position.KEY_RESULT, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                 return position;
 
@@ -243,13 +234,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
                                 case 10:
-                                    position.setLatitude(buf.readIntLE() * 0.0001 / 60);
+                                    position.setLatitude(buf.readIntLE() / 10000.0 / 60);
                                     break;
                                 case 11:
-                                    position.setLongitude(buf.readIntLE() * 0.0001 / 60);
+                                    position.setLongitude(buf.readIntLE() / 10000.0 / 60);
                                     break;
                                 case 12:
-                                    position.setAltitude(buf.readIntLE() * 0.1);
+                                    position.setAltitude(buf.readIntLE() / 10.0);
                                     break;
                                 case 13:
                                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
@@ -261,10 +252,10 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_ODOMETER, buf.readFloatLE() * 1000);
                                     break;
                                 case 19:
-                                    position.set(Position.KEY_POWER, buf.readShortLE() * 0.001);
+                                    position.set(Position.KEY_POWER, buf.readShortLE() / 1000.0);
                                     break;
                                 case 20:
-                                    position.set(Position.KEY_BATTERY, buf.readShortLE() * 0.001);
+                                    position.set(Position.KEY_BATTERY, buf.readShortLE() / 1000.0);
                                     break;
                                 case 21:
                                 case 22:
@@ -272,7 +263,8 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 24:
                                 case 25:
                                 case 26:
-                                    position.set(Position.PREFIX_ADC + (j + 1 - 21), buf.readUnsignedShortLE() * 0.001);
+                                    position.set(
+                                            Position.PREFIX_ADC + (j + 1 - 21), buf.readUnsignedShortLE() / 1000.0);
                                     break;
                                 case 29:
                                     value = buf.readUnsignedByte();
@@ -329,7 +321,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                         if (BitUtil.check(value, 15)) {
                                             position.set("obdFuelLevel", BitUtil.to(value, 14));
                                         } else {
-                                            position.set("obdFuel", BitUtil.to(value, 14) * 0.1);
+                                            position.set("obdFuel", BitUtil.to(value, 14) / 10.0);
                                         }
                                     }
                                     break;
@@ -374,7 +366,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                         if (BitUtil.check(value, 15)) {
                                             position.set("obdAdBlueLevel", BitUtil.to(value, 14));
                                         } else {
-                                            position.set("obdAdBlue", BitUtil.to(value, 14) * 0.1);
+                                            position.set("obdAdBlue", BitUtil.to(value, 14) / 10.0);
                                         }
                                     }
                                     break;
@@ -406,7 +398,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     value = buf.readShortLE();
                                     position.set(
                                             Position.PREFIX_TEMP + (j + 1 + 8 - 163),
-                                            (value != (short) 0x8000) ? value * 0.05 : null);
+                                            (value != (short) 0x8000) ? value / 20.0 : null);
                                     break;
                                 case 167:
                                 case 168:

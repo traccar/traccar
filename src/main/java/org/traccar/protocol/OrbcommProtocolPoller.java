@@ -29,12 +29,14 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.net.SocketAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.TimeZone;
 
 public class OrbcommProtocolPoller extends BaseProtocolPoller {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
 
     private final String accessId;
     private final String password;
@@ -60,9 +62,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
         encoder.addParam("access_id", accessId);
         encoder.addParam("password", password);
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        encoder.addParam("start_utc", dateFormat.format(startTime));
+        encoder.addParam("start_utc", DATE_FORMAT.format(startTime.toInstant()));
 
         HttpRequest request = new DefaultFullHttpRequest(
                 HttpVersion.HTTP_1_1, HttpMethod.GET, encoder.toString(), Unpooled.buffer());

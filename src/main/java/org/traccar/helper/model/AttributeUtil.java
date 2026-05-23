@@ -32,8 +32,7 @@ import org.traccar.storage.query.Request;
 
 public final class AttributeUtil {
 
-    private AttributeUtil() {
-    }
+    private AttributeUtil() {}
 
     public interface Provider {
         Device getDevice();

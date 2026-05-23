@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ public class CryptoManager {
 
     private final Storage storage;
 
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    private volatile KeyPair keyPair;
 
     @Inject
     public CryptoManager(Storage storage) {
@@ -48,11 +47,8 @@ public class CryptoManager {
     }
 
     public byte[] sign(byte[] data) throws GeneralSecurityException, StorageException {
-        if (privateKey == null) {
-            initializeKeys();
-        }
         Signature signature = Signature.getInstance("SHA256withECDSA");
-        signature.initSign(privateKey);
+        signature.initSign(getKeyPair().getPrivate());
         signature.update(data);
         byte[] block = signature.sign();
         byte[] combined = new byte[1 + block.length + data.length];
@@ -63,11 +59,8 @@ public class CryptoManager {
     }
 
     public byte[] verify(byte[] data) throws GeneralSecurityException, StorageException {
-        if (publicKey == null) {
-            initializeKeys();
-        }
         Signature signature = Signature.getInstance("SHA256withECDSA");
-        signature.initVerify(publicKey);
+        signature.initVerify(getKeyPair().getPublic());
         int length = data[0];
         byte[] originalData = new byte[data.length - 1 - length];
         System.arraycopy(data, 1 + length, originalData, 0, originalData.length);
@@ -78,32 +71,37 @@ public class CryptoManager {
         return originalData;
     }
 
-    public KeyPair getKeyPair() throws GeneralSecurityException, StorageException {
-        if (publicKey == null) {
-            initializeKeys();
+    public KeyPair getKeyPair() throws StorageException, GeneralSecurityException {
+        KeyPair result = keyPair;
+        if (result == null) {
+            synchronized (this) {
+                result = keyPair;
+                if (result == null) {
+                    result = loadOrGenerate();
+                    keyPair = result;
+                }
+            }
         }
-        return new KeyPair(publicKey, privateKey);
+        return result;
     }
 
-    private void initializeKeys() throws StorageException, GeneralSecurityException {
+    private KeyPair loadOrGenerate() throws StorageException, GeneralSecurityException {
         KeystoreModel model = storage.getObject(KeystoreModel.class, new Request(new Columns.All()));
         if (model != null) {
-            publicKey = KeyFactory.getInstance("EC")
+            PublicKey publicKey = KeyFactory.getInstance("EC")
                     .generatePublic(new X509EncodedKeySpec(model.getPublicKey()));
-            privateKey = KeyFactory.getInstance("EC")
+            PrivateKey privateKey = KeyFactory.getInstance("EC")
                     .generatePrivate(new PKCS8EncodedKeySpec(model.getPrivateKey()));
+            return new KeyPair(publicKey, privateKey);
         } else {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
             generator.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
             KeyPair pair = generator.generateKeyPair();
-
-            publicKey = pair.getPublic();
-            privateKey = pair.getPrivate();
-
             model = new KeystoreModel();
-            model.setPublicKey(publicKey.getEncoded());
-            model.setPrivateKey(privateKey.getEncoded());
+            model.setPublicKey(pair.getPublic().getEncoded());
+            model.setPrivateKey(pair.getPrivate().getEncoded());
             storage.addObject(model, new Request(new Columns.Exclude("id")));
+            return pair;
         }
     }
 

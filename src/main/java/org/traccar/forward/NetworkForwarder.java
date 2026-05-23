@@ -46,7 +46,7 @@ public class NetworkForwarder {
         connectionUdp = new DatagramSocket();
     }
 
-    public void forward(InetSocketAddress source, int port, boolean datagram, byte[] data) {
+    public synchronized void forward(InetSocketAddress source, int port, boolean datagram, byte[] data) {
         try {
             if (datagram) {
                 connectionUdp.send(new DatagramPacket(data, data.length, destination, port));
@@ -63,7 +63,7 @@ public class NetworkForwarder {
         }
     }
 
-    public void disconnect(InetSocketAddress source) {
+    public synchronized void disconnect(InetSocketAddress source) {
         Socket connectionTcp = connectionsTcp.remove(source);
         if (connectionTcp != null) {
             try {

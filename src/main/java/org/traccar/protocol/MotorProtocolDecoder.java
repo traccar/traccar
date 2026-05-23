@@ -64,10 +64,10 @@ public class MotorProtocolDecoder extends BaseProtocolDecoder {
             position.addAlarm(Position.ALARM_GENERAL);
         }
 
-        position.setLatitude(BcdUtil.readInteger(buf, 2) + BcdUtil.readInteger(buf, 6) * 0.0001 / 60);
-        position.setLongitude(BcdUtil.readInteger(buf, 4) + BcdUtil.readInteger(buf, 6) * 0.0001 / 60);
-        position.setSpeed(BcdUtil.readInteger(buf, 4) * 0.1);
-        position.setCourse(BcdUtil.readInteger(buf, 4) * 0.1);
+        position.setLatitude(BcdUtil.readInteger(buf, 2) + BcdUtil.readInteger(buf, 6) / 10000.0 / 60);
+        position.setLongitude(BcdUtil.readInteger(buf, 4) + BcdUtil.readInteger(buf, 6) / 10000.0 / 60);
+        position.setSpeed(BcdUtil.readInteger(buf, 4) / 10.0);
+        position.setCourse(BcdUtil.readInteger(buf, 4) / 10.0);
 
         position.setTime(new DateBuilder()
                 .setYear(BcdUtil.readInteger(buf, 2))

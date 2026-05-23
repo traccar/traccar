@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "78782da41a0509160203cf05be31f80c306530001c0010012ed000007ef40000000006428b074205041302ff0009389c0d0a"),
+                Position.KEY_ALARM, Position.ALARM_TAMPERING);
+
+        verifyAttribute(decoder, binary(
                 "78782e610869412070143950190a1e0d3806c802b0eb0f0561ecdc00d80002d404000004215f0e000001395581000d1ca60d0a"),
                 Position.KEY_DRIVER_UNIQUE_ID, "20534657");
 
@@ -595,6 +599,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
                 Position.KEY_BATTERY, 4.0);
+
+        verifyAttribute(decoder, binary(
+                "78784e25010356354871186947190909100e0f190909100e0fbf02846fe805078c900018000a02d410c80b0c352c17044605112a4700020000000005840f0102353130303635383036424446030113ed780d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "0235313030363538303642444603");
 
         decoder.setModelOverride("G18");
 

@@ -754,6 +754,27 @@ paths:
           description: No Content
           content: {}
   /permissions:
+    get:
+      summary: Fetches permission links between Objects
+      description: >-
+        Provide exactly two `*Id` query parameters matching the Permission body
+        shape (e.g. `reportId` and `deviceId`). Use `0` on a side to mean
+        "any", e.g. `?reportId=5&deviceId=0` lists all devices linked to
+        report 5. At least one side must be non-zero.
+      tags:
+        - Permissions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+        '400':
+          description: Bad Request
+          content: {}
     post:
       summary: Link an Object to another Object
       tags:

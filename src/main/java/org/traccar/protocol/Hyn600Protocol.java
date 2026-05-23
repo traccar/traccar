@@ -29,7 +29,7 @@ public class Hyn600Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 5, 2, -7, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 5, 2, -7, 0));
                 pipeline.addLast(new Hyn600ProtocolDecoder(Hyn600Protocol.this));
             }
         });

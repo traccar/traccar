@@ -18,6 +18,10 @@ public class Jt808FrameDecoderTest extends ProtocolTest {
                 binary("7e307e087d557e"),
                 decoder.decode(null, null, binary("7e307d02087d01557e")));
 
+        verifyFrame(
+                binary("7e307e087d557e"),
+                decoder.decode(null, null, binary("24247e307d02087d01557e")));
+
     }
 
 }

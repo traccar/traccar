@@ -35,8 +35,7 @@ public class Event extends Message {
         eventTime = new Date();
     }
 
-    public Event() {
-    }
+    public Event() {}
 
     public static final String ALL_EVENTS = "allEvents";
 

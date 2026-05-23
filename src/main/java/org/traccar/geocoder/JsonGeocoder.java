@@ -81,7 +81,7 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             String msg = "Empty address. Error: " + parseError(json);
             if (callback != null) {
-                callback.onFailure(new GeocoderException(msg));
+                callback.onFailure(new IllegalStateException(msg));
             } else {
                 LOGGER.warn(msg);
             }

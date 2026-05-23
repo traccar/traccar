@@ -17,11 +17,9 @@ package org.traccar.api.resource;
 
 import io.netty.buffer.ByteBuf;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.traccar.api.BaseResource;
@@ -36,21 +34,21 @@ public class VideoStreamResource extends BaseResource {
     private VideoStreamManager streamManager;
 
     @GET
-    @Path("{deviceId}/live.m3u8")
+    @Path("{deviceId}/{channel}/live.m3u8")
     public Response playlist(
             @PathParam("deviceId") long deviceId,
-            @QueryParam("channel") @DefaultValue("1") int channel) throws StorageException {
+            @PathParam("channel") int channel) throws StorageException {
 
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         return Response.ok(streamManager.getPlaylist(deviceId, channel), "application/vnd.apple.mpegurl").build();
     }
 
     @GET
-    @Path("{deviceId}/{index}.ts")
+    @Path("{deviceId}/{channel}/{index}.ts")
     public Response segment(
             @PathParam("deviceId") long deviceId,
-            @PathParam("index") int index,
-            @QueryParam("channel") @DefaultValue("1") int channel) throws StorageException {
+            @PathParam("channel") int channel,
+            @PathParam("index") int index) throws StorageException {
 
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         ByteBuf data = streamManager.getSegment(deviceId, channel, index);

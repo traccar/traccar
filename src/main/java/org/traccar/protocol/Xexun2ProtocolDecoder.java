@@ -174,8 +174,8 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(12 * buf.readUnsignedByte()); // tof
                     }
                     if (BitUtil.check(positionMask, 5)) {
-                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
-                        position.setCourse(buf.readUnsignedShort() * 0.1);
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
+                        position.setCourse(buf.readUnsignedShort() / 10.0);
                     }
                     if (BitUtil.check(positionMask, 6)) {
                         position.setValid(true);
@@ -196,8 +196,8 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                                 position.setValid(buf.readUnsignedByte() > 0);
                                 position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                                 buf.readUnsignedByte(); // satellite signal-to-noise ratio
-                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
-                                position.setCourse(buf.readUnsignedShort() * 0.1);
+                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
+                                position.setCourse(buf.readUnsignedShort() / 10.0);
                                 position.setAltitude(buf.readFloat());
                             }
                             buf.readerIndex(dataEndIndex);

@@ -115,7 +115,7 @@ public class UuxProtocolDecoder extends BaseProtocolDecoder {
             readInt(buf, 3); // alternative speed
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedByte() * 10000 + buf.readUnsignedByte() * 256
-                    + buf.readUnsignedByte() + buf.readUnsignedByte() * 0.1);
+                    + buf.readUnsignedByte() + buf.readUnsignedByte() / 10.0);
             position.set(Position.KEY_HOURS, buf.readUnsignedInt());
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 

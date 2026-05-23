@@ -25,6 +25,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class CguardProtocolDecoder extends BaseProtocolDecoder {
@@ -104,7 +105,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
                 case "PWR1" -> position.set(Position.KEY_POWER, Double.parseDouble(value));
-                default -> position.set(key.toLowerCase(), value);
+                default -> position.set(key.toLowerCase(Locale.ROOT), value);
             }
         }
 

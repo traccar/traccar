@@ -30,14 +30,17 @@ import org.traccar.storage.query.Request;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CsvExportProvider {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final Storage storage;
     private final PermissionsService permissionsService;
@@ -49,8 +52,8 @@ public class CsvExportProvider {
     }
 
     static String formatCell(Object value) {
-        if (value instanceof String) {
-            String trimmed = ((String) value).trim();
+        if (value instanceof String stringValue) {
+            String trimmed = stringValue.trim();
             if (!trimmed.isEmpty()) {
                 char c = trimmed.charAt(0);
                 return c == '=' || c == '+' || c == '-' || c == '@' ? "" : trimmed;
@@ -66,16 +69,20 @@ public class CsvExportProvider {
 
         var server = permissionsService.getServer();
         var user = permissionsService.getUser(userId);
-        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(UserUtil.getTimezone(server, user));
+        DateTimeFormatter dateFormat = DATE_FORMAT.withZone(UserUtil.getTimezone(server, user).toZoneId());
 
         Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
                 new Columns.All(), new Condition.Equals("id", geofenceId)));
 
+        List<Position> positions;
+        try (var stream = PositionUtil.getPositionsStream(storage, deviceId, from, to)) {
+            positions = stream
+                    .filter(position -> geofence == null || geofence.containsPosition(position))
+                    .toList();
+        }
+
         var attributes = positions.stream()
-                .filter(position -> geofence == null || geofence.containsPosition(position))
                 .flatMap(position -> position.getAttributes().keySet().stream())
                 .collect(Collectors.toUnmodifiableSet());
 
@@ -83,9 +90,9 @@ public class CsvExportProvider {
         properties.put("id", Position::getId);
         properties.put("deviceId", Position::getDeviceId);
         properties.put("protocol", Position::getProtocol);
-        properties.put("serverTime", position -> dateFormat.format(position.getServerTime()));
-        properties.put("deviceTime", position -> dateFormat.format(position.getDeviceTime()));
-        properties.put("fixTime", position -> dateFormat.format(position.getFixTime()));
+        properties.put("serverTime", position -> dateFormat.format(position.getServerTime().toInstant()));
+        properties.put("deviceTime", position -> dateFormat.format(position.getDeviceTime().toInstant()));
+        properties.put("fixTime", position -> dateFormat.format(position.getFixTime().toInstant()));
         properties.put("valid", Position::getValid);
         properties.put("latitude", Position::getLatitude);
         properties.put("longitude", Position::getLongitude);

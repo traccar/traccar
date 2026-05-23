@@ -11,8 +11,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 compileJava.options.encoding = "UTF-8"
@@ -79,6 +79,9 @@ protobuf {
         artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
 }
+
+// override jackson-core CVE (SNYK-JAVA-COMFASTERXMLJACKSONCORE-15907551); remove when Jersey bumps
+configurations.all { resolutionStrategy.force "com.fasterxml.jackson.core:jackson-core:2.21.2" }
 
 dependencies {
     implementation "commons-codec:commons-codec:1.22.0"

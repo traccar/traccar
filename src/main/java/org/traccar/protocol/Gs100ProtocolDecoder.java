@@ -96,9 +96,9 @@ public class Gs100ProtocolDecoder extends BaseProtocolDecoder {
 
                     String coordinates = ByteBufUtil.hexDump(buf.readSlice(9));
                     position.setLongitude(Integer.parseInt(coordinates.substring(0, 3))
-                            + Integer.parseInt(coordinates.substring(3, 9)) * 0.0001 / 60);
+                            + Integer.parseInt(coordinates.substring(3, 9)) / 10000.0 / 60);
                     position.setLatitude(Integer.parseInt(coordinates.substring(10, 12))
-                            + Integer.parseInt(coordinates.substring(12, 18)) * 0.0001 / 60);
+                            + Integer.parseInt(coordinates.substring(12, 18)) / 10000.0 / 60);
                     int flags = Integer.parseInt(coordinates.substring(9, 10), 16);
                     if (!BitUtil.check(flags, 3)) {
                         position.setLongitude(-position.getLongitude());
@@ -108,7 +108,7 @@ public class Gs100ProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     String other = ByteBufUtil.hexDump(buf.readSlice(4));
-                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(other.substring(0, 5)) * 0.01));
+                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(other.substring(0, 5)) / 100.0));
                     position.setCourse(Integer.parseInt(other.substring(5, 8)));
 
                 } else {
