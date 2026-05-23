@@ -1409,7 +1409,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new BooleanConfigKey(
             "notificator.telegram.sendLocation",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
      * Telegram notification proxy URL.
