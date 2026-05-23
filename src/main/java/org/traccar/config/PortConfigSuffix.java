@@ -243,7 +243,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("iotm", 5218);
         PORTS.put("dolphin", 5219);
         PORTS.put("ennfu", 5220);
-        PORTS.put("navtelecom", 5221);
+        PORTS.put("maxpb", 5221);
         PORTS.put("startek", 5222);
         PORTS.put("gs100", 5223);
         PORTS.put("mavlink2", 5224);
@@ -289,7 +289,6 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("xexun3", 5264);
         PORTS.put("radshid", 5265);
         PORTS.put("r16h", 5266);
-        PORTS.put("maxpb", 5267);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {

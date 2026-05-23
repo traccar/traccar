@@ -22,16 +22,16 @@ import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 
-public class NavtelecomProtocolEncoder extends BaseProtocolEncoder {
+public class NavisProtocolEncoder extends BaseProtocolEncoder {
 
-    public NavtelecomProtocolEncoder(Protocol protocol) {
+    public NavisProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
 
     @Override
     protected Object encodeCommand(Command command) {
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> NavtelecomProtocolDecoder.encodeContent(0, 1, Unpooled.copiedBuffer(
+            case Command.TYPE_CUSTOM -> NavisProtocolDecoder.encodeContent(0, 1, Unpooled.copiedBuffer(
                     command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII));
             default -> null;
         };
