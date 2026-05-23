@@ -248,10 +248,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
         register(115, fmbXXX, (p, b) -> p.set(Position.KEY_ENGINE_TEMP, b.readShort() / 10.0));
         register(389, "FMB003"::equals, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt() * 1000));
-        register(701, fmb6XX, (p, b) -> p.set("bleTemp1", b.readShort() / 100.0));
-        register(702, fmb6XX, (p, b) -> p.set("bleTemp2", b.readShort() / 100.0));
-        register(703, fmb6XX, (p, b) -> p.set("bleTemp3", b.readShort() / 100.0));
-        register(704, fmb6XX, (p, b) -> p.set("bleTemp4", b.readShort() / 100.0));
+        register(701, fmb6XX, (p, b) -> p.set("bleTemp1", b.readShort() / 10.0));
+        register(702, fmb6XX, (p, b) -> p.set("bleTemp2", b.readShort() / 10.0));
+        register(703, fmb6XX, (p, b) -> p.set("bleTemp3", b.readShort() / 10.0));
+        register(704, fmb6XX, (p, b) -> p.set("bleTemp4", b.readShort() / 10.0));
         register(179, any, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
         register(180, any, (p, b) -> p.set(Position.PREFIX_OUT + 2, b.readUnsignedByte() > 0));
         register(181, any, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() / 10.0));
