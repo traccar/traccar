@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,6 +236,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort());
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
                     position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
+                    if (endIndex - buf.readerIndex() >= 7) {
+                        position.set("fuelLevel2", buf.readUnsignedShort());
+                    }
                     buf.readUnsignedInt(); // trip id
                     if (buf.readerIndex() < endIndex) {
                         position.set("adBlueLevel", buf.readUnsignedByte() * 0.4);
@@ -257,6 +260,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_HOURS, buf.readUnsignedInt() / 20.0);
                     break;
                 case 0x0014:
+                    buf.readUnsignedByte(); // valid flag
                     position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() / 255.0);
                     position.set("timingAdvance", buf.readUnsignedByte() * 0.5);
                     position.set("airTemp", buf.readUnsignedByte() - 40);

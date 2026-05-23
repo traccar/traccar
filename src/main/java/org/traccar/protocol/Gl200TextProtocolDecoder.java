@@ -90,6 +90,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("C3", "GL320M"),
             Map.entry("DC", "GV600MG"),
             Map.entry("DE", "GL500M"),
+            Map.entry("DF", "CV100LG"),
             Map.entry("F1", "GV350M"),
             Map.entry("F8", "GV800W"),
             Map.entry("FC", "GV600W"),

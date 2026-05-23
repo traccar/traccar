@@ -41,14 +41,19 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 2, 1, 4, 2, 2, 2, 2, 2, 1, 1, 1, 2, 4, 2, 1,
             /* FLEX 2.0 */
             8, 2, 1, 16, 4, 2, 4, 37, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 12, 24, 48, 1, 1, 1, 1, 4, 4,
-            1, 4, 2, 6, 2, 6, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1
+            1, 4, 2, 6, 2, 6, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1,
+            /* FLEX 3.0 */
+            1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 1, 1, 2, 3, 2, 1, 1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 4, 4, 4, 2, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4,
+            4, 4, 6, 3, 1, 2, 2, 1, 4, 5, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8
     };
 
     private String prefix;
     private long deviceUniqueId, serverId;
     private int flexDataSize;
     private int flexBitFieldSize;
-    private final byte[] flexBitField = new byte[16];
+    private final byte[] flexBitField = new byte[32];
 
     public NavisProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -316,9 +321,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 continue;
             }
 
+            int value;
+
             switch (i) {
                 case 0 -> position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
                 case 1 -> position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+                case 2 -> position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                 case 3 -> {
                     short armedStatus = buf.readUnsignedByte();
                     position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
@@ -380,9 +388,73 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_OUT + (k + 9), BitUtil.check(output2, k));
                     }
                 }
+                case 32, 33 -> position.set(Position.PREFIX_COUNT + (i - 31), buf.readUnsignedIntLE());
+                case 34, 35 -> position.set("freq" + (i - 33), buf.readUnsignedShortLE());
                 case 36 -> position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
+                case 37, 38, 39, 40, 41, 42 -> {
+                    value = buf.readUnsignedShortLE();
+                    position.set(Position.KEY_FUEL + (i - 36), value < 65500 ? value : null);
+                }
+                case 43 -> {
+                    value = buf.readUnsignedShortLE();
+                    position.set(Position.KEY_FUEL, value < 65500 ? value : null);
+                }
                 case 44, 45, 46, 47, 48, 49, 50, 51 -> position.set(Position.PREFIX_TEMP + (i - 43), buf.readByte());
-                case 68 -> position.set("can-speed", buf.readUnsignedByte());
+                case 52 -> {
+                    value = buf.readUnsignedShortLE();
+                    if (value != 0x7FFF) {
+                        if (BitUtil.check(value, 15)) {
+                            position.set("obdFuelLevel", BitUtil.to(value, 14));
+                        } else {
+                            position.set("obdFuel", BitUtil.to(value, 14) / 10.0);
+                        }
+                    }
+                }
+                case 53 -> {
+                    double fuelUsed = buf.readFloatLE() * 0.5;
+                    position.set(Position.KEY_FUEL_USED, fuelUsed >= 0 ? fuelUsed : null);
+                }
+                case 54 -> {
+                    value = buf.readUnsignedShortLE();
+                    position.set(Position.KEY_RPM, value != 0xFFFF ? value : null);
+                }
+                case 55 -> {
+                    value = buf.readByte();
+                    position.set(Position.KEY_COOLANT_TEMP, value != (byte) 0x80 ? value : null);
+                }
+                case 56 -> position.set(Position.KEY_OBD_ODOMETER, buf.readFloatLE() * 1000);
+                case 57, 58, 59, 60, 61 -> {
+                    value = buf.readUnsignedShortLE();
+                    position.set("axleWeight" + (i - 56), value != 0xFFFF ? value : null);
+                }
+                case 62 -> {
+                    value = buf.readUnsignedByte();
+                    position.set("acceleratorPosition", value != 0xFF ? value : null);
+                }
+                case 63 -> {
+                    value = buf.readUnsignedByte();
+                    position.set("brakePosition", value != 0xFF ? value : null);
+                }
+                case 64 -> {
+                    value = buf.readUnsignedByte();
+                    position.set(Position.KEY_ENGINE_LOAD, value != 0xFF ? value : null);
+                }
+                case 65 -> {
+                    value = buf.readUnsignedShortLE();
+                    if (value != 0x7FFF) {
+                        if (BitUtil.check(value, 15)) {
+                            position.set("obdAdBlueLevel", BitUtil.to(value, 14));
+                        } else {
+                            position.set("obdAdBlue", BitUtil.to(value, 14) / 10.0);
+                        }
+                    }
+                }
+                case 66 -> position.set("obdHours", buf.readUnsignedIntLE() * 1000);
+                case 67 -> {
+                    value = buf.readUnsignedShortLE();
+                    position.set(Position.KEY_ODOMETER_SERVICE, value != 0xFFFF ? value * 5000 : null);
+                }
+                case 68 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
 
                 // FLEX 2.0
                 case 69 -> {
@@ -396,8 +468,28 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
                     position.set(Position.KEY_PDOP, buf.readUnsignedByte() / 10.0);
                 }
+                case 77, 78, 79, 80, 81, 82 -> position.set("fuelTemp" + (i - 76), (int) buf.readByte());
+                case 162, 163, 164, 165 -> {
+                    value = buf.readShortLE();
+                    position.set(
+                            Position.PREFIX_TEMP + (i + 9 - 162),
+                            value != (short) 0x8000 ? value / 20.0 : null);
+                }
+                case 166, 167, 168, 169 -> {
+                    value = buf.readUnsignedByte();
+                    position.set("humidity" + (i - 165), value != 0xFF ? value * 0.5 : null);
+                }
+                case 205 -> position.set("diagnostic", buf.readUnsignedIntLE());
                 default -> {
-                    if (i < FLEX_FIELDS_SIZES.length) {
+                    if (i >= 206 && i <= 221) {
+                        position.set("user1Byte" + (i - 205), buf.readUnsignedByte());
+                    } else if (i >= 222 && i <= 236) {
+                        position.set("user2Byte" + (i - 221), buf.readUnsignedShortLE());
+                    } else if (i >= 237 && i <= 251) {
+                        position.set("user4Byte" + (i - 236), buf.readUnsignedIntLE());
+                    } else if (i >= 252 && i <= 254) {
+                        position.set("user8Byte" + (i - 251), buf.readLongLE());
+                    } else if (i < FLEX_FIELDS_SIZES.length) {
                         buf.skipBytes(FLEX_FIELDS_SIZES[i]);
                     }
                 }
@@ -489,25 +581,19 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         short flexProtocolVersion = buf.readUnsignedByte();
         short flexStructVersion = buf.readUnsignedByte();
-        if ((flexProtocolVersion == 0x0A || flexProtocolVersion == 0x14)
-            && (flexStructVersion == 0x0A || flexStructVersion == 0x14)) {
 
-            flexBitFieldSize = buf.readUnsignedByte();
-            if (flexBitFieldSize > 122) {
-                return null;
+        flexBitFieldSize = buf.readUnsignedByte();
+        if (flexBitFieldSize > FLEX_FIELDS_SIZES.length) {
+            return null;
+        }
+
+        buf.readBytes(flexBitField, 0, (int) Math.ceil((double) flexBitFieldSize / 8));
+
+        flexDataSize = 0;
+        for (int i = 0; i < flexBitFieldSize; i++) {
+            if (checkFlexBitfield(i)) {
+                flexDataSize += FLEX_FIELDS_SIZES[i];
             }
-
-            buf.readBytes(flexBitField, 0, (int) Math.ceil((double) flexBitFieldSize / 8));
-
-            flexDataSize = 0;
-            for (int i = 0; i < flexBitFieldSize; i++) {
-                if (checkFlexBitfield(i)) {
-                    flexDataSize += FLEX_FIELDS_SIZES[i];
-                }
-            }
-        } else {
-            flexProtocolVersion = 0x14;
-            flexStructVersion = 0x14;
         }
 
         ByteBuf response = Unpooled.buffer(9);
@@ -540,6 +626,18 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(header, data), channel.remoteAddress()));
         }
+    }
+
+    static ByteBuf encodeContent(int receiver, int sender, ByteBuf content) {
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeCharSequence("@NTC", StandardCharsets.US_ASCII);
+        buf.writeIntLE(receiver);
+        buf.writeIntLE(sender);
+        buf.writeShortLE(content.readableBytes());
+        buf.writeByte(Checksum.xor(content.nioBuffer()));
+        buf.writeByte(Checksum.xor(buf.nioBuffer()));
+        buf.writeBytes(content);
+        return buf;
     }
 
     private void sendFlexReply(Channel channel, ByteBuf data) {
@@ -576,6 +674,14 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     case "*>F" -> {
                         buf.skipBytes(3);
                         yield processFlexNegotiation(channel, buf);
+                    }
+                    case "*@C" -> {
+                        Position position = new Position(getProtocolName());
+                        position.setDeviceId(deviceSession.getDeviceId());
+                        getLastLocation(position, null);
+                        position.set(Position.KEY_RESULT,
+                                "*@C" + buf.readCharSequence(length - 3, StandardCharsets.US_ASCII).toString());
+                        yield position;
                     }
                     default -> null;
                 };
@@ -615,10 +721,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        if (flexDataSize > 0) {
-            return decodeFlex(channel, remoteAddress, buf);
-        } else {
+        if (buf.getByte(buf.readerIndex()) == '@') {
             return decodeNtcb(channel, remoteAddress, buf);
+        } else {
+            return decodeFlex(channel, remoteAddress, buf);
         }
     }
 
