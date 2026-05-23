@@ -22,6 +22,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -49,6 +50,7 @@ public class LoginService {
     private final String serviceAccountToken;
     private final boolean forceLdap;
     private final boolean forceOpenId;
+    private final boolean allowOpenIdRegistration;
 
     @Inject
     public LoginService(
@@ -60,6 +62,7 @@ public class LoginService {
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
+        allowOpenIdRegistration = config.getBoolean(Keys.OPENID_ALLOW_REGISTRATION);
     }
 
     public LoginResult login(
@@ -125,6 +128,13 @@ public class LoginService {
                 new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
 
         if (user == null) {
+
+            if (!allowOpenIdRegistration && !UserUtil.isEmpty(storage)) {
+                Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+                if (!server.getRegistration()) {
+                    throw new SecurityException("Registration disabled");
+                }
+            }
 
             user = new User();
             UserUtil.setUserDefaults(user, config);

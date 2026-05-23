@@ -785,6 +785,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Allow new users authenticated via OpenID Connect to be auto-created even when the server
+     * registration setting is disabled. When false, OpenID logins for unknown users are rejected
+     * unless the server has registration enabled.
+     */
+    public static final ConfigKey<Boolean> OPENID_ALLOW_REGISTRATION = new BooleanConfigKey(
+            "openid.allowRegistration",
+            List.of(KeyType.CONFIG));
+
+    /**
      * OpenID Connect Client ID.
      * This is a unique ID assigned to each application you register with your identity provider.
      * Required to enable SSO.
