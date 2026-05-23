@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,8 +56,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)?,")                 // course
             .number("(dd)(dd)(dd),,,?")          // date (ddmmyy)
             .expression(".?/")
-            .expression("([01])+,")              // input
-            .expression("([01])+/")              // output
+            .expression("([01]+),")              // input
+            .expression("([01]+)/")              // output
             .expression("([^/]+)?/")             // adc
             .number("(d+)")                      // odometer
             .expression("/([^/]+)?/")            // rfid
@@ -108,8 +108,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_INPUT, parser.nextBinInt());
+        position.set(Position.KEY_OUTPUT, parser.nextBinInt());
 
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
