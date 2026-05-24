@@ -113,6 +113,11 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private ByteBuf formatCommand(Command command, String content) {
+        String model = getDeviceModel(command.getDeviceId());
+        if (model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"))) {
+            return OmniProtocolDecoder.encodeFrame(String.format(
+                    "*CMDS,%s,%s,000000000000,%s#\n", getVendor(command), getUniqueId(command.getDeviceId()), content));
+        }
         if (activeChannel != null) {
             OmniProtocolDecoder decoder = activeChannel.pipeline().get(OmniProtocolDecoder.class);
             if (decoder != null) {
@@ -130,22 +135,40 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
                 decoder.setPendingCommand(command.getType());
             }
         }
+        String model = getDeviceModel(command.getDeviceId());
+        if (model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"))) {
+            return formatCommand(command, String.format(
+                    "L0,%d,%s,%d", operation, getSenderId(command), System.currentTimeMillis() / 1000));
+        }
         return formatCommand(command, String.format(
                 "R0,%d,20,%s,%d", operation, getSenderId(command), System.currentTimeMillis() / 1000));
     }
 
     private ByteBuf formatNamedCommand(Command command, String name) {
+        String model = getDeviceModel(command.getDeviceId());
+        boolean isOmniCmds = model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"));
+
         switch (normalizeName(name)) {
             case "UNLOCK":
+                if (isOmniCmds) {
+                    return formatCommand(command, String.format(
+                            "L0,0,%s,%d", getSenderId(command), System.currentTimeMillis() / 1000));
+                }
                 return formatCommand(command, String.format(
                         "R0,0,20,%s,%d", getSenderId(command), System.currentTimeMillis() / 1000));
             case "LOCK":
+                if (isOmniCmds) {
+                    return formatCommand(command, String.format(
+                            "L0,1,%s,%d", getSenderId(command), System.currentTimeMillis() / 1000));
+                }
                 return formatCommand(command, String.format(
                         "R0,1,20,%s,%d", getSenderId(command), System.currentTimeMillis() / 1000));
             case "UPDATE_VEHICLE_INFO":
                 return formatCommand(command, "S6");
             case "UPDATE_GEO_INFO":
                 return formatCommand(command, "D0");
+            case "UPDATE_LOCK_INFO":
+                return formatCommand(command, "S5");
             case "SETTINGS":
             case "IOT_SETTINGS":
                 return formatCommand(command, "S5" + commandSuffix(command.getString(Command.KEY_DATA)));
@@ -201,6 +224,9 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
                 return formatCommand(command, String.format(
                         "S4,0,0,0,0,0,0,0,%d", getSpeedLimitValue(command, 25)));
             case "LOOK_FOR_ON":
+                if (isOmniCmds) {
+                    return formatCommand(command, "S8,3,0");
+                }
                 return formatCommand(command, "V0,2");
             case "BUZZER_CONTROL_ON":
                 return formatCommand(command, "V0,1");
@@ -211,18 +237,48 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
                 return formatCommand(command, "V1" + commandSuffix(command.getString(Command.KEY_DATA)));
             case "REBOOT":
                 return formatCommand(command, "S1,2");
+            case "SET_30_MIN_GEO_INTERVAL_LOCKED":
+                return formatCommand(command, "D1,1800");
             case "SET_GEO_INTERVAL_LOCKED":
                 return formatCommand(command, "D1,300");
             case "SET_GEO_INTERVAL_5_SEC_UNLOCKED":
                 return formatCommand(command, "D1,5");
             case "SET_GEO_INTERVAL_UNLOCKED":
                 return formatCommand(command, "D1,10");
+            case "UNLOCK_BATTERY_LOCK":
+                return formatCommand(command, "L5,1");
+            case "LOCK_BATTERY_LOCK":
+                return formatCommand(command, "L5,17");
+            case "UNLOCK_WHEEL_LOCK":
+                return formatCommand(command, "L5,2");
+            case "LOCK_WHEEL_LOCK":
+                return formatCommand(command, "L5,18");
+            case "UNLOCK_CABLE_LOCK":
+                return formatCommand(command, "L5,3");
+            case "LOCK_CABLE_LOCK":
+                return formatCommand(command, "L5,19");
+            case "TURN_OFF_LED":
+                return formatCommand(command, "F0,0,0,0,0,0,0,0,0,0");
+            case "SET_LED_RED":
+                return formatCommand(command, "F0,1,FF0000,0,0,0,0,0,0,0");
+            case "SET_LED_GREEN":
+                return formatCommand(command, "F0,1,00FF00,0,0,0,0,0,0,0");
+            case "DEFAULT_HEARTBEAT_INTERVAL":
+                return formatCommand(command, "S5,3,1,240,10");
             case "UNLOCK_HELMET_LOCK":
                 return formatCommand(command, "L5,2");
             case "LOCK_HELMET_LOCK":
                 return formatCommand(command, "L5,18");
             case "GET_HELMET_LOCK_STATUS":
                 return formatCommand(command, "L5,34");
+            case "UPDATE_ECU_FIRMWARE":
+                return formatCommand(command, "U5,0,10" + commandSuffix(command.getString(Command.KEY_DATA)) + ",1,1");
+            case "UPDATE_DISPLAY_FIRMWARE":
+                return formatCommand(command, "U5,0,10" + commandSuffix(command.getString(Command.KEY_DATA)) + ",1,10");
+            case "UPDATE_IOT_FIRMWARE":
+                return formatCommand(command, "U5,0,10" + commandSuffix(command.getString(Command.KEY_DATA)) + ",0,0");
+            case "UPDATE_BMS_1_FIRMWARE":
+                return formatCommand(command, "U5,0,10" + commandSuffix(command.getString(Command.KEY_DATA)) + ",1,2");
             case "DISABLE_UNLOCK_STATUS_UPLOAD_INFORMATION":
                 return formatCommand(command, "S5,0,1,0,0");
             case "REQUEST_BLE_KEY":
