@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -479,7 +479,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     value = buf.readUnsignedByte();
                     position.set("humidity" + (i - 165), value != 0xFF ? value * 0.5 : null);
                 }
-                case 205 -> position.set("diagnostic", buf.readUnsignedIntLE());
                 default -> {
                     if (i >= 206 && i <= 221) {
                         position.set("user1Byte" + (i - 205), buf.readUnsignedByte());
