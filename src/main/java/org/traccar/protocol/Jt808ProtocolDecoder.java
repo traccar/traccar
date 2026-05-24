@@ -862,6 +862,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
+                case 0xE5:
+                    if (length == 1) {
+                        position.set(Position.KEY_MOTION, buf.readUnsignedByte() == 1);
+                    }
+                    break;
                 case 0xE6:
                     if (length >= 7 && buf.getCharSequence(
                             buf.readerIndex(), 7, StandardCharsets.UTF_8).toString().equals("$OBD-RT")) {
@@ -874,6 +879,13 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
                             position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
                         }
+                    }
+                    break;
+                case 0xE7:
+                    if (length == 8) {
+                        alarm = buf.readUnsignedShort();
+                        position.addAlarm(BitUtil.check(alarm, 0) ? Position.ALARM_VIBRATION : null);
+                        position.addAlarm(BitUtil.between(alarm, 1, 4) != 0 ? Position.ALARM_SOS : null);
                     }
                     break;
                 case 0xE8:
