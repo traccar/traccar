@@ -8,10 +8,36 @@ import org.traccar.model.Command;
 
 public class OmniProtocolEncoder extends BaseProtocolEncoder {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OmniProtocolEncoder.class);
+
     private Channel activeChannel;
 
     public OmniProtocolEncoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private boolean isOmniCmds(long deviceId) {
+        String model = getDeviceModel(deviceId);
+        String name = null;
+        try {
+            org.traccar.model.Device device = getCacheManager().getObject(org.traccar.model.Device.class, deviceId);
+            if (device != null) {
+                name = device.getName();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+
+        boolean isOmniCmds = false;
+        if (model != null) {
+            String m = model.toUpperCase().trim();
+            isOmniCmds = m.contains("CMDS") || m.contains("OMNI_LOCK") || m.equals("OMNI LOCK") || m.equals("OMNILOCK") || m.contains("LOCK1") || m.contains("OMNI-LOCK");
+        }
+        if (!isOmniCmds && name != null) {
+            String n = name.toUpperCase().trim();
+            isOmniCmds = n.contains("LOCK") || n.contains("CMDS");
+        }
+        return isOmniCmds;
     }
 
     private static String normalizeName(String name) {
@@ -113,8 +139,11 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private ByteBuf formatCommand(Command command, String content) {
-        String model = getDeviceModel(command.getDeviceId());
-        if (model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"))) {
+        boolean isOmniCmds = isOmniCmds(command.getDeviceId());
+        LOGGER.info("Omni formatCommand - Device ID: {}, Unique ID: {}, isOmniCmds: {}, content: {}",
+                command.getDeviceId(), getUniqueId(command.getDeviceId()), isOmniCmds, content);
+
+        if (isOmniCmds) {
             return OmniProtocolDecoder.encodeFrame(String.format(
                     "*CMDS,%s,%s,000000000000,%s#\n", getVendor(command), getUniqueId(command.getDeviceId()), content));
         }
@@ -135,8 +164,7 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
                 decoder.setPendingCommand(command.getType());
             }
         }
-        String model = getDeviceModel(command.getDeviceId());
-        if (model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"))) {
+        if (isOmniCmds(command.getDeviceId())) {
             return formatCommand(command, String.format(
                     "L0,%d,%s,%d", operation, getSenderId(command), System.currentTimeMillis() / 1000));
         }
@@ -145,8 +173,7 @@ public class OmniProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private ByteBuf formatNamedCommand(Command command, String name) {
-        String model = getDeviceModel(command.getDeviceId());
-        boolean isOmniCmds = model != null && (model.equalsIgnoreCase("OMNI_CMDS") || model.equalsIgnoreCase("OMNI_LOCK"));
+        boolean isOmniCmds = isOmniCmds(command.getDeviceId());
 
         switch (normalizeName(name)) {
             case "UNLOCK":
