@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -68,6 +69,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             case 0x30 -> Position.ALARM_PARKING;
             case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
             case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0xA0 -> Position.ALARM_TEMPERATURE;
+            case 0xA3 -> Position.ALARM_VIBRATION;
+            case 0xB0 -> Position.ALARM_POWER_ON;
+            case 0xB1 -> Position.ALARM_POWER_OFF;
             default -> null;
         };
     }
@@ -76,6 +81,31 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
+
+        if (hardware == 0x40A) {
+
+            if (blockLength < 19) {
+                return false;
+            }
+
+            int status = buf.readUnsignedByte();
+            position.setValid(true);
+            position.setFixTime(new DateBuilder()
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()).getDate());
+
+            double latitude = buf.readUnsignedInt() / 1000000.0;
+            double longitude = buf.readUnsignedInt() / 1000000.0;
+            position.setLatitude(BitUtil.check(status, 0) ? latitude : -latitude);
+            position.setLongitude(BitUtil.check(status, 1) ? -longitude : longitude);
+
+            position.setCourse(buf.readUnsignedShort());
+            position.setSpeed(buf.readUnsignedShort() / 10.0);
+
+            buf.readerIndex(blockEnd);
+
+            return true;
+        }
 
         if (blockLength < 22) {
             return false;
@@ -299,6 +329,36 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.setNetwork(network);
 
+            } else if (hardware == 0x40A) {
+
+                Network network = new Network();
+                int count = buf.readUnsignedByte();
+                for (int i = 0; i < count; i++) {
+                    int signalInfo = buf.readUnsignedByte();
+                    int type = signalInfo >> 5;
+                    int cellEnd = buf.readerIndex() + (signalInfo & 0x1F);
+
+                    CellTower tower = CellTower.from(
+                            BcdUtil.readInteger(buf, 4),
+                            BcdUtil.readInteger(buf, 4) % 1000,
+                            buf.readUnsignedShort(),
+                            buf.readUnsignedInt());
+
+                    if (type == 0b000) {
+                        tower.setSignalStrength(-buf.readUnsignedByte());
+                    } else if (type == 0b110) {
+                        buf.readUnsignedShort(); // pci
+                        buf.skipBytes(3); // earfcn
+                        buf.readUnsignedByte(); // rsrp
+                        buf.readUnsignedByte(); // rsrq
+                        tower.setSignalStrength(-buf.readUnsignedByte());
+                    }
+
+                    buf.readerIndex(cellEnd);
+                    network.addCellTower(tower);
+                }
+                position.setNetwork(network);
+
             }
         }
 
@@ -309,30 +369,14 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockLength = buf.readUnsignedShort();
         blockEnd = buf.readerIndex() + blockLength;
 
-        if (hardware == 0x407 || blockLength >= 13) {
-            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
-            position.set("terminalInfo", buf.readUnsignedByte());
+        if (hardware == 0x40A) {
 
-            if (hardware != 0x407) {
-                int status = buf.readUnsignedByte();
-                position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
-                position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
-                status = buf.readUnsignedByte();
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
-                if (BitUtil.check(status, 0)) {
-                    position.addAlarm(Position.ALARM_SOS);
-                }
-            }
-
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-            position.set("gsmStatus", buf.readUnsignedByte());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
-
-            if (hardware != 0x407) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShort());
-                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
-            } else {
+            if (blockLength >= 14) {
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
+                position.set("terminalInfo", buf.readUnsignedByte());
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                position.set("gsmStatus", buf.readUnsignedByte());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                 int temperature = buf.readUnsignedShort();
                 if (!BitUtil.check(temperature, 15)) {
                     double value = BitUtil.to(temperature, 14) / 10.0;
@@ -342,12 +386,51 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 if (!BitUtil.check(humidity, 15)) {
                     position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) / 10.0);
                 }
-                position.set("lightSensor", buf.readUnsignedByte() == 0);
             }
-        }
 
-        if (blockLength >= 15) {
-            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
+        } else {
+
+            if (hardware == 0x407 || blockLength >= 13) {
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
+                position.set("terminalInfo", buf.readUnsignedByte());
+
+                if (hardware != 0x407) {
+                    int status = buf.readUnsignedByte();
+                    position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
+                    position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
+                    status = buf.readUnsignedByte();
+                    position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
+                    if (BitUtil.check(status, 0)) {
+                        position.addAlarm(Position.ALARM_SOS);
+                    }
+                }
+
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                position.set("gsmStatus", buf.readUnsignedByte());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+
+                if (hardware != 0x407) {
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                } else {
+                    int temperature = buf.readUnsignedShort();
+                    if (!BitUtil.check(temperature, 15)) {
+                        double value = BitUtil.to(temperature, 14) / 10.0;
+                        position.set(Position.PREFIX_TEMP + 1, BitUtil.check(temperature, 14) ? -value : value);
+                    }
+                    int humidity = buf.readUnsignedShort();
+                    if (!BitUtil.check(humidity, 15)) {
+                        position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) / 10.0);
+                    }
+                    position.set("lightSensor", buf.readUnsignedByte() == 0);
+                }
+            }
+
+            if (blockLength >= 15) {
+                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
+            }
+
         }
 
         buf.readerIndex(blockEnd);
@@ -366,6 +449,26 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         if (hardware == 0x153 || hardware == 0x406) {
 
             decodeTags(position, buf, hardware);
+
+        }
+
+        if (hardware == 0x40A) {
+
+            blockLength = buf.readUnsignedShort();
+            blockEnd = buf.readerIndex() + blockLength;
+
+            if (blockLength > 0) {
+                Network network = position.getNetwork() != null ? position.getNetwork() : new Network();
+                while (buf.readerIndex() < blockEnd) {
+                    String mac = String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                            buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
+                            buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    network.addWifiAccessPoint(WifiAccessPoint.from(mac, -buf.readUnsignedByte()));
+                }
+                position.setNetwork(network);
+            }
+
+            buf.readerIndex(blockEnd);
 
         }
 
