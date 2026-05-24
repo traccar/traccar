@@ -199,6 +199,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.3 * 2.0 / 4096.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0));
                 }
+                case "MT90G" -> {
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 4096.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0));
+                }
                 case "T1", "T3", "MVT100", "MVT600", "MVT800", "TC68", "TC68S" -> {
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.3 * 2.0 / 4096.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
