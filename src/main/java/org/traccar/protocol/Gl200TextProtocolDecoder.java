@@ -1032,8 +1032,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return positions; // can data not supported
         }
 
-        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)
-                || (BitUtil.check(mask, 0) && model.equals("GV350M"))) {
+        if ((BitUtil.check(mask, 3) || BitUtil.check(mask, 4)
+                || (BitUtil.check(mask, 0) && model.equals("GV350M")))
+                && index < v.length - 2) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // type
