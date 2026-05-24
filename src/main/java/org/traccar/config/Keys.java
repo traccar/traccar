@@ -1377,6 +1377,16 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Firebase message delivery mode. Supported values are {@code direct} (notification payload only,
+     * default and current behavior), {@code data} (data-only payload for the client app to handle),
+     * and {@code mixed} (both notification and data payloads).
+     */
+    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_MODE = new StringConfigKey(
+            "notificator.firebase.mode",
+            List.of(KeyType.CONFIG),
+            "direct");
+
+    /**
      * Pushover notification user name.
      */
     public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_USER = new StringConfigKey(
