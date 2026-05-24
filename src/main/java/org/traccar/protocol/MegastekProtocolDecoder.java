@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,8 +282,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?").text(",")
             .groupBegin()
             .number("(d+)?,")                    // rfid
+            .groupBegin()
             .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
+            .groupEnd("?")
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
             .expression("([^,]*)[,;]").optional() // wifi
