@@ -93,7 +93,11 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
                         command.getType(),
                         encodedCommand != null ? "sent" : "not sent");
 
-                ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
+                if (encodedCommand != null) {
+                    ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
+                } else {
+                    promise.trySuccess();
+                }
 
                 return;
             }

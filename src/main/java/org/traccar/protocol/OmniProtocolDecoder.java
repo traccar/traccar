@@ -175,7 +175,8 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String[] fields = sentence.split(",", -1);
-        if (fields.length < 4 || (!fields[0].equals("*SCOR") && !fields[0].equals("*CMDR"))) {
+        if (fields.length < 4
+                || (!fields[0].equals("*SCOR") && !fields[0].equals("*HBCR") && !fields[0].equals("*CMDR"))) {
             return null;
         }
 
@@ -184,6 +185,9 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
         String uniqueId = fields[2];
         int typeIndex = fields[0].equals("*CMDR") ? 4 : 3;
+        if (!commandMessageDialect && fields.length > typeIndex + 1 && fields[typeIndex].matches("\\d{12}")) {
+            typeIndex += 1;
+        }
         if (fields.length <= typeIndex) {
             return null;
         }

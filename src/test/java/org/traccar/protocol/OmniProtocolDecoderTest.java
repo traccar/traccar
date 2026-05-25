@@ -42,6 +42,28 @@ public class OmniProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeLegacyHbcrPositionHeader() throws Exception {
+
+        var decoder = inject(new OmniProtocolDecoder(null));
+
+        verifyPosition(decoder, text(
+                "*HBCR,OM,123456789012345,D0,0,120001.0,A,2457.8101,N,12125.5393,E,"
+                        + "8,0.8,010124,10.0,M,A#"));
+
+    }
+
+    @Test
+    public void testDecodePositionWithOptionalMessageTimestamp() throws Exception {
+
+        var decoder = inject(new OmniProtocolDecoder(null));
+
+        verifyPosition(decoder, text(
+                "*SCOR,OM,123456789012345,240101120001,D0,0,120001.0,A,2457.8101,N,12125.5393,E,"
+                        + "8,0.8,010124,10.0,M,A#"));
+
+    }
+
+    @Test
     public void testEncodePositionPeriodic() throws Exception {
 
         var encoder = inject(new OmniProtocolEncoder(null));
