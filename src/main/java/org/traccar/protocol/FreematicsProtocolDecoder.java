@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,17 +42,19 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = null;
         String event = null;
         String time = null;
+        String vin = null;
 
         for (String pair : sentence.split(",")) {
             String[] data = pair.split("=");
             String key = data[0];
             String value = data[1];
             switch (key) {
-                case "ID", "VIN" -> {
+                case "ID" -> {
                     if (deviceSession == null) {
                         deviceSession = getDeviceSession(channel, remoteAddress, value);
                     }
                 }
+                case "VIN" -> vin = value;
                 case "EV" -> event = value;
                 case "TS" -> time = value;
             }
@@ -62,6 +64,14 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
             String message = String.format("1#EV=%s,RX=1,TS=%s", event, time);
             message += '*' + Checksum.sum(message);
             channel.writeAndFlush(new NetworkMessage(message, remoteAddress));
+        }
+
+        if (deviceSession != null && vin != null) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_VIN, vin);
+            return position;
         }
 
         return null;
