@@ -34,7 +34,7 @@ public class OutsafeProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
-                pipeline.addLast(new HttpObjectAggregator(65535));
+                pipeline.addLast(new HttpObjectAggregator(MAX_HTTP_LENGTH));
                 pipeline.addLast(new OutsafeProtocolDecoder(OutsafeProtocol.this));
             }
         });

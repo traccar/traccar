@@ -162,15 +162,14 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             statisticsManager.registerMessageReceived();
         }
         Set<Long> deviceIds = new HashSet<>();
-        if (decodedMessage != null) {
-            if (decodedMessage instanceof Position position) {
-                deviceIds.add(position.getDeviceId());
-            } else if (decodedMessage instanceof Collection) {
-                Collection<Position> positions = (Collection) decodedMessage;
-                for (Position position : positions) {
-                    deviceIds.add(position.getDeviceId());
+        switch (decodedMessage) {
+            case Position position -> deviceIds.add(position.getDeviceId());
+            case Collection<?> positions -> {
+                for (Object position : positions) {
+                    deviceIds.add(((Position) position).getDeviceId());
                 }
             }
+            case null, default -> {}
         }
         if (deviceIds.isEmpty()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);

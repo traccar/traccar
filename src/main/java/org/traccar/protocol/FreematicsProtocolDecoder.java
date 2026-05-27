@@ -127,9 +127,9 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     case 0xF -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                     case 0x12 -> position.set(Position.KEY_HDOP, Integer.parseInt(value));
                     case 0x20 -> position.set(Position.KEY_ACCELERATION, value);
-                    case 0x24 -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.01);
+                    case 0x24 -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) / 100.0);
                     case 0x81 -> position.set(Position.KEY_RSSI, Integer.parseInt(value));
-                    case 0x82 -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value) * 0.1);
+                    case 0x82 -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value) / 10.0);
                     case 0x104 -> position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(value));
                     case 0x105 -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(value));
                     case 0x10c -> position.set(Position.KEY_RPM, Integer.parseInt(value));

@@ -96,7 +96,7 @@ public class RadarProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                 }
                 if (mask.get(5)) {
-                    position.setCourse(buf.readUnsignedShort() * 0.1);
+                    position.setCourse(buf.readUnsignedShort() / 10.0);
                 }
                 if (mask.get(6)) {
                     position.setAltitude(buf.readShort());

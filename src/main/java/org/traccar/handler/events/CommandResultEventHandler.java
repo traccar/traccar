@@ -22,8 +22,7 @@ import org.traccar.model.Position;
 public class CommandResultEventHandler extends BaseEventHandler {
 
     @Inject
-    public CommandResultEventHandler() {
-    }
+    public CommandResultEventHandler() {}
 
     @Override
     public void onPosition(Position position, Callback callback) {

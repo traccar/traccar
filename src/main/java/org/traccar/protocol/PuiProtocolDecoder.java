@@ -21,14 +21,18 @@ import jakarta.json.JsonObject;
 import org.apache.kafka.common.utils.ByteBufferInputStream;
 import org.traccar.BaseMqttProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class PuiProtocolDecoder extends BaseMqttProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneId.systemDefault());
 
     public PuiProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -51,8 +55,7 @@ public class PuiProtocolDecoder extends BaseMqttProtocolDecoder {
 
                 position.setValid(true);
 
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                position.setTime(dateFormat.parse(json.getString("ts")));
+                position.setTime(DateUtil.parse(DATE_FORMAT, json.getString("ts")));
 
                 JsonObject location = json.getJsonObject("location");
                 position.setLatitude(location.getJsonNumber("lat").doubleValue());

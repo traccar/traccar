@@ -34,13 +34,15 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyMMddHHmmss").withZone(ZoneOffset.UTC);
 
     private ByteBuf photo;
 
@@ -240,9 +242,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(network);
 
-        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String response = index + ",A03," + dateFormat.format(new Date());
+        String response = index + ",A03," + DATE_FORMAT.format(Instant.now());
         sendResponse(channel, remoteAddress, imei, response);
 
         return position;

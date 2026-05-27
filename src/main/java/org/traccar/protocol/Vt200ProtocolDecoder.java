@@ -28,8 +28,8 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -40,7 +40,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
     private static double decodeCoordinate(int value) {
         int degrees = value / 1000000;
         int minutes = value % 1000000;
-        return degrees + minutes * 0.0001 / 60;
+        return degrees + minutes / 10000.0 / 60;
     }
 
     protected Date decodeDate(ByteBuf buf) {
@@ -134,7 +134,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
             position.set("hardAccelerationCount", buf.readUnsignedByte());
             position.set("hardBrakingCount", buf.readUnsignedByte());
 
-            for (String speedType : Arrays.asList("over", "high", "normal", "low")) {
+            for (String speedType : List.of("over", "high", "normal", "low")) {
                 position.set(speedType + "SpeedTime", buf.readUnsignedShort());
                 position.set(speedType + "SpeedDistance", buf.readUnsignedInt());
                 position.set(speedType + "SpeedFuel", buf.readUnsignedInt());

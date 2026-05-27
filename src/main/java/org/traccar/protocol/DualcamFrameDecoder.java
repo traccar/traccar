@@ -19,10 +19,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BaseProtocol;
 
 public class DualcamFrameDecoder extends BaseFrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 4;
+
+    public DualcamFrameDecoder() {
+        super(BaseProtocol.MAX_FRAME_LENGTH_LARGE);
+    }
 
     @Override
     protected Object decode(

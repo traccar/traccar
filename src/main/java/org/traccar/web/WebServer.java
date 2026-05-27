@@ -62,6 +62,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.Locale;
 
 public class WebServer implements LifecycleObject {
 
@@ -221,7 +222,7 @@ public class WebServer implements LifecycleObject {
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
         if (sameSiteCookie != null) {
-            switch (sameSiteCookie.toLowerCase()) {
+            switch (sameSiteCookie.toLowerCase(Locale.ROOT)) {
                 case "lax":
                     sessionHandler.setSameSite(HttpCookie.SameSite.LAX);
                     break;

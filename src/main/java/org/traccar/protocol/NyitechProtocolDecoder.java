@@ -58,8 +58,8 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(BitUtil.check(flags, 3) ? lon : -lon);
 
         position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedShortLE()));
-        position.setCourse(buf.readUnsignedShortLE() * 0.1);
-        position.setAltitude(buf.readShortLE() * 0.1);
+        position.setCourse(buf.readUnsignedShortLE() / 10.0);
+        position.setAltitude(buf.readShortLE() / 10.0);
     }
 
     private String decodeAlarm(int type) {
@@ -124,7 +124,7 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.01);
+            position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 100.0);
             position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
 
 

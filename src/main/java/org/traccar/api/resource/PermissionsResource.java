@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,10 @@ package org.traccar.api.resource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.model.UserRestrictions;
 import org.traccar.session.cache.CacheManager;
@@ -28,6 +30,7 @@ import org.traccar.storage.StorageException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -68,6 +71,19 @@ public class PermissionsResource  extends BaseResource {
             }
             keys = entity.keySet();
         }
+    }
+
+    @GET
+    public List<Permission> get(@Context UriInfo uriInfo) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        var entries = uriInfo.getQueryParameters().entrySet().stream()
+                .filter(entry -> entry.getKey().endsWith("Id"))
+                .toList();
+        Class<? extends BaseModel> ownerClass = Permission.getKeyClass(entries.get(0).getKey());
+        long ownerId = Long.parseLong(entries.get(0).getValue().get(0));
+        Class<? extends BaseModel> propertyClass = Permission.getKeyClass(entries.get(1).getKey());
+        long propertyId = Long.parseLong(entries.get(1).getValue().get(0));
+        return storage.getPermissions(ownerClass, ownerId, propertyClass, propertyId);
     }
 
     @Path("bulk")

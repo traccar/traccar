@@ -30,6 +30,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
@@ -196,8 +197,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(7)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
-            position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+            position.set(Position.KEY_POWER, parser.nextInt() / 100.0);
+            position.set(Position.KEY_BATTERY, parser.nextInt() / 100.0);
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
             position.set(Position.PREFIX_TEMP + 2, parser.nextDouble());
@@ -221,8 +222,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RSSI, parser.nextInt());
         }
         if (parser.hasNext(2)) {
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
-            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt() / 100.0);
+            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() / 100.0);
         }
 
         position.setValid(valid == null || valid);
@@ -261,7 +262,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             for (String attribute : attributes) {
                 int index = attribute.indexOf('=');
                 if (index != -1) {
-                    String key = attribute.substring(0, index).toLowerCase();
+                    String key = attribute.substring(0, index).toLowerCase(Locale.ROOT);
                     String value = attribute.substring(index + 1);
                     switch (key) {
                         case "id" -> {
@@ -283,7 +284,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                         case "ix" -> position.set(Position.PREFIX_IO + 1, value);
                         case "ad" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
                         case "sv" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                        case "bl" -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
+                        case "bl" -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) / 1000.0);
                         case "vo" -> position.set(Position.KEY_ODOMETER, Long.parseLong(value));
                         default -> position.set(key, value);
                     }
@@ -306,7 +307,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";";
                         }
                         String model = getDeviceModel(deviceSession);
-                        boolean lantrix = model != null && model.toUpperCase().startsWith("LANTRIX");
+                        boolean lantrix = model != null && model.toUpperCase(Locale.ROOT).startsWith("LANTRIX");
                         int checksum = Checksum.xor(lantrix ? response : response + "*");
                         response += String.format("*%02X", checksum) + "<";
                     }

@@ -19,6 +19,7 @@ package org.traccar.geocoder;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
+import java.util.Locale;
 
 public class GeocodeJsonGeocoder extends JsonGeocoder {
 
@@ -67,7 +68,7 @@ public class GeocodeJsonGeocoder extends JsonGeocoder {
                 address.setState(properties.getString("state"));
             }
             if (properties.containsKey("countrycode")) {
-                address.setCountry(properties.getString("countrycode").toUpperCase());
+                address.setCountry(properties.getString("countrycode").toUpperCase(Locale.ROOT));
             }
             if (properties.containsKey("postcode")) {
                 address.setPostcode(properties.getString("postcode"));

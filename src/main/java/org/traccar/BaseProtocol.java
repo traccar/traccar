@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.string.StringEncoder;
@@ -31,9 +30,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public abstract class BaseProtocol implements Protocol {
+
+    public static final int MAX_FRAME_LENGTH = 1024;
+    public static final int MAX_FRAME_LENGTH_LARGE = 32 * 1024;
+    public static final int MAX_HTTP_LENGTH = 64 * 1024;
 
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
@@ -46,7 +50,7 @@ public abstract class BaseProtocol implements Protocol {
 
     public static String nameFromClass(Class<?> clazz) {
         String className = clazz.getSimpleName();
-        return className.substring(0, className.length() - 8).toLowerCase();
+        return className.substring(0, className.length() - 8).toLowerCase(Locale.ROOT);
     }
 
     public BaseProtocol() {
@@ -100,19 +104,23 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendDataCommand(Channel channel, SocketAddress remoteAddress, Command command) {
+        Object message;
         if (supportedDataCommands.contains(command.getType())) {
-            channel.writeAndFlush(new NetworkMessage(command, remoteAddress));
+            message = command;
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
             if (BasePipelineFactory.getHandler(channel.pipeline(), StringEncoder.class) != null) {
-                channel.writeAndFlush(new NetworkMessage(
-                        data.replace("\\r", "\r").replace("\\n", "\n"), remoteAddress));
+                message = data.replace("\\r", "\r").replace("\\n", "\n");
             } else {
-                ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
-                channel.writeAndFlush(new NetworkMessage(buf, remoteAddress));
+                message = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
+        }
+        try {
+            channel.writeAndFlush(new NetworkMessage(message, remoteAddress)).sync();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -81,7 +81,10 @@ import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
+import org.traccar.handler.MapMatcherHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.mapmatcher.MapMatcher;
+import org.traccar.mapmatcher.TraccarMapMatcher;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
@@ -300,6 +303,30 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static MapMatcher provideMapMatcher(Config config, Client client) {
+        if (config.getBoolean(Keys.MAP_MATCHER_ENABLE)) {
+            String type = config.getString(Keys.MAP_MATCHER_TYPE);
+            String url = config.getString(Keys.MAP_MATCHER_URL);
+            String key = config.getString(Keys.MAP_MATCHER_KEY);
+            return switch (type) {
+                case "traccar" -> new TraccarMapMatcher(client, url, key);
+                default -> throw new IllegalArgumentException("Unknown map matcher provider");
+            };
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MapMatcherHandler provideMapMatcherHandler(@Nullable MapMatcher mapMatcher) {
+        if (mapMatcher != null) {
+            return new MapMatcherHandler(mapMatcher);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
             return new SpeedLimitHandler(speedLimitProvider);
@@ -311,7 +338,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CopyAttributesHandler provideCopyAttributesHandler(Config config, CacheManager cacheManager) {
         if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
-            return new CopyAttributesHandler(config, cacheManager);
+            return new CopyAttributesHandler(cacheManager);
         }
         return null;
     }

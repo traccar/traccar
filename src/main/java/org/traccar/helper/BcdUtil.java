@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 
 public final class BcdUtil {
 
-    private BcdUtil() {
-    }
+    private BcdUtil() {}
 
     public static int readInteger(ByteBuf buf, int digits) {
         int result = 0;

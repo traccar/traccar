@@ -38,7 +38,7 @@ public class GpxExportProviderTest {
         TimeZone defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         try {
-            new GpxExportProvider(storage).generate(outputStream, 1, new Date(0), new Date(60_000));
+            new GpxExportProvider(storage).generate(outputStream, 1, 0, new Date(0), new Date(60_000));
         } finally {
             TimeZone.setDefault(defaultTimeZone);
         }

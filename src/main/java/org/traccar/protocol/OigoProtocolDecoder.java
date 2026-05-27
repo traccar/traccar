@@ -95,15 +95,15 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 3)) {
-            position.setLatitude(buf.readUnsignedInt() * 0.000001 - 90);
-            position.setLongitude(buf.readUnsignedInt() * 0.000001 - 180.0);
+            position.setLatitude(buf.readUnsignedInt() / 1000000.0 - 90);
+            position.setLongitude(buf.readUnsignedInt() / 1000000.0 - 180.0);
         }
 
         if (BitUtil.check(mask, 4)) {
             int status = buf.readUnsignedByte();
             position.setValid(BitUtil.between(status, 4, 8) != 0);
             position.set(Position.KEY_SATELLITES, BitUtil.to(status, 4));
-            position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
         }
 
         if (BitUtil.check(mask, 5)) {
@@ -123,11 +123,11 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 9)) {
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
         }
 
         if (BitUtil.check(mask, 10)) {
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
         }
 
         if (BitUtil.check(mask, 11)) {
@@ -156,7 +156,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
     private double convertCoordinate(long value) {
         boolean negative = value < 0;
         value = Math.abs(value);
-        double minutes = (value % 100000) * 0.001;
+        double minutes = (value % 100000) / 1000.0;
         value /= 100000;
         double degrees = value + minutes / 60;
         return negative ? -degrees : degrees;
@@ -199,7 +199,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort());
         position.setSpeed(UnitsConverter.knotsFromMph(buf.readUnsignedByte()));
 
-        position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
+        position.set(Position.KEY_POWER, buf.readUnsignedByte() / 10.0);
         position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
 
         dateBuilder.setSecond(buf.readUnsignedByte());

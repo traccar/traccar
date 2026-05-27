@@ -150,11 +150,11 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                     if (type == MSG_GPS_SENSORS) {
                         double power = buf.readUnsignedByte();
                         power += buf.readUnsignedByte() << 8;
-                        position.set(Position.KEY_POWER, power * 0.01);
+                        position.set(Position.KEY_POWER, power / 100.0);
 
                         double battery = buf.readUnsignedByte();
                         battery += buf.readUnsignedByte() << 8;
-                        position.set(Position.KEY_BATTERY, battery * 0.01);
+                        position.set(Position.KEY_BATTERY, battery / 100.0);
 
                         buf.skipBytes(6);
                     }

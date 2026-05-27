@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +20,7 @@ import org.traccar.model.Position;
 
 public final class DistanceCalculator {
 
-    private DistanceCalculator() {
-    }
+    private DistanceCalculator() {}
 
     private static final double EQUATORIAL_EARTH_RADIUS = 6378137.0;
     private static final double DEG_TO_RAD = Math.PI / 180;
@@ -33,8 +32,10 @@ public final class DistanceCalculator {
     public static double distance(double lat1, double lon1, double lat2, double lon2) {
         double dlong = (lon2 - lon1) * DEG_TO_RAD;
         double dlat = (lat2 - lat1) * DEG_TO_RAD;
-        double a = Math.pow(Math.sin(dlat / 2), 2)
-                + Math.cos(lat1 * DEG_TO_RAD) * Math.cos(lat2 * DEG_TO_RAD) * Math.pow(Math.sin(dlong / 2), 2);
+        double sinDlat = Math.sin(dlat / 2);
+        double sinDlong = Math.sin(dlong / 2);
+        double a = sinDlat * sinDlat
+                + Math.cos(lat1 * DEG_TO_RAD) * Math.cos(lat2 * DEG_TO_RAD) * sinDlong * sinDlong;
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return EQUATORIAL_EARTH_RADIUS * c;
     }
@@ -44,10 +45,13 @@ public final class DistanceCalculator {
         double d0 = distance(pointLat, pointLon, lat1, lon1);
         double d1 = distance(lat1, lon1, lat2, lon2);
         double d2 = distance(lat2, lon2, pointLat, pointLon);
-        if (Math.pow(d0, 2) > Math.pow(d1, 2) + Math.pow(d2, 2)) {
+        double d0Squared = d0 * d0;
+        double d1Squared = d1 * d1;
+        double d2Squared = d2 * d2;
+        if (d0Squared > d1Squared + d2Squared) {
             return d2;
         }
-        if (Math.pow(d2, 2) > Math.pow(d1, 2) + Math.pow(d0, 2)) {
+        if (d2Squared > d1Squared + d0Squared) {
             return d0;
         }
         double halfP = (d0 + d1 + d2) * 0.5;

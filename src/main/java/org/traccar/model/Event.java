@@ -35,8 +35,7 @@ public class Event extends Message {
         eventTime = new Date();
     }
 
-    public Event() {
-    }
+    public Event() {}
 
     public static final String ALL_EVENTS = "allEvents";
 
@@ -57,6 +56,10 @@ public class Event extends Message {
 
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
+
+    public static final String TYPE_PROXIMITY_ENTER = "proximityEnter";
+    public static final String TYPE_PROXIMITY_EXIT = "proximityExit";
+    public static final String TYPE_UNACCOMPANIED_MOTION = "unaccompaniedMotion";
 
     public static final String TYPE_ALARM = "alarm";
 

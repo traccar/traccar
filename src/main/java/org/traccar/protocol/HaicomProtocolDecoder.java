@@ -101,7 +101,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.set("powersaveCountdown", parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0) * 0.1);
+        position.set(Position.KEY_BATTERY, parser.nextDouble(0) / 10.0);
 
         return position;
     }

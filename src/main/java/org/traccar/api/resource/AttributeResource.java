@@ -34,7 +34,7 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
-import org.traccar.handler.ComputedAttributesHandler;
+import org.traccar.handler.ComputedAttributesProvider;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -49,7 +49,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     private CacheManager cacheManager;
 
     @Inject
-    private ComputedAttributesHandler.Late computedAttributesHandler;
+    private ComputedAttributesProvider computedAttributesProvider;
 
     public AttributeResource() {
         super(Attribute.class, "description", List.of("description"));
@@ -68,7 +68,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
         var key = new Object();
         try {
             cacheManager.addDevice(position.getDeviceId(), key);
-            Object result = computedAttributesHandler.computeAttribute(entity, position);
+            Object result = computedAttributesProvider.compute(entity, position);
             if (result != null) {
                 return switch (entity.getType()) {
                     case "number", "boolean" -> Response.ok(result).build();

@@ -13,19 +13,19 @@ jobs:
     name: Build installers
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: true
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
           cache: gradle
       - run: ./gradlew build
       - run: git checkout ${{ github.ref_name }}
         working-directory: ./traccar-web
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -38,15 +38,15 @@ jobs:
           sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386
           sudo apt-get install -y innoextract makeself wine32
       - run: |
-          JDK_VERSION="21.0.7+6"
-          JDK_BASE="https://github.com/adoptium/temurin21-binaries/releases/download/jdk-${JDK_VERSION}"
-          wget -q "$JDK_BASE/OpenJDK21U-jdk_x64_windows_hotspot_${JDK_VERSION/+/_}.zip"
-          wget -q "$JDK_BASE/OpenJDK21U-jdk_x64_linux_hotspot_${JDK_VERSION/+/_}.tar.gz"
-          wget -q "$JDK_BASE/OpenJDK21U-jdk_aarch64_linux_hotspot_${JDK_VERSION/+/_}.tar.gz"
+          JDK_API="https://api.adoptium.net/v3/binary/latest/25/ga"
+          wget -q --content-disposition --trust-server-names "$JDK_API/windows/x64/jdk/hotspot/normal/eclipse"
+          wget -q --content-disposition --trust-server-names "$JDK_API/linux/x64/jdk/hotspot/normal/eclipse"
+          wget -q --content-disposition --trust-server-names "$JDK_API/linux/aarch64/jdk/hotspot/normal/eclipse"
+          ls -l OpenJDK*
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
           ./package.sh ${{ github.event.inputs.version }}
         working-directory: ./setup
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: installers
           path: setup/traccar-*.zip
@@ -59,13 +59,13 @@ jobs:
     if: ${{ github.event.inputs.version == 'preview' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
       - env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: |
           sudo apt-get install -y s3cmd
-          s3cmd --acl-public put installers/traccar-*.zip s3://traccar/builds/ --host=nyc3.digitaloceanspaces.com --host-bucket=traccar --access_key="$S3_ACCESS_KEY" --secret_key="$S3_SECRET_KEY"
+          s3cmd --acl-public put traccar-*.zip s3://traccar/builds/ --host=nyc3.digitaloceanspaces.com --host-bucket=traccar --access_key="$S3_ACCESS_KEY" --secret_key="$S3_SECRET_KEY"
 
   release:
     name: Create release with installers
@@ -73,14 +73,14 @@ jobs:
     if: ${{ github.event.inputs.version != 'preview' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/download-artifact@v8
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ github.event.inputs.version }}
-          files: installers/traccar-*.zip
+          files: traccar-*.zip
 
   docker:
     name: Build and push docker images
@@ -93,25 +93,25 @@ jobs:
         include:
           - platforms: linux/amd64,linux/arm64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: docker
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           flavor: latest=false
           images: |
@@ -128,7 +128,7 @@ jobs:
             type=raw,value=${{ matrix.os }}
           labels: |
             org.opencontainers.image.version=${{ github.event.inputs.version }}
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: docker
           file: docker/Dockerfile.${{ matrix.os }}

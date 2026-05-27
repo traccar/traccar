@@ -111,13 +111,16 @@ public abstract class TrackerServer implements TrackerConnector {
 
     @Override
     public void start() throws Exception {
-        InetSocketAddress endpoint;
         if (address == null) {
-            endpoint = new InetSocketAddress(port);
+            bind(new InetSocketAddress(port));
         } else {
-            endpoint = new InetSocketAddress(address, port);
+            for (String value : address.split(",")) {
+                bind(new InetSocketAddress(value.trim(), port));
+            }
         }
+    }
 
+    private void bind(InetSocketAddress endpoint) {
         Channel channel = bootstrap.bind(endpoint).syncUninterruptibly().channel();
         if (channel != null) {
             getChannelGroup().add(channel);

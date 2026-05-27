@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,20 @@ package org.traccar.geocoder;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import jakarta.ws.rs.client.Client;
+import java.util.Locale;
 
 public class OpenCageGeocoder extends JsonGeocoder {
+
+    private static String readString(JsonObject json, String key) {
+        JsonValue value = json.get(key);
+        if (value instanceof JsonString jsonString) {
+            return jsonString.getString();
+        }
+        return value.toString();
+    }
 
     private static String formatUrl(String url, String key, String language) {
         if (url == null) {
@@ -50,10 +61,10 @@ public class OpenCageGeocoder extends JsonGeocoder {
                     address.setFormattedAddress(result.getJsonObject(0).getString("formatted"));
                 }
                 if (location.containsKey("building")) {
-                    address.setHouse(location.getString("building"));
+                    address.setHouse(readString(location, "building"));
                 }
                 if (location.containsKey("house_number")) {
-                    address.setHouse(location.getString("house_number"));
+                    address.setHouse(readString(location, "house_number"));
                 }
                 if (location.containsKey("road")) {
                     address.setStreet(location.getString("road"));
@@ -74,7 +85,7 @@ public class OpenCageGeocoder extends JsonGeocoder {
                     address.setState(location.getString("state"));
                 }
                 if (location.containsKey("country_code")) {
-                    address.setCountry(location.getString("country_code").toUpperCase());
+                    address.setCountry(location.getString("country_code").toUpperCase(Locale.ROOT));
                 }
                 if (location.containsKey("postcode")) {
                     address.setPostcode(location.getString("postcode"));

@@ -47,7 +47,7 @@ public class GoogleGeocoder extends JsonGeocoder {
         if (!results.isEmpty()) {
             Address address = new Address();
 
-            JsonObject result = (JsonObject) results.get(0);
+            JsonObject result = (JsonObject) results.getFirst();
             JsonArray components = result.getJsonArray("address_components");
 
             if (result.containsKey("formatted_address")) {

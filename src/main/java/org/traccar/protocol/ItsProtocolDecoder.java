@@ -28,13 +28,15 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class ItsProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("ddMMyyyyHHmmss").withZone(ZoneOffset.UTC);
 
     public ItsProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -140,9 +142,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             if (sentence.startsWith("$,01,")) {
                 channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));
             } else if (sentence.startsWith("$,LGN,")) {
-                DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyHHmmss");
-                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                String time = dateFormat.format(new Date());
+                String time = DATE_FORMAT.format(Instant.now());
                 channel.writeAndFlush(new NetworkMessage("$LGN" + time + "*", remoteAddress));
             } else if (sentence.startsWith("$,HBT,")) {
                 channel.writeAndFlush(new NetworkMessage("$HBT*", remoteAddress));

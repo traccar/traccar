@@ -23,14 +23,11 @@ public class NullBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void registerListener(BroadcastInterface listener) {
-    }
+    public void registerListener(BroadcastInterface listener) {}
 
     @Override
-    public void start() throws Exception {
-    }
+    public void start() throws Exception {}
 
     @Override
-    public void stop() throws Exception {
-    }
+    public void stop() throws Exception {}
 }

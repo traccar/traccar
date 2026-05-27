@@ -39,7 +39,7 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
 
         int value = buf.readUnsignedShort();
         int degrees = value / 100;
-        double minutes = value % 100 + buf.readUnsignedShort() * 0.0001;
+        double minutes = value % 100 + buf.readUnsignedShort() / 10000.0;
         double coordinate = degrees + minutes / 60;
         return negative ? -coordinate : coordinate;
     }
@@ -112,8 +112,8 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
                 position.setValid(BitUtil.check(flags, 7));
                 position.setLatitude(readCoordinate(buf, BitUtil.check(flags, 6)));
                 position.setLongitude(readCoordinate(buf, BitUtil.check(flags, 5)));
-                position.setSpeed(buf.readUnsignedShort() + buf.readUnsignedShort() * 0.001);
-                position.setCourse(buf.readUnsignedShort() + buf.readUnsignedByte() * 0.01);
+                position.setSpeed(buf.readUnsignedShort() + buf.readUnsignedShort() / 1000.0);
+                position.setCourse(buf.readUnsignedShort() + buf.readUnsignedByte() / 100.0);
 
                 DateBuilder dateBuilder = new DateBuilder()
                         .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())

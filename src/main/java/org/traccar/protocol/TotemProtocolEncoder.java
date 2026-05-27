@@ -21,6 +21,8 @@ import org.traccar.model.Command;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 
+import java.nio.charset.StandardCharsets;
+
 public class TotemProtocolEncoder extends StringProtocolEncoder {
 
     public TotemProtocolEncoder(Protocol protocol) {
@@ -57,7 +59,8 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
         initDevicePassword(command, "000000");
 
         String commandString = formatContent(command);
-        String builtCommand = String.format("$$%04dCF%s", 10 + commandString.getBytes().length, commandString);
+        String builtCommand = String.format(
+                "$$%04dCF%s", 10 + commandString.getBytes(StandardCharsets.US_ASCII).length, commandString);
 
         return String.format("%s%02X", builtCommand, Checksum.xor(builtCommand));
 

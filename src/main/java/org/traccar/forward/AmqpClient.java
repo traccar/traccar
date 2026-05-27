@@ -23,6 +23,7 @@ import com.rabbitmq.client.MessageProperties;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
@@ -53,6 +54,7 @@ public class AmqpClient {
     }
 
     public void publishMessage(String message) throws IOException {
-        channel.basicPublish(exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+        channel.basicPublish(
+                exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
     }
 }

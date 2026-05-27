@@ -114,8 +114,8 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // statusB
             buf.readUnsignedByte(); // statusC
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() / 10.0);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
             buf.readUnsignedByte(); // speed limit
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             buf.readUnsignedByte(); // sensor speed

@@ -27,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
@@ -106,7 +107,9 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
                 String[] data = parser.next().split(";");
                 for (String item : data) {
                     int valueIndex = item.indexOf(',');
-                    position.set(item.substring(0, valueIndex).toLowerCase(), item.substring(valueIndex + 1));
+                    position.set(
+                            item.substring(0, valueIndex).toLowerCase(Locale.ROOT),
+                            item.substring(valueIndex + 1));
                 }
             }
 

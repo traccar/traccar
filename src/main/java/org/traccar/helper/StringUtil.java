@@ -17,8 +17,7 @@ package org.traccar.helper;
 
 public final class StringUtil {
 
-    private StringUtil() {
-    }
+    private StringUtil() {}
 
     public static boolean containsHex(String value) {
         for (char c : value.toCharArray()) {

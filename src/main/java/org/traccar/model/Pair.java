@@ -15,5 +15,4 @@
  */
 package org.traccar.model;
 
-public record Pair<K, V>(K first, V second) {
-}
+public record Pair<K, V>(K first, V second) {}

@@ -38,4 +38,10 @@ public class BufferUtilTest {
         assertEquals(3, BufferUtil.indexOf("de", buf, 2, 6));
     }
 
+    @Test
+    public void testReadDecimalDigits() {
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex("0b1621"));
+        assertEquals("112233", BufferUtil.readDecimalDigits(buf, 3));
+    }
+
 }

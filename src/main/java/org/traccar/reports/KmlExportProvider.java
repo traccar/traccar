@@ -17,6 +17,8 @@ package org.traccar.reports;
 
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Geofence;
+import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -26,14 +28,18 @@ import org.traccar.storage.query.Request;
 import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class KmlExportProvider {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
     private final Storage storage;
 
@@ -43,14 +49,14 @@ public class KmlExportProvider {
     }
 
     public void generate(
-            OutputStream outputStream, long deviceId, Date from, Date to)
+            OutputStream outputStream, long deviceId, long geofenceId, Date from, Date to)
             throws StorageException, XMLStreamException {
 
         var device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", deviceId)));
-        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
-        var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
+                new Columns.All(), new Condition.Equals("id", geofenceId)));
 
         XMLStreamWriter writer = XMLOutputFactory.newFactory()
                 .createXMLStreamWriter(outputStream, StandardCharsets.UTF_8.name());
@@ -64,7 +70,7 @@ public class KmlExportProvider {
         writer.writeEndElement();
         writer.writeStartElement("Placemark");
         writer.writeStartElement("name");
-        writer.writeCharacters(dateFormat.format(from) + " - " + dateFormat.format(to));
+        writer.writeCharacters(DATE_FORMAT.format(from.toInstant()) + " - " + DATE_FORMAT.format(to.toInstant()));
         writer.writeEndElement();
         writer.writeStartElement("LineString");
         writer.writeStartElement("extrude");
@@ -77,9 +83,16 @@ public class KmlExportProvider {
         writer.writeCharacters("absolute");
         writer.writeEndElement();
         writer.writeStartElement("coordinates");
-        writer.writeCharacters(positions.stream()
-                .map(p -> String.format("%f,%f,%f", p.getLongitude(), p.getLatitude(), p.getAltitude()))
-                .collect(Collectors.joining(" ")));
+        try (Stream<Position> positions = PositionUtil.getPositionsStream(storage, deviceId, from, to)
+                .filter(position -> geofence == null || geofence.containsPosition(position))) {
+            String separator = "";
+            for (var iterator = positions.iterator(); iterator.hasNext();) {
+                Position position = iterator.next();
+                writer.writeCharacters(separator + String.format(
+                        "%f,%f,%f", position.getLongitude(), position.getLatitude(), position.getAltitude()));
+                separator = " ";
+            }
+        }
         writer.writeEndElement();
         writer.writeEndElement();
         writer.writeEndElement();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,16 +50,13 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private boolean jsonContains(JsonObject json, String key) {
-        if (json.containsKey(key)) {
-            JsonValue value = json.get(key);
+        JsonValue value = json.get(key);
+        if (value != null) {
             if (value.getValueType() == JsonValue.ValueType.STRING) {
                 return !((JsonString) value).getString().equals("null");
-
-            } else {
-                return true;
             }
         }
-        return false;
+        return value != null;
     }
 
     private boolean getJsonBoolean(JsonObject json, String key) {
@@ -162,7 +159,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                     int flags = buf.readUnsignedByte();
                     position.set(Position.KEY_MOTION, BitUtil.check(flags, 1));
 
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.02);
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() / 50.0);
                     position.set(Position.PREFIX_TEMP + 1, (int) buf.readByte());
 
                     position.setValid(true);
@@ -172,8 +169,8 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                 } else if (header == 0x0f || header == 0x1f) {
 
                     position.setValid(header >> 4 > 0);
-                    position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
-                    position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
+                    position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) / 1000000.0);
+                    position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) / 1000000.0);
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 
@@ -181,12 +178,12 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
                     if (BitUtil.to(header, 4) == 0) {
                         position.setValid(true);
-                        position.setLatitude(buf.readIntLE() * 0.0000001);
-                        position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setLatitude(buf.readIntLE() / 10000000.0);
+                        position.setLongitude(buf.readIntLE() / 10000000.0);
                         position.setCourse(buf.readUnsignedByte() * 2);
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-                        position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.025);
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedByte() / 40.0);
                     } else {
                         return null;
                     }
@@ -220,7 +217,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                             position.setLongitude(buf.readFloat());
                         }
                         case 0x03 -> position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
-                        case 0x04 -> position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                        case 0x04 -> position.set(Position.KEY_BATTERY, buf.readUnsignedByte() / 10.0);
                         case 0x05 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         case 0x06 -> {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");

@@ -22,6 +22,7 @@ import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -31,17 +32,18 @@ import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 
 public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
 
     public DmtHttpProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -67,10 +69,7 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private Collection<Position> decodeTraditional(
-            Channel channel, SocketAddress remoteAddress, JsonObject root) throws ParseException {
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Channel channel, SocketAddress remoteAddress, JsonObject root) {
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("IMEI"));
         if (deviceSession == null) {
@@ -81,24 +80,21 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
         JsonArray records = root.getJsonArray("Records");
 
-        for (int i = 0; i < records.size(); i++) {
+        for (JsonObject record : records.getValuesAs(JsonObject.class)) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-
-            JsonObject record = records.getJsonObject(i);
 
             position.set(Position.KEY_INDEX, record.getInt("SeqNo"));
             position.set(Position.KEY_EVENT, record.getInt("Reason"));
 
-            position.setDeviceTime(dateFormat.parse(record.getString("DateUTC")));
+            position.setDeviceTime(DateUtil.parse(DATE_FORMAT, record.getString("DateUTC")));
 
             JsonArray fields = record.getJsonArray("Fields");
 
-            for (int j = 0; j < fields.size(); j++) {
-                JsonObject field = fields.getJsonObject(j);
+            for (JsonObject field : fields.getValuesAs(JsonObject.class)) {
                 switch (field.getInt("FType")) {
                     case 0:
-                        position.setFixTime(dateFormat.parse(field.getString("GpsUTC")));
+                        position.setFixTime(DateUtil.parse(DATE_FORMAT, field.getString("GpsUTC")));
                         position.setLatitude(field.getJsonNumber("Lat").doubleValue());
                         position.setLongitude(field.getJsonNumber("Long").doubleValue());
                         position.setAltitude(field.getInt("Alt"));
@@ -120,19 +116,19 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                     case 6:
                         JsonObject adc = field.getJsonObject("AnalogueData");
                         if (adc.containsKey("1")) {
-                            position.set(Position.KEY_BATTERY, adc.getInt("1") * 0.001);
+                            position.set(Position.KEY_BATTERY, adc.getInt("1") / 1000.0);
                         }
                         if (adc.containsKey("2")) {
-                            position.set(Position.KEY_POWER, adc.getInt("2") * 0.01);
+                            position.set(Position.KEY_POWER, adc.getInt("2") / 100.0);
                         }
                         if (adc.containsKey("3")) {
-                            position.set(Position.KEY_DEVICE_TEMP, adc.getInt("3") * 0.01);
+                            position.set(Position.KEY_DEVICE_TEMP, adc.getInt("3") / 100.0);
                         }
                         if (adc.containsKey("4")) {
                             position.set(Position.KEY_RSSI, adc.getInt("4"));
                         }
                         if (adc.containsKey("5")) {
-                            position.set("solarPower", adc.getInt("5") * 0.001);
+                            position.set("solarPower", adc.getInt("5") / 1000.0);
                         }
                         break;
                     default:
@@ -176,8 +172,7 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (root.containsKey("analogues")) {
             JsonArray analogues = root.getJsonArray("analogues");
-            for (int i = 0; i < analogues.size(); i++) {
-                JsonObject adc = analogues.getJsonObject(i);
+            for (JsonObject adc : analogues.getValuesAs(JsonObject.class)) {
                 position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
             }
         }
@@ -196,11 +191,10 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (root.containsKey("counters")) {
             JsonArray counters = root.getJsonArray("counters");
-            for (int i = 0; i < counters.size(); i++) {
-                JsonObject counter = counters.getJsonObject(i);
+            for (JsonObject counter : counters.getValuesAs(JsonObject.class)) {
                 switch (counter.getInt("id")) {
-                    case 0 -> position.set(Position.KEY_BATTERY, counter.getInt("val") * 0.001);
-                    case 1 -> position.set(Position.KEY_BATTERY_LEVEL, counter.getInt("val") * 0.01);
+                    case 0 -> position.set(Position.KEY_BATTERY, counter.getInt("val") / 1000.0);
+                    case 1 -> position.set(Position.KEY_BATTERY_LEVEL, counter.getInt("val") / 100.0);
                     default -> position.set("counter" + counter.getInt("id"), counter.getInt("val"));
                 }
 

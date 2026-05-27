@@ -77,7 +77,6 @@ public abstract class GeofenceGeometry {
 
     public abstract String toWkt();
 
-    public record Coordinate(double lat, double lon) {
-    }
+    public record Coordinate(double lat, double lon) {}
 
 }

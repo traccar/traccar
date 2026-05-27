@@ -39,13 +39,16 @@ import org.traccar.model.WifiAccessPoint;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     private double minAccuracy;
 
@@ -118,8 +121,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                             if (value.contains("T")) {
                                 position.setTime(DateUtil.parseDate(value));
                             } else {
-                                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                position.setTime(dateFormat.parse(value));
+                                position.setTime(DateUtil.parse(DATE_FORMAT, value));
                             }
                         }
                         break;
@@ -304,7 +306,6 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     @Override
-    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
-    }
+    protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {}
 
 }

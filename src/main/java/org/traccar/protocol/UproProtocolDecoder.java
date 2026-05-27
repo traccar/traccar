@@ -157,9 +157,9 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
                 }
                 case 'F' -> position.setSpeed(
-                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) / 10.0);
                 case 'G' -> position.setAltitude(
-                        Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) * 0.1);
+                        Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) / 10.0);
                 case 'I' -> {
                     stringValue = data.toString(StandardCharsets.US_ASCII);
                     count = Integer.parseInt(stringValue.substring(0, 1));
@@ -180,7 +180,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     if (data.readableBytes() == 6) {
                         char index = (char) data.readUnsignedByte();
                         int status = data.readUnsignedByte();
-                        double value = Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1;
+                        double value = Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) / 10.0;
                         if (BitUtil.check(status, 0)) {
                             value = -value;
                         }
@@ -191,7 +191,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 case 'M' -> {
                     if (data.readableBytes() == 3) {
                         position.set(Position.KEY_BATTERY_LEVEL,
-                                Integer.parseInt(data.readSlice(3).toString(StandardCharsets.US_ASCII)) * 0.1);
+                                Integer.parseInt(data.readSlice(3).toString(StandardCharsets.US_ASCII)) / 10.0);
                     } else if (data.readableBytes() == 4) {
                         char index = (char) data.readUnsignedByte();
                         data.readUnsignedByte(); // status
@@ -236,7 +236,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
                 case 'V' -> position.set(Position.KEY_POWER,
-                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) / 10.0);
                 case 'W' -> {
                     int alarms = Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII));
                     position.addAlarm(BitUtil.check(alarms, 2) ? Position.ALARM_TAMPERING : null);
@@ -287,7 +287,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                         }
                     } else {
                         position.set(Position.KEY_POWER,
-                                Integer.parseInt(data.readSlice(5).toString(StandardCharsets.US_ASCII)) * 0.001);
+                                Integer.parseInt(data.readSlice(5).toString(StandardCharsets.US_ASCII)) / 1000.0);
                     }
                 }
                 case 'b' -> {

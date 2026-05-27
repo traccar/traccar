@@ -42,8 +42,7 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
                 }
 
                 @Override
-                public void setWriteListener(WriteListener writeListener) {
-                }
+                public void setWriteListener(WriteListener writeListener) {}
 
                 @Override
                 public void write(int b) {

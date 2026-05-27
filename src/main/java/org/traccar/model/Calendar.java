@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Content;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.VEvent;
 import org.traccar.storage.QueryIgnore;
@@ -32,6 +33,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
@@ -78,10 +80,14 @@ public class Calendar extends ExtendedModel {
             return calendar.<VEvent>getComponents(Component.VEVENT).stream()
                     .flatMap(event -> {
                         Temporal sample = event.getDateTimeStart().getDate();
-                        var period = new Period<>(convertToMatchingTemporal(instant, sample), Duration.ZERO);
-                        return event.calculateRecurrenceSet(period).stream();
+                        ZoneId overrideZone = resolveOverrideZone(event);
+                        var period = new Period<>(
+                                convertToMatchingTemporal(instant, sample, overrideZone), Duration.ZERO);
+                        return event.calculateRecurrenceSet(period).stream()
+                                .map(p -> new Period<>(
+                                        temporalToInstant(p.getStart(), overrideZone),
+                                        temporalToInstant(p.getEnd(), overrideZone)));
                     })
-                    .map(p -> new Period<>(temporalToInstant(p.getStart()), temporalToInstant(p.getEnd())))
                     .collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of();
@@ -92,34 +98,37 @@ public class Calendar extends ExtendedModel {
         return !findPeriods(date).isEmpty();
     }
 
-    private static Temporal convertToMatchingTemporal(Instant instant, Temporal sample) {
-        if (sample instanceof LocalDate) {
-            return instant.atZone(ZoneOffset.UTC).toLocalDate();
-        } else if (sample instanceof LocalDateTime) {
-            return instant.atZone(ZoneOffset.UTC).toLocalDateTime();
-        } else if (sample instanceof ZonedDateTime) {
-            return instant.atZone(((ZonedDateTime) sample).getZone());
-        } else if (sample instanceof OffsetDateTime) {
-            return instant.atOffset(((OffsetDateTime) sample).getOffset());
-        } else {
-            return instant;
-        }
+    private static Temporal convertToMatchingTemporal(Instant instant, Temporal sample, ZoneId overrideZone) {
+        return switch (sample) {
+            case LocalDate ignored -> instant.atZone(ZoneOffset.UTC).toLocalDate();
+            case LocalDateTime ignored -> instant.atZone(ZoneOffset.UTC).toLocalDateTime();
+            case ZonedDateTime zonedDateTime -> overrideZone != null
+                    ? instant.atZone(overrideZone).toLocalDateTime().atZone(zonedDateTime.getZone())
+                    : instant.atZone(zonedDateTime.getZone());
+            case OffsetDateTime offsetDateTime -> instant.atOffset(offsetDateTime.getOffset());
+            default -> instant;
+        };
     }
 
-    private static Instant temporalToInstant(Temporal temporal) {
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toInstant();
-        } else if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toInstant();
-        } else if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).toInstant(ZoneOffset.UTC);
-        } else if (temporal instanceof LocalDate) {
-            return ((LocalDate) temporal).atStartOfDay(ZoneOffset.UTC).toInstant();
-        } else if (temporal instanceof Instant) {
-            return (Instant) temporal;
-        } else {
-            throw new IllegalArgumentException("Unsupported Temporal type");
-        }
+    private static ZoneId resolveOverrideZone(VEvent event) {
+        return event.getDateTimeStart().getParameter("TZID")
+                .map(Content::getValue)
+                .filter(ZoneId.getAvailableZoneIds()::contains)
+                .map(ZoneId::of)
+                .orElse(null);
+    }
+
+    private static Instant temporalToInstant(Temporal temporal, ZoneId overrideZone) {
+        return switch (temporal) {
+            case ZonedDateTime zonedDateTime -> overrideZone != null
+                    ? zonedDateTime.toLocalDateTime().atZone(overrideZone).toInstant()
+                    : zonedDateTime.toInstant();
+            case OffsetDateTime offsetDateTime -> offsetDateTime.toInstant();
+            case LocalDateTime localDateTime -> localDateTime.toInstant(ZoneOffset.UTC);
+            case LocalDate localDate -> localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+            case Instant instantValue -> instantValue;
+            default -> throw new IllegalArgumentException("Unsupported Temporal type");
+        };
     }
 
 }

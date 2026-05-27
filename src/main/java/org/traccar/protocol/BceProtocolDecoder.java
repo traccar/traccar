@@ -174,7 +174,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLongLE()));
         }
         if (BitUtil.check(mask, 7)) {
-            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE() * 0.1 - 273);
+            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE() / 10.0 - 273);
         }
         if (BitUtil.check(mask, 8)) {
             buf.readUnsignedShortLE(); // dallas humidity
@@ -226,9 +226,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE();
         }
         if (BitUtil.check(mask, 6)) {
-            position.set("maxAcceleration", buf.readUnsignedByte() * 0.02);
-            position.set("maxBraking", buf.readUnsignedByte() * 0.02);
-            position.set("maxCornering", buf.readUnsignedByte() * 0.02);
+            position.set("maxAcceleration", buf.readUnsignedByte() / 50.0);
+            position.set("maxBraking", buf.readUnsignedByte() / 50.0);
+            position.set("maxCornering", buf.readUnsignedByte() / 50.0);
         }
         if (BitUtil.check(mask, 7)) {
             buf.skipBytes(16);
@@ -237,7 +237,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 1; i <= 4; i++) {
                 int temperature = buf.readUnsignedShortLE();
                 if (temperature > 0) {
-                    position.set(Position.PREFIX_TEMP + i, temperature * 0.1 - 273);
+                    position.set(Position.PREFIX_TEMP + i, temperature / 10.0 - 273);
                 }
                 buf.skipBytes(8);
             }

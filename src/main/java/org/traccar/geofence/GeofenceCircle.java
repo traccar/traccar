@@ -59,8 +59,7 @@ public class GeofenceCircle extends GeofenceGeometry {
         return wkt;
     }
 
-    public record DecodedCircle(double latitude, double longitude, double radius) {
-    }
+    public record DecodedCircle(double latitude, double longitude, double radius) {}
 
     public DecodedCircle fromWkt(String wkt) throws ParseException {
         if (!wkt.startsWith("CIRCLE")) {

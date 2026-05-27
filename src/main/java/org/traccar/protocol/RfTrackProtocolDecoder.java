@@ -112,8 +112,7 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
                         int mcc = cellInfo.getInt("c");
                         int mnc = cellInfo.getInt("n");
                         JsonArray cells = cellInfo.getJsonArray("b");
-                        for (int i = 0; i < cells.size(); i++) {
-                            JsonObject cell = cells.getJsonObject(i);
+                        for (JsonObject cell : cells.getValuesAs(JsonObject.class)) {
                             network.addCellTower(CellTower.from(
                                     mcc, mnc, cell.getInt("l"), cell.getInt("c"), cell.getInt("b")));
                         }
@@ -129,8 +128,7 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
                         break;
                     case "wifi":
                         JsonArray wifiInfo = Json.createReader(new StringReader(value)).readArray();
-                        for (int i = 0; i < wifiInfo.size(); i++) {
-                            JsonObject wifi = wifiInfo.getJsonObject(i);
+                        for (JsonObject wifi : wifiInfo.getValuesAs(JsonObject.class)) {
                             network.addWifiAccessPoint(WifiAccessPoint.from(
                                     wifi.getString("m").replace('-', ':'), wifi.getInt("l")));
                         }

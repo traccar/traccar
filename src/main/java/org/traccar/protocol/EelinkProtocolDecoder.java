@@ -126,7 +126,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 2 * 4) {
 
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
 
                 position.set(Position.KEY_RSSI, buf.readUnsignedShort());
 
@@ -277,7 +277,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_NORMAL) {
 
             if (buf.readableBytes() >= 2) {
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
             }
 
             if (buf.readableBytes() >= 4) {
@@ -301,7 +301,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 12) {
                 position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 256.0);
-                position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() * 0.1);
+                position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() / 10.0);
                 position.set("illuminance", buf.readUnsignedInt() / 256.0);
                 position.set("co2", buf.readUnsignedInt());
             }
@@ -319,7 +319,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // reserved
                     buf.readUnsignedByte(); // model
                     buf.readUnsignedByte(); // version
-                    position.set("tag" + i + "Battery", buf.readUnsignedShort() * 0.001);
+                    position.set("tag" + i + "Battery", buf.readUnsignedShort() / 1000.0);
                     position.set("tag" + i + "Temp", buf.readShort() / 256.0);
                     position.set("tag" + i + "Data", buf.readUnsignedShort());
                 }

@@ -91,14 +91,14 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
             case 0x2009 -> position.set("fuel2", record.readUnsignedByte());
             case 0x200A -> position.set(Position.KEY_ENGINE_LOAD, record.readUnsignedByte());
             case 0x2041 -> position.set(Position.KEY_BATTERY_LEVEL, record.readUnsignedByte());
-            case 0x3000 -> position.set(Position.KEY_POWER, record.readUnsignedShortLE() * 0.001);
+            case 0x3000 -> position.set(Position.KEY_POWER, record.readUnsignedShortLE() / 1000.0);
             case 0x3001, 0x3002, 0x3003 -> {
                 key = Position.PREFIX_ADC + (0x3003 - sensorId + 3);
-                position.set(key, record.readUnsignedShortLE() * 0.001);
+                position.set(key, record.readUnsignedShortLE() / 1000.0);
             }
-            case 0x3004 -> position.set(Position.KEY_BATTERY, record.readUnsignedShortLE() * 0.001);
+            case 0x3004 -> position.set(Position.KEY_BATTERY, record.readUnsignedShortLE() / 1000.0);
             case 0x300C -> position.set(Position.KEY_RPM, record.readUnsignedShortLE());
-            case 0x3021 -> position.set(Position.KEY_FUEL_CONSUMPTION, record.readUnsignedShortLE() * 0.05);
+            case 0x3021 -> position.set(Position.KEY_FUEL_CONSUMPTION, record.readUnsignedShortLE() / 20.0);
             case 0x3037 -> position.set("cargoWeight", record.readUnsignedShortLE() * 2);
             case 0x4001 -> position.set(Position.KEY_FUEL_USED, record.readUnsignedIntLE());
             case 0x4002 -> position.set(Position.KEY_HOURS, record.readUnsignedIntLE());

@@ -116,7 +116,10 @@ public class NotificatorTelegram extends Notificator {
         }
         message.text = shortMessage.digest();
         client.target(urlSendText).request().post(Entity.json(message)).close();
-        if (sendLocation && position != null) {
+        boolean sendUserLocation = user.hasAttribute(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
+                ? user.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
+                : sendLocation;
+        if (sendUserLocation && position != null) {
             client.target(urlSendLocation).request().post(
                     Entity.json(createLocationMessage(message.chatId, position))).close();
         }
