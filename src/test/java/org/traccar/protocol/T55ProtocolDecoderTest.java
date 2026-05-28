@@ -149,4 +149,20 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testWmcsDecode() throws Exception {
+
+        var decoder = inject(new T55ProtocolDecoder(null));
+
+        verifyNull(decoder, text(
+                "$CONNECT,350030950116536,NETWORK,\"Ben NL\",RO,001,LAC,B02C,CID,521B,V,120.69"));
+
+        verifyPosition(decoder, text(
+                "$ID,350030950116536,4,WMCS-34,0,IOP,O,0x01,I,0x00,GPSEX,A,D,050703,T,095121,S,9:5,La,51.89573,N,Lo,5.89860,E,DD,0"));
+
+        verifyPosition(decoder, text(
+                "$ID,355826017981316,666,370,ALARM,0x00004000,IOP,M,48,GPSET,V,D,160517,T,161628,S,0:0,La,51.64175,N,Lo,2.21816,W,H,21.47,V,0.0,DD,0"));
+
+    }
+
 }
