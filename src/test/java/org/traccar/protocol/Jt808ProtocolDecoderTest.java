@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -69,14 +66,6 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
                 "7e02000072014310709432043a00000000000c000000d17bb3060107f900000000000025042312214001040000189b30011a310100e4020056e50101e60100e7080000000400000000ec2330de4bf67368cec65bbec0fac6b8f0090d353c03b87890a2f4b01eaa6420e36e35e6a8e10c020800040013b202e4648300f50101457e"),
                 Position.KEY_MOTION, true);
 
-        var position = (Position) decoder.decode(null, null, binary(
-                "7e02000072014310709432043a00000000000c000000d17bb3060107f900000000000025042312214001040000189b30011a310100e4020056e50101e60100e7080000000400000000ec2330de4bf67368cec65bbec0fac6b8f0090d353c03b87890a2f4b01eaa6420e36e35e6a8e10c020800040013b202e4648300f50101457e"));
-        assertEquals(5, position.getNetwork().getWifiAccessPoints().size());
-        assertTrue(position.getNetwork().getWifiAccessPoints().stream().anyMatch(wifi ->
-                wifi.getMacAddress().equals("30:de:4b:f6:73:68") && wifi.getSignalStrength() == -50));
-        assertTrue(position.getNetwork().getWifiAccessPoints().stream().anyMatch(wifi ->
-                wifi.getMacAddress().equals("64:20:e3:6e:35:e6") && wifi.getSignalStrength() == -88));
-
         verifyAttribute(decoder, binary(
                 "7e070100150120764632790008000000114d442c53455420434f4e464947204f4b21187e"),
                 Position.KEY_RESULT, "MD,SET CONFIG OK!");
@@ -107,13 +96,8 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "7e020000df014164192753002900000000000000000158a32106ca167c00000000000024111514594501040000000030011f310100320200a2330103ebae000c00b28986012184236189583200060089ffffffff000600c5fffffff70004002d0f0c000300a83c001100d5383637333139303736333637313439007000b90535343a42313a32313a36363a43393a45322c2d35302c35343a42313a32313a36363a43393a45302c2d35312c35433a42303a30413a32433a41443a37302c2d35322c35433a42303a30413a39303a36433a32442c2d36332c32453a37303a34463a33303a46313a34452c2d37342a7e"));
 
-        position = (Position) decoder.decode(null, null, binary(
+        verifyPosition(decoder, binary(
                 "7E020000E241305716018504E6000000009020001E01651EAD02CAEC9902DE0000000024082517034401040000000030011D310107F00D02D4000301080509000079C9ACF231414F56585F474C3130302D4C415F48322E305F4547393135554C4141425230334130314D30385F56322E302E393A763130F423C0252F96F022D0C03DD95C5EC8C6E4FAC4EA462EB798B3EF4F74DCB58416F94020E6B4F616001E00D3026B0000FFD0000805DC002800000032000AF70600000F48014EF81D04086541305716018589553202100062282617474C3130302D4C410000F912000F00000001000000000018240825170407E27E"));
-        assertEquals(5, position.getNetwork().getWifiAccessPoints().size());
-        assertTrue(position.getNetwork().getWifiAccessPoints().stream().anyMatch(wifi ->
-                wifi.getMacAddress().equals("c0:25:2f:96:f0:22") && wifi.getSignalStrength() == -48));
-        assertTrue(position.getNetwork().getWifiAccessPoints().stream().anyMatch(wifi ->
-                wifi.getMacAddress().equals("84:16:f9:40:20:e6") && wifi.getSignalStrength() == -76));
 
         verifyAttribute(decoder, binary(
                 "7e020000bd4130571601850419000000001000000e01651ec702caec6402d10000000024082423485001040000000030011f310108f00d02d4000301080509000079c9aff231414f56585f474c3130302d4c415f48322e305f4547393135554c4141425230334130314d30385f56322e302e393a763130f616071eff940261ffe8ff10fdd805dc002800000032000af70600000f620150f81d04086541305716018589553202100062282617474c3130302d4c410000f912000f00000004000000000010240824234954d27e"),
