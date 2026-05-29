@@ -83,6 +83,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_REPORT_TEXT_MESSAGE = 0x6006;
     public static final int MSG_CONFIGURATION_PARAMETERS = 0x8103;
     public static final int MSG_COMMAND_RESPONSE = 0x0701;
+    public static final int MSG_TEXT_MESSAGE_RESPONSE = 0x1300;
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
@@ -361,6 +362,22 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
             position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, charset).toString());
+
+            return position;
+
+        } else if (type == MSG_TEXT_MESSAGE_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            int bodyLength = BitUtil.to(attribute, 10);
+
+            buf.readUnsignedShort(); // response serial number
+
+            String result = buf.readCharSequence(bodyLength - 2, StandardCharsets.UTF_16BE).toString().trim();
+            position.set(Position.KEY_RESULT, result);
 
             return position;
 

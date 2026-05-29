@@ -252,6 +252,10 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
                 "283734303139303331313138352c312c3030312c454c4f434b2c332c35323934333929"),
                 Position.KEY_RESULT, "(740190311185,1,001,ELOCK,3,529439)");
 
+        verifyAttribute(decoder, binary(
+                "7e13000012045450091546010900000053006500740020004f004b0021000d197e"),
+                Position.KEY_RESULT, "Set OK!");
+
         verifyPosition(decoder, binary(
                 "7e55028436740190311185091607200239270613212607536108630000170a000000014600005ded05e203000000000b010d0c06005b003e00ab0a0302dc65100100a37e"));
 
