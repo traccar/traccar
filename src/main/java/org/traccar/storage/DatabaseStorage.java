@@ -228,15 +228,14 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public void removePermission(Permission permission) throws StorageException {
-        var entries = permission.get().entrySet().stream().toList();
         StringBuilder query = new StringBuilder("DELETE FROM ");
         query.append(permission.getStorageName());
         query.append(" WHERE ");
-        query.append(entries.stream().map(e -> e.getKey() + " = ?").collect(Collectors.joining(" AND ")));
+        query.append(Permission.getKey(permission.getOwnerClass())).append(" = ? AND ");
+        query.append(Permission.getKey(permission.getPropertyClass())).append(" = ?");
         try (QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true)) {
-            for (int index = 0; index < entries.size(); index++) {
-                builder.setLong(index, entries.get(index).getValue());
-            }
+            builder.setLong(0, permission.getOwnerId());
+            builder.setLong(1, permission.getPropertyId());
             builder.executeUpdate();
         } catch (SQLException e) {
             throw new StorageException(e);
