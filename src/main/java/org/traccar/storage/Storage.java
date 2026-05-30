@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 
 public abstract class Storage {
 
+    public static final int MAX_GROUP_DEPTH = 3;
+
     public abstract <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException;
 
     public abstract <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) throws StorageException;
