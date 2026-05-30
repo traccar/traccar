@@ -321,6 +321,14 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_EVENT, parseInt(values[0]));
                 }
                 break;
+            case "K0":
+                // BLE 8-byte communication key reported by the lock (Omni K0
+                // response, e.g. "OmniW4GX"). Exposed for the app's BLE unlock.
+                if (values.length >= 1 && !values[0].isEmpty()) {
+                    position.set("omniBleKey", values[0]);
+                }
+                position.set(Position.KEY_RESULT, formatResult(type, values));
+                break;
             case "D1":
             case "R0":
             case "L0":
@@ -332,7 +340,6 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
             case "V0":
             case "V1":
             case "G0":
-            case "K0":
             case "I0":
             case "M0":
             case "L5":
