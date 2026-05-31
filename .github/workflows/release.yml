@@ -201,9 +201,60 @@ jobs:
           compression-level: 0
           retention-days: 1
 
+  test:
+    name: Test ${{ matrix.name }}
+    needs: [build-linux-64, build-linux-arm, build-windows]
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            runner: windows-latest
+            artifact: installers-windows
+            file: traccar-windows-64-${{ github.event.inputs.version }}.zip
+            logs_dir: "/c/Program Files/Traccar/logs"
+            start: sc start traccar
+          - name: Linux 64
+            runner: ubuntu-latest
+            artifact: installers-linux-64
+            file: traccar-linux-64-${{ github.event.inputs.version }}.zip
+            logs_dir: /opt/traccar/logs
+            start: sudo systemctl start traccar
+            sudo: sudo
+          - name: Linux ARM
+            runner: ubuntu-24.04-arm
+            artifact: installers-linux-arm
+            file: traccar-linux-arm-${{ github.event.inputs.version }}.zip
+            logs_dir: /opt/traccar/logs
+            start: sudo systemctl start traccar
+            sudo: sudo
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}
+      - name: Extract installer
+        run: unzip -q ${{ matrix.file }}
+      - name: Install (Linux)
+        if: runner.os == 'Linux'
+        run: sudo bash traccar.run
+      - name: Install (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART
+      - name: Start service and probe web port
+        run: |
+          ${{ matrix.start }}
+          ${{ matrix.sudo }} timeout 120 bash -c 'until grep -q "Started oejs.Server" "${{ matrix.logs_dir }}"/*.log 2>/dev/null; do sleep 2; done' || true
+          ${{ matrix.sudo }} cat "${{ matrix.logs_dir }}"/*.log
+          curl -fsS -m 5 http://localhost:8082
+
   publish:
     name: Publish installers
-    needs: [build-linux-64, build-linux-arm, build-windows, build-other]
+    needs: [test, build-other]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8
@@ -225,7 +276,7 @@ jobs:
 
   docker:
     name: Build and push docker images
-    needs: build-other
+    needs: [test, build-other]
     if: ${{ github.event.inputs.version != 'preview' }}
     runs-on: ubuntu-latest
     strategy:
