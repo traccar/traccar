@@ -1,0 +1,40 @@
+name: Test Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: URL to traccar-windows-*.zip
+        required: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Download installer archive
+        shell: pwsh
+        run: Invoke-WebRequest -Uri "${{ github.event.inputs.url }}" -OutFile installer.zip
+      - name: Extract installer
+        shell: pwsh
+        run: Expand-Archive -Path installer.zip -DestinationPath .
+      - name: Run silent install
+        shell: cmd
+        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART
+      - name: Start service and probe web port
+        shell: pwsh
+        run: |
+          Start-Service traccar
+          $ok = $false
+          for ($i = 0; $i -lt 60; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri http://localhost:8082 -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -eq 200) { $ok = $true; break }
+            } catch { Start-Sleep -Seconds 2 }
+          }
+          if (-not $ok) {
+            Get-ChildItem "C:\Program Files\Traccar\logs" -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName -Tail 200 }
+            throw "Server did not respond on port 8082"
+          }
+      - name: Uninstall
+        shell: cmd
+        run: '"C:\Program Files\Traccar\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES'
