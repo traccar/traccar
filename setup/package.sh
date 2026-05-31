@@ -119,7 +119,7 @@ package_other () {
 package_windows () {
   info "Building Windows 64 installer"
   unzip -q OpenJDK*64_windows*.zip
-  wine jdk-*/bin/jlink.exe --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+  wine jdk-*/bin/jlink.exe --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
   rm -rf jdk-*
   wine app/ISCC.exe traccar.iss >/dev/null
   rm -rf out/jre
