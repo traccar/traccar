@@ -57,7 +57,7 @@ jobs:
             echo "Traccar did not start within 120s"
             exit 1
           fi
-          curl -fsS -m 5 http://localhost:8082 >/dev/null
+          curl -fsS -m 5 http://localhost:8082
       - name: Stop service (Linux)
         if: always() && runner.os == 'Linux'
         run: sudo systemctl stop traccar || true
