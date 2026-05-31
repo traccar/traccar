@@ -955,14 +955,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Server debug version of the web app. Not recommended to use for performance reasons. It is intended to be used
-     * for development and debugging purposes.
-     */
-    public static final ConfigKey<Boolean> WEB_DEBUG = new BooleanConfigKey(
-            "web.debug",
-            List.of(KeyType.CONFIG));
-
-    /**
      * A token to log in as a virtual admin account. Can be used to restore access in case of issues with regular
      * admin login. For example, if a password is lost and can't be restored.
      */

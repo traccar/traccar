@@ -36,7 +36,6 @@ import org.eclipse.jetty.session.DatabaseAdaptor;
 import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
 import org.eclipse.jetty.session.SessionCache;
-import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -133,9 +132,9 @@ public class WebServer implements LifecycleObject {
         String cache = config.getString(Keys.WEB_CACHE_CONTROL);
 
         Path baseReal = Paths.get(config.getString(Keys.WEB_PATH)).toRealPath(LinkOption.NOFOLLOW_LINKS);
-        servletHandler.setBaseResource(ResourceFactory.of(servletHandler).newResource(baseReal));
 
         ServletHolder baseHolder = new ServletHolder(ResourceServlet.class);
+        baseHolder.setInitParameter("baseResource", baseReal.toString());
         baseHolder.setInitParameter("dirAllowed", "false");
         baseHolder.setInitParameter("cacheControl", cache);
         servletHandler.addServlet(baseHolder, "/");
@@ -155,11 +154,7 @@ public class WebServer implements LifecycleObject {
         filterHolder.setInitParameter("overridePath", overrideReal.toString());
         servletHandler.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        if (config.getBoolean(Keys.WEB_DEBUG)) {
-            servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
-        } else {
-            servletHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
-        }
+        servletHandler.setWelcomeFiles(new String[] {"index.html"});
     }
 
     private void initApi(ServletContextHandler servletHandler) {
