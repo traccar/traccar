@@ -37,11 +37,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386
           sudo apt-get install -y innoextract makeself wine32 wine64
+      - uses: docker/setup-qemu-action@v4
       - run: |
           JDK_API="https://api.adoptium.net/v3/binary/latest/25/ga"
           wget -q --content-disposition --trust-server-names "$JDK_API/windows/x64/jdk/hotspot/normal/eclipse"
-          wget -q --content-disposition --trust-server-names "$JDK_API/linux/x64/jdk/hotspot/normal/eclipse"
-          wget -q --content-disposition --trust-server-names "$JDK_API/linux/aarch64/jdk/hotspot/normal/eclipse"
           ls -l OpenJDK*
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
           ./package.sh ${{ github.event.inputs.version }}

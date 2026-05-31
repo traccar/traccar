@@ -67,11 +67,8 @@ fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
-if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
-  check_requirement "Linux 64 Java" "ls OpenJDK*x64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
-fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
-  check_requirement "Linux ARM Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
+  check_requirement "Docker" "which docker" "Missing docker (needed to cross-link aarch64 jlink)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
@@ -132,9 +129,12 @@ package_linux () {
   cp setup.sh out
   cp traccar.service out
 
-  tar -xf OpenJDK*$2_linux*.tar.gz
-  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
-  rm -rf jdk-*
+  if [ "$1" = "arm" ]; then
+    docker run --rm --platform linux/arm64 -v "$PWD:/work" -w /work --user "$(id -u):$(id -g)" eclipse-temurin:25 \
+      jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+  else
+    jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+  fi
   makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
 
@@ -147,13 +147,13 @@ package_linux () {
 
 package_linux_64 () {
   info "Building Linux 64 installer"
-  package_linux 64 x64
+  package_linux 64
   ok "Created Linux 64 installer"
 }
 
 package_linux_arm () {
   info "Building Linux ARM installer"
-  package_linux arm aarch64
+  package_linux arm
   ok "Created Linux ARM installer"
 }
 
