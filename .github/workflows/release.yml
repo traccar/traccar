@@ -275,7 +275,7 @@ jobs:
           files: traccar-*.zip
 
   docker:
-    name: Build and push docker images
+    name: Docker ${{ matrix.os }}
     needs: [test, build-other]
     if: ${{ github.event.inputs.version != 'preview' }}
     runs-on: ubuntu-latest
