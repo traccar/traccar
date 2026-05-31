@@ -1,23 +1,20 @@
-name: Test Windows
+name: Test Installers
 
 on:
   workflow_dispatch:
-    inputs:
-      url:
-        description: URL to traccar-windows-*.zip
-        required: true
 
 jobs:
-  test:
+  windows:
+    name: Windows
     runs-on: windows-latest
     steps:
-      - name: Download installer archive
+      - name: Download installer
         shell: pwsh
-        run: Invoke-WebRequest -Uri "${{ github.event.inputs.url }}" -OutFile installer.zip
+        run: Invoke-WebRequest -Uri "https://traccar.nyc3.digitaloceanspaces.com/builds/traccar-windows-64-preview.zip" -OutFile installer.zip
       - name: Extract installer
         shell: pwsh
         run: Expand-Archive -Path installer.zip -DestinationPath .
-      - name: Run silent install
+      - name: Install
         shell: cmd
         run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART /LOG=installer.log
       - name: Show installer log
@@ -47,3 +44,38 @@ jobs:
       - name: Uninstall
         shell: cmd
         run: '"C:\Program Files\Traccar\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES'
+
+  linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: 64
+            runner: ubuntu-latest
+          - arch: arm
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Download installer
+        run: wget -q "https://traccar.nyc3.digitaloceanspaces.com/builds/traccar-linux-${{ matrix.arch }}-preview.zip" -O installer.zip
+      - name: Extract installer
+        run: unzip -q installer.zip
+      - name: Install
+        run: sudo bash traccar.run
+      - name: Start service and probe web port
+        run: |
+          sudo systemctl start traccar
+          ok=0
+          for i in $(seq 1 60); do
+            if curl -fsS -m 5 http://localhost:8082 >/dev/null; then ok=1; break; fi
+            sleep 2
+          done
+          if [ "$ok" != "1" ]; then
+            sudo journalctl -u traccar --no-pager -n 200 || true
+            sudo tail -n 200 /opt/traccar/logs/* 2>/dev/null || true
+            exit 1
+          fi
+      - name: Stop service
+        if: always()
+        run: sudo systemctl stop traccar || true
