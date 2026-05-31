@@ -19,7 +19,16 @@ jobs:
         run: Expand-Archive -Path installer.zip -DestinationPath .
       - name: Run silent install
         shell: cmd
-        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART
+        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART /LOG=installer.log
+      - name: Show installer log
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path installer.log) { Get-Content installer.log }
+          Write-Host "---"
+          Get-ChildItem "C:\Program Files\Traccar" -ErrorAction SilentlyContinue | Select-Object FullName
+          Write-Host "---"
+          Get-Service -Name "*traccar*" -ErrorAction SilentlyContinue
       - name: Start service and probe web port
         shell: pwsh
         run: |
