@@ -49,14 +49,8 @@ jobs:
       - name: Start service and probe web port
         run: |
           ${{ matrix.start }}
-          for i in $(seq 1 30); do
-            ${{ matrix.sudo }} ls "${{ matrix.logs_dir }}"/*.log >/dev/null 2>&1 && break
-            sleep 1
-          done
-          if ! ${{ matrix.sudo }} timeout 120 bash -c 'tail -F "${{ matrix.logs_dir }}"/*.log | sed "/Started oejs.Server/q"'; then
-            echo "Traccar did not start within 120s"
-            exit 1
-          fi
+          ${{ matrix.sudo }} timeout 120 bash -c 'until grep -q "Started oejs.Server" "${{ matrix.logs_dir }}"/*.log 2>/dev/null; do sleep 2; done' || true
+          ${{ matrix.sudo }} cat "${{ matrix.logs_dir }}"/*.log
           curl -fsS -m 5 http://localhost:8082
       - name: Stop service (Linux)
         if: always() && runner.os == 'Linux'
