@@ -9,81 +9,223 @@ on:
         default: preview
 
 jobs:
-  build:
-    name: Build installers
+  build-server:
+    name: Build server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          submodules: true
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 25
           cache: gradle
-      - run: ./gradlew build
-      - run: git checkout ${{ github.ref_name }}
-        working-directory: ./traccar-web
+      - run: ./gradlew assemble
+      - name: Stage server payload
+        shell: bash
+        run: |
+          mkdir -p out/{conf,lib,schema,templates}
+          cp target/tracker-server.jar out/
+          cp target/lib/* out/lib/
+          cp schema/* out/schema/
+          cp -r templates/* out/templates/
+          cp setup/traccar.xml out/conf/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: staged-server
+          path: out
+          retention-days: 1
+
+  build-web:
+    name: Build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: traccar/traccar-web
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: traccar-web/package-lock.json
       - run: npm ci && npm run build
-        working-directory: ./traccar-web
-      - run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386
-          sudo apt-get install -y innoextract makeself wine32 wine64
-      - uses: docker/setup-qemu-action@v4
-      - run: |
-          JDK_API="https://api.adoptium.net/v3/binary/latest/25/ga"
-          wget -q --content-disposition --trust-server-names "$JDK_API/windows/x64/jdk/hotspot/normal/eclipse"
-          ls -l OpenJDK*
-          wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          ./package.sh ${{ github.event.inputs.version }}
-        working-directory: ./setup
+      - name: Stage web payload
+        shell: bash
+        run: |
+          mkdir -p out/web out/templates/translations
+          cp -r build/* out/web/
+          cp -r src/resources/l10n/* out/templates/translations/
       - uses: actions/upload-artifact@v7
         with:
-          name: installers
-          path: setup/traccar-*.zip
+          name: staged-web
+          path: out
+          retention-days: 1
+
+  build-linux-64:
+    name: Build Linux 64 installer
+    needs: [build-server, build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: sudo apt-get install -y makeself
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-server
+          path: setup/out
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-web
+          path: setup/out
+      - name: Build installer
+        shell: bash
+        working-directory: setup
+        run: |
+          mkdir -p out/data out/logs
+          cp setup.sh traccar.service out/
+          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+          makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
+          zip -q -j "traccar-linux-64-${{ github.event.inputs.version }}.zip" traccar.run README.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: installers-linux-64
+          path: setup/traccar-linux-64-*.zip
           compression-level: 0
           retention-days: 1
 
-  upload:
-    name: Upload installers
-    needs: build
-    if: ${{ github.event.inputs.version == 'preview' }}
+  build-linux-arm:
+    name: Build Linux ARM installer
+    needs: [build-server, build-web]
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: sudo apt-get install -y makeself
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-server
+          path: setup/out
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-web
+          path: setup/out
+      - name: Build installer
+        shell: bash
+        working-directory: setup
+        run: |
+          mkdir -p out/data out/logs
+          cp setup.sh traccar.service out/
+          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+          makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
+          zip -q -j "traccar-linux-arm-${{ github.event.inputs.version }}.zip" traccar.run README.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: installers-linux-arm
+          path: setup/traccar-linux-arm-*.zip
+          compression-level: 0
+          retention-days: 1
+
+  build-windows:
+    name: Build Windows installer
+    needs: [build-server, build-web]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-server
+          path: setup/out
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-web
+          path: setup/out
+      - name: jlink runtime image
+        shell: bash
+        working-directory: setup
+        run: jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+      - name: Build installer
+        shell: cmd
+        working-directory: setup
+        run: '"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" traccar.iss'
+      - name: Zip installer
+        shell: pwsh
+        working-directory: setup
+        run: |
+          New-Item -ItemType Directory -Path stage | Out-Null
+          Copy-Item Output\traccar-setup.exe stage\
+          Copy-Item README.txt stage\
+          Compress-Archive -Path stage\* -DestinationPath "traccar-windows-64-${{ github.event.inputs.version }}.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: installers-windows
+          path: setup/traccar-windows-64-*.zip
+          compression-level: 0
+          retention-days: 1
+
+  build-other:
+    name: Build other zip
+    needs: [build-server, build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-server
+          path: setup/out
+      - uses: actions/download-artifact@v8
+        with:
+          name: staged-web
+          path: setup/out
+      - name: Build zip
+        shell: bash
+        working-directory: setup
+        run: |
+          mkdir -p out/data out/logs
+          cp README.txt out/
+          (cd out && zip -q -r "../traccar-other-${{ github.event.inputs.version }}.zip" .)
+      - uses: actions/upload-artifact@v7
+        with:
+          name: installers-other
+          path: setup/traccar-other-*.zip
+          compression-level: 0
+          retention-days: 1
+
+  publish:
+    name: Publish installers
+    needs: [build-linux-64, build-linux-arm, build-windows, build-other]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8
-      - env:
+        with:
+          pattern: installers-*
+          merge-multiple: true
+      - if: ${{ github.event.inputs.version == 'preview' }}
+        env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: |
           sudo apt-get install -y s3cmd
           s3cmd --acl-public put traccar-*.zip s3://traccar/builds/ --host=nyc3.digitaloceanspaces.com --host-bucket=traccar --access_key="$S3_ACCESS_KEY" --secret_key="$S3_SECRET_KEY"
-
-  release:
-    name: Create release with installers
-    needs: build
-    if: ${{ github.event.inputs.version != 'preview' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - uses: actions/download-artifact@v8
-      - uses: softprops/action-gh-release@v3
+      - if: ${{ github.event.inputs.version != 'preview' }}
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ github.event.inputs.version }}
           files: traccar-*.zip
 
   docker:
     name: Build and push docker images
-    needs: build
+    needs: build-other
     if: ${{ github.event.inputs.version != 'preview' }}
     runs-on: ubuntu-latest
     strategy:
@@ -97,6 +239,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v8
         with:
+          name: installers-other
           path: docker
       - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
