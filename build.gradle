@@ -46,7 +46,7 @@ enforce {
 
 ext {
     guiceVersion = "7.0.0"
-    jettyVersion = "12.1.9"
+    jettyVersion = "12.1.8"
     jerseyVersion = "4.0.2"
     nettyVersion = "4.2.14.Final"
     protobufVersion = "4.35.0"
