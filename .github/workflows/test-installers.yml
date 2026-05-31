@@ -4,78 +4,64 @@ on:
   workflow_dispatch:
 
 jobs:
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    steps:
-      - name: Download installer
-        shell: pwsh
-        run: Invoke-WebRequest -Uri "https://traccar.nyc3.digitaloceanspaces.com/builds/traccar-windows-64-preview.zip" -OutFile installer.zip
-      - name: Extract installer
-        shell: pwsh
-        run: Expand-Archive -Path installer.zip -DestinationPath .
-      - name: Install
-        shell: cmd
-        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART /LOG=installer.log
-      - name: Show installer log
-        if: always()
-        shell: pwsh
-        run: |
-          if (Test-Path installer.log) { Get-Content installer.log }
-          Write-Host "---"
-          Get-ChildItem "C:\Program Files\Traccar" -ErrorAction SilentlyContinue | Select-Object FullName
-          Write-Host "---"
-          Get-Service -Name "*traccar*" -ErrorAction SilentlyContinue
-      - name: Start service and probe web port
-        shell: pwsh
-        run: |
-          Start-Service traccar
-          $ok = $false
-          for ($i = 0; $i -lt 60; $i++) {
-            try {
-              $response = Invoke-WebRequest -Uri http://localhost:8082 -UseBasicParsing -TimeoutSec 5
-              if ($response.StatusCode -eq 200) { $ok = $true; break }
-            } catch { Start-Sleep -Seconds 2 }
-          }
-          if (-not $ok) {
-            Get-ChildItem "C:\Program Files\Traccar\logs" -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName -Tail 200 }
-            throw "Server did not respond on port 8082"
-          }
-      - name: Uninstall
-        shell: cmd
-        run: '"C:\Program Files\Traccar\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES'
-
-  linux:
-    name: Linux ${{ matrix.arch }}
+  test:
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         include:
-          - arch: 64
+          - name: Windows
+            runner: windows-latest
+            platform: windows-64
+            logs_dir: "/c/Program Files/Traccar/logs"
+            start: sc start traccar
+          - name: Linux 64
             runner: ubuntu-latest
-          - arch: arm
+            platform: linux-64
+            logs_dir: /opt/traccar/logs
+            start: sudo systemctl start traccar
+            sudo: sudo
+          - name: Linux ARM
             runner: ubuntu-24.04-arm
+            platform: linux-arm
+            logs_dir: /opt/traccar/logs
+            start: sudo systemctl start traccar
+            sudo: sudo
     steps:
       - name: Download installer
-        run: wget -q "https://traccar.nyc3.digitaloceanspaces.com/builds/traccar-linux-${{ matrix.arch }}-preview.zip" -O installer.zip
+        run: curl -fsSL -o installer.zip "https://traccar.nyc3.digitaloceanspaces.com/builds/traccar-${{ matrix.platform }}-preview.zip"
       - name: Extract installer
         run: unzip -q installer.zip
-      - name: Install
+      - name: Install (Linux)
+        if: runner.os == 'Linux'
         run: sudo bash traccar.run
+      - name: Install (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: traccar-setup.exe /VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART /LOG=installer.log
+      - name: Show installer log (Windows)
+        if: always() && runner.os == 'Windows'
+        run: cat installer.log 2>/dev/null || true
       - name: Start service and probe web port
         run: |
-          sudo systemctl start traccar
-          ok=0
-          for i in $(seq 1 60); do
-            if curl -fsS -m 5 http://localhost:8082 >/dev/null; then ok=1; break; fi
-            sleep 2
+          ${{ matrix.start }}
+          for i in $(seq 1 30); do
+            ${{ matrix.sudo }} ls "${{ matrix.logs_dir }}"/*.log >/dev/null 2>&1 && break
+            sleep 1
           done
-          if [ "$ok" != "1" ]; then
-            sudo journalctl -u traccar --no-pager -n 200 || true
-            sudo tail -n 200 /opt/traccar/logs/* 2>/dev/null || true
+          if ! ${{ matrix.sudo }} timeout 120 bash -c 'tail -F "${{ matrix.logs_dir }}"/*.log | sed "/Started oejs.Server/q"'; then
+            echo "Traccar did not start within 120s"
             exit 1
           fi
-      - name: Stop service
-        if: always()
+          curl -fsS -m 5 http://localhost:8082 >/dev/null
+      - name: Stop service (Linux)
+        if: always() && runner.os == 'Linux'
         run: sudo systemctl stop traccar || true
+      - name: Uninstall (Windows)
+        if: always() && runner.os == 'Windows'
+        shell: cmd
+        run: '"C:\Program Files\Traccar\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES'
