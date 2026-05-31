@@ -36,7 +36,7 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386
-          sudo apt-get install -y innoextract makeself wine32
+          sudo apt-get install -y innoextract makeself wine32 wine64
       - run: |
           JDK_API="https://api.adoptium.net/v3/binary/latest/25/ga"
           wget -q --content-disposition --trust-server-names "$JDK_API/windows/x64/jdk/hotspot/normal/eclipse"
