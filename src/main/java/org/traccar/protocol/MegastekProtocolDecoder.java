@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
@@ -281,8 +282,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?").text(",")
             .groupBegin()
             .number("(d+)?,")                    // rfid
+            .groupBegin()
             .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
+            .groupEnd("?")
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
             .expression("([^,]*)[,;]").optional() // wifi
@@ -401,7 +404,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String value) {
-        value = value.toLowerCase();
+        value = value.toLowerCase(Locale.ROOT);
         if (value.startsWith("geo")) {
             if (value.endsWith("in")) {
                 return Position.ALARM_GEOFENCE_ENTER;

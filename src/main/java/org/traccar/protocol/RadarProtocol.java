@@ -30,7 +30,7 @@ public class RadarProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 12, 2, -14, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 12, 2, -14, 0));
                 pipeline.addLast(new RadarProtocolDecoder(RadarProtocol.this));
             }
         });

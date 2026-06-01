@@ -197,7 +197,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
             position.setLatitude(buf.readFloatLE());
-            position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) * 0.1));
+            position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
             position.setCourse(buf.readUnsignedShort());
 
             position.set(Position.KEY_RPM, buf.readUnsignedShort());
@@ -228,7 +228,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
     private double decodeBleTemp(ByteBuf buf) {
         int value = buf.readUnsignedShort();
-        return (BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15)) * 0.01;
+        return (BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15)) / 100.0;
     }
 
     private Position decodeBle(
@@ -246,14 +246,14 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             switch (buf.readUnsignedShort()) {
                 case 0x01 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 1.22);
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() / 100.0 + 1.22);
                     position.set("tag" + i + "TirePressure", buf.readUnsignedByte() * 1.527 * 2);
                     position.set("tag" + i + "TireTemp", buf.readUnsignedByte() - 55);
                     position.set("tag" + i + "TireStatus", buf.readUnsignedByte());
                 }
                 case 0x02 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) / 10.0);
                     switch (buf.readUnsignedByte()) {
                         case 0:
                             position.addAlarm(Position.ALARM_SOS);
@@ -269,7 +269,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x03 -> {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
+                    position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) / 10.0);
                     if (buf.readUnsignedByte() == 1) {
                         position.addAlarm(Position.ALARM_LOW_BATTERY);
                     }
@@ -278,16 +278,16 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x04 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() / 100.0 + 2);
                     buf.readUnsignedByte(); // battery level
                     position.set("tag" + i + "Temp", decodeBleTemp(buf));
-                    position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
+                    position.set("tag" + i + "Humidity", buf.readUnsignedShort() / 100.0);
                     position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
                 }
                 case 0x05 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() / 100.0 + 2);
                     buf.readUnsignedByte(); // battery level
                     position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
@@ -295,7 +295,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x06 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
+                    position.set("tag" + i + "Battery", buf.readUnsignedByte() / 100.0 + 2);
                     position.set("tag" + i + "Output", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
                 }
@@ -358,7 +358,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 1; i <= adcCount; i++) {
                     String value = ByteBufUtil.hexDump(buf.readSlice(2));
                     if (!value.equals("ffff")) {
-                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value, 16) * 0.01);
+                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value, 16) / 100.0);
                     }
                 }
             }
@@ -390,7 +390,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             if (header == 0x2626) {
                 buf.readUnsignedShort(); // reserved or hdop
             } else {
-                position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) * 0.1));
+                position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
             }
             position.setCourse(buf.readUnsignedShort());
 
@@ -417,15 +417,15 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             byte[] accelerationBytes = new byte[5];
             buf.readBytes(accelerationBytes);
             long acceleration = new BigInteger(accelerationBytes).longValue();
-            double accelerationZ = BitUtil.between(acceleration, 8, 15) + BitUtil.between(acceleration, 4, 8) * 0.1;
+            double accelerationZ = BitUtil.between(acceleration, 8, 15) + BitUtil.between(acceleration, 4, 8) / 10.0;
             if (!BitUtil.check(acceleration, 15)) {
                 accelerationZ = -accelerationZ;
             }
-            double accelerationY = BitUtil.between(acceleration, 20, 27) + BitUtil.between(acceleration, 16, 20) * 0.1;
+            double accelerationY = BitUtil.between(acceleration, 20, 27) + BitUtil.between(acceleration, 16, 20) / 10.0;
             if (!BitUtil.check(acceleration, 27)) {
                 accelerationY = -accelerationY;
             }
-            double accelerationX = BitUtil.between(acceleration, 28, 32) + BitUtil.between(acceleration, 32, 39) * 0.1;
+            double accelerationX = BitUtil.between(acceleration, 28, 32) + BitUtil.between(acceleration, 32, 39) / 10.0;
             if (!BitUtil.check(acceleration, 39)) {
                 accelerationX = -accelerationX;
             }
@@ -434,9 +434,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             int battery = BcdUtil.readInteger(buf, 2);
             position.set(Position.KEY_BATTERY_LEVEL, battery > 0 ? battery : 100);
             position.set(Position.KEY_DEVICE_TEMP, (int) buf.readByte());
-            position.set("lightSensor", BcdUtil.readInteger(buf, 2) * 0.1);
-            position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) * 0.1);
-            position.set("solarPanel", BcdUtil.readInteger(buf, 2) * 0.1);
+            position.set("lightSensor", BcdUtil.readInteger(buf, 2) / 10.0);
+            position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 2) / 10.0);
+            position.set("solarPanel", BcdUtil.readInteger(buf, 2) / 10.0);
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             int inputStatus = buf.readUnsignedShort();
@@ -461,9 +461,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
             if (buf.readableBytes() >= 19) {
                 position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
-                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) * 0.01);
-                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.001);
-                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() * 0.001);
+                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) / 100.0);
+                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 1000.0);
+                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 1000.0);
                 position.set(Position.KEY_RPM, buf.readUnsignedShort());
                 int value;
                 value = buf.readUnsignedByte();

@@ -25,8 +25,7 @@ import java.util.List;
 
 public final class NewMotionProcessor {
 
-    private NewMotionProcessor() {
-    }
+    private NewMotionProcessor() {}
 
     public static void updateState(
             NewMotionState state, Position position, double minDistance, long minDuration, long stopGap) {

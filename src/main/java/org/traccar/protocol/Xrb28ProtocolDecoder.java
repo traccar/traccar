@@ -120,13 +120,13 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
 
             switch (type) {
                 case "Q0" -> {
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.01);
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) / 100.0);
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
                     position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
                 }
                 case "H0" -> {
                     position.set(Position.KEY_BLOCKED, Integer.parseInt(values[index++]) > 0);
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.01);
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) / 100.0);
                     position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
                 }

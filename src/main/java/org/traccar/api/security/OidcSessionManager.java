@@ -66,8 +66,7 @@ public class OidcSessionManager {
             Instant expiration,
             String nonce,
             String codeChallenge,
-            String codeChallengeMethod) {
-    }
+            String codeChallengeMethod) {}
 
     public static final JWSAlgorithm ID_TOKEN_ALGORITHM = JWSAlgorithm.ES256;
     private static final Duration DEFAULT_LIFETIME = Duration.ofMinutes(5);

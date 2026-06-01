@@ -33,22 +33,28 @@ public class VideoStreamManager {
     private final Map<String, DeviceStream> streams = new ConcurrentHashMap<>();
 
     @Inject
-    public VideoStreamManager() {
+    public VideoStreamManager() {}
+
+    public void handleFrame(
+            long deviceId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
+        DeviceStream stream = streams.computeIfAbsent(deviceId + "_" + channel, k -> new DeviceStream());
+        stream.addFrame(nalData, timestamp, isKeyFrame, payloadType);
     }
 
-    public void handleFrame(String uniqueId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame) {
-        String key = uniqueId + "_" + channel;
-        DeviceStream stream = streams.computeIfAbsent(key, k -> new DeviceStream());
-        stream.addFrame(nalData, timestamp, isKeyFrame);
+    public String getPlaylist(long deviceId, int channel) {
+        DeviceStream stream = streams.get(deviceId + "_" + channel);
+        return stream != null ? stream.getPlaylist() : DeviceStream.EMPTY_PLAYLIST;
     }
 
-    public String getPlaylist(String uniqueId, int channel) {
-        DeviceStream stream = streams.get(uniqueId + "_" + channel);
-        return stream != null ? stream.getPlaylist() : null;
+    public void removeStream(long deviceId, int channel) {
+        DeviceStream stream = streams.remove(deviceId + "_" + channel);
+        if (stream != null) {
+            stream.release();
+        }
     }
 
-    public ByteBuf getSegment(String uniqueId, int channel, int index) {
-        DeviceStream stream = streams.get(uniqueId + "_" + channel);
+    public ByteBuf getSegment(long deviceId, int channel, int index) {
+        DeviceStream stream = streams.get(deviceId + "_" + channel);
         return stream != null ? stream.getSegment(index) : null;
     }
 
@@ -58,17 +64,21 @@ public class VideoStreamManager {
         private final LinkedHashMap<Integer, ByteBuf> segments = new LinkedHashMap<>();
         private ByteBuf currentSegment;
         private int segmentIndex;
+        private long firstTimestamp;
 
-        synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame) {
+        synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
             if (isKeyFrame && currentSegment != null) {
                 finalizeSegment();
             }
 
             if (currentSegment == null) {
                 currentSegment = Unpooled.buffer();
+                if (firstTimestamp == 0) {
+                    firstTimestamp = timestamp;
+                }
             }
 
-            writer.write(currentSegment, nalData, timestamp, isKeyFrame);
+            writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame, payloadType);
         }
 
         private void finalizeSegment() {
@@ -81,22 +91,37 @@ public class VideoStreamManager {
             }
         }
 
-        synchronized String getPlaylist() {
-            if (segments.isEmpty()) {
-                return null;
+        synchronized void release() {
+            if (currentSegment != null) {
+                currentSegment.release();
             }
+            for (ByteBuf segment : segments.values()) {
+                segment.release();
+            }
+        }
+
+        static final String EMPTY_PLAYLIST =
+                "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:5\n#EXT-X-MEDIA-SEQUENCE:0\n";
+
+        synchronized String getPlaylist() {
+            if (currentSegment != null) {
+                finalizeSegment();
+            }
+            if (segments.isEmpty()) {
+                return EMPTY_PLAYLIST;
+            }
+
+            int firstIndex = segments.keySet().iterator().next();
 
             StringBuilder sb = new StringBuilder();
             sb.append("#EXTM3U\n");
             sb.append("#EXT-X-VERSION:3\n");
             sb.append("#EXT-X-TARGETDURATION:5\n");
-
-            int firstIndex = segments.keySet().iterator().next();
             sb.append("#EXT-X-MEDIA-SEQUENCE:").append(firstIndex).append("\n");
 
-            for (Map.Entry<Integer, ByteBuf> entry : segments.entrySet()) {
+            for (int key : segments.keySet()) {
                 sb.append("#EXTINF:3.0,\n");
-                sb.append(entry.getKey()).append(".ts\n");
+                sb.append(key).append(".ts\n");
             }
 
             return sb.toString();

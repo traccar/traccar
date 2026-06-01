@@ -86,9 +86,9 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readInt() / 600000.0);
                         position.setLongitude(buf.readInt() / 600000.0);
                         position.setSpeed(buf.readUnsignedShort());
-                        position.setCourse(buf.readUnsignedShort() * 0.1);
+                        position.setCourse(buf.readUnsignedShort() / 10.0);
                         position.set(Position.KEY_ODOMETER, UnitsConverter.metersFromFeet(buf.readUnsignedInt()));
-                        position.setAltitude(buf.readInt() * 0.1);
+                        position.setAltitude(buf.readInt() / 10.0);
                     }
 
                     buf.readerIndex(endIndex);
@@ -117,8 +117,8 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
                         switch (fieldNumber) {
                             case 246 -> {
                                 String[] values = value.split(",");
-                                position.set(Position.KEY_POWER, Integer.parseInt(values[2]) * 0.01);
-                                position.set(Position.KEY_BATTERY, Integer.parseInt(values[3]) * 0.01);
+                                position.set(Position.KEY_POWER, Integer.parseInt(values[2]) / 100.0);
+                                position.set(Position.KEY_BATTERY, Integer.parseInt(values[3]) / 100.0);
                             }
                             case 255 -> position.setDeviceTime(new Date(Long.parseLong(value) * 1000));
                         }

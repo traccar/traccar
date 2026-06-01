@@ -87,8 +87,8 @@ public class SwiftechProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
 
-        position.set(Position.PREFIX_ADC + 1, parser.nextInt() * 0.001);
-        position.set(Position.PREFIX_ADC + 2, parser.nextInt() * 0.001);
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt() / 1000.0);
+        position.set(Position.PREFIX_ADC + 2, parser.nextInt() / 1000.0);
 
         return position;
     }

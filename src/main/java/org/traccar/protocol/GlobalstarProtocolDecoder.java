@@ -58,12 +58,18 @@ import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("dd/MM/yyyy hh:mm:ss z", Locale.ENGLISH).withZone(ZoneId.systemDefault());
 
     private final DocumentBuilder documentBuilder;
     private final XPath xPath;
@@ -94,7 +100,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         rootElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         rootElement.setAttribute(
                 "xsi:noNamespaceSchemaLocation", "http://cody.glpconnect.com/XSD/StuResponse_Rev1_0.xsd");
-        rootElement.setAttribute("deliveryTimeStamp", new SimpleDateFormat("dd/MM/yyyy hh:mm:ss z").format(new Date()));
+        rootElement.setAttribute("deliveryTimeStamp", DATE_FORMAT.format(Instant.now()));
         rootElement.setAttribute("messageID", "00000000000000000000000000000000");
         rootElement.setAttribute("correlationID", messageId);
         document.appendChild(rootElement);
@@ -204,8 +210,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
 
-        for (int i = 0; i < devices.size(); i++) {
-            JsonObject data = devices.getJsonObject(i);
+        for (JsonObject data : devices.getValuesAs(JsonObject.class)) {
 
             JsonObject deviceIdentify = data.getJsonObject("deviceIdentify");
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceIdentify.getString("esn"));

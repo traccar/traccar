@@ -101,12 +101,12 @@ public class Geofence extends ExtendedModel implements Schedulable {
     }
 
     public boolean containsPosition(Position position) {
-        double floor = position.getDouble("floor");
+        double floor = getDouble("floor");
         if (floor != 0 && position.getAltitude() < floor) {
             return false;
         }
 
-        double ceiling = position.getDouble("ceiling");
+        double ceiling = getDouble("ceiling");
         if (ceiling != 0 && position.getAltitude() > ceiling) {
             return false;
         }

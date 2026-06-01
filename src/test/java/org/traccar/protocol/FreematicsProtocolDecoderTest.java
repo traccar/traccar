@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class FreematicsProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class FreematicsProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new FreematicsProtocolDecoder(null));
+
+        verifyAttribute(decoder, text(
+                "UCFLFAYM#EV=4,TS=373624,ID=UCFLFAYM,SSI=-79,VIN=WAUZZZ8K9CA123456*D7"),
+                Position.KEY_VIN, "WAUZZZ8K9CA123456");
 
         verifyPositions(decoder, text(
                 "UCFLFAYM#0:33770,24:300,82:53.000000,*F9"));

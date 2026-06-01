@@ -20,8 +20,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BaseProtocol;
 
 public class WatchFrameDecoder extends BaseFrameDecoder {
+
+    public WatchFrameDecoder() {
+        super(BaseProtocol.MAX_FRAME_LENGTH_LARGE);
+    }
 
     @Override
     protected Object decode(

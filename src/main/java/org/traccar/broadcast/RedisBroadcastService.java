@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
@@ -41,7 +42,7 @@ public class RedisBroadcastService extends BaseBroadcastService {
     private final String channel = "traccar";
 
     private Jedis subscriber;
-    private Jedis publisher;
+    private JedisPool publisherPool;
 
     private final String id = UUID.randomUUID().toString();
 
@@ -53,7 +54,7 @@ public class RedisBroadcastService extends BaseBroadcastService {
 
         try {
             subscriber = new Jedis(url);
-            publisher = new Jedis(url);
+            publisherPool = new JedisPool(url);
             subscriber.connect();
         } catch (JedisConnectionException e) {
             throw new IOException(e);
@@ -67,10 +68,10 @@ public class RedisBroadcastService extends BaseBroadcastService {
 
     @Override
     protected void sendMessage(BroadcastMessage message) {
-        try {
+        try (Jedis publisher = publisherPool.getResource()) {
             String payload = id  + ":" + objectMapper.writeValueAsString(message);
             publisher.publish(channel, payload);
-        } catch (IOException | JedisConnectionException e) {
+        } catch (IOException | JedisException e) {
             LOGGER.warn("Broadcast failed", e);
         }
     }
@@ -91,9 +92,9 @@ public class RedisBroadcastService extends BaseBroadcastService {
             LOGGER.warn("Subscriber close failed", e);
         }
         try {
-            if (publisher != null) {
-                publisher.close();
-                publisher = null;
+            if (publisherPool != null) {
+                publisherPool.close();
+                publisherPool = null;
             }
         } catch (JedisException e) {
             LOGGER.warn("Publisher close failed", e);

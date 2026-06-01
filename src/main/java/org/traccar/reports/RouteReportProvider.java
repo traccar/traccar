@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public class RouteReportProvider {
 
@@ -60,15 +61,18 @@ public class RouteReportProvider {
         this.storage = storage;
     }
 
-    public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public Stream<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<Position> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            result.addAll(PositionUtil.getPositions(storage, device.getId(), from, to));
-        }
-        return result;
+        return DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds).stream()
+                .flatMap(device -> {
+                    try {
+                        return PositionUtil.getPositionsStream(storage, device.getId(), from, to);
+                    } catch (StorageException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
 

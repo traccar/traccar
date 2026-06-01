@@ -20,11 +20,12 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.traccar.api.BaseResource;
 import org.traccar.media.VideoStreamManager;
+import org.traccar.model.Device;
+import org.traccar.storage.StorageException;
 
 @Path("stream")
 public class VideoStreamResource extends BaseResource {
@@ -33,22 +34,24 @@ public class VideoStreamResource extends BaseResource {
     private VideoStreamManager streamManager;
 
     @GET
-    @Path("{uniqueId}/live.m3u8")
+    @Path("{deviceId}/{channel}/live.m3u8")
     public Response playlist(
-            @PathParam("uniqueId") String uniqueId,
-            @QueryParam("channel") int channel) {
+            @PathParam("deviceId") long deviceId,
+            @PathParam("channel") int channel) throws StorageException {
 
-        return Response.ok(streamManager.getPlaylist(uniqueId, channel), "application/vnd.apple.mpegurl").build();
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        return Response.ok(streamManager.getPlaylist(deviceId, channel), "application/vnd.apple.mpegurl").build();
     }
 
     @GET
-    @Path("{uniqueId}/{index}.ts")
+    @Path("{deviceId}/{channel}/{index}.ts")
     public Response segment(
-            @PathParam("uniqueId") String uniqueId,
-            @PathParam("index") int index,
-            @QueryParam("channel") int channel) {
+            @PathParam("deviceId") long deviceId,
+            @PathParam("channel") int channel,
+            @PathParam("index") int index) throws StorageException {
 
-        ByteBuf data = streamManager.getSegment(uniqueId, channel, index);
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        ByteBuf data = streamManager.getSegment(deviceId, channel, index);
         StreamingOutput stream = output -> data.getBytes(data.readerIndex(), output, data.readableBytes());
         return Response.ok(stream, "video/mp2t").build();
     }

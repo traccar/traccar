@@ -29,7 +29,7 @@ public class SolarPoweredProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new HuabaoFrameDecoder());
+                pipeline.addLast(new Jt808FrameDecoder());
                 pipeline.addLast(new SolarPoweredProtocolDecoder(SolarPoweredProtocol.this));
             }
         });

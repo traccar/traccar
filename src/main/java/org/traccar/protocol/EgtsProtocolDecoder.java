@@ -224,7 +224,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     int speed = buf.readUnsignedShortLE();
-                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
+                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) / 10.0));
                     position.setCourse(buf.readUnsignedByte() + (BitUtil.check(speed, 15) ? 0x100 : 0));
 
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE() * 100);

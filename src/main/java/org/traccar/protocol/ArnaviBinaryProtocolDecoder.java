@@ -98,6 +98,10 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
 
+                case 2:
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
+                    break;
+
                 case 3:
                     position.setLatitude(buf.readFloatLE());
                     break;
@@ -147,6 +151,32 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
                     break;
 
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                    position.set(Position.PREFIX_ADC + (tag - 29), buf.readUnsignedShortLE() / 1000.0);
+                    buf.skipBytes(2);
+                    break;
+
+                case 40:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                    position.set(Position.PREFIX_TEMP + (tag - 39), buf.readShortLE() / 100.0);
+                    buf.skipBytes(2);
+                    break;
+
                 case 51:
                     position.set("canStatus", buf.readUnsignedIntLE());
                     break;
@@ -193,6 +223,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     position.set("axleLoad" + (tag - 59), buf.readUnsignedIntLE());
                     break;
 
+                case 67:
+                    position.set("adBlueLevel", buf.readUnsignedShortLE() / 10.0);
+                    buf.skipBytes(2);
+                    break;
+
                 case 69:
                     position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
@@ -216,6 +251,14 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.set("llsLevel" + (tag - 70), level);
                         position.set("llsTemp" + (tag - 70), (buf.readUnsignedShortLE() - 100.0) / 10.0);
                     }
+                    break;
+
+                case 100:
+                    position.set("tachographOdometer", buf.readUnsignedIntLE() * 10);
+                    break;
+
+                case 102:
+                    position.set("tachographPower", buf.readUnsignedIntLE() / 1000.0);
                     break;
 
                 case 151:

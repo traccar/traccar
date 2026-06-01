@@ -152,8 +152,7 @@ public class Position extends Message {
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
 
-    public Position() {
-    }
+    public Position() {}
 
     public Position(String protocol) {
         this.protocol = protocol;

@@ -42,7 +42,7 @@ public class ScheduleManager implements LifecycleObject {
 
     @Override
     public void start() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(4);
         Stream.of(
                 TaskHealthCheck.class,
                 TaskClearStatus.class,
@@ -50,6 +50,7 @@ public class ScheduleManager implements LifecycleObject {
                 TaskDeleteTemporary.class,
                 TaskReports.class,
                 TaskDeviceInactivityCheck.class,
+                TaskSessionTimeout.class,
                 TaskWebSocketKeepalive.class)
                 .forEachOrdered(taskClass -> {
                     var task = injector.getInstance(taskClass);

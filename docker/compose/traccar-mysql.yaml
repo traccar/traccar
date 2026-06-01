@@ -1,7 +1,7 @@
 services:
 
   database:
-    image: mysql:8.4
+    image: mysql:lts
     restart: unless-stopped
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"

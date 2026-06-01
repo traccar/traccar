@@ -22,16 +22,14 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class Gl200FrameDecoder extends BaseFrameDecoder {
 
     private static final int MINIMUM_LENGTH = 11;
 
-    private static final Set<String> BINARY_HEADERS = new HashSet<>(
-            Arrays.asList("+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN"));
+    private static final Set<String> BINARY_HEADERS = Set.of(
+            "+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN");
 
     public static boolean isBinary(ByteBuf buf) {
         String header = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);

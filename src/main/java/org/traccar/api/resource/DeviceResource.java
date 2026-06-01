@@ -22,6 +22,7 @@ import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
+import org.traccar.model.LinkedDevice;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
@@ -84,6 +85,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("deviceId") long linkedFromDeviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
             @QueryParam("limit") int limit, @QueryParam("offset") int offset,
             @QueryParam("keyword") String keyword) throws StorageException {
@@ -124,6 +126,12 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     permissionsService.checkUser(getUserId(), userId);
                     conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
                 }
+            }
+
+            if (linkedFromDeviceId > 0) {
+                permissionsService.checkPermission(Device.class, getUserId(), linkedFromDeviceId);
+                conditions.add(new Condition.Permission(
+                        Device.class, linkedFromDeviceId, LinkedDevice.class).excludeGroups());
             }
 
             if (keyword != null && !keyword.isEmpty()) {
@@ -193,6 +201,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Response uploadImage(
             @PathParam("id") long deviceId, File file,
             @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
+
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(),

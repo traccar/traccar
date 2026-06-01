@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GeofenceEventHandler extends BaseEventHandler {
 
@@ -41,17 +41,17 @@ public class GeofenceEventHandler extends BaseEventHandler {
             return;
         }
 
-        List<Long> oldGeofences = new ArrayList<>();
+        Set<Long> oldGeofences = new HashSet<>();
         Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition != null && lastPosition.getGeofenceIds() != null) {
             oldGeofences.addAll(lastPosition.getGeofenceIds());
         }
 
-        List<Long> newGeofences = new ArrayList<>();
+        Set<Long> newGeofences = new HashSet<>();
         if (position.getGeofenceIds() != null) {
             newGeofences.addAll(position.getGeofenceIds());
             newGeofences.removeAll(oldGeofences);
-            oldGeofences.removeAll(position.getGeofenceIds());
+            position.getGeofenceIds().forEach(oldGeofences::remove);
         }
 
         for (long geofenceId : oldGeofences) {

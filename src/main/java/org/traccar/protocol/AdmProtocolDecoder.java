@@ -58,18 +58,18 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(!BitUtil.check(status, 5));
             position.setLatitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
-            position.setCourse(buf.readUnsignedShortLE() * 0.1);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
+            position.setCourse(buf.readUnsignedShortLE() / 10.0);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() / 10.0));
 
-            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte() / 10.0);
             position.setAltitude(buf.readShortLE());
-            position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte() & 0x0f);
 
             position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
 
-            position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+            position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
 
             if (BitUtil.check(type, 2)) {
                 buf.readUnsignedByte(); // vib
@@ -85,7 +85,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
             if (BitUtil.check(type, 3)) {
                 for (int i = 1; i <= 6; i++) {
-                    position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE() * 0.001);
+                    position.set(Position.PREFIX_ADC + i, buf.readUnsignedShortLE() / 1000.0);
                 }
             }
 

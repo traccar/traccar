@@ -32,8 +32,7 @@ import org.traccar.storage.query.Request;
 
 public final class AttributeUtil {
 
-    private AttributeUtil() {
-    }
+    private AttributeUtil() {}
 
     public interface Provider {
         Device getDevice();
@@ -46,12 +45,13 @@ public final class AttributeUtil {
         return lookup(new CacheProvider(cacheManager, deviceId), key);
     }
 
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings("unchecked")
     public static <T> T lookup(Provider provider, ConfigKey<T> key) {
         Device device = provider.getDevice();
         Object result = device.getAttributes().get(key.getKey());
         long groupId = device.getGroupId();
-        while (result == null && groupId > 0) {
+        int depth = Storage.MAX_GROUP_DEPTH;
+        while (result == null && groupId > 0 && depth-- > 0) {
             Group group = provider.getGroup(groupId);
             if (group != null) {
                 result = group.getAttributes().get(key.getKey());

@@ -16,7 +16,6 @@
 package org.traccar.handler;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
@@ -27,7 +26,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@Singleton
 public class TimeHandler extends BasePositionHandler {
 
     private static final long ROLLOVER_CYCLE = 1024 * Duration.ofDays(7).toMillis();

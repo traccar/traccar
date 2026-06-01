@@ -23,7 +23,7 @@ import org.traccar.model.Server;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,62 +65,53 @@ public class MemoryStorage extends Storage {
         if (genericCondition == null) {
             return true;
         }
-
-        if (genericCondition instanceof Condition.Compare condition) {
-
-            Object value = retrieveValue(object, condition.getColumn());
-            int result = ((Comparable) value).compareTo(condition.getValue());
-            return switch (condition.getOperator()) {
-                case "<" -> result < 0;
-                case "<=" -> result <= 0;
-                case ">" -> result > 0;
-                case ">=" -> result >= 0;
-                case "=" -> result == 0;
-                default -> throw new RuntimeException("Unsupported comparison condition");
-            };
-
-        } else if (genericCondition instanceof Condition.Between condition) {
-
-            Object fromValue = retrieveValue(object, condition.getColumn());
-            int fromResult = ((Comparable) fromValue).compareTo(condition.getFromValue());
-            Object toValue = retrieveValue(object, condition.getColumn());
-            int toResult = ((Comparable) toValue).compareTo(condition.getToValue());
-            return fromResult >= 0 && toResult <= 0;
-
-        } else if (genericCondition instanceof Condition.Binary condition) {
-
-            if (condition.getOperator().equals("AND")) {
-                return checkCondition(condition.getFirst(), object) && checkCondition(condition.getSecond(), object);
-            } else if (condition.getOperator().equals("OR")) {
-                return checkCondition(condition.getFirst(), object) || checkCondition(condition.getSecond(), object);
+        return switch (genericCondition) {
+            case Condition.Compare condition -> {
+                Object value = retrieveValue(object, condition.getColumn());
+                int result = ((Comparable) value).compareTo(condition.getValue());
+                yield switch (condition.getOperator()) {
+                    case "<" -> result < 0;
+                    case "<=" -> result <= 0;
+                    case ">" -> result > 0;
+                    case ">=" -> result >= 0;
+                    case "=" -> result == 0;
+                    default -> throw new RuntimeException("Unsupported comparison condition");
+                };
             }
-
-        } else if (genericCondition instanceof Condition.Permission condition) {
-
-            long id = (Long) retrieveValue(object, "id");
-            return getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
-                    .anyMatch(pair -> {
-                        if (condition.getOwnerId() > 0) {
-                            return pair.first() == condition.getOwnerId() && pair.second() == id;
-                        } else {
-                            return pair.first() == id && pair.second() == condition.getPropertyId();
-                        }
-                    });
-
-        } else if (genericCondition instanceof Condition.LatestPositions) {
-
-            return false;
-
-        }
-
-        return false;
+            case Condition.Between condition -> {
+                Object fromValue = retrieveValue(object, condition.getColumn());
+                int fromResult = ((Comparable) fromValue).compareTo(condition.getFromValue());
+                Object toValue = retrieveValue(object, condition.getColumn());
+                int toResult = ((Comparable) toValue).compareTo(condition.getToValue());
+                yield fromResult >= 0 && toResult <= 0;
+            }
+            case Condition.Binary condition -> switch (condition.getOperator()) {
+                case "AND" -> checkCondition(condition.getFirst(), object)
+                        && checkCondition(condition.getSecond(), object);
+                case "OR" -> checkCondition(condition.getFirst(), object)
+                        || checkCondition(condition.getSecond(), object);
+                default -> false;
+            };
+            case Condition.Permission condition -> {
+                long id = (Long) retrieveValue(object, "id");
+                yield getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
+                        .anyMatch(pair -> {
+                            if (condition.getOwnerId() > 0) {
+                                return pair.first() == condition.getOwnerId() && pair.second() == id;
+                            } else {
+                                return pair.first() == id && pair.second() == condition.getPropertyId();
+                            }
+                        });
+            }
+            default -> false;
+        };
     }
 
     private Object retrieveValue(Object object, String key) {
+        MethodHandle handle = ReflectionCache.getProperties(object.getClass(), "get").get(key).handle();
         try {
-            Method method = ReflectionCache.getProperties(object.getClass(), "get").get(key).method();
-            return method.invoke(object);
-        } catch (ReflectiveOperationException e) {
+            return handle.invokeExact(object);
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
@@ -144,13 +135,14 @@ public class MemoryStorage extends Storage {
         var getters = ReflectionCache.getProperties(entity.getClass(), "get");
         var setters = ReflectionCache.getProperties(entity.getClass(), "set");
         for (String column : request.getColumns().getColumns(entity.getClass(), "get")) {
+            MethodHandle setter = setters.get(column).handle();
+            MethodHandle getter = getters.get(column).handle();
             try {
-                Method setter = setters.get(column).method();
-                Object value = getters.get(column).method().invoke(entity);
+                Object value = getter.invokeExact(entity);
                 for (Object object : items) {
-                    setter.invoke(object, value);
+                    setter.invokeExact(object, value);
                 }
-            } catch (ReflectiveOperationException e) {
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         }

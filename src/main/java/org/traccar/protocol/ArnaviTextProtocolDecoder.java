@@ -82,8 +82,8 @@ public class ArnaviTextProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_INDEX, parser.nextInt());
-        position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+        position.set(Position.KEY_POWER, parser.nextInt() / 100.0);
+        position.set(Position.KEY_BATTERY, parser.nextInt() / 100.0);
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
         position.set(Position.KEY_INPUT, parser.nextInt());
         position.set(Position.KEY_SATELLITES, parser.nextInt());

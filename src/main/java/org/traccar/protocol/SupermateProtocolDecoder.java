@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,17 +86,13 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextHexInt(0), parser.nextHexInt(0), parser.nextHexInt(0));
         position.setTime(dateBuilder.getDate());
 
-        if (parser.nextHexInt(0) == 8) {
-            position.setLatitude(-parser.nextHexInt(0) / 600000.0);
-        } else {
-            position.setLatitude(parser.nextHexInt(0) / 600000.0);
-        }
+        boolean latitudeNegative = parser.nextHexInt(0) == 8;
+        double latitude = parser.nextHexInt(0) / 600000.0;
+        position.setLatitude(latitudeNegative ? -latitude : latitude);
 
-        if (parser.nextHexInt(0) == 8) {
-            position.setLongitude(-parser.nextHexInt(0) / 600000.0);
-        } else {
-            position.setLongitude(parser.nextHexInt(0) / 600000.0);
-        }
+        boolean longitudeNegative = parser.nextHexInt(0) == 8;
+        double longitude = parser.nextHexInt(0) / 600000.0;
+        position.setLongitude(longitudeNegative ? -longitude : longitude);
 
         position.setSpeed(parser.nextHexInt(0) / 100.0);
         position.setCourse(parser.nextHexInt(0) / 100.0);

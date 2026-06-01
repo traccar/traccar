@@ -173,7 +173,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 24)) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
             }
 
             if (BitUtil.check(mask, 25)) {

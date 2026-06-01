@@ -48,6 +48,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Path("positions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -128,22 +130,33 @@ public class PositionResource extends BaseResource {
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
-    @Path("kml")
+    @Path("{extension:kml|kmz}")
     @GET
-    @Produces("application/vnd.google-earth.kml+xml")
     public Response getKml(
-            @QueryParam("deviceId") long deviceId,
+            @PathParam("extension") String extension,
+            @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         StreamingOutput stream = output -> {
             try {
-                kmlExportProvider.generate(output, deviceId, from, to);
+                if (extension.equals("kmz")) {
+                    try (ZipOutputStream zipStream = new ZipOutputStream(output)) {
+                        zipStream.putNextEntry(new ZipEntry("doc.kml"));
+                        kmlExportProvider.generate(zipStream, deviceId, geofenceId, from, to);
+                        zipStream.closeEntry();
+                    }
+                } else {
+                    kmlExportProvider.generate(output, deviceId, geofenceId, from, to);
+                }
             } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
             }
         };
-        return Response.ok(stream)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.kml").build();
+        String mediaType = extension.equals("kmz")
+                ? "application/vnd.google-earth.kmz"
+                : "application/vnd.google-earth.kml+xml";
+        return Response.ok(stream, mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions." + extension).build();
     }
 
     @Path("csv")
@@ -168,12 +181,12 @@ public class PositionResource extends BaseResource {
     @GET
     @Produces("application/gpx+xml")
     public Response getGpx(
-            @QueryParam("deviceId") long deviceId,
+            @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         StreamingOutput stream = output -> {
             try {
-                gpxExportProvider.generate(output, deviceId, from, to);
+                gpxExportProvider.generate(output, deviceId, geofenceId, from, to);
             } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
             }

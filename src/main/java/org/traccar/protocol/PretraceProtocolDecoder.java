@@ -100,10 +100,10 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
                             if (value.charAt(4) == '%') {
                                 position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value.substring(2, 4)));
                             } else {
-                                position.set(Position.KEY_BATTERY, Integer.parseInt(value.substring(2), 16) * 0.01);
+                                position.set(Position.KEY_BATTERY, Integer.parseInt(value.substring(2), 16) / 100.0);
                             }
                         } else {
-                            position.set(Position.KEY_POWER, Integer.parseInt(value.substring(2), 16) * 0.01);
+                            position.set(Position.KEY_POWER, Integer.parseInt(value.substring(2), 16) / 100.0);
                         }
                         break;
                     case 'T':
@@ -115,7 +115,9 @@ public class PretraceProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 'F':
-                        position.set("fuel" + (value.charAt(1) - '0'), Integer.parseInt(value.substring(2), 16) * 0.01);
+                        position.set(
+                                "fuel" + (value.charAt(1) - '0'),
+                                Integer.parseInt(value.substring(2), 16) / 100.0);
                         break;
                     case 'R':
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, value.substring(3));

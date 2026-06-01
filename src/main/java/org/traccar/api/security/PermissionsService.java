@@ -22,6 +22,7 @@ import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
+import org.traccar.model.LinkedDevice;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Schedulable;
@@ -210,15 +211,17 @@ public class PermissionsService {
 
     public <T extends BaseModel> void checkPermission(
             Class<T> clazz, long userId, long objectId) throws StorageException, SecurityException {
-        if (!getUser(userId).getAdministrator() && !(clazz.equals(User.class) && userId == objectId)) {
-            var object = storage.getObject(clazz, new Request(
+        Class<? extends BaseModel> queryClass = clazz.equals(LinkedDevice.class) ? Device.class : clazz;
+        if (!getUser(userId).getAdministrator() && !(queryClass.equals(User.class) && userId == objectId)) {
+            var object = storage.getObject(queryClass, new Request(
                     new Columns.Include("id"),
                     new Condition.And(
                             new Condition.Equals("id", objectId),
                             new Condition.Permission(
-                                    User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz))));
+                                    User.class, userId,
+                                    queryClass.equals(User.class) ? ManagedUser.class : queryClass))));
             if (object == null) {
-                throw new SecurityException(clazz.getSimpleName() + " access denied");
+                throw new SecurityException(queryClass.getSimpleName() + " access denied");
             }
         }
     }

@@ -64,11 +64,11 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     public static <T extends ChannelHandler> T getHandler(ChannelPipeline pipeline, Class<T> clazz) {
         for (Map.Entry<String, ChannelHandler> handlerEntry : pipeline) {
             ChannelHandler handler = handlerEntry.getValue();
-            if (handler instanceof WrapperInboundHandler wrapperHandler) {
-                handler = wrapperHandler.getWrappedHandler();
-            } else if (handler instanceof WrapperOutboundHandler wrapperHandler) {
-                handler = wrapperHandler.getWrappedHandler();
-            }
+            handler = switch (handler) {
+                case WrapperInboundHandler wrapperHandler -> wrapperHandler.getWrappedHandler();
+                case WrapperOutboundHandler wrapperHandler -> wrapperHandler.getWrappedHandler();
+                default -> handler;
+            };
             if (clazz.isAssignableFrom(handler.getClass())) {
                 return (T) handler;
             }
@@ -106,11 +106,11 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {
                 injectMembers(handler);
             } else {
-                if (handler instanceof ChannelInboundHandler channelHandler) {
-                    handler = new WrapperInboundHandler(channelHandler);
-                } else if (handler instanceof ChannelOutboundHandler channelHandler) {
-                    handler = new WrapperOutboundHandler(channelHandler);
-                }
+                handler = switch (handler) {
+                    case ChannelInboundHandler channelHandler -> new WrapperInboundHandler(channelHandler);
+                    case ChannelOutboundHandler channelHandler -> new WrapperOutboundHandler(channelHandler);
+                    default -> handler;
+                };
             }
             pipeline.addLast(handler);
         });

@@ -43,7 +43,8 @@ public class Gps103Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(2048, false, "\r\n", "\n", ";", "*"));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(
+                        MAX_FRAME_LENGTH_LARGE, false, "\r\n", "\n", ";", "*"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new Gps103ProtocolEncoder(Gps103Protocol.this));

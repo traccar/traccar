@@ -92,14 +92,14 @@ public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
                 case 0x07 -> position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 case 0x08 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                 case 0x09 -> position.setCourse(buf.readUnsignedShortLE());
-                case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
                 case 0x0B -> position.setAltitude(buf.readShortLE());
                 case 0x0C -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                 case 0x0D -> position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
                 case 0x14 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
                 case 0x15 -> position.set(Position.KEY_INPUT, buf.readUnsignedByte());
-                case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
-                case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
+                case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 100.0);
                 case 0x1B -> buf.readUnsignedByte(); // geofence
             }
         }

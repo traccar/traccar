@@ -19,5 +19,4 @@ package org.traccar.model;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_users")
-public class ManagedUser extends User {
-}
+public class ManagedUser extends User {}
