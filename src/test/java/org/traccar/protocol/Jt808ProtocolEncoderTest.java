@@ -16,7 +16,9 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(encoder, decoder, command, binary("7e810500010b3a73ce2ff20000f0247e"));
+        verifyFrame(
+            binary("7e810500010b3a73ce2ff20000f0247e"),
+            encodeCommand(encoder, decoder, command));
 
     }
 

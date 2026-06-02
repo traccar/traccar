@@ -353,14 +353,14 @@ public class ProtocolTest extends BaseTest {
         verifyFrame(expected, encoder.encodeCommand(command));
     }
 
-    protected void verifyCommand(
-            BaseProtocolEncoder encoder, BaseProtocolDecoder decoder, Command command, ByteBuf expected) {
+    protected Object encodeCommand(
+            BaseProtocolEncoder encoder, BaseProtocolDecoder decoder, Command command) {
         var pipeline = mock(ChannelPipeline.class);
         when(pipeline.iterator()).thenReturn(
                 List.<Map.Entry<String, ChannelHandler>>of(Map.entry("decoder", decoder)).iterator());
         var channel = mock(Channel.class);
         when(channel.pipeline()).thenReturn(pipeline);
-        verifyFrame(expected, encoder.encodeCommand(channel, command));
+        return encoder.encodeCommand(channel, command);
     }
 
     protected void verifyFrame(ByteBuf expected, Object object) {
