@@ -42,21 +42,20 @@ public class CacheManagerTest {
         Object key = new Object();
         cacheManager.addDevice(deviceId, key);
 
-        Date fixTime = new Date();
+        long fixTime = System.currentTimeMillis();
 
         Position first = new Position();
         first.setDeviceId(deviceId);
-        first.setFixTime(fixTime);
-        first.set(Position.KEY_TOTAL_DISTANCE, 1000);
+        first.setFixTime(new Date(fixTime));
 
         Position replacement = new Position();
         replacement.setDeviceId(deviceId);
-        replacement.setFixTime(fixTime);
-        replacement.set(Position.KEY_TOTAL_DISTANCE, 2000);
+        replacement.setFixTime(new Date(fixTime));
 
         cacheManager.updatePosition(first);
         cacheManager.updatePosition(replacement);
 
         assertSame(replacement, cacheManager.getPosition(deviceId));
     }
+
 }
