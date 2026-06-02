@@ -267,9 +267,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (key == 0x26) {
                             position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() / 10.0);
                             position.setAltitude(buf.readShortLE());
-                        } else if (length > 15) {
+                        } else if (buf.readerIndex() < endIndex) {
                             position.set("description", buf.readCharSequence(
-                                    length, StandardCharsets.US_ASCII).toString());
+                                    endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
                         }
                         break;
                     case 0x24:

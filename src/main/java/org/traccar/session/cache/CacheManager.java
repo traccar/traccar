@@ -185,8 +185,13 @@ public class CacheManager implements BroadcastInterface {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
             var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
             Position previous = positions.peekLast();
-            if (previous != null && !position.getFixTime().after(previous.getFixTime())) {
-                return oldValue;
+            if (previous != null) {
+                if (position.getFixTime().before(previous.getFixTime())) {
+                    return oldValue;
+                }
+                if (position.getFixTime().equals(previous.getFixTime())) {
+                    positions.pollLast();
+                }
             }
             positions.add(position);
             if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
