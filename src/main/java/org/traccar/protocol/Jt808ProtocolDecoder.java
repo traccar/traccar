@@ -853,7 +853,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
                     }
                     break;
-                    case 0xD5:
+                case 0xD5:
                     if (length == 2) {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                     } else {
