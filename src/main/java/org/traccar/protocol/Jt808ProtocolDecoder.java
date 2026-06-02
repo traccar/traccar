@@ -831,7 +831,18 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xD4:
                 case 0xE1:
                 case 0xE9:
-                    if (length == 1) {
+                    if (subtype == 0xE1 && length > 4 && (length - 4) % 8 == 0) {
+                        int mcc = buf.readUnsignedShort();
+                        int mnc = buf.readUnsignedShort();
+
+                        while (buf.readerIndex() < endIndex) {
+                            int lac = buf.readUnsignedMedium();
+                            long cid = buf.readUnsignedInt();
+                            int rssi = buf.readUnsignedByte();
+
+                            network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                        }
+                    } else if (length == 1) {
                         int batteryLevel = buf.readUnsignedByte();
                         if (batteryLevel == 0xff) {
                             position.set(Position.KEY_CHARGE, true);
@@ -842,7 +853,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
                     }
                     break;
-                case 0xD5:
+                    case 0xD5:
                     if (length == 2) {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                     } else {
