@@ -4,12 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.embedded.EmbeddedChannel;
-
-import java.util.List;
-
 public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
     @Test
@@ -23,6 +17,33 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_ENGINE_STOP);
 
         verifyCommand(encoder, decoder, command, binary("7e810500010b3a73ce2ff20000f0247e"));
+
+    }
+
+    @Test
+    public void testEncodeCustom() throws Exception {
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+        var encoder = inject(new Jt808ProtocolEncoder(null));
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_CUSTOM);
+
+        command.set(Command.KEY_DATA, "7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e");
+        verifyCommand(encoder, decoder, command, binary("7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e"));
+
+        encoder.setModelOverride("BSJ");
+        command.set(Command.KEY_DATA, "Test, Command, 123#");
+        verifyCommand(encoder, decoder, command, binary("7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e"));
+
+        encoder.setModelOverride("C5");
+        command.set(Command.KEY_DATA, "Test, Command, 123#");
+        verifyCommand(encoder, decoder, command, binary("7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e"));
+
+        encoder.setModelOverride("C5L");
+        command.set(Command.KEY_DATA, "Test, Command, 123#");
+        verifyCommand(encoder, decoder, command, binary("7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e"));
 
     }
 
