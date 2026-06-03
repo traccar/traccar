@@ -3,7 +3,6 @@ package org.traccar.session.cache;
 import org.junit.jupiter.api.Test;
 import org.traccar.config.Config;
 import org.traccar.model.Device;
-import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.broadcast.BroadcastService;
@@ -32,8 +31,8 @@ public class CacheManagerTest {
         device.setId(1);
         when(storage.getObject(eq(Server.class), any(Request.class))).thenReturn(new Server());
         when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
-        when(storage.getPermissions(eq(Device.class), any())).thenReturn(List.<Permission>of());
-        when(storage.getPermissions(eq(User.class), eq(Device.class))).thenReturn(List.<Permission>of());
+        when(storage.getPermissions(eq(Device.class), any())).thenReturn(List.of());
+        when(storage.getPermissions(eq(User.class), eq(Device.class))).thenReturn(List.of());
         doNothing().when(broadcastService).registerListener(any());
 
         CacheManager cacheManager = new CacheManager(new Config(), storage, broadcastService);
