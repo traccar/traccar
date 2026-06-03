@@ -743,14 +743,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0x64:
-                    buf.readUnsignedInt(); // alarm serial number
-                    buf.readUnsignedByte(); // alarm status
-                    position.set("adasAlarm", buf.readUnsignedByte());
-                    break;
                 case 0x65:
                     buf.readUnsignedInt(); // alarm serial number
                     buf.readUnsignedByte(); // alarm status
-                    position.set("dmsAlarm", buf.readUnsignedByte());
+                    position.set(subtype == 0x64 ? "adasAlarm" : "dmsAlarm", buf.readUnsignedByte());
+                    if (length >= 47) {
+                        buf.readerIndex(endIndex - 16);
+                        position.set("alarmLabel", ByteBufUtil.hexDump(buf.readSlice(16)));
+                    }
                     break;
                 case 0x67:
                     stringValue = buf.readCharSequence(8, StandardCharsets.US_ASCII).toString();
