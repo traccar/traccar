@@ -863,6 +863,17 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         } else {
                             position.set(Position.KEY_BATTERY_LEVEL, batteryLevel);
                         }
+                    } else if (subtype == 0xE1 && length >= 12 && (length - 4) % 8 == 0) {
+                        int mcc = buf.readUnsignedShort();
+                        int mnc = buf.readUnsignedShort();
+
+                        while (buf.readerIndex() < endIndex) {
+                            int lac = buf.readUnsignedMedium();
+                            long cid = buf.readUnsignedInt();
+                            int rssi = buf.readUnsignedByte();
+
+                            network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                        }
                     } else {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
                     }
