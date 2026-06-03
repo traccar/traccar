@@ -76,6 +76,11 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    } else if (model != null && model.startsWith("JC")) {
+                        data.writeByte(0xF0); // online command
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
+                        return decoder.formatMessage(
+                                Jt808ProtocolDecoder.MSG_TRANSPARENT_DOWNLINK, id, false, data);
                     } else {
                         return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
                     }
