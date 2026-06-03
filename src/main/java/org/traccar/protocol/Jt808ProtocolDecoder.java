@@ -19,7 +19,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.traccar.BaseProtocol;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.config.Keys;
 import org.traccar.helper.BufferUtil;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
@@ -36,6 +38,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -148,6 +151,25 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             channel.writeAndFlush(new NetworkMessage(
                     formatMessage(MSG_GENERAL_RESPONSE_2, id, true, response), remoteAddress));
         }
+    }
+
+    private void requestAttachments(Channel channel, SocketAddress remoteAddress, ByteBuf id, Position position) {
+        if (channel == null || position == null || !position.hasAttribute("alarmLabel")) {
+            return;
+        }
+        String webUrl = getConfig().getString(Keys.WEB_URL);
+        int uploadPort = getConfig().getInteger(
+                Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(JimiPhotoProtocol.class)));
+        if (webUrl == null || uploadPort <= 0) {
+            return;
+        }
+        String text = String.format("VIDEOUPLOAD,%s,%d,%s,0,0",
+                URI.create(webUrl).getHost(), uploadPort, position.getString("alarmLabel"));
+        ByteBuf data = Unpooled.buffer();
+        data.writeByte(0xF0);
+        data.writeCharSequence(text, StandardCharsets.US_ASCII);
+        channel.writeAndFlush(new NetworkMessage(
+                formatMessage(MSG_TRANSPARENT_DOWNLINK, id, false, data), remoteAddress));
     }
 
     private void decodeAlarm(Position position, String model, long value) {
@@ -408,7 +430,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
-            return decodeLocation(deviceSession, buf);
+            Position position = decodeLocation(deviceSession, buf);
+            requestAttachments(channel, remoteAddress, id, position);
+            return position;
 
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 
