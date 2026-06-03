@@ -1729,7 +1729,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> TIME_OVERRIDE = new StringConfigKey(
             "time.override",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * List of protocols to enable. If not specified, Traccar enables all protocols that have port numbers listed.
