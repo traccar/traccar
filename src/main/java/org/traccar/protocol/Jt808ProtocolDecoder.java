@@ -838,7 +838,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         } else {
                             position.set(Position.KEY_BATTERY_LEVEL, batteryLevel);
                         }
-                    } else if (subtype == 0xE1 && length > 12 && (length - 4) % 8 == 0) {
+                    } else if (subtype == 0xE1 && length >= 12 && (length - 4) % 8 == 0) {
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedShort();
 
