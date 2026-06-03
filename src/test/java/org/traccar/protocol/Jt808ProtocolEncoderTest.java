@@ -16,6 +16,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
 
         command.setType(Command.TYPE_ENGINE_STOP);
+
         verifyFrame(
             binary("7e810500010b3a73ce2ff20000f0247e"),
             encodeCommand(encoder, decoder, command));
@@ -28,6 +29,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             encodeCommand(encoder, decoder, command));
 
         encoder.setModelOverride("BSJ");
+
         command.set(Command.KEY_DATA, "Test, Command, 123#");
         verifyFrame(
             binary("7e830000140b3a73ce2ff2000001546573742c20436f6d6d616e642c2031323323a57e"),
