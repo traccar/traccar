@@ -68,6 +68,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<ConnectionKey, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
     private final Map<ConnectionKey, UnknownEntry> unknownByEndpoint = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lastSeenByDeviceId = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -99,9 +100,9 @@ public class ConnectionManager implements BroadcastInterface {
 
     public void sweepIdleSessions() {
         long cutoff = System.currentTimeMillis() - deviceTimeout * 1000;
-        for (DeviceSession session : sessionsByDeviceId.values()) {
-            if (session.getLastUpdate() < cutoff) {
-                deviceUnknown(session.getDeviceId());
+        for (var entry : lastSeenByDeviceId.entrySet()) {
+            if (entry.getValue() < cutoff) {
+                deviceUnknown(entry.getKey());
             }
         }
         unknownByEndpoint.values().removeIf(entry -> entry.timestamp() < cutoff);
@@ -229,6 +230,7 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     private void removeDeviceSession(long deviceId) {
+        lastSeenByDeviceId.remove(deviceId);
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
         if (deviceSession != null) {
             ConnectionKey connectionKey = deviceSession.getConnectionKey();
@@ -256,6 +258,12 @@ public class ConnectionManager implements BroadcastInterface {
 
         String oldStatus = device.getStatus();
         device.setStatus(status);
+
+        if (Device.STATUS_ONLINE.equals(status)) {
+            lastSeenByDeviceId.put(deviceId, System.currentTimeMillis());
+        } else {
+            lastSeenByDeviceId.remove(deviceId);
+        }
 
         if (!status.equals(oldStatus) && statusEventsEnabled) {
             String eventType = switch (status) {
