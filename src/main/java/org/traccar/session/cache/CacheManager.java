@@ -183,6 +183,9 @@ public class CacheManager implements BroadcastInterface {
                 return false;
             }
             if (position.getFixTime().equals(previous.getFixTime())) {
+                if (position.getServerTime().before(previous.getServerTime())) {
+                    return false;
+                }
                 positions.pollLast();
             }
         }
