@@ -78,13 +78,9 @@ public class MemoryStorage extends Storage {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private int compareByOrder(Object a, Object b, Order order) {
-        for (String column : order.getColumns()) {
-            int comparison = ((Comparable) retrieveValue(a, column)).compareTo(retrieveValue(b, column));
-            if (comparison != 0) {
-                return order.getDescending() ? -comparison : comparison;
-            }
-        }
-        return 0;
+        int comparison = ((Comparable) retrieveValue(a, order.getColumn()))
+                .compareTo(retrieveValue(b, order.getColumn()));
+        return order.getDescending() ? -comparison : comparison;
     }
 
     private boolean checkCondition(Condition genericCondition, Object object) {

@@ -80,7 +80,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
-        Order order = new Order(false, limit, offset, sortField != null ? sortField : "id");
+        Order order = new Order(sortField != null ? sortField : "id", false, limit, offset);
         return storage.getObjectsStream(baseClass, new Request(columns, Condition.merge(conditions), order));
     }
 

@@ -371,14 +371,9 @@ public class DatabaseStorage extends Storage {
         StringBuilder result = new StringBuilder();
         if (order != null) {
             result.append(" ORDER BY ");
-            for (int i = 0; i < order.getColumns().length; i++) {
-                if (i > 0) {
-                    result.append(", ");
-                }
-                result.append(order.getColumns()[i]);
-                if (order.getDescending()) {
-                    result.append(" DESC");
-                }
+            result.append(order.getColumn());
+            if (order.getDescending()) {
+                result.append(" DESC");
             }
             if (order.getLimit() > 0) {
                 if (databaseType.equals("Microsoft SQL Server")) {

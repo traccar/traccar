@@ -140,7 +140,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             }
 
             return storage.getObjectsStream(baseClass, new Request(
-                    columns, Condition.merge(conditions), new Order(false, limit, offset, "name")));
+                    columns, Condition.merge(conditions), new Order("name", false, limit, offset)));
 
         }
     }
