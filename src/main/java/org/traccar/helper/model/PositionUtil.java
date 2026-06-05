@@ -68,7 +68,7 @@ public final class PositionUtil {
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Compare("fixTime", "<", from)),
-                new Order("fixTime", true, 1)));
+                new Order(true, 1, "fixTime", "serverTime")));
         Stream<Position> positions = getPositionsStream(storage, deviceId, from, to);
         return Stream.concat(extraStream, positions);
     }
@@ -80,7 +80,7 @@ public final class PositionUtil {
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", from, to)),
-                new Order("fixTime")));
+                new Order("fixTime", "serverTime")));
     }
 
     public static Position getEdgePosition(
@@ -90,7 +90,7 @@ public final class PositionUtil {
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", from, to)),
-                new Order("fixTime", end, 1)));
+                new Order(end, 1, "fixTime")));
     }
 
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {

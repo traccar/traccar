@@ -127,7 +127,7 @@ public class CommandsManager implements BroadcastInterface {
             var commands = storage.getObjects(QueuedCommand.class, new Request(
                     new Columns.All(),
                     new Condition.Equals("deviceId", deviceId),
-                    new Order("id", false, count)));
+                    new Order(false, count, "id")));
             Map<Event, Position> events = new HashMap<>();
             for (var command : commands) {
                 storage.removeObject(QueuedCommand.class, new Request(

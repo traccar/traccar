@@ -17,28 +17,28 @@ package org.traccar.storage.query;
 
 public class Order {
 
-    private final String column;
+    private final String[] columns;
     private final boolean descending;
     private final int limit;
     private final int offset;
 
-    public Order(String column) {
-        this(column, false, 0, 0);
+    public Order(String... columns) {
+        this(false, 0, 0, columns);
     }
 
-    public Order(String column, boolean descending, int limit) {
-        this(column, descending, limit, 0);
+    public Order(boolean descending, int limit, String... columns) {
+        this(descending, limit, 0, columns);
     }
 
-    public Order(String column, boolean descending, int limit, int offset) {
-        this.column = column;
+    public Order(boolean descending, int limit, int offset, String... columns) {
+        this.columns = columns;
         this.descending = descending;
         this.limit = limit;
         this.offset = offset;
     }
 
-    public String getColumn() {
-        return column;
+    public String[] getColumns() {
+        return columns;
     }
 
     public boolean getDescending() {
