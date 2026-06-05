@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@ package org.traccar.storage;
 
 import org.traccar.helper.ReflectionCache;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.model.GroupedModel;
 import org.traccar.model.Pair;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import java.lang.invoke.MethodHandle;
@@ -28,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -56,9 +61,30 @@ public class MemoryStorage extends Storage {
 
     @Override
     public <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) {
-        return objects.computeIfAbsent(clazz, key -> new HashMap<>()).values().stream()
-                .filter(object -> checkCondition(request.getCondition(), object))
-                .map(object -> (T) object);
+        var stream = objects.computeIfAbsent(clazz, key -> new HashMap<>()).values().stream()
+                .filter(object -> checkCondition(request.getCondition(), object));
+        Order order = request.getOrder();
+        if (order != null) {
+            stream = stream.sorted((a, b) -> compareByOrder(a, b, order));
+            if (order.getOffset() > 0) {
+                stream = stream.skip(order.getOffset());
+            }
+            if (order.getLimit() > 0) {
+                stream = stream.limit(order.getLimit());
+            }
+        }
+        return stream.map(object -> (T) object);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private int compareByOrder(Object a, Object b, Order order) {
+        for (String column : order.getColumns()) {
+            int comparison = ((Comparable) retrieveValue(a, column)).compareTo(retrieveValue(b, column));
+            if (comparison != 0) {
+                return order.getDescending() ? -comparison : comparison;
+            }
+        }
+        return 0;
     }
 
     private boolean checkCondition(Condition genericCondition, Object object) {
@@ -92,19 +118,78 @@ public class MemoryStorage extends Storage {
                         || checkCondition(condition.getSecond(), object);
                 default -> false;
             };
-            case Condition.Permission condition -> {
-                long id = (Long) retrieveValue(object, "id");
-                yield getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
-                        .anyMatch(pair -> {
-                            if (condition.getOwnerId() > 0) {
-                                return pair.first() == condition.getOwnerId() && pair.second() == id;
-                            } else {
-                                return pair.first() == id && pair.second() == condition.getPropertyId();
-                            }
-                        });
+            case Condition.Permission condition -> checkPermission(condition, object);
+            case Condition.Contains condition -> {
+                String needle = condition.getValue().toLowerCase(Locale.ROOT);
+                yield condition.getColumns().stream().anyMatch(column -> {
+                    Object value = retrieveValue(object, column);
+                    return value != null && value.toString().toLowerCase(Locale.ROOT).contains(needle);
+                });
+            }
+            case Condition.LatestPositions condition -> {
+                long positionId = (Long) retrieveValue(object, "id");
+                long positionDeviceId = (Long) retrieveValue(object, "deviceId");
+                if (condition.getDeviceId() > 0 && positionDeviceId != condition.getDeviceId()) {
+                    yield false;
+                }
+                yield objects.computeIfAbsent(Device.class, key -> new HashMap<>()).values().stream()
+                        .anyMatch(device -> (Long) retrieveValue(device, "positionId") == positionId);
             }
             default -> false;
         };
+    }
+
+    private boolean checkPermission(Condition.Permission condition, Object object) {
+        long objectId = (Long) retrieveValue(object, "id");
+        Class<?> ownerClass = condition.getOwnerClass();
+        Class<?> propertyClass = condition.getPropertyClass();
+        boolean ownerFixed = condition.getOwnerId() > 0;
+        long fixedId = ownerFixed ? condition.getOwnerId() : condition.getPropertyId();
+
+        if (hasPermissionPair(ownerClass, propertyClass, ownerFixed, fixedId, objectId)) {
+            return true;
+        }
+
+        if (condition.getIncludeGroups()) {
+            Class<?> variableClass = ownerFixed ? propertyClass : ownerClass;
+            if (GroupedModel.class.isAssignableFrom(variableClass) && object instanceof GroupedModel grouped) {
+                Set<Long> ancestors = new HashSet<>();
+                collectAncestorGroups(grouped, ancestors);
+                Class<?> groupOwnerClass = ownerFixed ? ownerClass : Group.class;
+                Class<?> groupPropertyClass = ownerFixed ? Group.class : propertyClass;
+                for (long ancestorId : ancestors) {
+                    if (hasPermissionPair(groupOwnerClass, groupPropertyClass, ownerFixed, fixedId, ancestorId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasPermissionPair(
+            Class<?> ownerClass, Class<?> propertyClass, boolean ownerFixed, long fixedId, long variableId) {
+        Set<Pair<Long, Long>> permissions = getPermissionsSet(ownerClass, propertyClass);
+        return ownerFixed
+                ? permissions.contains(new Pair<>(fixedId, variableId))
+                : permissions.contains(new Pair<>(variableId, fixedId));
+    }
+
+    private void collectAncestorGroups(GroupedModel object, Set<Long> result) {
+        long groupId = object.getGroupId();
+        int depth = 0;
+        while (groupId > 0 && depth++ < MAX_GROUP_DEPTH) {
+            if (!result.add(groupId)) {
+                break;
+            }
+            Object group = objects.computeIfAbsent(Group.class, key -> new HashMap<>()).get(groupId);
+            if (group instanceof GroupedModel parent) {
+                groupId = parent.getGroupId();
+            } else {
+                break;
+            }
+        }
     }
 
     private Object retrieveValue(Object object, String key) {
