@@ -1,5 +1,6 @@
 /*
- * Copyright 2024 - 2024 容均致 (harryrong@rushanio.com)
+ * Copyright 2024 容均致 (harryrong@rushanio.com)
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +21,6 @@ import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 import org.traccar.helper.CoordinateUtil;
 
-
 public class BaiduGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String key, String language) {
@@ -39,62 +39,42 @@ public class BaiduGeocoder extends JsonGeocoder {
         super(client, formatUrl(key, language), cacheSize, addressFormat);
     }
 
+    @Override
     public Address parseAddress(JsonObject json) {
-        JsonObject result = json.getJsonObject("result");
-        if (result != null) {
-            Address address = new Address();
-            if (result.containsKey("formatted_address")) {
-                address.setFormattedAddress(result.getString("formatted_address"));
-            }
-
-            if (result.containsKey("pois")) {
-                JsonArray pois = result.getJsonArray("pois");
-                if (!pois.isEmpty()) {
-                    JsonObject poi = pois.getJsonObject(0);
-                    if (poi.containsKey("name")) {
-                        address.setHouse(poi.getString("name"));
-                    }
-                }
-            }
-
-            JsonObject addressComponent = result.getJsonObject("addressComponent");
-            if (addressComponent != null) {
-                if (addressComponent.containsKey("street")) {
-                    address.setStreet(addressComponent.getString("street"));
-                }
-                if (addressComponent.containsKey("town")) {
-                    address.setSuburb(addressComponent.getString("town"));
-                }
-                if (addressComponent.containsKey("district")) {
-                    address.setDistrict(addressComponent.getString("district"));
-                }
-                if (addressComponent.containsKey("city")) {
-                    address.setSettlement(addressComponent.getString("city"));
-                }
-                if (addressComponent.containsKey("province")) {
-                    address.setState(addressComponent.getString("province"));
-                }
-                if (addressComponent.containsKey("country")) {
-                    address.setCountry(addressComponent.getString("country"));
-                }
-            }
-            return address;
+        JsonObject result = readObject(json, "result");
+        if (result == null) {
+            return null;
         }
-        return null;
+        Address address = new Address();
+        address.setFormattedAddress(readValue(result, "formatted_address"));
+
+        JsonArray pois = readArray(result, "pois");
+        if (pois != null && !pois.isEmpty()) {
+            address.setHouse(readValue(pois.getJsonObject(0), "name"));
+        }
+
+        JsonObject addressComponent = readObject(result, "addressComponent");
+        if (addressComponent != null) {
+            address.setStreet(readValue(addressComponent, "street"));
+            address.setSuburb(readValue(addressComponent, "town"));
+            address.setDistrict(readValue(addressComponent, "district"));
+            address.setSettlement(readValue(addressComponent, "city"));
+            address.setState(readValue(addressComponent, "province"));
+            address.setCountry(readValue(addressComponent, "country"));
+        }
+        return address;
     }
 
+    @Override
     protected String parseError(JsonObject json) {
-        return json.getString("message");
+        return readValue(json, "message");
     }
 
     @Override
     public String getAddress(
             final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
-        if (CoordinateUtil.outOfChina(latitude, longitude)) {
-            return null;
-        }
         CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(latitude, longitude);
-
-        return super.getAddress(coordinate.getLatitude(), coordinate.getLongitude(), callback);
+        return super.getAddress(coordinate.latitude(), coordinate.longitude(), callback);
     }
+
 }

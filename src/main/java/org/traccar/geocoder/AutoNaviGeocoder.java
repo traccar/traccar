@@ -1,5 +1,6 @@
 /*
- * Copyright 2024 - 2024 容均致 (harryrong@rushanio.com)
+ * Copyright 2024 容均致 (harryrong@rushanio.com)
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +18,8 @@ package org.traccar.geocoder;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
-import jakarta.json.JsonValue;
 import jakarta.ws.rs.client.Client;
 import org.traccar.helper.CoordinateUtil;
-
 
 public class AutoNaviGeocoder extends JsonGeocoder {
 
@@ -37,69 +35,52 @@ public class AutoNaviGeocoder extends JsonGeocoder {
         super(client, formatUrl(key), cacheSize, addressFormat);
     }
 
+    @Override
     public Address parseAddress(JsonObject json) {
-        JsonObject regeocode = json.getJsonObject("regeocode");
-        if (regeocode != null) {
-            Address address = new Address();
-
-            address.setFormattedAddress(getJsonNode(regeocode, "formatted_address"));
-
-            JsonObject addressComponent = regeocode.getJsonObject("addressComponent");
-            if (addressComponent != null) {
-                JsonObject building = addressComponent.getJsonObject("building");
-                String houseName = getJsonNode(building, "name");
-                if (houseName == null) {
-                    JsonArray aois = regeocode.getJsonArray("aois");
-                    if (!aois.isEmpty()) {
-                        JsonObject aoi = aois.getJsonObject(0);
-                        houseName = getJsonNode(aoi, "name");
-                    }
-                }
-                if (houseName == null) {
-                    JsonArray pois = regeocode.getJsonArray("pois");
-                    if (!pois.isEmpty()) {
-                        JsonObject poi = pois.getJsonObject(0);
-                        houseName = getJsonNode(poi, "name");
-                    }
-                }
-                address.setHouse(houseName);
-
-                JsonObject street = addressComponent.getJsonObject("streetNumber");
-                address.setStreet(getJsonNode(street, "street"));
-
-                address.setSuburb(getJsonNode(addressComponent, "township"));
-                address.setDistrict(getJsonNode(addressComponent, "district"));
-                address.setSettlement(getJsonNode(addressComponent, "city"));
-                address.setState(getJsonNode(addressComponent, "province"));
-                address.setCountry(getJsonNode(addressComponent, "country"));
-            }
-            return address;
+        JsonObject regeocode = readObject(json, "regeocode");
+        if (regeocode == null) {
+            return null;
         }
-        return null;
+        Address address = new Address();
+        address.setFormattedAddress(readValue(regeocode, "formatted_address"));
+
+        JsonObject addressComponent = readObject(regeocode, "addressComponent");
+        if (addressComponent != null) {
+            String houseName = readValue(readObject(addressComponent, "building"), "name");
+            if (houseName == null) {
+                JsonArray aois = readArray(regeocode, "aois");
+                if (aois != null && !aois.isEmpty()) {
+                    houseName = readValue(aois.getJsonObject(0), "name");
+                }
+            }
+            if (houseName == null) {
+                JsonArray pois = readArray(regeocode, "pois");
+                if (pois != null && !pois.isEmpty()) {
+                    houseName = readValue(pois.getJsonObject(0), "name");
+                }
+            }
+            address.setHouse(houseName);
+
+            address.setStreet(readValue(readObject(addressComponent, "streetNumber"), "street"));
+            address.setSuburb(readValue(addressComponent, "township"));
+            address.setDistrict(readValue(addressComponent, "district"));
+            address.setSettlement(readValue(addressComponent, "city"));
+            address.setState(readValue(addressComponent, "province"));
+            address.setCountry(readValue(addressComponent, "country"));
+        }
+        return address;
     }
 
-    private String getJsonNode(JsonObject json, String key) {
-        if (json != null && json.containsKey(key)) {
-            JsonValue value = json.get(key);
-            if (value.getValueType() == JsonValue.ValueType.STRING) {
-                return ((JsonString) value).getString();
-            }
-        }
-        return null;
-    }
-
+    @Override
     protected String parseError(JsonObject json) {
-        return json.getString("info");
+        return readValue(json, "info");
     }
 
     @Override
     public String getAddress(
             final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
-        if (CoordinateUtil.outOfChina(latitude, longitude)) {
-            return null;
-        }
         CoordinateUtil.Coordinate coordinate = CoordinateUtil.wgs84ToGcj02(latitude, longitude);
-
-        return super.getAddress(coordinate.getLatitude(), coordinate.getLongitude(), callback);
+        return super.getAddress(coordinate.latitude(), coordinate.longitude(), callback);
     }
+
 }
