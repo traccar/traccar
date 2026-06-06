@@ -70,10 +70,16 @@ public class NotificatorTelegram extends Notificator {
     public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
             Client client, ObjectMapperContextResolver objectMapperContextResolver) {
         super(notificationFormatter);
+
+        String baseUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_BASE_URL);
+        if (baseUrl == null) {
+            baseUrl = "https://api.telegram.org/bot";
+        }
+
         urlSendText = String.format(
-                "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+                "%s%s/sendMessage", baseUrl, config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
-                "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+                "%s%s/sendLocation", baseUrl, config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
 

@@ -1437,6 +1437,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Telegram notification base URL.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_BASE_URL = new StringConfigKey(
+            "notificator.telegram.base.url",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
