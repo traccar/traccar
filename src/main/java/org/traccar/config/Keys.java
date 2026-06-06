@@ -1007,6 +1007,22 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Raw data forwarding TCP connect timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "server.forward.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Raw data forwarding TCP write timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_WRITE_TIMEOUT = new IntegerConfigKey(
+            "server.forward.writeTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
      */
     public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(
