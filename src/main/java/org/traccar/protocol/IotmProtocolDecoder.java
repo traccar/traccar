@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,12 +104,22 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
             case 0x4002 -> position.set(Position.KEY_HOURS, record.readUnsignedIntLE());
             case 0x4003 -> position.set(Position.KEY_ODOMETER, record.readUnsignedIntLE() * 5);
             case 0x4063 -> position.set(Position.KEY_AXLE_WEIGHT, record.readUnsignedIntLE());
-            case 0x5000 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(record.readLongLE()));
+            case 0x5000 -> {
+                Object value = readValue(record, sensorType);
+                if (value != null) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value.toString());
+                }
+            }
             case 0x5004, 0x5005, 0x5006, 0x5007 -> {
                 key = Position.PREFIX_TEMP + (sensorId - 0x5004 + 1);
                 position.set(key, record.readLongLE());
             }
-            case 0x500D -> position.set("trailerId", String.valueOf(record.readLongLE()));
+            case 0x500D -> {
+                Object value = readValue(record, sensorType);
+                if (value != null) {
+                    position.set("trailerId", value.toString());
+                }
+            }
             case 0xA000 -> position.set(Position.KEY_DEVICE_TEMP, record.readFloatLE());
             case 0xA001 -> position.set(Position.KEY_ACCELERATION, record.readFloatLE());
             case 0xA002 -> position.set("cornering", record.readFloatLE());
@@ -155,7 +165,7 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
                         position.setLongitude(record.readFloatLE());
                         position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
 
-                        position.set(Position.KEY_HDOP, record.readUnsignedByte());
+                        position.set(Position.KEY_HDOP, record.readUnsignedByte() / 10.0);
                         position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
 
                         position.setCourse(record.readUnsignedShortLE());
