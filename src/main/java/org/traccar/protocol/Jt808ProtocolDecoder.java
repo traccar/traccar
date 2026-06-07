@@ -163,7 +163,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         if (webUrl == null || uploadPort <= 0) {
             return;
         }
-        String text = String.format("VIDEOUPLOAD,%s,%d,%s,0,0",
+        String text = String.format("VIDEOUPLOAD,%s,%d,%s,1-2-3,2",
                 URI.create(webUrl).getHost(), uploadPort, position.getString("alarmLabel"));
         ByteBuf data = Unpooled.buffer();
         data.writeByte(0xF0);
