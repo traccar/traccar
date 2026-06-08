@@ -136,6 +136,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Automatically enable periodic position tracking when a device connects by sending it a positioning interval
+     * command with the configured value in seconds. Currently only available for Omni protocol. A value of zero
+     * (default) disables it.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_TRACKING_INTERVAL = new IntegerConfigSuffix(
+            ".trackingInterval",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Decode additional TK103 attributes. Not supported for some devices.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_DECODE_LOW = new BooleanConfigSuffix(
