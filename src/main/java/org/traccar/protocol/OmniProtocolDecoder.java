@@ -138,6 +138,8 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 content = String.format("*SCOS,%s,%s,%s#\n", vendor, uniqueId, type);
             }
+            LOGGER.info("Omni response to {} (uniqueId={}, type={}): [{}]",
+                    remoteAddress, uniqueId, type, content.trim());
             channel.writeAndFlush(new NetworkMessage(
                     encodeFrame(content), remoteAddress));
         }
@@ -152,9 +154,11 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
         String type = pendingCommand.equals(Command.TYPE_ENGINE_STOP)
                 || pendingCommand.equals(Command.TYPE_ALARM_ARM) ? "L1" : "L0";
+        String content = String.format("%s,%s,%s,%s", type, values[1], values[2], values[3]);
+        LOGGER.info("Omni pending command '{}' sent to {} (uniqueId={}): [{}]",
+                pendingCommand, remoteAddress, uniqueId, content);
         channel.writeAndFlush(new NetworkMessage(
-                encodeCommand(uniqueId, String.format("%s,%s,%s,%s", type, values[1], values[2], values[3])),
-                remoteAddress));
+                encodeCommand(uniqueId, content), remoteAddress));
         pendingCommand = null;
     }
 
