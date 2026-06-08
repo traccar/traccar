@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -30,12 +31,20 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
     private String vendor = "OM";
     private boolean commandMessageDialect;
 
+    private int trackingInterval;
+    private boolean autoTrackingSent;
+
     public void setPendingCommand(String pendingCommand) {
         this.pendingCommand = pendingCommand;
     }
 
     public OmniProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    @Override
+    protected void init() {
+        trackingInterval = getConfig().getInteger(Keys.PROTOCOL_TRACKING_INTERVAL.withPrefix(getProtocolName()));
     }
 
     static ByteBuf encodeFrame(String content) {
@@ -217,6 +226,16 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
         String type = fields[typeIndex];
         LOGGER.info("Omni decoded message type '{}' from device {} (uniqueId={})",
                 type, deviceSession.getDeviceId(), uniqueId);
+
+        if (channel != null && trackingInterval > 0 && !autoTrackingSent) {
+            String content = "D1," + trackingInterval;
+            LOGGER.info("Omni auto-tracking for device {} (uniqueId={}): sending [{}]",
+                    deviceSession.getDeviceId(), uniqueId, content);
+            channel.writeAndFlush(new NetworkMessage(
+                    encodeCommand(uniqueId, content), remoteAddress));
+            autoTrackingSent = true;
+        }
+
         String[] values = new String[Math.max(0, fields.length - typeIndex - 1)];
         System.arraycopy(fields, typeIndex + 1, values, 0, values.length);
 
