@@ -25,6 +25,31 @@ import org.traccar.model.Command;
 
 import jakarta.inject.Inject;
 
+/**
+ * Mictrack GPS tracker protocol — all device families on a single port.
+ *
+ * <p>Frame format is detected from the first byte by {@link MictrackFrameDecoder}:
+ *
+ * <ul>
+ *   <li><b>{@code *HQ,...#}</b> — HQ protocol (MT532 and compatible)
+ *       <ul>
+ *         <li>MT532 — compact asset/vehicle tracker; V1/V5/V6 position, V4 heartbeat,
+ *             4-byte active-low vehicle status bitmask (SOS, overspeed, ignition, geofence, etc.)</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code #IMEI#MODEL#...##}</b> — MT700-style protocol; model field in header selects alarm mapping
+ *       <ul>
+ *         <li>MT700 — portable battery-powered asset tracker; GPRMC + WiFi location;
+ *             alarms: TOWED, SHAKE, DEF (light-sensor removal), BLP (backup battery)</li>
+ *         <li>MT700W — MT700 variant with enhanced WiFi scanning; same alarm set</li>
+ *         <li>MT600 — vehicle tracker with ACC input; GPRMC + WiFi location;
+ *             alarms: DEF (power cut), HT (temperature), SOS, OVERSPEED, OS/RS (geofence), BLP, CLP</li>
+ *         <li>MT530 — compact vehicle tracker; same frame and alarm set as MT600</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>Newline-terminated</b> — legacy MT format ({@code MT;N;IMEI;RN;...} or {@code IMEI$GPRMC...})</li>
+ * </ul>
+ */
 public class MictrackProtocol extends BaseProtocol {
 
     @Inject
