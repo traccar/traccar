@@ -14,18 +14,18 @@ public class JimiPhotoProtocolDecoderTest extends ProtocolTest {
 
         String body = """
                 --boundary
-                Content-Disposition: form-data; name="file"; filename="img.jpg"
+                Content-Disposition: form-data; name="file"; filename="ALDW_20260610_203521_CH1_001_000000.jpg"
                 Content-Type: image/jpeg
 
                 ÿØÿàfakejpeg
                 --boundary
                 Content-Disposition: form-data; name="filename"
 
-                img.jpg
+                ALDW_20260610_203521_CH1_001_000000.jpg
                 --boundary
                 Content-Disposition: form-data; name="timestamp"
 
-                1737550459000
+                1781089614000
                 --boundary
                 Content-Disposition: form-data; name="sign"
 
@@ -33,7 +33,7 @@ public class JimiPhotoProtocolDecoderTest extends ProtocolTest {
                 --boundary
                 Content-Disposition: form-data; name="callbackBody"
 
-                {"businessType":"eventAttachment","imei":"864547000000123","camera":1,"alarmTime":1737550459,"eventType":"0C01","lat":"22.576635","lng":"113.943064","mimeType":"image/jpeg","localFileName":"img.jpg"}
+                {"businessType":"eventAttachment","imei":"865478070305877","camera":1,"alarmTime":1781089614,"lat":"-27.263320","lng":"153.037503","localFileName":"865478070305877_30333035383737260610203521030500_1_00.jpg","mimeType":"image/jpeg","eventType":null,"videoBeginTime":null,"videoEndTime":null,"timezone":"GMT+10:00","instructionId":"30333035383737260610203521030500"}
                 --boundary--
                 """.replace("\n", "\r\n");
 
