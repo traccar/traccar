@@ -46,6 +46,52 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Pattern PATTERN_MT700_POSITION = new PatternBuilder()
+            .text("#")
+            .number("(?:(dd|dddd)|x*)")          // voltage (optional capture)
+            .groupBegin()
+            .text("#")
+            .groupBegin()
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+)")                      // cell id
+            .groupEnd("?")
+            .groupEnd("?")
+            .text("$GPRMC,")
+            .number("(?:(dd)(dd)(dd).d+)?,")     // time (hhmmss.sss)
+            .expression("([AVL]),")              // validity
+            .groupBegin()
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .number("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .groupEnd("?")
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_MT700_WIFI = new PatternBuilder()
+            .text("#")
+            .number("(?:(dd|dddd)|x+)")          // voltage (optional capture)
+            .expression("#?")
+            .groupBegin()
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+)")                      // cell id
+            .groupEnd("?")
+            .text("$WIFI,")
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
+            .expression("[AVL],")                // validity
+            .expression("(.*)")                  // access points
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .text("*")
+            .number("xx")                        // checksum
+            .compile();
+
     private static final Pattern PATTERN_LOW_ALTITUDE = new PatternBuilder()
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("([AV]),")               // validity
@@ -58,6 +104,122 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.?d*)?,")              // altitude
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .compile();
+
+    private String decodeMT700Alarm(String event) {
+        return switch (event) {
+            case "SHAKE" -> Position.ALARM_VIBRATION;
+            case "TOWED" -> Position.ALARM_TOW;
+            case "DEF" -> Position.ALARM_TAMPERING;
+            case "BLP" -> Position.ALARM_LOW_BATTERY;
+            case "SOS" -> Position.ALARM_SOS;
+            case "OVERSPEED" -> Position.ALARM_OVERSPEED;
+            case "OS" -> Position.ALARM_GEOFENCE_EXIT;
+            case "RS" -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
+    }
+
+    private Object decodeMT700(Channel channel, SocketAddress remoteAddress, String sentence) {
+        String[] lines = sentence.split("\r?\n");
+        if (lines.length < 2) {
+            return null;
+        }
+
+        String[] header = lines[0].split("#");
+        if (header.length < 5) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, header[1]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.addAlarm(decodeMT700Alarm(header[4]));
+
+        String body = lines[1];
+
+        if (body.contains("$GPRMC")) {
+
+            Parser parser = new Parser(PATTERN_MT700_POSITION, body);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            if (parser.hasNext()) {
+                int voltage = parser.nextInt();
+                position.set(Position.KEY_BATTERY, voltage > 100 ? voltage / 1000.0 : voltage / 10.0);
+            }
+
+            if (parser.hasNext(4)) {
+                Network network = new Network();
+                network.addCellTower(CellTower.from(
+                        parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt()));
+                position.setNetwork(network);
+            }
+
+            DateBuilder dateBuilder = new DateBuilder();
+            if (parser.hasNext(3)) {
+                dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            }
+
+            position.setValid(parser.next().equals("A"));
+
+            if (parser.hasNext()) {
+                position.setLatitude(parser.nextCoordinate());
+                position.setLongitude(parser.nextCoordinate());
+                position.setSpeed(parser.nextDouble(0));
+                position.setCourse(parser.nextDouble(0));
+                dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                position.setTime(dateBuilder.getDate());
+            } else {
+                getLastLocation(position, null);
+            }
+
+        } else if (body.contains("$WIFI")) {
+
+            Parser parser = new Parser(PATTERN_MT700_WIFI, body);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            if (parser.hasNext()) {
+                int voltage = parser.nextInt();
+                position.set(Position.KEY_BATTERY, voltage > 100 ? voltage / 1000.0 : voltage / 10.0);
+            }
+
+            Network network = new Network();
+            if (parser.hasNext(4)) {
+                network.addCellTower(CellTower.from(
+                        parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt()));
+            }
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            for (String ap : parser.next().split(",(?=-)")) {
+                String[] parts = ap.split(",", 2);
+                if (parts.length == 2 && !parts[1].isEmpty()) {
+                    try {
+                        String mac = parts[1].replaceAll("(..)", "$1:").substring(0, 17);
+                        network.addWifiAccessPoint(WifiAccessPoint.from(mac, Integer.parseInt(parts[0])));
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException ignored) {
+                    }
+                }
+            }
+            position.setNetwork(network);
+
+            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            getLastLocation(position, dateBuilder.getDate());
+
+        } else {
+            return null;
+        }
+
+        return position;
+    }
 
     private String decodeAlarm(int event) {
         return switch (event) {
@@ -158,7 +320,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
 
-        if (sentence.startsWith("MT")) {
+        if (sentence.startsWith("#")) {
+            return decodeMT700(channel, remoteAddress, sentence);
+        } else if (sentence.startsWith("MT")) {
             return decodeStandard(channel, remoteAddress, sentence);
         } else if (sentence.contains("$")) {
             return decodeLowAltitude(channel, remoteAddress, sentence);

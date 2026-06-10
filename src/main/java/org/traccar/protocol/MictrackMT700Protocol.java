@@ -44,7 +44,7 @@ public class MictrackMT700Protocol extends BaseProtocol {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new MictrackMT700ProtocolEncoder(MictrackMT700Protocol.this));
-                pipeline.addLast(new MictrackMT700ProtocolDecoder(MictrackMT700Protocol.this));
+                pipeline.addLast(new MictrackProtocolDecoder(MictrackMT700Protocol.this));
             }
         });
         addServer(new TrackerServer(config, getName(), true) {
@@ -53,7 +53,7 @@ public class MictrackMT700Protocol extends BaseProtocol {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new MictrackMT700ProtocolEncoder(MictrackMT700Protocol.this));
-                pipeline.addLast(new MictrackMT700ProtocolDecoder(MictrackMT700Protocol.this));
+                pipeline.addLast(new MictrackProtocolDecoder(MictrackMT700Protocol.this));
             }
         });
     }
