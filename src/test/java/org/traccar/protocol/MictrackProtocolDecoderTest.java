@@ -65,6 +65,38 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeHQ() throws Exception {
+
+        var decoder = inject(new MictrackProtocolDecoder(null));
+
+        verifyPosition(decoder, text(
+                "*HQ,8168000008,V1,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFF,460,00,10342,4283"),
+                position("2015-07-10 04:36:02.000", true, 22.58212, 113.90664));
+
+        verifyPosition(decoder, text(
+                "*HQ,8168000008,V5,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFF,460,00,10342,4283,1000,125"));
+
+        verifyPosition(decoder, text(
+                "*HQ,8168000008,V6,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFF,460,00,10342,4283,898602A2091508006821"));
+
+        verifyAttribute(decoder, text(
+                "*HQ,8168000008,V1,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFD,460,00,10342,4283"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, text(
+                "*HQ,8168000008,V1,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFB,460,00,10342,4283"),
+                Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+
+        verifyNull(decoder, text(
+                "*HQ,8168000008,V4,V1,20150710043602"));
+
+        verifyPosition(decoder, text(
+                "*HQ,8168000008,V1,083000,A,3600.0000,N,09600.0000,W,000.00,142,010124,FFF7FBFF,310,410,12345,67890"),
+                position("2024-01-01 08:30:00.000", true, 36.0, -96.0));
+
+    }
+
+    @Test
     public void testDecodeMT700() throws Exception {
 
         var decoder = inject(new MictrackProtocolDecoder(null));
@@ -101,6 +133,16 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, text(
                 "#862255061947757#MT700#0000#TOWED#1\n#37$GPRMC,090000.00,V,,,,,,,100124,,,A*7C\n"),
                 Position.KEY_ALARM, Position.ALARM_TOW);
+
+        // MT700 DEF = device remove / light sensor alarm (not power cut)
+        verifyAttribute(decoder, text(
+                "#862255061947757#MT700#0000#DEF#1\n#3815$GPRMC,090000.00,A,2238.8946,N,11402.0635,E,0.0,0.0,100124,,,A*00\n"),
+                Position.KEY_ALARM, Position.ALARM_REMOVING);
+
+        // MT600 DEF = cut power alarm
+        verifyAttribute(decoder, text(
+                "#862255061947757#MT600#0000#DEF#1\n#3815$GPRMC,090000.00,A,2238.8946,N,11402.0635,E,0.0,0.0,100124,,,A*00\n"),
+                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
 
     }
 

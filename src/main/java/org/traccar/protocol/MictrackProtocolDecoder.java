@@ -17,8 +17,9 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
@@ -29,8 +30,10 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
@@ -39,8 +42,13 @@ import java.util.regex.Pattern;
 
 public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
+    public static final AttributeKey<String> VARIANT_KEY = AttributeKey.valueOf("mictrack.variant");
+
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyMMddHHmmss").withZone(ZoneOffset.UTC);
+
+    private static final DateTimeFormatter UTC_TIME = DateTimeFormatter
+            .ofPattern("HHmmss").withZone(ZoneOffset.UTC);
 
     public MictrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -105,12 +113,15 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .compile();
 
-    private String decodeMT700Alarm(String event) {
+    private String decodeMT700Alarm(String event, boolean isMT700) {
         return switch (event) {
             case "SHAKE" -> Position.ALARM_VIBRATION;
             case "TOWED" -> Position.ALARM_TOW;
-            case "DEF" -> Position.ALARM_TAMPERING;
-            case "BLP" -> Position.ALARM_LOW_BATTERY;
+            // MT700: DEF = light sensor / device removal; MT600: DEF = cut power
+            case "DEF" -> isMT700 ? Position.ALARM_REMOVING : Position.ALARM_POWER_CUT;
+            // MT700: HT = heartbeat mode indicator (not an alarm); MT600: HT = high temperature
+            case "HT" -> isMT700 ? null : Position.ALARM_TEMPERATURE;
+            case "BLP", "CLP" -> Position.ALARM_LOW_BATTERY;
             case "SOS" -> Position.ALARM_SOS;
             case "OVERSPEED" -> Position.ALARM_OVERSPEED;
             case "OS" -> Position.ALARM_GEOFENCE_EXIT;
@@ -120,6 +131,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeMT700(Channel channel, SocketAddress remoteAddress, String sentence) {
+        if (channel != null) {
+            channel.attr(VARIANT_KEY).set("mt700");
+        }
         String[] lines = sentence.split("\r?\n");
         if (lines.length < 2) {
             return null;
@@ -137,7 +151,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.addAlarm(decodeMT700Alarm(header[4]));
+        position.addAlarm(decodeMT700Alarm(header[4], header[2].startsWith("MT700")));
 
         String body = lines[1];
 
@@ -216,6 +230,172 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
             return null;
+        }
+
+        return position;
+    }
+
+    // *HQ,ID,V1/V5/V6,hhmmss,A/V,lat,N/S,lon,E/W,speed,dir,ddmmyy,VSTATUS,MCC,MNC,LAC,CI[,extras]
+    private static final Pattern PATTERN_HQ = new PatternBuilder()
+            .text("*HQ,")
+            .expression("([^,]+),")           // device ID
+            .expression("(V\\d+),")           // data type
+            .number("(dd)(dd)(dd),")          // time (hhmmss)
+            .expression("([AV]),")            // validity
+            .number("(d+)(dd.d+),")           // latitude (ddmm.mmmm)
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")           // longitude (dddmm.mmmm)
+            .expression("([EW]),")
+            .number("(d+.?d*),")              // speed
+            .number("(d+),")                  // direction
+            .number("(dd)(dd)(dd),")          // date (ddmmyy)
+            .expression("([0-9A-Fa-f]{8}),")  // vehicle status (4 bytes as hex)
+            .number("(d+),")                  // MCC
+            .number("(d+),")                  // MNC
+            .number("(d+),")                  // LAC
+            .number("(d+)")                   // CI
+            .groupBegin()
+            .text(",")
+            .expression("([^,#]+)")           // extra1: V5=mileage, V6=ICCID
+            .groupEnd("?")
+            .groupBegin()
+            .text(",")
+            .number("(d+)")                   // extra2: V5=voltage (tenths of V)
+            .groupEnd("?")
+            .any()
+            .compile();
+
+    // *HQ,ID,V4,firmware,YYYYMMDDHHmmss
+    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
+            .text("*HQ,")
+            .expression("([^,]+),")     // device ID
+            .text("V4,")
+            .expression("[^,]*,")       // firmware version
+            .number("(dddd)(dd)(dd)")   // date (YYYYMMDD)
+            .number("(dd)(dd)(dd)")     // time (HHmmss)
+            .any()
+            .compile();
+
+    private void decodeVehicleStatus(Position position, String statusHex) {
+        // Four bytes, active-low (bit=0 means condition is active)
+        int byte1 = Integer.parseInt(statusHex.substring(0, 2), 16); // device alarms
+        int byte2 = Integer.parseInt(statusHex.substring(2, 4), 16); // device status
+        int byte3 = Integer.parseInt(statusHex.substring(4, 6), 16); // vehicle status
+        int byte4 = Integer.parseInt(statusHex.substring(6, 8), 16); // alarm status
+
+        if ((byte1 & 0x02) == 0) {
+            position.addAlarm(Position.ALARM_TOW);
+        }
+        if ((byte1 & 0x08) == 0) {
+            position.addAlarm(Position.ALARM_POWER_CUT);
+        }
+        if ((byte1 & 0x10) == 0) {
+            position.addAlarm(Position.ALARM_REMOVING);
+        }
+
+        if ((byte2 & 0x02) == 0) {
+            position.addAlarm(Position.ALARM_VIBRATION);
+        }
+
+        position.set(Position.KEY_DOOR, (byte3 & 0x01) == 0);
+        if ((byte3 & 0x02) == 0) {
+            position.addAlarm(Position.ALARM_GEOFENCE);
+        }
+        if ((byte3 & 0x20) == 0) {
+            position.set(Position.KEY_IGNITION, true);
+        } else if ((byte3 & 0x04) == 0) {
+            position.set(Position.KEY_IGNITION, false);
+        }
+
+        if ((byte4 & 0x02) == 0) {
+            position.addAlarm(Position.ALARM_SOS);
+        }
+        if ((byte4 & 0x04) == 0) {
+            position.addAlarm(Position.ALARM_OVERSPEED);
+        }
+        if ((byte4 & 0x08) == 0) {
+            position.addAlarm(Position.ALARM_POWER_ON);
+        }
+        if ((byte4 & 0x20) == 0) {
+            position.addAlarm(Position.ALARM_LOW_BATTERY);
+        }
+    }
+
+    private Object decodeHeartbeat(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+        String deviceId = parser.next();
+        if (getDeviceSession(channel, remoteAddress, deviceId) == null) {
+            return null;
+        }
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(
+                    String.format("HQ,%s,R12,%s#", deviceId, UTC_TIME.format(Instant.now())),
+                    remoteAddress));
+        }
+        return null;
+    }
+
+    private Object decodeHQ(Channel channel, SocketAddress remoteAddress, String sentence) {
+        if (channel != null) {
+            channel.attr(VARIANT_KEY).set("hq");
+        }
+
+        if (sentence.contains(",V4,")) {
+            return decodeHeartbeat(channel, remoteAddress, sentence);
+        }
+
+        Parser parser = new Parser(PATTERN_HQ, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String deviceId = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(
+                    String.format("HQ,%s,R12,%s#", deviceId, UTC_TIME.format(Instant.now())),
+                    remoteAddress));
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        String dataType = parser.next();
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        decodeVehicleStatus(position, parser.next());
+
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+
+        String extra1 = parser.next();
+        String extra2 = parser.next();
+
+        if ("V5".equals(dataType) && extra1 != null) {
+            position.set(Position.KEY_ODOMETER, Long.parseLong(extra1) * 100);
+            if (extra2 != null) {
+                position.set(Position.KEY_POWER, Integer.parseInt(extra2) / 10.0);
+            }
+        } else if ("V6".equals(dataType) && extra1 != null) {
+            position.set(Position.KEY_ICCID, extra1);
         }
 
         return position;
@@ -320,7 +500,9 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
 
-        if (sentence.startsWith("#")) {
+        if (sentence.startsWith("*HQ,")) {
+            return decodeHQ(channel, remoteAddress, sentence);
+        } else if (sentence.startsWith("#")) {
             return decodeMT700(channel, remoteAddress, sentence);
         } else if (sentence.startsWith("MT")) {
             return decodeStandard(channel, remoteAddress, sentence);

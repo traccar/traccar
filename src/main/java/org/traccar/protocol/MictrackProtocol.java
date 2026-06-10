@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+import org.traccar.model.Command;
 
 import jakarta.inject.Inject;
 
@@ -28,11 +29,24 @@ public class MictrackProtocol extends BaseProtocol {
 
     @Inject
     public MictrackProtocol(Config config) {
+        setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_MODE_DEEP_SLEEP,
+                Command.TYPE_SET_CONNECTION,
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new MictrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MictrackProtocolEncoder(MictrackProtocol.this));
                 pipeline.addLast(new MictrackProtocolDecoder(MictrackProtocol.this));
             }
         });
@@ -41,6 +55,7 @@ public class MictrackProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new MictrackProtocolEncoder(MictrackProtocol.this));
                 pipeline.addLast(new MictrackProtocolDecoder(MictrackProtocol.this));
             }
         });
