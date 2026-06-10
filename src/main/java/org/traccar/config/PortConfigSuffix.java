@@ -142,6 +142,8 @@ import org.traccar.protocol.MaxPbProtocol;
 import org.traccar.protocol.MegastekProtocol;
 import org.traccar.protocol.MeiligaoProtocol;
 import org.traccar.protocol.MeitrackProtocol;
+import org.traccar.protocol.MictrackHQProtocol;
+import org.traccar.protocol.MictrackMT700Protocol;
 import org.traccar.protocol.MictrackProtocol;
 import org.traccar.protocol.MilesmateProtocol;
 import org.traccar.protocol.Minifinder2Protocol;
@@ -562,6 +564,8 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(RadshidProtocol.class, 5265);
         put(R16hProtocol.class, 5266);
         put(JimiPhotoProtocol.class, 5267);
+        put(MictrackMT700Protocol.class, 5268);
+        put(MictrackHQProtocol.class, 5269);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {
