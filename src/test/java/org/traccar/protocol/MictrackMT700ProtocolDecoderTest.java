@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MictrackMT700ProtocolDecoderTest extends ProtocolTest {
 
@@ -37,6 +38,11 @@ public class MictrackMT700ProtocolDecoderTest extends ProtocolTest {
         // MT700W variant header
         verifyAttributes(decoder, text(
                 "#862255061947757#MT700W#0000#AUTO#1\n#3815#460,00,262C,11F1$WIFI,095147.00,V,,,,,,,,,,,241223*06\n"));
+
+        // TOWED alarm, GPS unavailable, low voltage raw value (37 = 3.7V)
+        verifyAttribute(decoder, text(
+                "#862255061947757#MT700#0000#TOWED#1\n#37$GPRMC,090000.00,V,,,,,,,100124,,,A*7C\n"),
+                Position.KEY_ALARM, Position.ALARM_TOW);
 
     }
 

@@ -36,8 +36,13 @@ public class MictrackMT700ProtocolDecoder extends BaseProtocolDecoder {
     private String decodeAlarm(String event) {
         return switch (event) {
             case "SHAKE" -> Position.ALARM_VIBRATION;
+            case "TOWED" -> Position.ALARM_TOW;
             case "DEF" -> Position.ALARM_TAMPERING;
             case "BLP" -> Position.ALARM_LOW_BATTERY;
+            case "SOS" -> Position.ALARM_SOS;
+            case "OVERSPEED" -> Position.ALARM_OVERSPEED;
+            case "OS" -> Position.ALARM_GEOFENCE_EXIT;
+            case "RS" -> Position.ALARM_GEOFENCE_ENTER;
             default -> null;
         };
     }
@@ -224,7 +229,7 @@ public class MictrackMT700ProtocolDecoder extends BaseProtocolDecoder {
         String[] prefixParts = prefix.split("#", 2);
         try {
             int voltageRaw = Integer.parseInt(prefixParts[0].trim());
-            position.set(Position.KEY_BATTERY, voltageRaw / 1000.0);
+            position.set(Position.KEY_BATTERY, voltageRaw > 100 ? voltageRaw / 1000.0 : voltageRaw / 10.0);
         } catch (NumberFormatException e) {
             // ignore
         }

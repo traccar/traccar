@@ -104,12 +104,44 @@ public class MictrackHQProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    // *HQ,ID,V4,firmware,YYYYMMDDHHmmss#
+    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
+            .text("*HQ,")
+            .expression("([^,]+),")     // device ID
+            .text("V4,")
+            .expression("[^,]*,")       // firmware version
+            .number("(dddd)(dd)(dd)")   // date (YYYYMMDD)
+            .number("(dd)(dd)(dd)")     // time (HHmmss)
+            .any()
+            .compile();
+
+    private Object decodeHeartbeat(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+        String deviceId = parser.next();
+        if (getDeviceSession(channel, remoteAddress, deviceId) == null) {
+            return null;
+        }
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(
+                    String.format("HQ,%s,R12,%s#", deviceId, UTC_TIME.format(Instant.now())),
+                    remoteAddress));
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
 
         if (!sentence.startsWith("*HQ,")) {
             return null;
+        }
+
+        if (sentence.contains(",V4,")) {
+            return decodeHeartbeat(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN_HQ, sentence);

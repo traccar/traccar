@@ -34,6 +34,15 @@ public class MictrackHQProtocolDecoderTest extends ProtocolTest {
                 "*HQ,8168000008,V1,043602,A,2234.9273,N,11354.3980,E,000.06,000,100715,FBFFBBFB,460,00,10342,4283"),
                 Position.KEY_ALARM, Position.ALARM_OVERSPEED);
 
+        // V4 heartbeat
+        verifyNull(decoder, text(
+                "*HQ,8168000008,V4,V1,20150710043602"));
+
+        // V1 western hemisphere, ignition off (byte3 bit2=0), no alarm
+        verifyPosition(decoder, text(
+                "*HQ,8168000008,V1,083000,A,3600.0000,N,09600.0000,W,000.00,142,010124,FFF7FBFF,310,410,12345,67890"),
+                position("2024-01-01 08:30:00.000", true, 36.0, -96.0));
+
     }
 
 }
