@@ -117,7 +117,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         if (protocolVersion != null) {
             buf.writeByte(protocolVersion);
         }
-        buf.writeBytes(id);
+        buf.writeBytes(id, id.readerIndex(), id.readableBytes());
         if (shortIndex) {
             buf.writeByte(1);
         } else {
