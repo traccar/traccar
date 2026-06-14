@@ -3,9 +3,12 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -22,9 +25,14 @@ import java.util.regex.Pattern;
 
 public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OmniProtocolDecoder.class);
+
     private String pendingCommand;
     private String vendor = "OM";
     private boolean commandMessageDialect;
+
+    private int trackingInterval;
+    private boolean autoTrackingSent;
 
     public void setPendingCommand(String pendingCommand) {
         this.pendingCommand = pendingCommand;
@@ -32,6 +40,11 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
     public OmniProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    @Override
+    protected void init() {
+        trackingInterval = getConfig().getInteger(Keys.PROTOCOL_TRACKING_INTERVAL.withPrefix(getProtocolName()));
     }
 
     static ByteBuf encodeFrame(String content) {
@@ -134,6 +147,8 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 content = String.format("*SCOS,%s,%s,%s#\n", vendor, uniqueId, type);
             }
+            LOGGER.info("Omni response to {} (uniqueId={}, type={}): [{}]",
+                    remoteAddress, uniqueId, type, content.trim());
             channel.writeAndFlush(new NetworkMessage(
                     encodeFrame(content), remoteAddress));
         }
@@ -148,15 +163,19 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
         String type = pendingCommand.equals(Command.TYPE_ENGINE_STOP)
                 || pendingCommand.equals(Command.TYPE_ALARM_ARM) ? "L1" : "L0";
+        String content = String.format("%s,%s,%s,%s", type, values[1], values[2], values[3]);
+        LOGGER.info("Omni pending command '{}' sent to {} (uniqueId={}): [{}]",
+                pendingCommand, remoteAddress, uniqueId, content);
         channel.writeAndFlush(new NetworkMessage(
-                encodeCommand(uniqueId, String.format("%s,%s,%s,%s", type, values[1], values[2], values[3])),
-                remoteAddress));
+                encodeCommand(uniqueId, content), remoteAddress));
         pendingCommand = null;
     }
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
+
+        LOGGER.info("Omni raw frame from {}: [{}]", remoteAddress, sentence);
 
         if (sentence.isEmpty()) {
             return null;
@@ -167,6 +186,7 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (sentence.startsWith("$")) {
+            LOGGER.info("Omni NMEA frame from {}: [{}]", remoteAddress, sentence);
             return decodeNmea(channel, remoteAddress, sentence);
         }
 
@@ -177,6 +197,8 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
         String[] fields = sentence.split(",", -1);
         if (fields.length < 4
                 || (!fields[0].equals("*SCOR") && !fields[0].equals("*HBCR") && !fields[0].equals("*CMDR"))) {
+            LOGGER.warn("Omni frame dropped from {} (fields={}, header={}): [{}]",
+                    remoteAddress, fields.length, fields.length > 0 ? fields[0] : "", sentence);
             return null;
         }
 
@@ -189,15 +211,31 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
             typeIndex += 1;
         }
         if (fields.length <= typeIndex) {
+            LOGGER.warn("Omni frame without message type from {} (uniqueId={}): [{}]",
+                    remoteAddress, uniqueId, sentence);
             return null;
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
+            LOGGER.warn("Omni frame for unknown device from {} (uniqueId={}): [{}]",
+                    remoteAddress, uniqueId, sentence);
             return null;
         }
 
         String type = fields[typeIndex];
+        LOGGER.info("Omni decoded message type '{}' from device {} (uniqueId={})",
+                type, deviceSession.getDeviceId(), uniqueId);
+
+        if (channel != null && trackingInterval > 0 && !autoTrackingSent) {
+            String content = "D1," + trackingInterval;
+            LOGGER.info("Omni auto-tracking for device {} (uniqueId={}): sending [{}]",
+                    deviceSession.getDeviceId(), uniqueId, content);
+            channel.writeAndFlush(new NetworkMessage(
+                    encodeCommand(uniqueId, content), remoteAddress));
+            autoTrackingSent = true;
+        }
+
         String[] values = new String[Math.max(0, fields.length - typeIndex - 1)];
         System.arraycopy(fields, typeIndex + 1, values, 0, values.length);
 
@@ -222,6 +260,8 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(DeviceSession deviceSession, String[] values) {
         if (values.length < 13) {
+            LOGGER.warn("Omni D0 position with too few fields ({}) for device {}: {}",
+                    values.length, deviceSession.getDeviceId(), String.join(",", values));
             return null;
         }
 
@@ -236,6 +276,12 @@ public class OmniProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(parseCoordinate(values[3], values[4]));
             position.setLongitude(parseCoordinate(values[5], values[6]));
         }
+
+        LOGGER.info("Omni D0 position for device {}: status={} ({}), rawLat=[{}{}], rawLon=[{}{}], "
+                + "rawDate=[{}], satellites=[{}], parsedLat={}, parsedLon={}",
+                deviceSession.getDeviceId(), status, status.equals("A") ? "valid" : "INVALID/no fix",
+                values[3], values[4], values[5], values[6], values[9], values[7],
+                position.getLatitude(), position.getLongitude());
 
         if (!values[1].isEmpty() && !values[9].isEmpty()) {
             int[] time = parseTime(values[1]);
