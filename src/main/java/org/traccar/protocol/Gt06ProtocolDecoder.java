@@ -1601,7 +1601,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_STATUS_3 && length == 0x0c) {
             variant = Variant.SEEWORLD;
-        } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && length == 0x28) {
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && (length == 0x28 || length == 0x27)) {
             variant = Variant.RFID;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_5 && length == 0x40) {
             variant = Variant.LW4G;

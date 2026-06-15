@@ -11,6 +11,9 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gt06ProtocolDecoder(null));
 
+        verifyPosition(decoder, binary(
+                "787827171a060e160e33cd022e10560453b05500592102d40b1bd7002a9f4606500e020129f800238ffa0d0a"));
+
         verifyNull(decoder, binary(
                 "787805120099abec0d0a"));
 
