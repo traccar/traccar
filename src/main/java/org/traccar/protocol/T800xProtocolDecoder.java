@@ -453,7 +453,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             String model = getDeviceModel(deviceSession);
-            if ("TLW2-2BL".equals(model)) {
+            if ("TLW2-2BL".equals(model) || type == MSG_GPS_2 || type == MSG_ALARM_2) {
                 position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 4) / 100.0);
             }
             if (buf.readableBytes() >= 2) {
