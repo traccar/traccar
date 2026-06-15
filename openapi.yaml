@@ -75,7 +75,43 @@ tags:
     description: Checking server health status
   - name: Orders
     description: Order management
+  - name: Audit
+    description: Audit log access
+  - name: Password
+    description: Password reset flow
+  - name: Stream
+    description: Live video streaming
 paths:
+  /audit:
+    get:
+      summary: Fetch audit log Actions
+      description: Admin only. Returns Actions performed in the given time window.
+      tags:
+        - Audit
+      parameters:
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Action'
   /health:
     get:
       summary: Check server health
@@ -170,6 +206,23 @@ paths:
                 $ref: '#/components/schemas/Command'
       x-codegen-request-body-name: body
   /commands/{id}:
+    get:
+      summary: Fetch a Saved Command
+      tags:
+        - Commands
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
     put:
       summary: Update a Saved Command
       tags:
@@ -378,6 +431,23 @@ paths:
                 $ref: '#/components/schemas/Order'
       x-codegen-request-body-name: body
   /orders/{id}:
+    get:
+      summary: Fetch an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
     put:
       summary: Update an Order
       tags:
@@ -498,6 +568,23 @@ paths:
                 $ref: '#/components/schemas/Device'
       x-codegen-request-body-name: body
   /devices/{id}:
+    get:
+      summary: Fetch a Device
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
     put:
       summary: Update a Device
       tags:
@@ -715,6 +802,23 @@ paths:
           content: {}
       x-codegen-request-body-name: body
   /groups/{id}:
+    get:
+      summary: Fetch a Group
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
     put:
       summary: Update a Group
       tags:
@@ -752,6 +856,54 @@ paths:
       responses:
         '204':
           description: No Content
+          content: {}
+  /password/reset:
+    post:
+      summary: Send password reset email
+      description: Always responds with `200` regardless of whether the email matches a user.
+      tags:
+        - Password
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+  /password/update:
+    post:
+      summary: Set a new password using a reset token
+      tags:
+        - Password
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+                - token
+                - password
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '404':
+          description: User not found
           content: {}
   /permissions:
     get:
@@ -806,6 +958,47 @@ paths:
       responses:
         '204':
           description: No Content
+          content: {}
+      x-codegen-request-body-name: body
+  /permissions/bulk:
+    post:
+      summary: Link multiple Objects in a single request
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad Request
+          content: {}
+      x-codegen-request-body-name: body
+    delete:
+      summary: Unlink multiple Objects in a single request
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad Request
           content: {}
       x-codegen-request-body-name: body
   /positions:
@@ -1199,6 +1392,25 @@ paths:
         '204':
           description: No Content
           content: {}
+  /session/{id}:
+    get:
+      summary: Open a Session as another User
+      description: Admin or manager only. Establishes a session impersonating the specified user.
+      tags:
+        - Session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
   /session/token:
     post:
       summary: Generate Session Token
@@ -1330,6 +1542,23 @@ paths:
               schema:
                 type: string
   /users/{id}:
+    get:
+      summary: Fetch a User
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
     put:
       summary: Update a User
       tags:
@@ -1448,6 +1677,23 @@ paths:
                 $ref: '#/components/schemas/Notification'
       x-codegen-request-body-name: body
   /notifications/{id}:
+    get:
+      summary: Fetch a Notification
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
     put:
       summary: Update a Notification
       tags:
@@ -1500,11 +1746,49 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NotificationType'
+  /notifications/notificators:
+    get:
+      summary: Fetch a list of available Notificators
+      tags:
+        - Notifications
+      parameters:
+        - name: announcement
+          in: query
+          description: When `true`, exclude notificators that cannot deliver announcements
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationType'
   /notifications/test:
     post:
       summary: Send test notification to current user via Email and SMS
       tags:
         - Notifications
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
+  /notifications/test/{notificator}:
+    post:
+      summary: Send a test notification to the current User using the specified notificator
+      tags:
+        - Notifications
+      parameters:
+        - name: notificator
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           description: Successful sending
@@ -1622,6 +1906,23 @@ paths:
                 $ref: '#/components/schemas/Geofence'
       x-codegen-request-body-name: body
   /geofences/{id}:
+    get:
+      summary: Fetch a Geofence
+      tags:
+        - Geofences
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
     put:
       summary: Update a Geofence
       tags:
@@ -1679,6 +1980,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+  /reports/combined:
+    get:
+      summary: Fetch a combined route, Events and Positions report for the Devices or Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CombinedReportItem'
   /reports/route:
     get:
       summary: >-
@@ -1732,6 +2079,62 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Position'
+  /reports/route/{type}:
+    get:
+      summary: Download the route report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
   /reports/events:
     get:
       summary: Fetch a list of Events within the time period for the Devices or Groups
@@ -1792,6 +2195,80 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
+  /reports/events/{type}:
+    get:
+      summary: Download the events report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: type
+          in: query
+          description: Event types to include; `%` matches all
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: alarm
+          in: query
+          description: Alarm types to include
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
   /reports/geofences:
     get:
       summary: >-
@@ -1901,6 +2378,67 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportSummary'
+  /reports/summary/{type}:
+    get:
+      summary: Download the summary report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: daily
+          in: query
+          description: Aggregate values by day instead of the full period
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
   /reports/trips:
     get:
       summary: >-
@@ -1954,6 +2492,62 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportTrips'
+  /reports/trips/{type}:
+    get:
+      summary: Download the trips report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
   /reports/stops:
     get:
       summary: >-
@@ -2007,6 +2601,88 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportStops'
+  /reports/stops/{type}:
+    get:
+      summary: Download the stops report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+  /reports/devices/{type}:
+    get:
+      summary: Download the devices report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
   /statistics:
     get:
       summary: Fetch server Statistics
@@ -2036,6 +2712,58 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Statistics'
+  /stream/{deviceId}/{channel}/live.m3u8:
+    get:
+      summary: Fetch the HLS playlist for a Device camera channel
+      tags:
+        - Stream
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: channel
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.apple.mpegurl:
+              schema:
+                type: string
+  /stream/{deviceId}/{channel}/{index}.ts:
+    get:
+      summary: Fetch an HLS video segment for a Device camera channel
+      tags:
+        - Stream
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: channel
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            video/mp2t:
+              schema:
+                type: string
+                format: binary
   /calendars:
     get:
       summary: Fetch a list of Calendars
@@ -2096,6 +2824,23 @@ paths:
                 $ref: '#/components/schemas/Calendar'
       x-codegen-request-body-name: body
   /calendars/{id}:
+    get:
+      summary: Fetch a Calendar
+      tags:
+        - Calendars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
     put:
       summary: Update a Calendar
       tags:
@@ -2211,7 +2956,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/Attribute'
       x-codegen-request-body-name: body
+  /attributes/computed/test:
+    post:
+      summary: Evaluate a Computed Attribute against the latest Device Position
+      description: Admin only. Returns the computed value without persisting the attribute.
+      tags:
+        - Attributes
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: number
+                  - type: boolean
+                  - type: string
+        '204':
+          description: Computation produced no value
+          content: {}
+      x-codegen-request-body-name: body
   /attributes/computed/{id}:
+    get:
+      summary: Fetch an Attribute
+      tags:
+        - Attributes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
     put:
       summary: Update an Attribute
       tags:
@@ -2328,6 +3122,23 @@ paths:
                 $ref: '#/components/schemas/Driver'
       x-codegen-request-body-name: body
   /drivers/{id}:
+    get:
+      summary: Fetch a Driver
+      tags:
+        - Drivers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
     put:
       summary: Update a Driver
       tags:
@@ -2444,6 +3255,23 @@ paths:
                 $ref: '#/components/schemas/Maintenance'
       x-codegen-request-body-name: body
   /maintenance/{id}:
+    get:
+      summary: Fetch a Maintenance
+      tags:
+        - Maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
     put:
       summary: Update a Maintenance
       tags:
@@ -2973,6 +3801,28 @@ components:
           type: object
           properties: {}
           description: Additional event-specific attributes
+    CombinedReportItem:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the report item
+        route:
+          type: array
+          description: Simplified route as `[longitude, latitude]` pairs
+          items:
+            type: array
+            items:
+              type: number
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
     ReportSummary:
       type: object
       properties:
@@ -3247,6 +4097,41 @@ components:
           type: object
           properties: {}
           description: Custom order attributes
+    Action:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique action identifier
+        actionTime:
+          type: string
+          format: date-time
+          description: When the action was recorded
+        address:
+          type: string
+          description: Client address that initiated the action
+        userId:
+          type: integer
+          format: int64
+          description: Identifier of the User who performed the action
+        userEmail:
+          type: string
+          description: Email of the User who performed the action
+        actionType:
+          type: string
+          description: Action category (e.g. login, edit, link)
+        objectType:
+          type: string
+          description: Type of object affected by the action
+        objectId:
+          type: integer
+          format: int64
+          description: Identifier of the affected object
+        attributes:
+          type: object
+          properties: {}
+          description: Additional action attributes
   parameters:
     entityId:
       name: id
