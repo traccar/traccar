@@ -1070,7 +1070,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                             buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
                                     break;
                                 case 0x002D:
-                                    if (extendedLength >= 6) {
+                                    if (extendedLength == 6) {
                                         position.set(Position.KEY_POWER, buf.readUnsignedInt() / 1000.0);
                                     } else {
                                         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
