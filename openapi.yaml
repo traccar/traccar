@@ -1033,7 +1033,7 @@ paths:
   /permissions:
     get:
       operationId: getPermissions
-      summary: Fetches permission links between Objects
+      summary: Fetch permission links between Objects
       description: >-
         Provide exactly two `*Id` query parameters matching the Permission body
         shape (e.g. `reportId` and `deviceId`). Use `0` on a side to mean
@@ -1051,7 +1051,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Permission'
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
     post:
       operationId: postPermissions
@@ -1108,7 +1108,7 @@ paths:
           description: No Content
           content: {}
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
     delete:
       operationId: deletePermissionsBulk
@@ -1128,12 +1128,12 @@ paths:
           description: No Content
           content: {}
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
   /positions:
     get:
       operationId: getPositions
-      summary: Fetches a list of Positions
+      summary: Fetch a list of Positions
       description: >-
         We strongly recommend using [Traccar WebSocket
         API](https://www.traccar.org/traccar-api/) instead of periodically
@@ -1223,7 +1223,7 @@ paths:
           description: No Content
           content: {}
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
   /positions/{id}:
     delete:
@@ -1242,7 +1242,7 @@ paths:
           description: No Content
           content: {}
         '404':
-          description: Not Found
+          description: Not found
           content: {}
   /positions/kml:
     get:
@@ -1468,7 +1468,7 @@ paths:
           description: OK
           content: {}
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
   /server/gc:
     get:
@@ -1535,7 +1535,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '404':
-          description: Not Found
+          description: Not found
           content: {}
     post:
       operationId: postSession
@@ -1657,7 +1657,7 @@ paths:
           description: No Content
           content: {}
         '400':
-          description: Bad Request
+          description: Bad request
           content: {}
   /session/openid/auth:
     get:
@@ -2276,8 +2276,8 @@ paths:
   /events/{id}:
     get:
       operationId: getEventsId
-      summary: Get event by id
-      description: Retrieve a single event record with full context for the specified identifier
+      summary: Fetch an Event
+      description: Returns a single Event record with full context for the specified identifier
       tags:
         - Events
       parameters:
@@ -3050,7 +3050,7 @@ paths:
   /statistics:
     get:
       operationId: getStatistics
-      summary: Fetch server Statistics
+      summary: Fetch Server Statistics
       tags:
         - Statistics
       parameters:
@@ -3643,8 +3643,8 @@ paths:
   /maintenance:
     get:
       operationId: getMaintenance
-      summary: Fetch a list of Maintenance
-      description: Without params, it returns a list of Maintenance the user has access to
+      summary: Fetch a list of Maintenance tasks
+      description: Without params, it returns a list of Maintenance tasks the user has access to
       tags:
         - Maintenance
       parameters:
@@ -3705,7 +3705,7 @@ paths:
           content: {}
     post:
       operationId: postMaintenance
-      summary: Create a Maintenance
+      summary: Create a Maintenance task
       tags:
         - Maintenance
       requestBody:
@@ -3730,7 +3730,7 @@ paths:
   /maintenance/{id}:
     get:
       operationId: getMaintenanceId
-      summary: Fetch a Maintenance
+      summary: Fetch a Maintenance task
       tags:
         - Maintenance
       parameters:
@@ -3754,7 +3754,7 @@ paths:
           content: {}
     put:
       operationId: putMaintenanceId
-      summary: Update a Maintenance
+      summary: Update a Maintenance task
       tags:
         - Maintenance
       parameters:
@@ -3784,7 +3784,7 @@ paths:
           content: {}
     delete:
       operationId: deleteMaintenanceId
-      summary: Delete a Maintenance
+      summary: Delete a Maintenance task
       tags:
         - Maintenance
       parameters:
