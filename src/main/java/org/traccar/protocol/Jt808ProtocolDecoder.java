@@ -870,6 +870,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             network.addCellTower(CellTower.from(
                                 mcc, mnc, buf.readUnsignedMedium(), buf.readUnsignedInt(), buf.readUnsignedByte()));
                         }
+                    } else if (subtype == 0xE1 && length == 2) {
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
                     } else {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
                     }
@@ -1068,7 +1070,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                             buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
                                     break;
                                 case 0x002D:
-                                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
+                                    if (extendedLength == 6) {
+                                        position.set(Position.KEY_POWER, buf.readUnsignedInt() / 1000.0);
+                                    } else {
+                                        position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
+                                    }
                                     break;
                                 case 0x0089:
                                     alarm = buf.readUnsignedInt();
