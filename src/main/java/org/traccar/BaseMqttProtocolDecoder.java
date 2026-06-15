@@ -70,8 +70,6 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Object result = decode(deviceSession, message);
-
             MqttMessage response = MqttMessageBuilders.pubAck()
                     .packetId(message.variableHeader().packetId())
                     .build();
@@ -80,7 +78,7 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
-            return result;
+            return decode(deviceSession, message);
 
         }
 

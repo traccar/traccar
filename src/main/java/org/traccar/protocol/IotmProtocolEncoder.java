@@ -24,7 +24,12 @@ import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class IotmProtocolEncoder extends BaseProtocolEncoder {
+
+    private final AtomicInteger messageId = new AtomicInteger();
+    private final AtomicInteger commandIndex = new AtomicInteger();
 
     public IotmProtocolEncoder(Protocol protocol) {
         super(protocol);
@@ -51,7 +56,7 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShortLE(10); // record length
         buf.writeIntLE(Integer.MAX_VALUE); // expiration
         buf.writeByte(command.getInteger(Command.KEY_INDEX) - 1); // output id
-        buf.writeByte(0); // output command index
+        buf.writeByte(commandIndex.getAndUpdate(value -> (value + 1) & 0xff));
         buf.writeByte(3); // length
         buf.writeByte(command.getInteger(Command.KEY_DATA));
         buf.writeByte(0xB0);
@@ -63,7 +68,7 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
                 .topicName(uniqueId + "/OUTC")
                 .qos(MqttQoS.AT_LEAST_ONCE)
                 .payload(buf)
-                .messageId(0)
+                .messageId(messageId.updateAndGet(value -> value == 0xffff ? 1 : value + 1))
                 .build();
     }
 

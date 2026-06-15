@@ -23,6 +23,8 @@ import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -30,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IotmProtocolDecoder.class);
 
     public IotmProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -139,9 +143,20 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
     protected Object decode(
             DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
-        List<Position> positions = new LinkedList<>();
+        try {
+            return decodePayload(deviceSession, message.payload());
+        } catch (IndexOutOfBoundsException | IllegalArgumentException error) {
+            if ("BCE/E".equals(message.variableHeader().topicName())) {
+                LOGGER.debug("Unsupported IOTM event payload", error);
+                return null;
+            }
+            throw error;
+        }
+    }
 
-        ByteBuf buf = message.payload();
+    private Object decodePayload(DeviceSession deviceSession, ByteBuf buf) {
+
+        List<Position> positions = new LinkedList<>();
 
         buf.readUnsignedByte(); // structure version
 

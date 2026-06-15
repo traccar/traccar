@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 public class IotmProtocolEncoderTest extends ProtocolTest {
 
     @Test
@@ -20,6 +23,13 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
         verifyFrame(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e"), encodedCommand.payload());
+        assertEquals(1, encodedCommand.variableHeader().packetId());
+
+        MqttPublishMessage nextCommand = (MqttPublishMessage) encoder.encodeCommand(command);
+        assertEquals(2, nextCommand.variableHeader().packetId());
+        assertNotEquals(
+                encodedCommand.payload().getUnsignedByte(20),
+                nextCommand.payload().getUnsignedByte(20));
 
     }
 
