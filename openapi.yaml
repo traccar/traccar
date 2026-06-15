@@ -84,6 +84,7 @@ tags:
 paths:
   /audit:
     get:
+      operationId: getAudit
       summary: Fetch audit log Actions
       description: Admin only. Returns Actions performed in the given time window.
       tags:
@@ -112,8 +113,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Action'
+        '401':
+          description: Unauthorized
+          content: {}
   /health:
     get:
+      operationId: getHealth
       summary: Check server health
       description: Return plain text status for basic uptime monitoring
       tags:
@@ -130,8 +135,12 @@ paths:
         '500':
           description: Service is unavailable
           content: {}
+        '400':
+          description: Bad request
+          content: {}
   /commands:
     get:
+      operationId: getCommands
       summary: Fetch a list of Saved Commands
       tags:
         - Commands
@@ -187,7 +196,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postCommands
       summary: Create a Saved Command
       tags:
         - Commands
@@ -204,9 +217,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Command'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /commands/{id}:
     get:
+      operationId: getCommandsId
       summary: Fetch a Saved Command
       tags:
         - Commands
@@ -223,7 +242,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putCommandsId
       summary: Update a Saved Command
       tags:
         - Commands
@@ -246,8 +272,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Command'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteCommandsId
       summary: Delete a Saved Command
       tags:
         - Commands
@@ -261,8 +293,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /commands/send:
     get:
+      operationId: getCommandsSend
       summary: Fetch a list of Saved Commands supported by Device at the moment
       description: >-
         Return a list of saved commands linked to Device and its groups,
@@ -291,6 +327,7 @@ paths:
           description: Could happen when the user doesn't have permission for the device
           content: {}
     post:
+      operationId: postCommandsSend
       summary: Dispatch commands to device
       description: Dispatch a new command or Saved Command if _body.id_ set
       tags:
@@ -329,9 +366,9 @@ paths:
             Could happen when the user doesn't have permission or an incorrect
             command _type_ for the device
           content: {}
-      x-codegen-request-body-name: body
   /commands/types:
     get:
+      operationId: getCommandsTypes
       summary: >-
         Fetch a list of available Commands for the Device or all possible
         Commands if Device ommited
@@ -368,6 +405,7 @@ paths:
           content: {}
   /orders:
     get:
+      operationId: getOrders
       summary: Fetch a list of Orders
       description: Without params, it returns a list of Orders the user has access to
       tags:
@@ -412,7 +450,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postOrders
       summary: Create an Order
       tags:
         - Orders
@@ -429,9 +471,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /orders/{id}:
     get:
+      operationId: getOrdersId
       summary: Fetch an Order
       tags:
         - Orders
@@ -448,7 +496,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putOrdersId
       summary: Update an Order
       tags:
         - Orders
@@ -471,8 +526,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteOrdersId
       summary: Delete an Order
       tags:
         - Orders
@@ -486,8 +547,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /devices:
     get:
+      operationId: getDevices
       summary: Fetch a list of Devices
       description: Without any params, returns a list of the user's devices
       tags:
@@ -550,6 +615,7 @@ paths:
           description: No permission
           content: {}
     post:
+      operationId: postDevices
       summary: Create a Device
       tags:
         - Devices
@@ -566,9 +632,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Device'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /devices/{id}:
     get:
+      operationId: getDevicesId
       summary: Fetch a Device
       tags:
         - Devices
@@ -585,7 +657,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Device'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putDevicesId
       summary: Update a Device
       tags:
         - Devices
@@ -608,8 +687,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Device'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteDevicesId
       summary: Delete a Device
       tags:
         - Devices
@@ -623,8 +708,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /devices/{id}/accumulators:
     put:
+      operationId: putDevicesIdAccumulators
       summary: Update total distance and hours of the Device
       tags:
         - Devices
@@ -644,9 +733,15 @@ paths:
         '204':
           description: No Content
           content: {}
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /devices/{id}/image:
     post:
+      operationId: postDevicesIdImage
       summary: Upload/Update Device image
       tags:
         - Devices
@@ -679,6 +774,7 @@ paths:
           content: {}
   /share/device:
     post:
+      operationId: postShareDevice
       summary: Share device location
       tags:
         - Share
@@ -710,6 +806,7 @@ paths:
           content: {}
   /share/group:
     post:
+      operationId: postShareGroup
       summary: Share group devices
       tags:
         - Share
@@ -741,6 +838,7 @@ paths:
           content: {}
   /groups:
     get:
+      operationId: getGroups
       summary: Fetch a list of Groups
       description: Without any params, returns a list of the Groups the user belongs to
       tags:
@@ -780,7 +878,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postGroups
       summary: Create a Group
       tags:
         - Groups
@@ -800,9 +902,9 @@ paths:
         '400':
           description: No permission
           content: {}
-      x-codegen-request-body-name: body
   /groups/{id}:
     get:
+      operationId: getGroupsId
       summary: Fetch a Group
       tags:
         - Groups
@@ -819,7 +921,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putGroupsId
       summary: Update a Group
       tags:
         - Groups
@@ -842,8 +951,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteGroupsId
       summary: Delete a Group
       tags:
         - Groups
@@ -857,8 +972,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /password/reset:
     post:
+      operationId: postPasswordReset
       summary: Send password reset email
       description: Always responds with `200` regardless of whether the email matches a user.
       tags:
@@ -868,6 +987,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required:
                 - email
               properties:
@@ -878,8 +998,12 @@ paths:
         '200':
           description: OK
           content: {}
+        '400':
+          description: Bad request
+          content: {}
   /password/update:
     post:
+      operationId: postPasswordUpdate
       summary: Set a new password using a reset token
       tags:
         - Password
@@ -888,6 +1012,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required:
                 - token
                 - password
@@ -907,6 +1032,7 @@ paths:
           content: {}
   /permissions:
     get:
+      operationId: getPermissions
       summary: Fetches permission links between Objects
       description: >-
         Provide exactly two `*Id` query parameters matching the Permission body
@@ -928,6 +1054,7 @@ paths:
           description: Bad Request
           content: {}
     post:
+      operationId: postPermissions
       summary: Link an Object to another Object
       tags:
         - Permissions
@@ -944,8 +1071,8 @@ paths:
         '400':
           description: No permission
           content: {}
-      x-codegen-request-body-name: body
     delete:
+      operationId: deletePermissions
       summary: Unlink an Object from another Object
       tags:
         - Permissions
@@ -959,9 +1086,12 @@ paths:
         '204':
           description: No Content
           content: {}
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
   /permissions/bulk:
     post:
+      operationId: postPermissionsBulk
       summary: Link multiple Objects in a single request
       tags:
         - Permissions
@@ -980,8 +1110,8 @@ paths:
         '400':
           description: Bad Request
           content: {}
-      x-codegen-request-body-name: body
     delete:
+      operationId: deletePermissionsBulk
       summary: Unlink multiple Objects in a single request
       tags:
         - Permissions
@@ -1000,9 +1130,9 @@ paths:
         '400':
           description: Bad Request
           content: {}
-      x-codegen-request-body-name: body
   /positions:
     get:
+      operationId: getPositions
       summary: Fetches a list of Positions
       description: >-
         We strongly recommend using [Traccar WebSocket
@@ -1058,7 +1188,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Position'
+        '401':
+          description: Unauthorized
+          content: {}
     delete:
+      operationId: deletePositions
       summary: Deletes all the Positions of a device in the time span specified
       description: ''
       tags:
@@ -1093,6 +1227,7 @@ paths:
           content: {}
   /positions/{id}:
     delete:
+      operationId: deletePositionsId
       summary: Delete a Position
       tags:
         - Positions
@@ -1111,6 +1246,7 @@ paths:
           content: {}
   /positions/kml:
     get:
+      operationId: getPositionsKml
       summary: Export Positions as KML
       tags:
         - Positions
@@ -1140,8 +1276,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '401':
+          description: Unauthorized
+          content: {}
   /positions/csv:
     get:
+      operationId: getPositionsCsv
       summary: Export Positions as CSV
       tags:
         - Positions
@@ -1175,8 +1315,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '401':
+          description: Unauthorized
+          content: {}
   /positions/gpx:
     get:
+      operationId: getPositionsGpx
       summary: Export Positions as GPX
       tags:
         - Positions
@@ -1206,8 +1350,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '401':
+          description: Unauthorized
+          content: {}
   /server:
     get:
+      operationId: getServer
       summary: Fetch Server information
       tags:
         - Server
@@ -1219,7 +1367,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Server'
+        '400':
+          description: Bad request
+          content: {}
     put:
+      operationId: putServer
       summary: Update Server information
       tags:
         - Server
@@ -1236,9 +1388,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Server'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /server/geocode:
     get:
+      operationId: getServerGeocode
       summary: Reverse geocode coordinates
       tags:
         - Server
@@ -1265,8 +1423,12 @@ paths:
         '500':
           description: Reverse geocoding is not enabled
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /server/timezones:
     get:
+      operationId: getServerTimezones
       summary: Fetch available timezones
       tags:
         - Server
@@ -1279,8 +1441,12 @@ paths:
                 type: array
                 items:
                   type: string
+        '401':
+          description: Unauthorized
+          content: {}
   /server/file/{path}:
     post:
+      operationId: postServerFilePath
       summary: Upload a server file
       tags:
         - Server
@@ -1306,6 +1472,7 @@ paths:
           content: {}
   /server/gc:
     get:
+      operationId: getServerGc
       summary: Trigger garbage collection
       tags:
         - Server
@@ -1313,8 +1480,12 @@ paths:
         '200':
           description: OK
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /server/cache:
     get:
+      operationId: getServerCache
       summary: Fetch cache diagnostics
       tags:
         - Server
@@ -1325,8 +1496,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        '401':
+          description: Unauthorized
+          content: {}
   /server/reboot:
     post:
+      operationId: postServerReboot
       summary: Reboot the server process
       tags:
         - Server
@@ -1334,8 +1509,15 @@ paths:
         '200':
           description: OK
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /session:
     get:
+      operationId: getSession
       summary: Fetch Session information
       tags:
         - Session
@@ -1356,6 +1538,7 @@ paths:
           description: Not Found
           content: {}
     post:
+      operationId: postSession
       summary: Create a new Session
       tags:
         - Session
@@ -1364,6 +1547,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required:
                 - email
                 - password
@@ -1385,6 +1569,7 @@ paths:
           description: Unauthorized
           content: {}
     delete:
+      operationId: deleteSession
       summary: Close the Session
       tags:
         - Session
@@ -1392,8 +1577,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /session/{id}:
     get:
+      operationId: getSessionId
       summary: Open a Session as another User
       description: Admin or manager only. Establishes a session impersonating the specified user.
       tags:
@@ -1411,8 +1600,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /session/token:
     post:
+      operationId: postSessionToken
       summary: Generate Session Token
       tags:
         - Session
@@ -1420,6 +1616,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               properties:
                 expiration:
                   type: string
@@ -1432,8 +1629,15 @@ paths:
             text/plain:
               schema:
                 type: string
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /session/token/revoke:
     post:
+      operationId: postSessionTokenRevoke
       summary: Revoke Session Token
       tags:
         - Session
@@ -1441,6 +1645,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required:
                 - token
               properties:
@@ -1456,15 +1661,23 @@ paths:
           content: {}
   /session/openid/auth:
     get:
-      summary: Fetch Session information
+      operationId: getSessionOpenidAuth
+      summary: Begin OpenID Connect authentication
       tags:
         - Session
       responses:
         '303':
           description: Redirect to OpenID Connect identity provider
           content: {}
+        '400':
+          description: OpenID Connect is not configured
+          content: {}
+        default:
+          description: Unexpected error
+          content: {}
   /session/openid/callback:
     get:
+      operationId: getSessionOpenidCallback
       summary: OpenID Callback
       tags:
         - Session
@@ -1472,8 +1685,15 @@ paths:
         '303':
           description: Successful authentication, redirect to homepage
           content: {}
+        '400':
+          description: Invalid or expired callback parameters
+          content: {}
+        default:
+          description: Unexpected error
+          content: {}
   /users:
     get:
+      operationId: getUsers
       summary: Fetch a list of Users
       tags:
         - Users
@@ -1511,6 +1731,7 @@ paths:
           description: No Permission
           content: {}
     post:
+      operationId: postUsers
       summary: Create a User
       tags:
         - Users
@@ -1527,9 +1748,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /users/totp:
     post:
+      operationId: postUsersTotp
       summary: Generate TOTP secret
       tags:
         - Users
@@ -1541,8 +1768,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        '400':
+          description: Bad request
+          content: {}
   /users/{id}:
     get:
+      operationId: getUsersId
       summary: Fetch a User
       tags:
         - Users
@@ -1559,7 +1790,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putUsersId
       summary: Update a User
       tags:
         - Users
@@ -1582,8 +1820,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteUsersId
       summary: Delete a User
       tags:
         - Users
@@ -1597,8 +1841,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /notifications:
     get:
+      operationId: getNotifications
       summary: Fetch a list of Notifications
       description: >-
         Without params, it returns a list of Notifications the user has access
@@ -1658,7 +1906,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postNotifications
       summary: Create a Notification
       tags:
         - Notifications
@@ -1675,9 +1927,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Notification'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /notifications/{id}:
     get:
+      operationId: getNotificationsId
       summary: Fetch a Notification
       tags:
         - Notifications
@@ -1694,7 +1952,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putNotificationsId
       summary: Update a Notification
       tags:
         - Notifications
@@ -1717,8 +1982,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Notification'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteNotificationsId
       summary: Delete a Notification
       tags:
         - Notifications
@@ -1732,8 +2003,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /notifications/types:
     get:
+      operationId: getNotificationsTypes
       summary: Fetch a list of available Notification types
       tags:
         - Notifications
@@ -1746,8 +2021,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NotificationType'
+        '401':
+          description: Unauthorized
+          content: {}
   /notifications/notificators:
     get:
+      operationId: getNotificationsNotificators
       summary: Fetch a list of available Notificators
       tags:
         - Notifications
@@ -1766,8 +2045,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NotificationType'
+        '401':
+          description: Unauthorized
+          content: {}
   /notifications/test:
     post:
+      operationId: postNotificationsTest
       summary: Send test notification to current user via Email and SMS
       tags:
         - Notifications
@@ -1780,6 +2063,7 @@ paths:
           content: {}
   /notifications/test/{notificator}:
     post:
+      operationId: postNotificationsTestNotificator
       summary: Send a test notification to the current User using the specified notificator
       tags:
         - Notifications
@@ -1798,6 +2082,7 @@ paths:
           content: {}
   /notifications/send/{notificator}:
     post:
+      operationId: postNotificationsSendNotificator
       summary: Send a custom notification to selected users using the specified notificator
       tags:
         - Notifications
@@ -1830,6 +2115,7 @@ paths:
           content: {}
   /geofences:
     get:
+      operationId: getGeofences
       summary: Fetch a list of Geofences
       description: Without params, it returns a list of Geofences the user has access to
       tags:
@@ -1887,7 +2173,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postGeofences
       summary: Create a Geofence
       tags:
         - Geofences
@@ -1904,9 +2194,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Geofence'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /geofences/{id}:
     get:
+      operationId: getGeofencesId
       summary: Fetch a Geofence
       tags:
         - Geofences
@@ -1923,7 +2219,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putGeofencesId
       summary: Update a Geofence
       tags:
         - Geofences
@@ -1946,8 +2249,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Geofence'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteGeofencesId
       summary: Delete a Geofence
       tags:
         - Geofences
@@ -1961,8 +2270,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /events/{id}:
     get:
+      operationId: getEventsId
       summary: Get event by id
       description: Retrieve a single event record with full context for the specified identifier
       tags:
@@ -1980,8 +2293,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/combined:
     get:
+      operationId: getReportsCombined
       summary: Fetch a combined route, Events and Positions report for the Devices or Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
       tags:
@@ -1990,7 +2310,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -1998,7 +2317,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2026,8 +2344,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CombinedReportItem'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/route:
     get:
+      operationId: getReportsRoute
       summary: >-
         Fetch a list of Positions within the time period for the Devices or
         Groups
@@ -2038,7 +2360,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2046,7 +2367,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2079,8 +2399,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Position'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/route/{type}:
     get:
+      operationId: getReportsRouteType
       summary: Download the route report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2097,7 +2421,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2105,7 +2428,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2135,8 +2457,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/events:
     get:
+      operationId: getReportsEvents
       summary: Fetch a list of Events within the time period for the Devices or Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
       tags:
@@ -2145,7 +2474,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2153,7 +2481,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2195,8 +2522,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/events/{type}:
     get:
+      operationId: getReportsEventsType
       summary: Download the events report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2213,7 +2544,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2221,7 +2551,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2269,8 +2598,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/geofences:
     get:
+      operationId: getReportsGeofences
       summary: >-
         Fetch geofence enter/exit intervals within the time period for Devices
         or Groups
@@ -2281,7 +2617,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2289,7 +2624,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2297,7 +2631,6 @@ paths:
         - name: geofenceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2325,8 +2658,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportGeofences'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/summary:
     get:
+      operationId: getReportsSummary
       summary: >-
         Fetch a list of ReportSummary within the time period for the Devices or
         Groups
@@ -2337,7 +2674,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2345,7 +2681,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2378,8 +2713,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportSummary'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/summary/{type}:
     get:
+      operationId: getReportsSummaryType
       summary: Download the summary report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2396,7 +2735,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2404,7 +2742,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2439,8 +2776,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/trips:
     get:
+      operationId: getReportsTrips
       summary: >-
         Fetch a list of ReportTrips within the time period for the Devices or
         Groups
@@ -2451,7 +2795,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2459,7 +2802,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2492,8 +2834,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportTrips'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/trips/{type}:
     get:
+      operationId: getReportsTripsType
       summary: Download the trips report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2510,7 +2856,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2518,7 +2863,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2548,8 +2892,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/stops:
     get:
+      operationId: getReportsStops
       summary: >-
         Fetch a list of ReportStops within the time period for the Devices or
         Groups
@@ -2560,7 +2911,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2568,7 +2918,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2601,8 +2950,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportStops'
+        '401':
+          description: Unauthorized
+          content: {}
   /reports/stops/{type}:
     get:
+      operationId: getReportsStopsType
       summary: Download the stops report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2619,7 +2972,6 @@ paths:
         - name: deviceId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2627,7 +2979,6 @@ paths:
         - name: groupId
           in: query
           style: form
-          explode: true
           schema:
             type: array
             items:
@@ -2657,8 +3008,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /reports/devices/{type}:
     get:
+      operationId: getReportsDevicesType
       summary: Download the devices report as a spreadsheet or send it by email
       description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
       tags:
@@ -2683,8 +3041,15 @@ paths:
         '204':
           description: Report queued for email delivery
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
   /statistics:
     get:
+      operationId: getStatistics
       summary: Fetch server Statistics
       tags:
         - Statistics
@@ -2712,8 +3077,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Statistics'
+        '401':
+          description: Unauthorized
+          content: {}
   /stream/{deviceId}/{channel}/live.m3u8:
     get:
+      operationId: getStreamDeviceIdChannelLiveM3u8
       summary: Fetch the HLS playlist for a Device camera channel
       tags:
         - Stream
@@ -2735,8 +3104,12 @@ paths:
             application/vnd.apple.mpegurl:
               schema:
                 type: string
+        '401':
+          description: Unauthorized
+          content: {}
   /stream/{deviceId}/{channel}/{index}.ts:
     get:
+      operationId: getStreamDeviceIdChannelIndexTs
       summary: Fetch an HLS video segment for a Device camera channel
       tags:
         - Stream
@@ -2764,8 +3137,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        '401':
+          description: Unauthorized
+          content: {}
   /calendars:
     get:
+      operationId: getCalendars
       summary: Fetch a list of Calendars
       description: Without params, it returns a list of Calendars the user has access to
       tags:
@@ -2805,7 +3182,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postCalendars
       summary: Create a Calendar
       tags:
         - Calendars
@@ -2822,9 +3203,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Calendar'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /calendars/{id}:
     get:
+      operationId: getCalendarsId
       summary: Fetch a Calendar
       tags:
         - Calendars
@@ -2841,7 +3228,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putCalendarsId
       summary: Update a Calendar
       tags:
         - Calendars
@@ -2864,8 +3258,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Calendar'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteCalendarsId
       summary: Delete a Calendar
       tags:
         - Calendars
@@ -2879,8 +3279,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /attributes/computed:
     get:
+      operationId: getAttributesComputed
       summary: Fetch a list of Attributes
       description: Without params, it returns a list of Attributes the user has access to
       tags:
@@ -2938,7 +3342,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postAttributesComputed
       summary: Create an Attribute
       tags:
         - Attributes
@@ -2955,9 +3363,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attribute'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /attributes/computed/test:
     post:
+      operationId: postAttributesComputedTest
       summary: Evaluate a Computed Attribute against the latest Device Position
       description: Admin only. Returns the computed value without persisting the attribute.
       tags:
@@ -2987,9 +3401,15 @@ paths:
         '204':
           description: Computation produced no value
           content: {}
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /attributes/computed/{id}:
     get:
+      operationId: getAttributesComputedId
       summary: Fetch an Attribute
       tags:
         - Attributes
@@ -3006,7 +3426,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putAttributesComputedId
       summary: Update an Attribute
       tags:
         - Attributes
@@ -3029,8 +3456,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attribute'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteAttributesComputedId
       summary: Delete an Attribute
       tags:
         - Attributes
@@ -3044,8 +3477,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /drivers:
     get:
+      operationId: getDrivers
       summary: Fetch a list of Drivers
       description: Without params, it returns a list of Drivers the user has access to
       tags:
@@ -3103,7 +3540,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postDrivers
       summary: Create a Driver
       tags:
         - Drivers
@@ -3120,9 +3561,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Driver'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /drivers/{id}:
     get:
+      operationId: getDriversId
       summary: Fetch a Driver
       tags:
         - Drivers
@@ -3139,7 +3586,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putDriversId
       summary: Update a Driver
       tags:
         - Drivers
@@ -3162,8 +3616,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Driver'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteDriversId
       summary: Delete a Driver
       tags:
         - Drivers
@@ -3177,8 +3637,12 @@ paths:
         '204':
           description: No Content
           content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /maintenance:
     get:
+      operationId: getMaintenance
       summary: Fetch a list of Maintenance
       description: Without params, it returns a list of Maintenance the user has access to
       tags:
@@ -3236,7 +3700,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
     post:
+      operationId: postMaintenance
       summary: Create a Maintenance
       tags:
         - Maintenance
@@ -3253,9 +3721,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Maintenance'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
   /maintenance/{id}:
     get:
+      operationId: getMaintenanceId
       summary: Fetch a Maintenance
       tags:
         - Maintenance
@@ -3272,7 +3746,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
     put:
+      operationId: putMaintenanceId
       summary: Update a Maintenance
       tags:
         - Maintenance
@@ -3295,8 +3776,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Maintenance'
-      x-codegen-request-body-name: body
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
     delete:
+      operationId: deleteMaintenanceId
       summary: Delete a Maintenance
       tags:
         - Maintenance
@@ -3309,6 +3796,9 @@ paths:
       responses:
         '204':
           description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
           content: {}
 components:
   schemas:
@@ -3389,8 +3879,7 @@ components:
           type: string
           description: Email address used for login and notifications
         phone:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Contact phone number for alerts
         readonly:
           type: boolean
@@ -3399,8 +3888,7 @@ components:
           type: boolean
           description: Grants full administrative privileges when enabled
         map:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Preferred default map layer for the user
         latitude:
           type: number
@@ -3415,17 +3903,15 @@ components:
           type: string
           description: Password for user authentication
         coordinateFormat:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Preferred coordinate display format
         disabled:
           type: boolean
           description: Indicates whether the user account is disabled
         expirationTime:
-          type: string
+          type: [string, 'null']
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
-          nullable: true
         deviceLimit:
           type: integer
           description: Maximum number of devices the user can manage
@@ -3442,8 +3928,7 @@ components:
           type: boolean
           description: Locks the email field to avoid changes
         poiLayer:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: External POI layer configured for the user
         attributes:
           type: object
@@ -3576,35 +4061,28 @@ components:
           type: boolean
           description: Whether the device is disabled by an administrator
         lastUpdate:
-          type: string
+          type: [string, 'null']
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
-          nullable: true
         positionId:
-          type: integer
+          type: [integer, 'null']
           format: int64
-          nullable: true
           description: Identifier of the last known position
         groupId:
-          type: integer
+          type: [integer, 'null']
           format: int64
-          nullable: true
           description: Parent group identifier when the device is assigned to a group
         phone:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Contact phone number used for SMS commands
         model:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Device model or hardware revision
         contact:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Responsible person's contact information
         category:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Free form category used for grouping devices in the UI
         attributes:
           type: object
@@ -3724,8 +4202,7 @@ components:
           type: string
           description: Notification category such as geofenceEnter or ignitionOn
         description:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: User-defined text describing the notification
         always:
           type: boolean
@@ -4132,153 +4609,6 @@ components:
           type: object
           properties: {}
           description: Additional action attributes
-  parameters:
-    entityId:
-      name: id
-      in: path
-      description: Unique identifier of the entity
-      required: true
-      schema:
-        type: integer
-        format: int64
-    all:
-      name: all
-      in: query
-      description: Can only be used by admins or managers to fetch all entities
-      schema:
-        type: boolean
-    refresh:
-      name: refresh
-      in: query
-      description: Force refreshed values instead of cached results
-      schema:
-        type: boolean
-    userId:
-      name: userId
-      in: query
-      description: Standard users can use this only with their own _userId_
-      schema:
-        type: integer
-        format: int64
-    deviceId:
-      name: deviceId
-      in: query
-      description: Standard users can use this only with _deviceId_s, they have access to
-      schema:
-        type: integer
-        format: int64
-    groupId:
-      name: groupId
-      in: query
-      description: Standard users can use this only with _groupId_s, they have access to
-      schema:
-        type: integer
-        format: int64
-    deviceIdArray:
-      name: deviceId
-      in: query
-      style: form
-      explode: true
-      description: List of device identifiers to include
-      schema:
-        type: array
-        items:
-          type: integer
-          format: int64
-    groupIdArray:
-      name: groupId
-      in: query
-      style: form
-      explode: true
-      description: List of group identifiers to include
-      schema:
-        type: array
-        items:
-          type: integer
-          format: int64
-    fromTime:
-      name: from
-      in: query
-      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
-      required: true
-      schema:
-        type: string
-        format: date-time
-    toTime:
-      name: to
-      in: query
-      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
-      required: true
-      schema:
-        type: string
-        format: date-time
-  requestBodies:
-    Device:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Device'
-      required: true
-    Permission:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Permission'
-      required: true
-    Group:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Group'
-      required: true
-    User:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
-      required: true
-    Geofence:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Geofence'
-      required: true
-    Calendar:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Calendar'
-      required: true
-    Attribute:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Attribute'
-      required: true
-    Driver:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Driver'
-      required: true
-    Command:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Command'
-      required: true
-    Notification:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Notification'
-      required: true
-    Maintenance:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Maintenance'
-      required: true
   securitySchemes:
     BasicAuth:
       type: http
