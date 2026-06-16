@@ -972,9 +972,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return decode9(channel, remoteAddress, values);
             } else if (prefix.startsWith("ST4")) {
                 return decode4(channel, remoteAddress, values);
-            } else {
+            } else if (prefix.startsWith("S")) {
                 return decode2356(channel, remoteAddress, prefix.substring(0, 5), values);
             }
+            return null;
         }
     }
 
