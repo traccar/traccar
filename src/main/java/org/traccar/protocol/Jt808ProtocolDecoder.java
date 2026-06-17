@@ -1203,6 +1203,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xF6:
                     if (length == 2) {
                         position.set("airPressure", buf.readUnsignedShort());
+                    } else if (length == 8) {
+                        position.set(Position.KEY_IMEI, ByteBufUtil.hexDump(buf.readSlice(length)).replaceFirst("^0", "").replaceAll("f", ""));
                     } else {
                         event = buf.readUnsignedByte();
                         position.set(Position.KEY_EVENT, event);

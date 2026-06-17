@@ -92,6 +92,7 @@ public class Position extends Message {
     public static final String KEY_AXLE_WEIGHT = "axleWeight";
     public static final String KEY_G_SENSOR = "gSensor";
     public static final String KEY_ICCID = "iccid";
+    public static final String KEY_IMEI = "imei";
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SPEED_LIMIT = "speedLimit";
     public static final String KEY_DRIVING_TIME = "drivingTime";
