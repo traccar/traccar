@@ -24,6 +24,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
@@ -48,7 +50,7 @@ import java.util.Map;
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     private double minAccuracy;
 
@@ -74,7 +76,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private Object decodeQuery(
-            Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
+        Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
 
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> params = decoder.parameters();
@@ -140,18 +142,18 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         String[] cell = value.split(",");
                         if (cell.length > 4) {
                             network.addCellTower(CellTower.from(
-                                    Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
-                                    Integer.parseInt(cell[2]), Integer.parseInt(cell[3]), Integer.parseInt(cell[4])));
+                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3]), Integer.parseInt(cell[4])));
                         } else {
                             network.addCellTower(CellTower.from(
-                                    Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
-                                    Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
+                                Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                                Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
                         }
                         break;
                     case "wifi":
                         String[] wifi = value.split(",");
                         network.addWifiAccessPoint(WifiAccessPoint.from(
-                                wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
+                            wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
                         break;
                     case "speed":
                         position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
@@ -179,14 +181,18 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.set(Position.KEY_CHARGE, Boolean.parseBoolean(value));
                         break;
                     default:
-                        try {
-                            position.set(entry.getKey(), Double.parseDouble(value));
-                        } catch (NumberFormatException e) {
-                            switch (value) {
-                                case "true" -> position.set(entry.getKey(), true);
-                                case "false" -> position.set(entry.getKey(), false);
-                                default -> position.set(entry.getKey(), value);
-                            }
+                        switch (value) {
+                            case "true":
+                            case "false":
+                                position.set(entry.getKey(), value.equals("true"));
+                                break;
+                            default:
+                                try {
+                                    position.set(entry.getKey(), Double.parseDouble(value));
+                                } catch (NumberFormatException e) {
+                                    position.set(entry.getKey(), value);
+                                }
+                                break;
                         }
                         break;
                 }
@@ -226,7 +232,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private Object decodeJson(
-            Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
+        Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
 
         String content = request.content().toString(StandardCharsets.UTF_8);
         JsonObject root = Json.createReader(new StringReader(content)).readObject();
@@ -294,10 +300,36 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (location.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, location.getString("alarm"));
-        } else if (location.containsKey("extras")) {
+        }
+
+        if (location.containsKey("extras")) {
             JsonObject extras = location.getJsonObject("extras");
             if (extras.containsKey("alarm")) {
                 position.set(Position.KEY_ALARM, extras.getString("alarm"));
+            }
+
+            for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
+                String extraEntryKey = extraEntry.getKey();
+                JsonValue extraEntryValue = extraEntry.getValue();
+                JsonValue.ValueType valueType = extraEntryValue.getValueType();
+
+                // Check the value type and handle accordingly
+                switch (valueType) {
+                    case NUMBER:
+                        try {
+                            position.set(extraEntryKey, Double.parseDouble(extraEntryValue.toString()));
+                        } catch (NumberFormatException e) {
+                            position.set(extraEntryKey, extraEntryValue.toString());
+                        }
+                        break;
+                    case TRUE:
+                    case FALSE:
+                        position.set(extraEntryKey, valueType== JsonValue.ValueType.TRUE);
+                        break;
+                    default:
+                        position.set(extraEntryKey, extraEntryValue.toString());
+                        break;
+                }
             }
         }
 
