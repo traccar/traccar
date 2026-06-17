@@ -324,7 +324,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         break;
                     case TRUE:
                     case FALSE:
-                        position.set(extraEntryKey, valueType== JsonValue.ValueType.TRUE);
+                        position.set(extraEntryKey, valueType == JsonValue.ValueType.TRUE);
                         break;
                     default:
                         position.set(extraEntryKey, extraEntryValue.toString());
