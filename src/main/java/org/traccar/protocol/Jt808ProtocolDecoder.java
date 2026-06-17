@@ -442,6 +442,20 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeLocation2(deviceSession, buf, type);
 
+        } else if (type == MSG_LOCATION_BATCH_2 && BitUtil.to(attribute, 10) == 7) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.setTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+
+            return position;
+
         } else if (type == MSG_LOCATION_BATCH || type == MSG_LOCATION_BATCH_2) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
