@@ -357,6 +357,10 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "7e02000072045460005635007300000000000000000236d51c00823f19000000000000260602220701010400000000300111310100e4020064e50100e60100e7080000000600000000e10c010c000600bbe4001ada1500ec23f0090dba115abb5091e3194157b9ce20bd25d93fb5ce20bd85d93fb57e9cd82cadd5b1f50101717e"));
 
+        verifyAttribute(decoder, binary(
+                "7e0210000704546000231900884f2606180229579c7e"),
+                Position.KEY_BATTERY_LEVEL, 79);                
+
         decoder.setModelOverride("MV710G");
 
         verifyAttribute(decoder, binary(
