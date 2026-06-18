@@ -23,7 +23,10 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
@@ -294,10 +297,44 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (location.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, location.getString("alarm"));
-        } else if (location.containsKey("extras")) {
+        }
+        if (location.containsKey("extras")) {
             JsonObject extras = location.getJsonObject("extras");
             if (extras.containsKey("alarm")) {
                 position.set(Position.KEY_ALARM, extras.getString("alarm"));
+            }
+            for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
+                String extraEntryKey = extraEntry.getKey();
+                JsonValue extraEntryValue = extraEntry.getValue();
+                JsonValue.ValueType valueType = extraEntryValue.getValueType();
+
+                switch (valueType) {
+                    case NUMBER:
+                        JsonNumber jsonNumber = (JsonNumber) extraEntryValue;
+                        if (jsonNumber.isIntegral()) {
+                            position.set(extraEntryKey, jsonNumber.longValue());
+                        } else {
+                            position.set(extraEntryKey, jsonNumber.doubleValue());
+                        }
+                        break;
+                    case TRUE:
+                        position.set(extraEntryKey, true);
+                        break;
+                    case FALSE:
+                        position.set(extraEntryKey, false);
+                        break;
+                    case STRING:
+                        String entryStrValue = ((JsonString) extraEntryValue).getString();
+                        switch (entryStrValue) {
+                            case "true" -> position.set(extraEntryKey, true);
+                            case "false" -> position.set(extraEntryKey, false);
+                            default -> position.set(extraEntryKey, entryStrValue);
+                        }
+                        break;
+                    default:
+                        position.set(extraEntryKey, extraEntryValue.toString());
+                        break;
+                }
             }
         }
 
