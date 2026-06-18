@@ -304,30 +304,26 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_ALARM, extras.getString("alarm"));
             }
             for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
-                String extraEntryKey = extraEntry.getKey();
-                JsonValue extraEntryValue = extraEntry.getValue();
-                JsonValue.ValueType valueType = extraEntryValue.getValueType();
-
-                switch (valueType) {
+                switch (extraEntry.getValue().getValueType()) {
                     case NUMBER -> {
-                        JsonNumber jsonNumber = (JsonNumber) extraEntryValue;
+                        JsonNumber jsonNumber = (JsonNumber) extraEntry.getValue();
                         if (jsonNumber.isIntegral()) {
-                            position.set(extraEntryKey, jsonNumber.longValue());
+                            position.set(extraEntry.getKey(), jsonNumber.longValue());
                         } else {
-                            position.set(extraEntryKey, jsonNumber.doubleValue());
+                            position.set(extraEntry.getKey(), jsonNumber.doubleValue());
                         }
                     }
-                    case TRUE -> position.set(extraEntryKey, true);
-                    case FALSE -> position.set(extraEntryKey, false);
+                    case TRUE -> position.set(extraEntry.getKey(), true);
+                    case FALSE -> position.set(extraEntry.getKey(), false);
                     case STRING -> {
-                        String entryStrValue = ((JsonString) extraEntryValue).getString();
+                        String entryStrValue = ((JsonString) extraEntry.getValue()).getString();
                         switch (entryStrValue) {
-                            case "true" -> position.set(extraEntryKey, true);
-                            case "false" -> position.set(extraEntryKey, false);
-                            default -> position.set(extraEntryKey, entryStrValue);
+                            case "true" -> position.set(extraEntry.getKey(), true);
+                            case "false" -> position.set(extraEntry.getKey(), false);
+                            default -> position.set(extraEntry.getKey(), entryStrValue);
                         }
                     }
-                    default -> position.set(extraEntryKey, extraEntryValue.toString());
+                    default -> {}
                 }
             }
         }

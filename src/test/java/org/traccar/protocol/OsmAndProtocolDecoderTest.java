@@ -46,13 +46,13 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, request(
                 "/?lat=49.60688&lon=6.15788&timestamp=2014-06-04+09%3A10%3A11&altitude=384.7&speed=0.0&id=353861053849681"));
-
+        
         verifyPosition(decoder, request(
                 "/?id=123456&timestamp=1377177267&lat=60.0&lon=30.0&speed=0.0&bearing=0.0&altitude=0&hdop=0.0"));
-
+        
         verifyPosition(decoder, request(
                 "/?id=123456&timestamp=1377177267&lat=60.0&lon=30.0"));
-
+        
         verifyPosition(decoder, request(
                 "/?lat=60.0&lon=30.0&speed=0.0&heading=0.0&vacc=0&hacc=0&altitude=0&deviceid=123456"));
 
