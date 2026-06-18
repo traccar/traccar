@@ -449,12 +449,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            int batteryLevel = buf.readUnsignedByte();
-            Date time = readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE));
-
-            getLastLocation(position, time);
-
-            position.set(Position.KEY_BATTERY_LEVEL, batteryLevel);
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            getLastLocation(position, readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
 
             return position;
 
