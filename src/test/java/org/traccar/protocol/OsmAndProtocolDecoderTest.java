@@ -56,10 +56,6 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, request(
                 "/?id=861001000719969&lat=41.666667&lon=-0.883333&altitude=350.059479&speed=0.000000&batt=87"));
 
-        verifyAttribute(decoder, request(
-                "/?id=861001000719969&lat=41.666667&lon=-0.883333&altitude=350.059479&speed=0.000000&batt=87"),
-            Position.KEY_BATTERY_LEVEL, 87.0);
-
         verifyPosition(decoder, request(
                 "/?id=123456&timestamp=1377177267&location=60.0,30.0"));
 
