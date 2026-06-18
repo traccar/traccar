@@ -342,6 +342,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
         int attribute = buf.readUnsignedShort();
 
+        int bodyLength = BitUtil.to(attribute, 10);
+
         protocolVersion = BitUtil.check(attribute, 14) ? (int) buf.readUnsignedByte() : null;
         ByteBuf id = buf.readSlice(protocolVersion != null ? 10 : (delimiter == 0xe7 ? 7 : 6));
 
@@ -395,8 +397,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            int bodyLength = BitUtil.to(attribute, 10);
-
             buf.readUnsignedShort(); // response serial number
 
             String result = buf.readCharSequence(bodyLength - 2, StandardCharsets.UTF_16BE).toString().trim();
@@ -441,6 +441,18 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return decodeLocation2(deviceSession, buf, type);
+
+        } else if (type == MSG_LOCATION_BATCH_2 && bodyLength == 7) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            getLastLocation(position, readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+
+            return position;
 
         } else if (type == MSG_LOCATION_BATCH || type == MSG_LOCATION_BATCH_2) {
 
