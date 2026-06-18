@@ -309,31 +309,25 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 JsonValue.ValueType valueType = extraEntryValue.getValueType();
 
                 switch (valueType) {
-                    case NUMBER:
+                    case NUMBER -> {
                         JsonNumber jsonNumber = (JsonNumber) extraEntryValue;
                         if (jsonNumber.isIntegral()) {
                             position.set(extraEntryKey, jsonNumber.longValue());
                         } else {
                             position.set(extraEntryKey, jsonNumber.doubleValue());
                         }
-                        break;
-                    case TRUE:
-                        position.set(extraEntryKey, true);
-                        break;
-                    case FALSE:
-                        position.set(extraEntryKey, false);
-                        break;
-                    case STRING:
+                    }
+                    case TRUE -> position.set(extraEntryKey, true);
+                    case FALSE -> position.set(extraEntryKey, false);
+                    case STRING -> {
                         String entryStrValue = ((JsonString) extraEntryValue).getString();
                         switch (entryStrValue) {
                             case "true" -> position.set(extraEntryKey, true);
                             case "false" -> position.set(extraEntryKey, false);
                             default -> position.set(extraEntryKey, entryStrValue);
                         }
-                        break;
-                    default:
-                        position.set(extraEntryKey, extraEntryValue.toString());
-                        break;
+                    }
+                    default -> position.set(extraEntryKey, extraEntryValue.toString());
                 }
             }
         }
