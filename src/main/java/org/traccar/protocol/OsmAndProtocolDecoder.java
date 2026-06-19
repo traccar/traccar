@@ -294,16 +294,15 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_CHARGE, true);
             }
         }
-
         if (location.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, location.getString("alarm"));
         }
         if (location.containsKey("extras")) {
             JsonObject extras = location.getJsonObject("extras");
-            if (extras.containsKey("alarm")) {
-                position.set(Position.KEY_ALARM, extras.getString("alarm"));
-            }
             for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
+                if (extraEntry.getKey().equals("alarm") && location.containsKey("alarm")) {
+                    continue;
+                }
                 switch (extraEntry.getValue().getValueType()) {
                     case NUMBER -> {
                         JsonNumber jsonNumber = (JsonNumber) extraEntry.getValue();
