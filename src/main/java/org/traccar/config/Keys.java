@@ -1724,16 +1724,8 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
-     */
-    public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new BooleanConfigKey(
-            "filter.skipAttributes.enable",
-            List.of(KeyType.CONFIG, KeyType.DEVICE));
-
-    /**
-     * Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
+     * List of attributes that prevent filtering. If any attribute mentioned in this config key changed value
+     * since the last position, the position is not filtered out.
      */
     public static final ConfigKey<String> FILTER_SKIP_ATTRIBUTES = new StringConfigKey(
             "filter.skipAttributes",
