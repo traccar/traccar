@@ -23,7 +23,10 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
@@ -267,13 +270,29 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_CHARGE, true);
             }
         }
-
         if (location.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, location.getString("alarm"));
-        } else if (location.containsKey("extras")) {
+        }
+        if (location.containsKey("extras")) {
             JsonObject extras = location.getJsonObject("extras");
-            if (extras.containsKey("alarm")) {
-                position.set(Position.KEY_ALARM, extras.getString("alarm"));
+            for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
+                if (extraEntry.getKey().equals("alarm") && location.containsKey("alarm")) {
+                    continue;
+                }
+                switch (extraEntry.getValue().getValueType()) {
+                    case NUMBER -> {
+                        JsonNumber jsonNumber = (JsonNumber) extraEntry.getValue();
+                        if (jsonNumber.isIntegral()) {
+                            position.set(extraEntry.getKey(), jsonNumber.longValue());
+                        } else {
+                            position.set(extraEntry.getKey(), jsonNumber.doubleValue());
+                        }
+                    }
+                    case TRUE -> position.set(extraEntry.getKey(), true);
+                    case FALSE -> position.set(extraEntry.getKey(), false);
+                    case STRING -> position.set(extraEntry.getKey(), ((JsonString) extraEntry.getValue()).getString());
+                    default -> {}
+                }
             }
         }
 
