@@ -52,7 +52,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private final boolean connectionless;
     private boolean extended;
-    private final Map<Long, ByteBuf> photos = new HashMap<>();
 
     public void setExtended(boolean extended) {
         this.extended = extended;
@@ -127,8 +126,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (subtype == 0x01) {
 
                 long photoId = buf.readUnsignedInt();
-                ByteBuf photo = Unpooled.buffer(buf.readInt());
-                photos.put(photoId, photo);
+                ByteBuf photo = newMediaBuffer(buf.readInt());
                 sendImageRequest(
                         channel, remoteAddress, photoId,
                         0, Math.min(IMAGE_PACKET_MAX, photo.capacity()));
@@ -137,19 +135,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 long photoId = buf.readUnsignedInt();
                 buf.readInt(); // offset
-                ByteBuf photo = photos.get(photoId);
+                ByteBuf photo = getMediaBuffer();
                 photo.writeBytes(buf, buf.readUnsignedShort());
                 if (photo.writableBytes() > 0) {
                     sendImageRequest(
                             channel, remoteAddress, photoId,
                             photo.writerIndex(), Math.min(IMAGE_PACKET_MAX, photo.writableBytes()));
                 } else {
-                    photos.remove(photoId);
-                    try {
-                        position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-                    } finally {
-                        photo.release();
-                    }
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
                 }
 
             }

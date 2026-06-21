@@ -49,7 +49,6 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     private int dataSize;
     private int dataCurrent;
     private boolean video;
-    private ByteBuf media;
 
     private boolean isPacketData() {
         return dataSize < 8192;
@@ -60,15 +59,10 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         getLastLocation(position, null);
-        try {
-            if (video) {
-                position.set(Position.KEY_VIDEO, writeMediaFile(uniqueId, media, "h265"));
-            } else {
-                position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, media, "jpg"));
-            }
-        } finally {
-            media.release();
-            media = null;
+        if (video) {
+            position.set(Position.KEY_VIDEO, writeMediaFile(uniqueId, "h265"));
+        } else {
+            position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, "jpg"));
         }
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
@@ -127,7 +121,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(); // length
                 dataSize = buf.readInt();
                 dataCurrent = isPacketData() ? 1 : 0;
-                media = Unpooled.buffer();
+                newMediaBuffer();
                 if (channel != null) {
                     ByteBuf response = Unpooled.buffer();
                     response.writeShort(MSG_RESUME);
@@ -138,7 +132,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case MSG_DATA:
                 int length = buf.readUnsignedShort() - 2;
-                media.writeBytes(buf, length);
+                getMediaBuffer().writeBytes(buf, length);
                 boolean finished;
                 if (isPacketData()) {
                     finished = dataCurrent == dataSize;
@@ -152,7 +146,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case MSG_COMPLETE:
-                if (media != null) {
+                if (getMediaBuffer() != null) {
                     return completeMedia(channel, remoteAddress);
                 }
                 break;

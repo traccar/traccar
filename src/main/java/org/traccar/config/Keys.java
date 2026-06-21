@@ -900,6 +900,15 @@ public final class Keys {
             "./media");
 
     /**
+     * Maximum size in bytes of a single media buffer (photo, audio or video) that a protocol decoder accumulates from
+     * a device. Transfers larger than this limit are dropped. Only one media buffer is kept per connection.
+     */
+    public static final ConfigKey<Integer> MEDIA_BUFFER_SIZE = new IntegerConfigKey(
+            "media.bufferSize",
+            List.of(KeyType.CONFIG),
+            32 * 1024 * 1024);
+
+    /**
      * Optional parameter to specify a network interface for the web interface to bind to. By default, the server will
      * bind to all available interfaces.
      */
