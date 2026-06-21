@@ -1749,6 +1749,14 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
+     * Number of days to use for hybrid time threshold. If not defined, defaults to 7 days.
+     */
+    public static final ConfigKey<Long> HYBRID_TIME_DAYS = new LongConfigKey(
+            "time.hybridDays",
+            List.of(KeyType.CONFIG),
+            7L);
+
+    /**
      * List of protocols to enable. If not specified, Traccar enables all protocols that have port numbers listed.
      * The value is a comma-separated list of protocol names.
      * Example value: teltonika,osmand

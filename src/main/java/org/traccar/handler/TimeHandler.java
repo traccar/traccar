@@ -35,11 +35,13 @@ public class TimeHandler extends BasePositionHandler {
 
     private final CacheManager cacheManager;
     private final Set<String> overrideProtocols;
+    private final long hybridTimeMillis;
 
     @Inject
     public TimeHandler(Config config, CacheManager cacheManager) {
 
         this.cacheManager = cacheManager;
+        hybridTimeMillis = Duration.ofDays(config.getLong(Keys.HYBRID_TIME_DAYS)).toMillis();
         String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             overrideProtocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
@@ -82,7 +84,15 @@ public class TimeHandler extends BasePositionHandler {
                 position.setDeviceTime(position.getServerTime());
                 position.setFixTime(position.getServerTime());
                 break;
-            case "deviceTime":
+            case "hybridTime":
+                if (position.getDeviceTime() != null && position.getServerTime() != null
+                        && position.getDeviceTime().getTime() < position.getServerTime().getTime() - hybridTimeMillis) {
+                    position.setDeviceTime(position.getServerTime());
+                    position.setFixTime(position.getServerTime());
+                } else {
+                    position.setFixTime(position.getDeviceTime());
+                }
+                break;
             default:
                 position.setFixTime(position.getDeviceTime());
                 break;
