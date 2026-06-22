@@ -43,7 +43,6 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -124,7 +123,8 @@ public class SummaryReportProvider {
     }
 
     private Collection<SummaryReportItem> calculateDeviceResults(
-            Device device, ZonedDateTime from, ZonedDateTime to, DateUtil.SummaryReportPeriod reportPeriod) throws StorageException {
+            Device device, ZonedDateTime from, ZonedDateTime to,
+            DateUtil.SummaryReportPeriod reportPeriod) throws StorageException {
 
         boolean fast = Duration.between(from, to).toSeconds() > config.getLong(Keys.REPORT_FAST_THRESHOLD);
         var results = new ArrayList<SummaryReportItem>();
@@ -195,7 +195,7 @@ public class SummaryReportProvider {
 
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to, DateUtil.SummaryReportPeriod  reportPeriod) throws StorageException, IOException {
+            Date from, Date to, DateUtil.SummaryReportPeriod reportPeriod) throws StorageException, IOException {
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, reportPeriod);
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "summary.xlsx").toFile();

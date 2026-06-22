@@ -242,7 +242,8 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("reportPeriod") String reportPeriod) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "summary", from, to, deviceIds, groupIds);
-        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to,  DateUtil.nextSummaryReportPeriod(reportPeriod, daily));
+        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, 
+                DateUtil.nextSummaryReportPeriod(reportPeriod, daily));
     }
 
     @Path("summary")
@@ -259,7 +260,8 @@ public class ReportResource extends SimpleObjectResource<Report> {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             actionLogger.report(request, getUserId(), false, "summary", from, to, deviceIds, groupIds);
-            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, DateUtil.nextSummaryReportPeriod(reportPeriod, daily));
+            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to,
+                DateUtil.nextSummaryReportPeriod(reportPeriod, daily));
         });
     }
 

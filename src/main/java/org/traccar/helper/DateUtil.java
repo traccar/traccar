@@ -95,7 +95,7 @@ public final class DateUtil {
         if (daily) {
             return SummaryReportPeriod.DAILY;
         }
-        switch (reportPeriod){
+        switch (reportPeriod) {
             case "daily" -> {
                 return SummaryReportPeriod.DAILY;
             }
