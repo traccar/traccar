@@ -83,7 +83,7 @@ public final class DateUtil {
         }
     }
 
-    public enum SummaryReportPeriod {
+    public enum SummaryReportInterval {
         NONE,
         DAILY,
         WEEKLY,
@@ -91,26 +91,29 @@ public final class DateUtil {
         YEARLY
     }
 
-    public static SummaryReportPeriod nextSummaryReportPeriod(String reportPeriod, boolean daily) {
+    public static SummaryReportInterval nextSummaryReportInterval(String reportInterval, boolean daily) {
         if (daily) {
-            return SummaryReportPeriod.DAILY;
+            return SummaryReportInterval.DAILY;
         }
-        switch (reportPeriod) {
+        if (reportInterval == null) {
+            return SummaryReportInterval.NONE;
+        }
+        switch (reportInterval) {
             case "daily" -> {
-                return SummaryReportPeriod.DAILY;
+                return SummaryReportInterval.DAILY;
             }
             case "weekly" -> {
-                return SummaryReportPeriod.WEEKLY;
+                return SummaryReportInterval.WEEKLY;
             }
             case "monthly" -> {
-                return SummaryReportPeriod.MONTHLY;
+                return SummaryReportInterval.MONTHLY;
             }
             case "yearly" -> {
-                return SummaryReportPeriod.YEARLY;
+                return SummaryReportInterval.YEARLY;
             }
             default -> {}
         }
-        return SummaryReportPeriod.NONE;
+        return SummaryReportInterval.NONE;
     }
 
     public static ZonedDateTime startOfZDTDay(ZonedDateTime date) {
