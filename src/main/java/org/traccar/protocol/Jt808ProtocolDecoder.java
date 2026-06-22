@@ -436,12 +436,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            buf.skipBytes(2); // terminal type
+            buf.readUnsignedShort(); // terminal type
             buf.skipBytes(5); // manufacturer id
             buf.skipBytes(20); // terminal model
             buf.skipBytes(7); // terminal id
 
-            position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)).replaceAll("f", ""));
+            position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)).substring(0, 20));
 
             return position;
 
