@@ -15,9 +15,12 @@
  */
 package org.traccar.helper;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -80,4 +83,49 @@ public final class DateUtil {
         }
     }
 
+    public enum SummaryReportPeriod {
+        NONE,
+        DAILY,
+        WEEKLY,
+        MONTHLY,
+        YEARLY
+    }
+
+    public static SummaryReportPeriod nextSummaryReportPeriod(String reportPeriod, boolean daily) {
+        if (daily) {
+            return SummaryReportPeriod.DAILY;
+        }
+        switch (reportPeriod){
+            case "daily" -> {
+                return SummaryReportPeriod.DAILY;
+            }
+            case "weekly" -> {
+                return SummaryReportPeriod.WEEKLY;
+            }
+            case "monthly" -> {
+                return SummaryReportPeriod.MONTHLY;
+            }
+            case "yearly" -> {
+                return SummaryReportPeriod.YEARLY;
+            }
+            default -> {}
+        }
+        return SummaryReportPeriod.NONE;
+    }
+
+    public static ZonedDateTime startOfZDTDay(ZonedDateTime date) {
+        return date.truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTWeek(ZonedDateTime date) {
+        return date.with(DayOfWeek.MONDAY).truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTMonth(ZonedDateTime date) {
+        return date.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTYear(ZonedDateTime date) {
+        return date.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS);
+    }
 }
