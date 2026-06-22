@@ -441,7 +441,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(20); // terminal model
             buf.skipBytes(7); // terminal id
 
-            position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)).substring(0, 20));
+            position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
 
             return position;
 
