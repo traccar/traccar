@@ -558,7 +558,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        }        
+        }
 
         return null;
     }
