@@ -359,7 +359,7 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
          verifyAttribute(decoder, binary(
                 "7e02000026000000000000000100000000000000020000000000000000000000000000260618001512f6080867567041100769907e"),
-                Position.KEY_IMEI, "867567041100769");
+                "imei", "867567041100769");
 
         verifyAttribute(decoder, binary(
                 "7e0210000704546000231900884f2606180229579c7e"),
