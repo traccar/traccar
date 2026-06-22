@@ -40,16 +40,12 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
-
-    private final Map<Integer, ByteBuf> photos = new HashMap<>();
 
     public Gt06ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -279,7 +275,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void sendPhotoRequest(Channel channel, int pictureId) {
-        ByteBuf photo = photos.get(pictureId);
+        ByteBuf photo = getMediaBuffer();
         ByteBuf content = Unpooled.buffer();
         content.writeInt(pictureId);
         content.writeInt(photo.writerIndex());
@@ -608,9 +604,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // photo source
             buf.readUnsignedByte(); // picture format
 
-            ByteBuf photo = Unpooled.buffer(buf.readInt());
+            newMediaBuffer(buf.readInt());
             int pictureId = buf.readInt();
-            photos.put(pictureId, photo);
             sendPhotoRequest(channel, pictureId);
 
             return null;
@@ -1279,7 +1274,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             int pictureId = buf.readInt();
 
-            ByteBuf photo = photos.get(pictureId);
+            ByteBuf photo = getMediaBuffer();
 
             buf.readUnsignedInt(); // offset
             buf.readBytes(photo, buf.readUnsignedShort());
@@ -1287,8 +1282,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (photo.writableBytes() > 0) {
                 sendPhotoRequest(channel, pictureId);
             } else {
-                position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-                photos.remove(pictureId).release();
+                position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
             }
 
         } else if (type == MSG_AZ735_GPS || type == MSG_AZ735_ALARM) {
@@ -1449,7 +1443,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(4 + 4 + 2 + 1 + 1 + 2); // gps
             buf.skipBytes(2 + 2 + 2 + 2); // cell
 
-            int mediaId = buf.readInt();
+            buf.readInt(); // media id
             int mediaLength = buf.readInt();
             int mediaType = buf.readUnsignedByte();
             int mediaFormat = buf.readUnsignedByte();
@@ -1460,21 +1454,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 ByteBuf photo;
                 if (buf.readUnsignedShort() == 0) {
-                    photo = Unpooled.buffer(mediaLength);
-                    if (photos.containsKey(mediaId)) {
-                        photos.remove(mediaId).release();
-                    }
-                    photos.put(mediaId, photo);
+                    photo = newMediaBuffer(mediaLength);
                 } else {
-                    photo = photos.get(mediaId);
+                    photo = getMediaBuffer();
                 }
 
                 if (photo != null) {
                     buf.readBytes(photo, buf.readableBytes() - 3 * 2);
                     if (!photo.isWritable()) {
                         getLastLocation(position, new Date(timestamp));
-                        position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-                        photos.remove(mediaId).release();
+                        position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
                     }
                 }
 
