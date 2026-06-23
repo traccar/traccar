@@ -70,6 +70,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
+    public static final int MSG_TERMINAL_ATTRIBUTES = 0x0107;
     public static final int MSG_LOCATION_REPORT = 0x0200;
     public static final int MSG_LOCATION_BATCH_2 = 0x0210;
     public static final int MSG_ACCELERATION = 0x2070;
@@ -425,6 +426,24 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_PHOTO || type == MSG_TERMINAL_LOGOUT) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+        } else if (type == MSG_TERMINAL_ATTRIBUTES) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedShort(); // terminal type
+            buf.skipBytes(5); // manufacturer id
+            buf.skipBytes(20); // terminal model
+            buf.skipBytes(7); // terminal id
+
+            position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+
+            return position;
 
         } else if (type == MSG_LOCATION_REPORT) {
 
