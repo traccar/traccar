@@ -424,7 +424,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             }
 
         } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT_2
-                || type == MSG_PHOTO || type == MSG_TERMINAL_LOGOUT) {
+                || type == MSG_PHOTO || type == MSG_TERMINAL_LOGOUT || type == MSG_TIMEZONE_SYNC) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -494,10 +494,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
-
-        } else if (type == MSG_TIMEZONE_SYNC) {
-
-            sendGeneralResponse(channel, remoteAddress, id, type, index);
 
         } else if (type == MSG_ACCELERATION) {
 
