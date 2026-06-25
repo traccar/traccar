@@ -1272,7 +1272,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF8:
-                    if (Set.of("C5", "C5L").contains(model)) {
+                    if (model != null && Set.of("C5", "C5L").contains(model)) {
                         position.set("steps", buf.readUnsignedShort());
                     } else {
                         position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 10.0 - 50);
