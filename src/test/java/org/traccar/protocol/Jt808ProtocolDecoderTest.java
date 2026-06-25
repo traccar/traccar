@@ -411,6 +411,7 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "7e02000020000000000000000100000000000000000000000000000000000000000000260625120000f8023039c77e"),
                 "steps", 12345);
+
     }
 
 }
