@@ -185,6 +185,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Use static signal outputs for IOTM output control commands.
+     */
+    public static final ConfigKey<Boolean> IOTM_PERMANENT_OUTPUT_CONTROL = new BooleanConfigKey(
+            "iotm.permanentOutputControl",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Alarm mapping for Atrack protocol.
      */
     public static final ConfigSuffix<String> PROTOCOL_ALARM_MAP = new StringConfigSuffix(

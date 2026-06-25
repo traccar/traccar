@@ -3,6 +3,8 @@ package org.traccar.protocol;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +24,16 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
         return command;
     }
 
+    private IotmProtocolEncoder newEncoder(boolean permanentOutputControl) throws Exception {
+        Config config = new Config();
+        config.setString(Keys.IOTM_PERMANENT_OUTPUT_CONTROL, Boolean.toString(permanentOutputControl));
+        return inject(new IotmProtocolEncoder(null, config));
+    }
+
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new IotmProtocolEncoder(null));
+        var encoder = inject(new IotmProtocolEncoder(null, new Config()));
 
         Command command = outputCommand(1, 1);
 
@@ -46,10 +54,9 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePermanentOutput() throws Exception {
 
-        var encoder = inject(new IotmProtocolEncoder(null));
+        var encoder = newEncoder(true);
 
         Command command = outputCommand(1, 1);
-        command.set("permanent", true);
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
         verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0801010142"), encodedCommand.payload());
@@ -67,10 +74,9 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePermanentOutputIndex() throws Exception {
 
-        var encoder = inject(new IotmProtocolEncoder(null));
+        var encoder = newEncoder(true);
 
         Command command = outputCommand(2, 1);
-        command.set("permanent", true);
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
         verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0901010143"), encodedCommand.payload());
@@ -88,14 +94,12 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePermanentOutputValidation() throws Exception {
 
-        var encoder = inject(new IotmProtocolEncoder(null));
+        var encoder = newEncoder(true);
 
         Command indexCommand = outputCommand(3, 1);
-        indexCommand.set("permanent", true);
         assertThrows(IllegalArgumentException.class, () -> encoder.encodeCommand(indexCommand));
 
         Command dataCommand = outputCommand(1, 2);
-        dataCommand.set("permanent", true);
         assertThrows(IllegalArgumentException.class, () -> encoder.encodeCommand(dataCommand));
 
     }

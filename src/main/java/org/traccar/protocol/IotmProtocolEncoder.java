@@ -21,6 +21,8 @@ import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
@@ -32,9 +34,11 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
 
     private final AtomicInteger messageId = new AtomicInteger();
     private final AtomicInteger commandIndex = new AtomicInteger();
+    private final boolean permanentOutputControl;
 
-    public IotmProtocolEncoder(Protocol protocol) {
+    public IotmProtocolEncoder(Protocol protocol, Config config) {
         super(protocol);
+        permanentOutputControl = config.getBoolean(Keys.IOTM_PERMANENT_OUTPUT_CONTROL);
     }
 
     @Override
@@ -54,13 +58,11 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShortLE(8); // record length
         buf.writeLongLE(Long.parseLong(uniqueId));
 
-        boolean permanent = command.getBoolean("permanent");
-
         buf.writeByte(4); // record type output control
-        buf.writeShortLE(permanent ? 8 : 10); // record length
+        buf.writeShortLE(permanentOutputControl ? 8 : 10); // record length
         buf.writeIntLE(Integer.MAX_VALUE); // expiration
         int index = command.getInteger(Command.KEY_INDEX);
-        if (permanent) {
+        if (permanentOutputControl) {
             if (index < 1 || index > 2) {
                 throw new IllegalArgumentException("Unsupported permanent output index");
             }
@@ -70,7 +72,7 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
         }
         buf.writeByte(commandIndex.updateAndGet(value -> value >= 0xff ? 1 : value + 1));
         int data = command.getInteger(Command.KEY_DATA);
-        if (permanent) {
+        if (permanentOutputControl) {
             if (data != 0 && data != 1) {
                 throw new IllegalArgumentException("Unsupported permanent output value");
             }
