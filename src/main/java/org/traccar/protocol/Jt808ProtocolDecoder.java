@@ -491,8 +491,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
                 response.writeByte(calendar.get(Calendar.MINUTE));
                 response.writeByte(calendar.get(Calendar.SECOND));
+                response.writeByte(RESULT_SUCCESS);
                 channel.writeAndFlush(new NetworkMessage(
-                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
+                        formatMessage(MSG_TIME_SYNC_RESPONSE, id, false, response), remoteAddress));
             }
 
         } else if (type == MSG_ACCELERATION) {
