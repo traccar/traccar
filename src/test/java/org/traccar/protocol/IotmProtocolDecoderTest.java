@@ -49,7 +49,21 @@ public class IotmProtocolDecoderTest extends ProtocolTest {
         assertEquals(packetId, ((MqttMessageIdVariableHeader) mqttMessage.variableHeader()).messageId());
     }
 
+    private void verifyPingResp(Channel channel) {
+        var captor = ArgumentCaptor.forClass(Object.class);
+        verify(channel).writeAndFlush(captor.capture());
+        var networkMessage = (NetworkMessage) captor.getValue();
+        var mqttMessage = (MqttMessage) networkMessage.getMessage();
+        assertEquals(MqttMessageType.PINGRESP, mqttMessage.fixedHeader().messageType());
+    }
+
     private MqttPublishMessage decodeMqtt(String data) {
+        var channel = new EmbeddedChannel(new MqttDecoder());
+        channel.writeInbound(binary(data));
+        return channel.readInbound();
+    }
+
+    private MqttMessage decodeMqttMessage(String data) {
         var channel = new EmbeddedChannel(new MqttDecoder());
         channel.writeInbound(binary(data));
         return channel.readInbound();
@@ -117,6 +131,16 @@ public class IotmProtocolDecoderTest extends ProtocolTest {
         assertTrue(position.getBoolean(Position.PREFIX_OUT + 1));
         assertFalse(position.getBoolean(Position.PREFIX_OUT + 2));
         verifyPubAck(channel, 2);
+    }
+
+    @Test
+    public void testPingRequest() throws Exception {
+
+        var decoder = inject(new TestIotmProtocolDecoder());
+        var channel = mock(Channel.class);
+
+        assertNull(decoder.decodeMessage(channel, decodeMqttMessage("c000")));
+        verifyPingResp(channel);
     }
 
     @Test

@@ -20,6 +20,7 @@ import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import org.traccar.session.DeviceSession;
@@ -79,6 +80,13 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return decode(deviceSession, message);
+
+        } else if (msg instanceof MqttMessage message
+                && message.fixedHeader().messageType() == MqttMessageType.PINGREQ) {
+
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(MqttMessage.PINGRESP, remoteAddress));
+            }
 
         }
 
