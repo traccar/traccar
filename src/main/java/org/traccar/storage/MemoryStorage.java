@@ -49,11 +49,7 @@ public class MemoryStorage extends Storage {
         Server server = new Server();
         server.setId(1);
         server.setRegistration(true);
-        getObjectMap(Server.class).put(server.getId(), server);
-    }
-
-    private Map<Long, Object> getObjectMap(Class<?> clazz) {
-        return objects.computeIfAbsent(clazz, key -> new ConcurrentHashMap<>());
+        objects.computeIfAbsent(Server.class, key -> new ConcurrentHashMap<>()).put(server.getId(), server);
     }
 
     @Override
@@ -65,7 +61,7 @@ public class MemoryStorage extends Storage {
 
     @Override
     public <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) {
-        var stream = getObjectMap(clazz).values().stream()
+        var stream = objects.computeIfAbsent(clazz, key -> new ConcurrentHashMap<>()).values().stream()
                 .filter(object -> checkCondition(request.getCondition(), object));
         Order order = request.getOrder();
         if (order != null) {
@@ -132,7 +128,7 @@ public class MemoryStorage extends Storage {
                 if (condition.getDeviceId() > 0 && positionDeviceId != condition.getDeviceId()) {
                     yield false;
                 }
-                yield getObjectMap(Device.class).values().stream()
+                yield objects.computeIfAbsent(Device.class, key -> new ConcurrentHashMap<>()).values().stream()
                         .anyMatch(device -> (Long) retrieveValue(device, "positionId") == positionId);
             }
             default -> false;
@@ -183,7 +179,7 @@ public class MemoryStorage extends Storage {
             if (!result.add(groupId)) {
                 break;
             }
-            Object group = getObjectMap(Group.class).get(groupId);
+            Object group = objects.computeIfAbsent(Group.class, key -> new ConcurrentHashMap<>()).get(groupId);
             if (group instanceof GroupedModel parent) {
                 groupId = parent.getGroupId();
             } else {
@@ -204,7 +200,7 @@ public class MemoryStorage extends Storage {
     @Override
     public <T> long addObject(T entity, Request request) {
         long id = increment.incrementAndGet();
-        getObjectMap(entity.getClass()).put(id, entity);
+        objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>()).put(id, entity);
         return id;
     }
 
@@ -213,10 +209,10 @@ public class MemoryStorage extends Storage {
         Collection<Object> items;
         if (request.getCondition() != null) {
             long id = (Long) ((Condition.Equals) request.getCondition()).getValue();
-            Object item = getObjectMap(entity.getClass()).get(id);
+            Object item = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>()).get(id);
             items = item != null ? List.of(item) : List.of();
         } else {
-            items = getObjectMap(entity.getClass()).values();
+            items = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>()).values();
         }
         var getters = ReflectionCache.getProperties(entity.getClass(), "get");
         var setters = ReflectionCache.getProperties(entity.getClass(), "set");
@@ -237,7 +233,7 @@ public class MemoryStorage extends Storage {
     @Override
     public void removeObject(Class<?> clazz, Request request) {
         long id = (Long) ((Condition.Equals) request.getCondition()).getValue();
-        getObjectMap(clazz).remove(id);
+        objects.computeIfAbsent(clazz, key -> new ConcurrentHashMap<>()).remove(id);
     }
 
     private Set<Pair<Long, Long>> getPermissionsSet(Class<?> ownerClass, Class<?> propertyClass) {
