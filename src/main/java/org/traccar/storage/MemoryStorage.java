@@ -49,9 +49,7 @@ public class MemoryStorage extends Storage {
         Server server = new Server();
         server.setId(1);
         server.setRegistration(true);
-        Map<Long, Object> servers = new ConcurrentHashMap<>();
-        servers.put(server.getId(), server);
-        objects.put(Server.class, servers);
+        objects.put(Server.class, Map.of(server.getId(), server));
     }
 
     @Override
