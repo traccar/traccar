@@ -94,7 +94,7 @@ public final class DateUtil {
     public static SummaryReportInterval nextSummaryReportInterval(String reportInterval, boolean daily) {
         if (daily) {
             return SummaryReportInterval.DAILY;
-        }else if (reportInterval == null) {
+        } else if (reportInterval == null) {
             return SummaryReportInterval.NONE;
         }
         switch (reportInterval) {
