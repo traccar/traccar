@@ -475,8 +475,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("agpsLongitude", buf.readIntLE() / 10000000.0);
                 }
                 case 0x30 -> {
-                    position.set("numberFlag", buf.readUnsignedByte());
-                    position.set("number", BufferUtil.readString(buf, length - 1));
+                    int numberIndex = BitUtil.to(buf.readUnsignedByte(), 4);
+                    position.set("number" + numberIndex, BufferUtil.readString(buf, length - 1));
                 }
                 case 0x31 -> {
                     position.set("prefixFlag", buf.readUnsignedByte());
