@@ -17,12 +17,16 @@ package org.traccar.forward;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
 
 public class PositionForwarderAmqp implements PositionForwarder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwarderAmqp.class);
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
@@ -42,6 +46,7 @@ public class PositionForwarderAmqp implements PositionForwarder {
             amqpClient.publishMessage(value);
             resultHandler.onResult(true, null);
         } catch (IOException e) {
+            LOGGER.warn("Position forwarding error", e);
             resultHandler.onResult(false, e);
         }
     }
