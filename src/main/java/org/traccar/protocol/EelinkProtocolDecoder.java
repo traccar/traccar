@@ -264,7 +264,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
             }
             if (BitUtil.check(status, 5)) {
-                position.set(Position.KEY_BLOCKED, BitUtil.check(status, 6));
+                position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6));
             }
             if (BitUtil.check(status, 7)) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
