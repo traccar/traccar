@@ -36,7 +36,7 @@ public class IotmProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(MqttEncoder.INSTANCE);
                 pipeline.addLast(new MqttDecoder());
-                pipeline.addLast(new IotmProtocolEncoder(IotmProtocol.this));
+                pipeline.addLast(new IotmProtocolEncoder(IotmProtocol.this, config));
                 pipeline.addLast(new IotmProtocolDecoder(IotmProtocol.this));
             }
         });

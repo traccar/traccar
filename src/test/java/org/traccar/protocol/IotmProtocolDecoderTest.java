@@ -1,11 +1,73 @@
 package org.traccar.protocol;
 
+import io.netty.channel.Channel;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.mqtt.MqttDecoder;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
+import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.traccar.NetworkMessage;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class IotmProtocolDecoderTest extends ProtocolTest {
+
+    private static class TestIotmProtocolDecoder extends IotmProtocolDecoder {
+
+        TestIotmProtocolDecoder() {
+            super(null);
+        }
+
+        public Object decodeMessage(Channel channel, Object message) throws Exception {
+            return decode(channel, mock(SocketAddress.class), message);
+        }
+    }
+
+    private void verifyPubAck(Channel channel, int packetId) {
+        var captor = ArgumentCaptor.forClass(Object.class);
+        verify(channel).writeAndFlush(captor.capture());
+        var networkMessage = (NetworkMessage) captor.getValue();
+        var mqttMessage = (MqttMessage) networkMessage.getMessage();
+        assertEquals(MqttMessageType.PUBACK, mqttMessage.fixedHeader().messageType());
+        assertEquals(packetId, ((MqttMessageIdVariableHeader) mqttMessage.variableHeader()).messageId());
+    }
+
+    private void verifyPingResp(Channel channel) {
+        var captor = ArgumentCaptor.forClass(Object.class);
+        verify(channel).writeAndFlush(captor.capture());
+        var networkMessage = (NetworkMessage) captor.getValue();
+        var mqttMessage = (MqttMessage) networkMessage.getMessage();
+        assertEquals(MqttMessageType.PINGRESP, mqttMessage.fixedHeader().messageType());
+    }
+
+    private MqttPublishMessage decodeMqtt(String data) {
+        var channel = new EmbeddedChannel(new MqttDecoder());
+        channel.writeInbound(binary(data));
+        return channel.readInbound();
+    }
+
+    private MqttMessage decodeMqttMessage(String data) {
+        var channel = new EmbeddedChannel(new MqttDecoder());
+        channel.writeInbound(binary(data));
+        return channel.readInbound();
+    }
 
     @Test
     public void testDecode() throws Exception {
@@ -33,6 +95,81 @@ public class IotmProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, false, MqttMessageBuilders.publish().payload(binary(
                 "02020800f24cbb60e4160300014c00a303136a0d02b000000040bf9ffc4006005016a1c1010500306b2f0308300e00d035fe2c4217d3df410200180c0000d200006d00011300030320030520010200000b00009400001200001e00014500df03136a06005016a1c1010500306b2f0508301c010e00d035fe2c4217d3df410000000000000000006d00011300040320030405203b000200010b00009400001200001e000145001b04136a06005016a1c101050030a32f0508301c010e00d030fe2c422dd3df4100000e090000dc00006d00011300040320030405203f000200010b00009400001200001e000145005704136a06005016a1c101050030cb2f0508301c010e00d030fe2c422dd3df4100000f090000dc00006d00011300040320030405203d000200010b00009400001200001e000145009304136a06005016a1c1010500308b2f0508301c010e00d030fe2c422dd3df410000ff090000dc00006d00011300040320030405203d000200010b00009400001200001e00015000c304136a0d02b000000040bf9ffc4006005016a1c101050030ab2f0508301c010e00d030fe2c422dd3df4100000e0a0000dc00006d00011300040320030405203d000200010b00009400001200001e00014500ff04136a06005016a1c101050030832f0508301c010e00d030fe2c422dd3df410000270a0000dc00006d00011300040320030405203d000200010b00009400001200001e00014c003705136a0d02b000000040bf9ffc4006005016a1c101050030b32f0308300e00d040fe2c4232d3df410000180a0000d800006d00011300030320030520010200000b00009400001200001e000145007305136a06005016a1c101050030932f0508301c010e00d042fe2c4232d3df410000000000000000006d000113000403200304052041000200010b00009400001200001e00014500af05136a06005016a1c1010500303b2f0508301c010e00d01dfe2c4241d3df41000027090000e900006d00011300040320030405203d000200010b00009400001200001e00014500eb05136a06005016a1c1010500305b2f0508301c010e00d01dfe2c4241d3df4100007c090000e900006d00011300040320030405203d000200010b00009400001200001e000145002706136a06005016a1c101050030932f0508301c010e00d01dfe2c4241d3df41000020090000e900006d000113000403200304052041000200010b00009400001200001e000145006306136a06005016a1c101050030db2f0508301c010e00d01dfe2c4241d3df410000180a0000e900006d00011300040320030405203f000200010b00009400001200001e00ff")).qos(MqttQoS.AT_LEAST_ONCE).messageId(3).build());
 
+    }
+
+    @Test
+    public void testTelemetryTopic() throws Exception {
+
+        var decoder = inject(new TestIotmProtocolDecoder());
+        var channel = mock(Channel.class);
+
+        decoder.decodeMessage(channel, MqttMessageBuilders.connect().clientId("869595060875258").build());
+        clearInvocations(channel);
+
+        MqttPublishMessage message = decodeMqtt(
+                "327200054243452f44000202020800faafb360e4160300015900ab4b306a0302b0030b30050030eb2e"
+                        + "0504307a0c030340030140030240031d30030c300301a0031ba00300200e00d0e0402d42ca56dd4100"
+                        + "00090e000082010094000095000401200e04052035001300000200030820030720fb");
+
+        assertEquals("BCE/D", message.variableHeader().topicName());
+        assertEquals(2, message.variableHeader().packetId());
+
+        Object decoded = decoder.decodeMessage(channel, message);
+        var position = (Position) ((List<?>) decoded).getFirst();
+        assertFalse(position.getBoolean(Position.PREFIX_OUT + 1));
+        assertFalse(position.getBoolean(Position.PREFIX_OUT + 2));
+        verifyPubAck(channel, 2);
+        clearInvocations(channel);
+
+        message = decodeMqtt(
+                "327200054243452f44000202020800faafb360e4160300015900c34b306a0302b0030b30050030eb2e"
+                        + "050430800c030340030140030240031d30030c300301a0031ba00300200e00d0e0402d42ca56dd4100"
+                        + "000b0e000082010194000095000401200e040520350013000002000308200307201c");
+
+        decoded = decoder.decodeMessage(channel, message);
+        position = (Position) ((List<?>) decoded).getFirst();
+        assertTrue(position.getBoolean(Position.PREFIX_OUT + 1));
+        assertFalse(position.getBoolean(Position.PREFIX_OUT + 2));
+        verifyPubAck(channel, 2);
+    }
+
+    @Test
+    public void testPingRequest() throws Exception {
+
+        var decoder = inject(new TestIotmProtocolDecoder());
+        var channel = mock(Channel.class);
+
+        assertNull(decoder.decodeMessage(channel, decodeMqttMessage("c000")));
+        verifyPingResp(channel);
+    }
+
+    @Test
+    public void testEventAcknowledgement() throws Exception {
+
+        var decoder = inject(new TestIotmProtocolDecoder());
+        var channel = mock(Channel.class);
+
+        decoder.decodeMessage(channel, MqttMessageBuilders.connect().clientId("869595060875258").build());
+        clearInvocations(channel);
+
+        Object decoded = decoder.decodeMessage(channel, MqttMessageBuilders.publish()
+                .topicName("BCE/E")
+                .payload(binary("02020800faafb360e4160300031000c44b306add005130375f30325f303033c9"))
+                .qos(MqttQoS.AT_LEAST_ONCE)
+                .messageId(2)
+                .build());
+        assertInstanceOf(List.class, decoded);
+        verifyPubAck(channel, 2);
+        clearInvocations(channel);
+
+        assertNull(decoder.decodeMessage(channel, MqttMessageBuilders.publish()
+                .topicName("BCE/E")
+                .payload(binary("02"))
+                .qos(MqttQoS.AT_LEAST_ONCE)
+                .messageId(3)
+                .build()));
+
+        verifyPubAck(channel, 3);
     }
 
 }
