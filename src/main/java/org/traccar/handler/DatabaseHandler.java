@@ -18,6 +18,8 @@ package org.traccar.handler;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.PositionBatchWriter;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Position;
@@ -28,15 +30,22 @@ public class DatabaseHandler extends BasePositionHandler {
 
     private final PositionBatchWriter batchWriter;
     private final StatisticsManager statisticsManager;
+    private final boolean savePositions;
 
     @Inject
-    public DatabaseHandler(PositionBatchWriter batchWriter, StatisticsManager statisticsManager) {
+    public DatabaseHandler(Config config, PositionBatchWriter batchWriter, StatisticsManager statisticsManager) {
         this.batchWriter = batchWriter;
         this.statisticsManager = statisticsManager;
+        this.savePositions = config.getBoolean(Keys.DATABASE_SAVE_POSITIONS);
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
+        if (!savePositions) {
+            callback.processed(false);
+            return;
+        }
+
         batchWriter.submit(position).whenComplete((id, error) -> {
             if (error == null) {
                 position.setId(id);
