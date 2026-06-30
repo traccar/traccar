@@ -596,6 +596,22 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Store positions in the database.
+     */
+    public static final ConfigKey<Boolean> DATABASE_SAVE_POSITIONS = new BooleanConfigKey(
+            "database.savePositions",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * Store events in the database.
+     */
+    public static final ConfigKey<Boolean> DATABASE_SAVE_EVENTS = new BooleanConfigKey(
+            "database.saveEvents",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
      * Throttle unknown device database queries when it sends repeated requests.
      */
     public static final ConfigKey<Boolean> DATABASE_THROTTLE_UNKNOWN = new BooleanConfigKey(
