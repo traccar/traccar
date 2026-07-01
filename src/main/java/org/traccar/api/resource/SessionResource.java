@@ -145,14 +145,18 @@ public class SessionResource extends BaseResource {
     @Path("token")
     @POST
     public String requestToken(
-            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+            @FormParam("expiration") Date expiration,
+            @FormParam("userId") Long userId) throws StorageException, GeneralSecurityException, IOException {
+        long currentUserId = getUserId();
+        long targetUserId = userId != null ? userId : currentUserId;
+        permissionsService.checkUser(currentUserId, targetUserId);
         Date currentExpiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
-        if (currentExpiration != null && currentExpiration.before(expiration)) {
+        if (currentExpiration != null && (expiration == null || currentExpiration.before(expiration))) {
             expiration = currentExpiration;
         }
-        String token = tokenManager.generateToken(getUserId(), expiration);
+        String token = tokenManager.generateToken(targetUserId, expiration);
         TokenManager.TokenData data = tokenManager.decodeToken(token);
-        actionLogger.token(request, getUserId(), data.getId());
+        actionLogger.token(request, targetUserId, data.getId());
         return token;
     }
 
