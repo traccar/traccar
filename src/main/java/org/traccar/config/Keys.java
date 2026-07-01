@@ -1445,6 +1445,20 @@ public final class Keys {
             "notificator.telegram.proxy.url",
             List.of(KeyType.CONFIG));
 
+    public static final ConfigKey<String> NOTIFICATOR_NTFY_HTTP_URL = new StringConfigKey(
+            "notificator.ntfy.http.url",
+            List.of(KeyType.CONFIG),
+            "ntfy.sh");
+
+    public static final ConfigKey<String> NOTIFICATOR_NTFY_HTTP_TOKEN = new StringConfigKey(
+            "notificator.ntfy.http.token",
+            List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<String> NOTIFICATOR_NTFY_TOPIC = new StringConfigKey(
+            "notificator.ntfy.topic",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
     /**
      * WhatsApp Cloud API permanent access token.
      */
@@ -2265,5 +2279,4 @@ public final class Keys {
     public static final ConfigKey<Boolean> BROADCAST_SECONDARY = new BooleanConfigKey(
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
-
 }
