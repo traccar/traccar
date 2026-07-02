@@ -43,7 +43,6 @@ public class MemoryStorage extends Storage {
 
     private final Map<Class<?>, Map<Long, Object>> objects = new ConcurrentHashMap<>();
     private final Map<Pair<Class<?>, Class<?>>, Set<Pair<Long, Long>>> permissions = new ConcurrentHashMap<>();
-    private final Map<Long, Long> latestPositionIds = new ConcurrentHashMap<>();
 
     private final AtomicLong increment = new AtomicLong();
 
@@ -203,24 +202,23 @@ public class MemoryStorage extends Storage {
     public <T> long addObject(T entity, Request request) {
         long id = increment.incrementAndGet();
         var items = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>());
-        items.put(id, entity);
 
         if (entity instanceof Position position) {
-            latestPositionIds.compute(position.getDeviceId(), (deviceId, previousId) -> {
-                Position previous = previousId != null ? (Position) items.get(previousId) : null;
-                if (previous == null
-                        || position.getFixTime().after(previous.getFixTime())
-                        || position.getFixTime().equals(previous.getFixTime())
-                        && !position.getServerTime().before(previous.getServerTime())) {
-                    if (previousId != null) {
-                        items.remove(previousId);
-                    }
-                    return id;
-                } else {
-                    items.remove(id);
-                    return previousId;
+            boolean latest = true;
+            for (Object item : items.values()) {
+                Position stored = (Position) item;
+                if (stored.getDeviceId() == position.getDeviceId()
+                        && stored.getFixTime().after(position.getFixTime())) {
+                    latest = false;
+                    break;
                 }
-            });
+            }
+            if (latest) {
+                items.values().removeIf(item -> ((Position) item).getDeviceId() == position.getDeviceId());
+                items.put(id, entity);
+            }
+        } else {
+            items.put(id, entity);
         }
 
         return id;
@@ -256,9 +254,6 @@ public class MemoryStorage extends Storage {
     public void removeObject(Class<?> clazz, Request request) {
         long id = (Long) ((Condition.Equals) request.getCondition()).getValue();
         objects.computeIfAbsent(clazz, key -> new ConcurrentHashMap<>()).remove(id);
-        if (clazz.equals(Position.class)) {
-            latestPositionIds.values().remove(id);
-        }
     }
 
     private Set<Pair<Long, Long>> getPermissionsSet(Class<?> ownerClass, Class<?> propertyClass) {
