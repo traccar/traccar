@@ -18,8 +18,6 @@ package org.traccar.handler;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -38,29 +36,24 @@ public class PostProcessHandler extends BasePositionHandler {
     private final CacheManager cacheManager;
     private final Storage storage;
     private final ConnectionManager connectionManager;
-    private final boolean savePositions;
 
     @Inject
-    public PostProcessHandler(
-            Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager) {
+    public PostProcessHandler(CacheManager cacheManager, Storage storage, ConnectionManager connectionManager) {
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.connectionManager = connectionManager;
-        this.savePositions = config.getBoolean(Keys.DATABASE_SAVE_POSITIONS);
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
         try {
             if (PositionUtil.isLatest(cacheManager, position)) {
-                if (savePositions) {
-                    Device updatedDevice = new Device();
-                    updatedDevice.setId(position.getDeviceId());
-                    updatedDevice.setPositionId(position.getId());
-                    storage.updateObject(updatedDevice, new Request(
-                            new Columns.Include("positionId"),
-                            new Condition.Equals("id", updatedDevice.getId())));
-                }
+                Device updatedDevice = new Device();
+                updatedDevice.setId(position.getDeviceId());
+                updatedDevice.setPositionId(position.getId());
+                storage.updateObject(updatedDevice, new Request(
+                        new Columns.Include("positionId"),
+                        new Condition.Equals("id", updatedDevice.getId())));
 
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(true, position);
