@@ -22,6 +22,7 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Pair;
 import org.traccar.model.Permission;
+import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
@@ -42,6 +43,7 @@ public class MemoryStorage extends Storage {
 
     private final Map<Class<?>, Map<Long, Object>> objects = new ConcurrentHashMap<>();
     private final Map<Pair<Class<?>, Class<?>>, Set<Pair<Long, Long>>> permissions = new ConcurrentHashMap<>();
+    private final Map<Long, Long> latestPositionIds = new ConcurrentHashMap<>();
 
     private final AtomicLong increment = new AtomicLong();
 
@@ -200,7 +202,27 @@ public class MemoryStorage extends Storage {
     @Override
     public <T> long addObject(T entity, Request request) {
         long id = increment.incrementAndGet();
-        objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>()).put(id, entity);
+        var items = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>());
+        items.put(id, entity);
+
+        if (entity instanceof Position position) {
+            latestPositionIds.compute(position.getDeviceId(), (deviceId, previousId) -> {
+                Position previous = previousId != null ? (Position) items.get(previousId) : null;
+                if (previous == null
+                        || position.getFixTime().after(previous.getFixTime())
+                        || position.getFixTime().equals(previous.getFixTime())
+                        && !position.getServerTime().before(previous.getServerTime())) {
+                    if (previousId != null) {
+                        items.remove(previousId);
+                    }
+                    return id;
+                } else {
+                    items.remove(id);
+                    return previousId;
+                }
+            });
+        }
+
         return id;
     }
 
@@ -234,6 +256,9 @@ public class MemoryStorage extends Storage {
     public void removeObject(Class<?> clazz, Request request) {
         long id = (Long) ((Condition.Equals) request.getCondition()).getValue();
         objects.computeIfAbsent(clazz, key -> new ConcurrentHashMap<>()).remove(id);
+        if (clazz.equals(Position.class)) {
+            latestPositionIds.values().remove(id);
+        }
     }
 
     private Set<Pair<Long, Long>> getPermissionsSet(Class<?> ownerClass, Class<?> propertyClass) {
