@@ -31,6 +31,7 @@ import org.traccar.storage.query.Request;
 import java.lang.invoke.MethodHandle;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -204,19 +205,17 @@ public class MemoryStorage extends Storage {
         var items = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>());
 
         if (entity instanceof Position position) {
-            boolean latest = true;
-            for (Object item : items.values()) {
-                Position stored = (Position) item;
-                if (stored.getDeviceId() == position.getDeviceId()
-                        && stored.getFixTime().after(position.getFixTime())) {
-                    latest = false;
-                    break;
+            Iterator<Object> iterator = items.values().iterator();
+            while (iterator.hasNext()) {
+                Position item = (Position) iterator.next();
+                if (item.getDeviceId() == position.getDeviceId()) {
+                    if (item.getFixTime().after(position.getFixTime())) {
+                        return id;
+                    }
+                    iterator.remove();
                 }
             }
-            if (latest) {
-                items.values().removeIf(item -> ((Position) item).getDeviceId() == position.getDeviceId());
-                items.put(id, entity);
-            }
+            items.put(id, entity);
         } else {
             items.put(id, entity);
         }
