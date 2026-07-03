@@ -31,7 +31,6 @@ import org.traccar.storage.query.Request;
 import java.lang.invoke.MethodHandle;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -213,13 +212,12 @@ public class MemoryStorage extends Storage {
                         return id;
                     }
                     iterator.remove();
+                    break;
                 }
             }
-            items.put(id, entity);
-        } else {
-            items.put(id, entity);
         }
 
+        items.put(id, entity);
         return id;
     }
 
