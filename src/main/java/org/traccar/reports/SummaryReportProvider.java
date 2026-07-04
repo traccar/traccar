@@ -124,8 +124,7 @@ public class SummaryReportProvider {
     }
 
     private Collection<SummaryReportItem> calculateDeviceResults(
-            Device device, ZonedDateTime from, ZonedDateTime to,
-            ChronoUnit reportInterval) throws StorageException {
+            Device device, ZonedDateTime from, ZonedDateTime to, ChronoUnit reportInterval) throws StorageException {
 
         boolean fast = Duration.between(from, to).toSeconds() > config.getLong(Keys.REPORT_FAST_THRESHOLD);
         var results = new ArrayList<SummaryReportItem>();
@@ -176,8 +175,7 @@ public class SummaryReportProvider {
 
     public Collection<SummaryReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to,
-            ChronoUnit reportInterval) throws StorageException {
+            Date from, Date to, ChronoUnit reportInterval) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
         var tz = UserUtil.getTimezone(permissionsService.getServer(), permissionsService.getUser(userId)).toZoneId();
@@ -197,8 +195,7 @@ public class SummaryReportProvider {
 
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to,
-            ChronoUnit reportInterval) throws StorageException, IOException {
+            Date from, Date to, ChronoUnit reportInterval) throws StorageException, IOException {
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to,
                 reportInterval);
 
