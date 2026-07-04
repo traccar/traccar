@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -124,13 +125,13 @@ public class SummaryReportProvider {
 
     private Collection<SummaryReportItem> calculateDeviceResults(
             Device device, ZonedDateTime from, ZonedDateTime to,
-            DateUtil.SummaryReportInterval reportInterval) throws StorageException {
+            ChronoUnit reportInterval) throws StorageException {
 
         boolean fast = Duration.between(from, to).toSeconds() > config.getLong(Keys.REPORT_FAST_THRESHOLD);
         var results = new ArrayList<SummaryReportItem>();
-        if (reportInterval != DateUtil.SummaryReportInterval.NONE) {
+        if (reportInterval != null) {
             switch (reportInterval) {
-                case DateUtil.SummaryReportInterval.DAILY -> {
+                case ChronoUnit.DAYS -> {
                     while (DateUtil.startOfZDTDay(from).isBefore(DateUtil.startOfZDTDay(to))) {
                         ZonedDateTime fromDay = DateUtil.startOfZDTDay(from);
                         ZonedDateTime nextDay = fromDay.plusDays(1);
@@ -139,7 +140,7 @@ public class SummaryReportProvider {
                         from = nextDay;
                     }
                 }
-                case DateUtil.SummaryReportInterval.WEEKLY -> {
+                case ChronoUnit.WEEKS -> {
                     while (DateUtil.startOfZDTWeek(from).isBefore(DateUtil.startOfZDTWeek(to))) {
                         ZonedDateTime fromWeek = DateUtil.startOfZDTWeek(from);
                         ZonedDateTime nextWeek = fromWeek.plusWeeks(1);
@@ -148,7 +149,7 @@ public class SummaryReportProvider {
                         from = nextWeek;
                     }
                 }
-                case DateUtil.SummaryReportInterval.MONTHLY -> {
+                case ChronoUnit.MONTHS -> {
                     while (DateUtil.startOfZDTMonth(from).isBefore(DateUtil.startOfZDTMonth(to))) {
                         ZonedDateTime fromMonth = DateUtil.startOfZDTMonth(from);
                         ZonedDateTime nextMonth = fromMonth.plusMonths(1);
@@ -157,7 +158,7 @@ public class SummaryReportProvider {
                         from = nextMonth;
                     }
                 }
-                case DateUtil.SummaryReportInterval.YEARLY -> {
+                case ChronoUnit.YEARS -> {
                     while (DateUtil.startOfZDTYear(from).isBefore(DateUtil.startOfZDTYear(to))) {
                         ZonedDateTime fromYear = DateUtil.startOfZDTYear(from);
                         ZonedDateTime nextYear = fromYear.plusYears(1);
@@ -176,7 +177,7 @@ public class SummaryReportProvider {
     public Collection<SummaryReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to,
-            DateUtil.SummaryReportInterval reportInterval) throws StorageException {
+            ChronoUnit reportInterval) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
         var tz = UserUtil.getTimezone(permissionsService.getServer(), permissionsService.getUser(userId)).toZoneId();
@@ -197,7 +198,7 @@ public class SummaryReportProvider {
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to,
-            DateUtil.SummaryReportInterval reportInterval) throws StorageException, IOException {
+            ChronoUnit reportInterval) throws StorageException, IOException {
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to,
                 reportInterval);
 

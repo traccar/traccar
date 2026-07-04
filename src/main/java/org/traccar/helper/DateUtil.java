@@ -83,38 +83,6 @@ public final class DateUtil {
         }
     }
 
-    public enum SummaryReportInterval {
-        NONE,
-        DAILY,
-        WEEKLY,
-        MONTHLY,
-        YEARLY
-    }
-
-    public static SummaryReportInterval nextSummaryReportInterval(String reportInterval, boolean daily) {
-        if (daily) {
-            return SummaryReportInterval.DAILY;
-        } else if (reportInterval == null) {
-            return SummaryReportInterval.NONE;
-        }
-        switch (reportInterval) {
-            case "daily" -> {
-                return SummaryReportInterval.DAILY;
-            }
-            case "weekly" -> {
-                return SummaryReportInterval.WEEKLY;
-            }
-            case "monthly" -> {
-                return SummaryReportInterval.MONTHLY;
-            }
-            case "yearly" -> {
-                return SummaryReportInterval.YEARLY;
-            }
-            default -> {}
-        }
-        return SummaryReportInterval.NONE;
-    }
-
     public static ZonedDateTime startOfZDTDay(ZonedDateTime date) {
         return date.truncatedTo(ChronoUnit.DAYS);
     }
