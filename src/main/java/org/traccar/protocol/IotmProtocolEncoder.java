@@ -32,7 +32,6 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
 
     private static final int OUTPUT_ID_STATIC_SIGNAL = 0x08;
 
-    private final AtomicInteger messageId = new AtomicInteger();
     private final AtomicInteger commandIndex = new AtomicInteger();
     private final boolean permanentOutputControl;
 
@@ -91,7 +90,7 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
                 .topicName(uniqueId + "/OUTC")
                 .qos(MqttQoS.AT_LEAST_ONCE)
                 .payload(buf)
-                .messageId(messageId.updateAndGet(value -> value == 0xffff ? 1 : value + 1))
+                .messageId(1)
                 .build();
     }
 

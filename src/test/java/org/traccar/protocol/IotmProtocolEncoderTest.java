@@ -9,6 +9,7 @@ import org.traccar.model.Command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IotmProtocolEncoderTest extends ProtocolTest {
 
@@ -42,7 +43,7 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
         assertEquals(1, encodedCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX));
 
         MqttPublishMessage nextCommand = (MqttPublishMessage) encoder.encodeCommand(command);
-        assertEquals(2, nextCommand.variableHeader().packetId());
+        assertEquals(1, nextCommand.variableHeader().packetId());
         assertEquals(2, nextCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX));
         assertNotEquals(
                 encodedCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX),
@@ -51,7 +52,7 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodePermanentOutputControl() throws Exception {
+    public void testEncodePermanentOutput() throws Exception {
 
         var encoder = newEncoder(true);
 
@@ -59,6 +60,51 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
         verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0801010142"), encodedCommand.payload());
+        assertEquals(1, encodedCommand.variableHeader().packetId());
+
+        command.set(Command.KEY_DATA, 0);
+
+        MqttPublishMessage nextCommand = (MqttPublishMessage) encoder.encodeCommand(command);
+        verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0802010042"), nextCommand.payload());
+        assertEquals(1, nextCommand.variableHeader().packetId());
+        assertNotEquals(
+                encodedCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX),
+                nextCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX));
+
+    }
+
+    @Test
+    public void testEncodePermanentOutputIndex() throws Exception {
+
+        var encoder = newEncoder(true);
+
+        Command command = outputCommand(2, 1);
+
+        MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
+        verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0901010143"), encodedCommand.payload());
+        assertEquals(1, encodedCommand.variableHeader().packetId());
+
+        command.set(Command.KEY_DATA, 0);
+
+        MqttPublishMessage nextCommand = (MqttPublishMessage) encoder.encodeCommand(command);
+        verifyFrame(binary("0202080079df0d8648700000040800ffffff7f0902010043"), nextCommand.payload());
+        assertEquals(1, nextCommand.variableHeader().packetId());
+        assertNotEquals(
+                encodedCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX),
+                nextCommand.payload().getUnsignedByte(OUTPUT_COMMAND_UNIQUE_ID_INDEX));
+
+    }
+
+    @Test
+    public void testEncodePermanentOutputValidation() throws Exception {
+
+        var encoder = newEncoder(true);
+
+        Command indexCommand = outputCommand(3, 1);
+        assertThrows(IllegalArgumentException.class, () -> encoder.encodeCommand(indexCommand));
+
+        Command dataCommand = outputCommand(1, 2);
+        assertThrows(IllegalArgumentException.class, () -> encoder.encodeCommand(dataCommand));
 
     }
 
