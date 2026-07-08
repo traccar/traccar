@@ -62,9 +62,6 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
         buf.writeIntLE(Integer.MAX_VALUE); // expiration
         int index = command.getInteger(Command.KEY_INDEX);
         if (permanentOutputControl) {
-            if (index < 1 || index > 2) {
-                throw new IllegalArgumentException("Unsupported permanent output index");
-            }
             buf.writeByte(OUTPUT_ID_STATIC_SIGNAL + index - 1); // output id
         } else {
             buf.writeByte(index - 1); // output id
