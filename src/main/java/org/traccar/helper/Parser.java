@@ -367,22 +367,13 @@ public class Parser {
         if (reportInterval == null) {
             return null;
         }
-        switch (reportInterval) {
-            case "daily" -> {
-                return ChronoUnit.DAYS;
-            }
-            case "weekly" -> {
-                return ChronoUnit.WEEKS;
-            }
-            case "monthly" -> {
-                return ChronoUnit.MONTHS;
-            }
-            case "yearly" -> {
-                return ChronoUnit.YEARS;
-            }
-            default -> {}
-        }
-        return null;
+        return switch (reportInterval) {
+            case "daily" -> ChronoUnit.DAYS;
+            case "weekly" -> ChronoUnit.WEEKS;
+            case "monthly" -> ChronoUnit.MONTHS;
+            case "yearly" -> ChronoUnit.YEARS;
+            default -> null;
+        };
     }
 
 }
