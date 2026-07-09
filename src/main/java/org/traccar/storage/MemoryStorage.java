@@ -204,14 +204,13 @@ public class MemoryStorage extends Storage {
         var items = objects.computeIfAbsent(entity.getClass(), key -> new ConcurrentHashMap<>());
 
         if (entity instanceof Position position) {
-            var iterator = items.values().iterator();
-            while (iterator.hasNext()) {
-                Position item = (Position) iterator.next();
+            for (var entry : items.entrySet()) {
+                Position item = (Position) entry.getValue();
                 if (item.getDeviceId() == position.getDeviceId()) {
                     if (item.getFixTime().after(position.getFixTime())) {
                         return id;
                     }
-                    iterator.remove();
+                    items.remove(entry.getKey(), item);
                     break;
                 }
             }
