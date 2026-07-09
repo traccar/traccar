@@ -52,13 +52,13 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
     private void decodeMask1(ByteBuf buf, int mask, Position position) {
 
         if (BitUtil.check(mask, 0)) {
-            int index = buf.readerIndex();
+            int startIndex = buf.readerIndex();
             try {
                 position.setLongitude(buf.readFloatLE());
                 position.setLatitude(buf.readFloatLE());
                 position.setValid(true);
             } catch (IllegalArgumentException e) {
-                buf.readerIndex(index + 8);
+                buf.readerIndex(startIndex + 8);
             }
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
