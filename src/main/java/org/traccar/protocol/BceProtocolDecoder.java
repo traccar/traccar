@@ -52,13 +52,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
     private void decodeMask1(ByteBuf buf, int mask, Position position) {
 
         if (BitUtil.check(mask, 0)) {
-            double longitude = buf.readFloatLE();
-            double latitude = buf.readFloatLE();
-            if (longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90) {
-                position.setValid(true);
-                position.setLongitude(longitude);
-                position.setLatitude(latitude);
-            }
+            position.setValid(true);
+            position.setLongitude(buf.readFloatLE());
+            position.setLatitude(buf.readFloatLE());
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
             int status = buf.readUnsignedByte();
@@ -306,30 +302,34 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         masks.add(mask);
                     } while (BitUtil.check(mask, 15));
 
-                    mask = masks.get(0);
-                    decodeMask1(buf, mask, position);
+                    try {
+                        mask = masks.get(0);
+                        decodeMask1(buf, mask, position);
 
-                    if (masks.size() >= 2) {
-                        mask = masks.get(1);
-                        decodeMask2(buf, mask, position);
-                    }
+                        if (masks.size() >= 2) {
+                            mask = masks.get(1);
+                            decodeMask2(buf, mask, position);
+                        }
 
-                    if (masks.size() >= 3) {
-                        mask = masks.get(2);
-                        decodeMask3(buf, mask, position);
-                    }
+                        if (masks.size() >= 3) {
+                            mask = masks.get(2);
+                            decodeMask3(buf, mask, position);
+                        }
 
-                    if (masks.size() >= 4) {
-                        mask = masks.get(3);
-                        decodeMask4(buf, mask, position);
+                        if (masks.size() >= 4) {
+                            mask = masks.get(3);
+                            decodeMask4(buf, mask, position);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        position = null;
                     }
                 }
 
                 buf.readerIndex(structEnd);
 
-                if (position.getValid()) {
+                if (position != null && position.getValid()) {
                     positions.add(position);
-                } else if (!position.getAttributes().isEmpty()) {
+                } else if (position != null && !position.getAttributes().isEmpty()) {
                     getLastLocation(position, null);
                     positions.add(position);
                 }
