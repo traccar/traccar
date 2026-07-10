@@ -66,6 +66,9 @@ public abstract class TrackerServer implements TrackerConnector {
                 try {
                     if (isSecure()) {
                         SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        // Server-side engine: the JSSE default use-client-mode is not
+                        // guaranteed across JVMs, so set server mode to present the cert.
+                        engine.setUseClientMode(false);
                         pipeline.addLast(new SslHandler(engine));
                     }
                 } catch (Exception e) {
