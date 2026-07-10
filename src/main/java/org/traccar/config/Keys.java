@@ -1446,6 +1446,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Matrix homeserver URL for notifications.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MATRIX_HOMESERVER_URL = new StringConfigKey(
+            "notificator.matrix.homeserverUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Matrix bot access token for notifications.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MATRIX_ACCESS_TOKEN = new StringConfigKey(
+            "notificator.matrix.accessToken",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
