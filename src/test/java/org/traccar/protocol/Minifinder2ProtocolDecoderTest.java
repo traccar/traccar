@@ -12,6 +12,9 @@ public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Minifinder2ProtocolDecoder(null));
 
         verifyPositions(decoder, binary(
+                "ab104b00cab208010110013836323232313038373738303438310d24d0b71d6a0800f864000000000d0200100000d0b71d6a000000001c23c69b531448e06ed4e621e254cf084d696e6946696e646572204851"));
+
+        verifyPositions(decoder, binary(
                 "ab105b0063ca28000110013836323737313037363837383334300d246eaeb2690103fb2b030001001620eacce6217a59cf0800001e01a600050000000000160b2c00d14699811df7d600640b2c0187442817d4fdd100640b2c020a2f7f89cfc8cc0064"));
 
         verifyPositions(decoder, binary(

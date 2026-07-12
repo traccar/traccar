@@ -213,6 +213,8 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         
         verifyAttribute(decoder, buffer("ST300CMD;Res;511848119;319H;Disable1"), Position.KEY_RESULT, "319H;Disable1");
 
+        verifyNull(decoder, buffer("-Error"));
+
         decoder.setProtocolType(1);
 
         verifyPosition(decoder, buffer(

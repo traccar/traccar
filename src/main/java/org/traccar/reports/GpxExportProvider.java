@@ -15,6 +15,8 @@
  */
 package org.traccar.reports;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
@@ -37,10 +39,12 @@ import javax.xml.stream.XMLStreamWriter;
 
 public class GpxExportProvider {
 
+    private final Config config;
     private final Storage storage;
 
     @Inject
-    public GpxExportProvider(Storage storage) {
+    public GpxExportProvider(Config config, Storage storage) {
+        this.config = config;
         this.storage = storage;
     }
 
@@ -65,7 +69,8 @@ public class GpxExportProvider {
         writer.writeCharacters(device.getName());
         writer.writeEndElement();
         writer.writeStartElement("trkseg");
-        try (Stream<Position> positions = PositionUtil.getPositionsStream(storage, deviceId, from, to)
+        try (Stream<Position> positions = PositionUtil.getPositionsStream(
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
                 .filter(position -> geofence == null || geofence.containsPosition(position))) {
             for (var iterator = positions.iterator(); iterator.hasNext();) {
                 Position position = iterator.next();

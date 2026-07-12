@@ -1,6 +1,7 @@
 package org.traccar.reports;
 
 import org.junit.jupiter.api.Test;
+import org.traccar.config.Config;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
@@ -39,7 +40,7 @@ public class KmlExportProviderTest {
         TimeZone defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         try {
-            new KmlExportProvider(storage).generate(outputStream, 1, 0, from, to);
+            new KmlExportProvider(mock(Config.class), storage).generate(outputStream, 1, 0, from, to);
         } finally {
             TimeZone.setDefault(defaultTimeZone);
         }

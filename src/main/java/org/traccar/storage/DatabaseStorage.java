@@ -86,7 +86,7 @@ public class DatabaseStorage extends Storage {
             for (int index = 0; index < values.size(); index++) {
                 builder.setValue(index, values.get(index));
             }
-            Stream<T> stream = builder.executeQueryStreamed(clazz);
+            Stream<T> stream = builder.executeQueryStreamed(clazz, databaseType);
             builder = null;
             return stream;
         } catch (SQLException e) {

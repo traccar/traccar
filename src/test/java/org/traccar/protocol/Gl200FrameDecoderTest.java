@@ -13,6 +13,10 @@ public class Gl200FrameDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200FrameDecoder());
 
         assertEquals(
+                binary("2b000038000865134050947226820300030000216a3ed6f101895000521629fa8b28f402ac1a8e6a3ed6f100001600000010f505010ff824"),
+                decoder.decode(null, null, binary("2b000038000865134050947226820300030000216a3ed6f101895000521629fa8b28f402ac1a8e6a3ed6f100001600000010f505010ff824")));
+
+        assertEquals(
                 binary("2b4c474e00ff0026fe110b07020106563454040d054905000007e4031911213905083abd0d0a"),
                 decoder.decode(null, null, binary("2b4c474e00ff0026fe110b07020106563454040d054905000007e4031911213905083abd0d0a")));
 

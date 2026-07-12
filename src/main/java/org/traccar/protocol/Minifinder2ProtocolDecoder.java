@@ -267,9 +267,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (key == 0x26) {
                             position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() / 10.0);
                             position.setAltitude(buf.readShortLE());
-                        } else if (length > 15) {
+                        } else if (buf.readerIndex() < endIndex) {
                             position.set("description", buf.readCharSequence(
-                                    length, StandardCharsets.US_ASCII).toString());
+                                    endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
                         }
                         break;
                     case 0x24:
@@ -475,8 +475,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("agpsLongitude", buf.readIntLE() / 10000000.0);
                 }
                 case 0x30 -> {
-                    position.set("numberFlag", buf.readUnsignedByte());
-                    position.set("number", BufferUtil.readString(buf, length - 1));
+                    int numberIndex = BitUtil.to(buf.readUnsignedByte(), 4);
+                    position.set("number" + numberIndex, BufferUtil.readString(buf, length - 1));
                 }
                 case 0x31 -> {
                     position.set("prefixFlag", buf.readUnsignedByte());

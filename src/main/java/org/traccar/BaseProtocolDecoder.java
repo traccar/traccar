@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 package org.traccar;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.MediaManager;
@@ -52,6 +54,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private CommandsManager commandsManager;
 
     private String modelOverride;
+
+    private ByteBuf mediaBuffer;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
@@ -92,6 +96,41 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public String writeMediaFile(String uniqueId, ByteBuf buf, String extension) {
         return mediaManager.writeFile(uniqueId, buf, extension);
+    }
+
+    public String writeMediaFile(String uniqueId, String extension) {
+        try {
+            return mediaManager.writeFile(uniqueId, mediaBuffer, extension);
+        } finally {
+            releaseMediaBuffer();
+        }
+    }
+
+    public ByteBuf getMediaBuffer() {
+        return mediaBuffer;
+    }
+
+    public ByteBuf newMediaBuffer() {
+        return newMediaBuffer(0);
+    }
+
+    public ByteBuf newMediaBuffer(int size) {
+        releaseMediaBuffer();
+        mediaBuffer = Unpooled.buffer(size, getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE));
+        return mediaBuffer;
+    }
+
+    private void releaseMediaBuffer() {
+        if (mediaBuffer != null) {
+            mediaBuffer.release();
+            mediaBuffer = null;
+        }
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        releaseMediaBuffer();
     }
 
     public String getProtocolName() {

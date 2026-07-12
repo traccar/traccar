@@ -70,7 +70,7 @@ public class SnsSmsClient implements SmsManager {
         try {
             snsClient.publish(publishRequest);
         } catch (SnsException e) {
-            LOGGER.error("SMS send failed", e);
+            LOGGER.warn("SMS send failed", e);
         }
     }
 }

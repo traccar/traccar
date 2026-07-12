@@ -18,7 +18,9 @@ package org.traccar.handler;
 import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -31,13 +33,13 @@ public class TimeHandler extends BasePositionHandler {
     private static final long ROLLOVER_CYCLE = 1024 * Duration.ofDays(7).toMillis();
     private static final long ROLLOVER_THRESHOLD = ROLLOVER_CYCLE - Duration.ofDays(90).toMillis();
 
-    private final String overrideType;
+    private final CacheManager cacheManager;
     private final Set<String> overrideProtocols;
 
     @Inject
-    public TimeHandler(Config config) {
+    public TimeHandler(Config config, CacheManager cacheManager) {
 
-        overrideType = config.getString(Keys.TIME_OVERRIDE);
+        this.cacheManager = cacheManager;
         String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             overrideProtocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
@@ -68,6 +70,7 @@ public class TimeHandler extends BasePositionHandler {
     }
 
     private void handleOverride(Position position) {
+        String overrideType = AttributeUtil.lookup(cacheManager, Keys.TIME_OVERRIDE, position.getDeviceId());
         if (overrideType == null) {
             return;
         }

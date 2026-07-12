@@ -29,6 +29,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.StringUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -122,7 +123,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // header
 
-        String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
+        String id = StringUtil.stripLeading('0', ByteBufUtil.hexDump(buf.readSlice(5)));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;

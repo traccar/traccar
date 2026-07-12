@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "79790026f16318c0000001010100020101000301000004010100050201950006010010000100008021af0d0a"),
+                Position.KEY_POWER, 4.05);
+
+        verifyAttribute(decoder, binary(
                 "78782da41a0509160203cf05be31f80c306530001c0010012ed000007ef40000000006428b074205041302ff0009389c0d0a"),
                 Position.KEY_ALARM, Position.ALARM_TAMPERING);
 
@@ -614,6 +618,17 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "7878271208667030665022971a020c0a1e32c601727c1c0f89af002c14fa01366e000100010c003c1fdd0d0a"));
+
+        decoder.setModelOverride("VL103");
+
+        verifyPosition(decoder, binary(
+                "787822221607160f1000cf0225e03f0bd723182c149701cc0075c300933301000002a5f0860d0a"));
+
+        verifyPosition(decoder, binary(
+                "78782aa015041007350eca027ac8a20c4658be00140081cc00000000287d0000000002ea5e010004000009dffc0d0a"));
+
+        verifyNotNull(decoder, binary(
+                "7979007e7000000001020035000100003300126303564e07017004ea01f800f41d5c001466003400060e6303564e000043000b00de00322ae9770600000d0001000808685650500023470002000802225000120407580003000a8939500021051530683600180002019510000001010009000107000a00010c00280001120ce2299a0d0a"));
 
     }
 

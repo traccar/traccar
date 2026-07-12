@@ -16,6 +16,8 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
@@ -65,6 +67,9 @@ public class PositionResource extends BaseResource {
     @Inject
     private GpxExportProvider gpxExportProvider;
 
+    @Inject
+    private Config config;
+
     @GET
     public Stream<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
@@ -87,7 +92,8 @@ public class PositionResource extends BaseResource {
                 Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
                         new Columns.All(), new Condition.Equals("id", geofenceId)));
 
-                return PositionUtil.getPositionsStream(storage, deviceId, from, to)
+                return PositionUtil.getPositionsStream(
+                        storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
                         .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
                 return storage.getObjectsStream(Position.class, new Request(

@@ -60,8 +60,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private int frameMask;
     private String form;
 
-    private ByteBuf photo;
-
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
     public AtrackProtocolDecoder(Protocol protocol) {
@@ -593,10 +591,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
-        if (photo == null) {
-            photo = Unpooled.buffer();
+        if (getMediaBuffer() == null) {
+            newMediaBuffer();
         }
-        photo.writeBytes(buf.readSlice(buf.readUnsignedShort()));
+        getMediaBuffer().writeBytes(buf, buf.readUnsignedShort());
 
         if (index == count - 1) {
             Position position = new Position(getProtocolName());
@@ -604,9 +602,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
-            photo.release();
-            photo = null;
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), "jpg"));
 
             return position;
         }

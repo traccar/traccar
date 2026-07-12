@@ -16,6 +16,8 @@
 package org.traccar.reports;
 
 import org.traccar.api.security.PermissionsService;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Geofence;
@@ -42,11 +44,13 @@ public class CsvExportProvider {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
 
     @Inject
-    public CsvExportProvider(Storage storage, PermissionsService permissionsService) {
+    public CsvExportProvider(Config config, Storage storage, PermissionsService permissionsService) {
+        this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
     }
@@ -76,7 +80,8 @@ public class CsvExportProvider {
                 new Columns.All(), new Condition.Equals("id", geofenceId)));
 
         List<Position> positions;
-        try (var stream = PositionUtil.getPositionsStream(storage, deviceId, from, to)) {
+        try (var stream = PositionUtil.getPositionsStream(
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))) {
             positions = stream
                     .filter(position -> geofence == null || geofence.containsPosition(position))
                     .toList();

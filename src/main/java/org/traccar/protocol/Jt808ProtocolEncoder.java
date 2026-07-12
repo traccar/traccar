@@ -70,12 +70,17 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
-                    } else if ("BSJ".equals(model)) {
+                    } else if (model != null && Set.of("BSJ", "C5", "C5L").contains(model)) {
                         data.writeByte(1); // flag
                         var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    } else if (model != null && model.startsWith("JC")) {
+                        data.writeByte(0xF0); // online command
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
+                        return decoder.formatMessage(
+                                Jt808ProtocolDecoder.MSG_TRANSPARENT_DOWNLINK, id, false, data);
                     } else {
                         return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
                     }
