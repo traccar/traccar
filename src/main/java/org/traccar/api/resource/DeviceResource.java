@@ -49,6 +49,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -160,6 +161,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             if (entity.getHours() != null) {
                 position.getAttributes().put(Position.KEY_HOURS, entity.getHours());
             }
+            position.setServerTime(new Date());
             position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
 
             Device device = new Device();
