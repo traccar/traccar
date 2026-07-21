@@ -39,6 +39,7 @@ public class AmqpClient {
     private final String exchange;
     private final String topic;
 
+    private Connection connection;
     private Channel channel;
 
     AmqpClient(String connectionUrl, String exchange, String topic) {
@@ -53,8 +54,28 @@ public class AmqpClient {
         }
     }
 
+    private void disconnect() {
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (IOException | TimeoutException e) {
+                LOGGER.warn("AMQP channel close error", e);
+            }
+            channel = null;
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (IOException e) {
+                LOGGER.warn("AMQP connection close error", e);
+            }
+            connection = null;
+        }
+    }
+
     private void connect() throws IOException, TimeoutException {
-        Connection connection = factory.newConnection();
+        disconnect();
+        connection = factory.newConnection();
         channel = connection.createChannel();
         channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, true);
     }
@@ -64,7 +85,7 @@ public class AmqpClient {
             try {
                 connect();
             } catch (IOException | TimeoutException e) {
-                channel = null;
+                disconnect();
                 LOGGER.warn("AMQP connection error", e);
                 return;
             }
@@ -73,7 +94,7 @@ public class AmqpClient {
             channel.basicPublish(
                     exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            channel = null;
+            disconnect();
             throw e;
         }
     }
