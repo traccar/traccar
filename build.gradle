@@ -48,7 +48,7 @@ ext {
     guiceVersion = "7.0.0"
     jettyVersion = "12.1.8"
     jerseyVersion = "4.0.2"
-    nettyVersion = "4.2.14.Final"
+    nettyVersion = "4.2.16.Final"
     protobufVersion = "4.35.0"
     jxlsVersion = "2.14.0" // version 3 has breaking changes
     junixsocketVersion = "2.10.1"
