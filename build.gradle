@@ -88,7 +88,7 @@ dependencies {
     implementation "com.h2database:h2:2.4.240"
     implementation "com.mysql:mysql-connector-j:9.7.0"
     implementation "org.mariadb.jdbc:mariadb-java-client:3.5.8"
-    implementation "org.postgresql:postgresql:42.7.11"
+    implementation "org.postgresql:postgresql:42.7.13"
     implementation "com.kohlschutter.junixsocket:junixsocket-core:$junixsocketVersion"
     implementation "com.kohlschutter.junixsocket:junixsocket-mysql:$junixsocketVersion"
     implementation "com.microsoft.sqlserver:mssql-jdbc:13.4.0.jre11"
