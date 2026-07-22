@@ -97,6 +97,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
+    @Override
     public int getPort() {
         return port;
     }
