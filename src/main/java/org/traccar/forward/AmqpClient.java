@@ -54,23 +54,21 @@ public class AmqpClient {
         }
     }
 
+    private static void closeQuietly(AutoCloseable resource) {
+        if (resource != null) {
+            try {
+                resource.close();
+            } catch (Exception e) {
+                LOGGER.warn("AMQP close error", e);
+            }
+        }
+    }
+
     private void disconnect() {
-        if (channel != null) {
-            try {
-                channel.close();
-            } catch (IOException | TimeoutException e) {
-                LOGGER.warn("AMQP channel close error", e);
-            }
-            channel = null;
-        }
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (IOException e) {
-                LOGGER.warn("AMQP connection close error", e);
-            }
-            connection = null;
-        }
+        closeQuietly(channel);
+        channel = null;
+        closeQuietly(connection);
+        connection = null;
     }
 
     private void connect() throws IOException, TimeoutException {
@@ -81,21 +79,16 @@ public class AmqpClient {
     }
 
     public synchronized void publishMessage(String message) throws IOException {
-        if (channel == null || !channel.isOpen()) {
-            try {
-                connect();
-            } catch (IOException | TimeoutException e) {
-                disconnect();
-                LOGGER.warn("AMQP connection error", e);
-                return;
-            }
-        }
         try {
+            if (channel == null || !channel.isOpen()) {
+                connect();
+            }
             channel.basicPublish(
-                    exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
+                    exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    message.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException | TimeoutException e) {
             disconnect();
-            throw e;
+            throw new IOException("AMQP publish failed", e);
         }
     }
 }
