@@ -17,12 +17,16 @@ package org.traccar.forward;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
 
 public class EventForwarderAmqp implements EventForwarder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderAmqp.class);
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
@@ -42,6 +46,7 @@ public class EventForwarderAmqp implements EventForwarder {
             amqpClient.publishMessage(value);
             resultHandler.onResult(true, null);
         } catch (IOException e) {
+            LOGGER.warn("Event forwarding error", e);
             resultHandler.onResult(false, e);
         }
     }
