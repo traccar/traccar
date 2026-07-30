@@ -316,7 +316,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setSpeed(parser.nextDouble());
 
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
+        position.set(Position.KEY_BATTERY, parser.nextInt() / 1000.0);
 
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextHexInt())));

@@ -127,7 +127,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                     position.setLatitude(data.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
                     position.setLongitude(data.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
                     int speed = data.readUnsignedShortLE();
-                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
+                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) / 10.0));
                     if (BitUtil.check(speed, 14)) {
                         position.setLatitude(-position.getLatitude());
                     }
@@ -151,9 +151,9 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                     int powerLow = data.readUnsignedByte();
                     int powerFlags = data.readUnsignedByte();
                     int batteryHigh = data.readUnsignedByte();
-                    position.set(Position.KEY_POWER, (powerLow + (BitUtil.to(powerFlags, 5) << 8)) * 0.01);
+                    position.set(Position.KEY_POWER, (powerLow + (BitUtil.to(powerFlags, 5) << 8)) / 100.0);
                     position.set(Position.KEY_IGNITION, BitUtil.check(powerFlags, 5));
-                    position.set(Position.KEY_BATTERY, (BitUtil.from(powerFlags, 6) + (batteryHigh << 2)) * 0.01);
+                    position.set(Position.KEY_BATTERY, (BitUtil.from(powerFlags, 6) + (batteryHigh << 2)) / 100.0);
                     if (recordLength >= 4) {
                         int extraFlags = data.readUnsignedByte();
                         if (BitUtil.check(extraFlags, 0)) {
@@ -198,7 +198,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                     int tempMask = data.readUnsignedByte();
                     for (int i = 0; i < 8; i++) {
                         if (BitUtil.check(tempMask, i)) {
-                            position.set(Position.PREFIX_TEMP + (i + 1), data.readShortLE() * 0.01);
+                            position.set(Position.PREFIX_TEMP + (i + 1), data.readShortLE() / 100.0);
                         }
                     }
                     break;

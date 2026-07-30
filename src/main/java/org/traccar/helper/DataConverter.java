@@ -21,8 +21,7 @@ import org.apache.commons.codec.binary.Hex;
 
 public final class DataConverter {
 
-    private DataConverter() {
-    }
+    private DataConverter() {}
 
     public static byte[] parseHex(String string) {
         try {

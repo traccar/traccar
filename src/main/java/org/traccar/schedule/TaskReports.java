@@ -41,9 +41,9 @@ import jakarta.inject.Inject;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +87,7 @@ public class TaskReports extends SingleScheduleTask {
                 Set<Period<Instant>> finishedEvents = new HashSet<>(lastEvents);
                 finishedEvents.removeAll(currentEvents);
                 for (Period<Instant> period : finishedEvents) {
-                    RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
+                    RequestScoper scope = ServletScopes.scopeRequest(Map.of());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
                         executeReport(report, Date.from(period.getStart()), Date.from(period.getEnd()));
                     }

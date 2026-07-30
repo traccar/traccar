@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,8 @@ public class NotificatorTraccar extends Notificator {
         private String[] tokens;
         @JsonProperty("notification")
         private NotificationObject notification;
+        @JsonProperty("priority")
+        private boolean priority;
     }
 
     @Inject
@@ -101,6 +103,7 @@ public class NotificatorTraccar extends Notificator {
             message.type = "manager";
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = item;
+            message.priority = shortMessage.priority();
 
             var request = client.target(url).request().header("Authorization", "key=" + key);
             try (Response result = request.post(Entity.json(message))) {

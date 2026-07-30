@@ -21,8 +21,7 @@ import org.traccar.reports.common.TripsConfig;
 
 public final class MotionProcessor {
 
-    private MotionProcessor() {
-    }
+    private MotionProcessor() {}
 
     public static void updateState(
             MotionState state, Position last, Position position, boolean newState, TripsConfig tripsConfig) {

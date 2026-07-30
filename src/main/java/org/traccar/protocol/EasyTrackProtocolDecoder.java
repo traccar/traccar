@@ -99,6 +99,8 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Set<String> ACK_TYPES = Set.of("HB", "CC", "AM", "DW", "JZ");
+
     private void decodeAlarm(Position position, long status, String model) {
         if ((status & 0x02000000L) != 0) {
             position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
@@ -161,8 +163,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             if (type.equals("TX") || type.equals("MQ")) {
                 channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
-            } else if ("E3+4G".equals(getDeviceModel(deviceSession))
-                    && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
+            } else if ("E3+4G".equals(getDeviceModel(deviceSession)) && ACK_TYPES.contains(type)) {
                 channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
             }
         }
@@ -213,7 +214,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 100.0));
-        double course = parser.nextHexInt() * 0.01;
+        double course = parser.nextHexInt() / 100.0;
         if (course < 360) {
             position.setCourse(course);
         }
@@ -244,7 +245,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
             }
 
-            position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() * 0.01);
+            position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() / 100.0);
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }

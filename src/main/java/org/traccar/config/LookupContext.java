@@ -17,8 +17,7 @@ package org.traccar.config;
 
 public interface LookupContext {
 
-    class Global implements LookupContext {
-    }
+    class Global implements LookupContext {}
 
     class User implements LookupContext {
 

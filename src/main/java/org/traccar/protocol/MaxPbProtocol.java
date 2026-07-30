@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,16 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
 import jakarta.inject.Inject;
-import org.traccar.model.Command;
 
-public class NavtelecomProtocol extends BaseProtocol {
+public class MaxPbProtocol extends BaseProtocol {
 
     @Inject
-    public NavtelecomProtocol(Config config) {
-        setSupportedDataCommands(
-                Command.TYPE_CUSTOM);
+    public MaxPbProtocol(Config config) {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new NavtelecomFrameDecoder());
-                pipeline.addLast(new NavtelecomProtocolEncoder(NavtelecomProtocol.this));
-                pipeline.addLast(new NavtelecomProtocolDecoder(NavtelecomProtocol.this));
+                pipeline.addLast(new MaxPbFrameDecoder());
+                pipeline.addLast(new MaxPbProtocolDecoder(MaxPbProtocol.this));
             }
         });
     }

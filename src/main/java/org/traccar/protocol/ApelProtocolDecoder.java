@@ -166,10 +166,10 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 } else {
                     int speed = buf.readShortLE();
                     position.setValid(speed != -1);
-                    position.setSpeed(UnitsConverter.knotsFromKph(speed * 0.01));
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed / 100.0));
                 }
 
-                position.setCourse(buf.readShortLE() * 0.01);
+                position.setCourse(buf.readShortLE() / 100.0);
                 position.setAltitude(buf.readShortLE());
 
                 if (subtype == MSG_STATE_FULL_INFO_T104) {

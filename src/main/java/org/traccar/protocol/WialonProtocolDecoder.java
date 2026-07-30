@@ -31,6 +31,7 @@ import java.net.SocketAddress;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .text("#")                           // separator
             .expression("(.*)")                  // message
             .compile();
+
+    private static final Pattern PATTERN_PARAM = Pattern.compile("(.*):[1-3]:(.*)");
 
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
@@ -137,9 +140,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
             for (String param : values) {
-                Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
+                Matcher paramParser = PATTERN_PARAM.matcher(param);
                 if (paramParser.matches()) {
-                    String key = paramParser.group(1).toLowerCase();
+                    String key = paramParser.group(1).toLowerCase(Locale.ROOT);
                     String value = paramParser.group(2);
                     try {
                         position.set(key, Double.parseDouble(value));

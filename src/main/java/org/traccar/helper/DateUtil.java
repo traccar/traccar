@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.helper;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,8 +23,10 @@ import java.util.Date;
 
 public final class DateUtil {
 
-    private DateUtil() {
-    }
+    private DateUtil() {}
+
+    private static final DateTimeFormatter LOCAL_DATE_TIME = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public static Date correctDay(Date guess) {
         return correctDate(new Date(), guess, Calendar.DAY_OF_MONTH);
@@ -63,6 +64,10 @@ public final class DateUtil {
         return Date.from(Instant.from(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(value)));
     }
 
+    public static Date parse(DateTimeFormatter formatter, String value) {
+        return Date.from(Instant.from(formatter.parse(value)));
+    }
+
     public static String formatDate(Date date) {
         return formatDate(date, true);
     }
@@ -71,7 +76,7 @@ public final class DateUtil {
         if (zoned) {
             return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.systemDefault()).format(date.toInstant());
         } else {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            return LOCAL_DATE_TIME.format(date.toInstant());
         }
     }
 

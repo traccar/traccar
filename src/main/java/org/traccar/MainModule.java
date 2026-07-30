@@ -72,6 +72,9 @@ import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
+import org.traccar.geocoder.AutoNaviGeocoder;
+import org.traccar.geocoder.BaiduGeocoder;
+import org.traccar.geocoder.TencentGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -81,7 +84,10 @@ import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
+import org.traccar.handler.MapMatcherHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.mapmatcher.MapMatcher;
+import org.traccar.mapmatcher.TraccarMapMatcher;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
@@ -238,6 +244,9 @@ public class MainModule extends AbstractModule {
                 case "maptiler" -> new MapTilerGeocoder(client, key, cacheSize, addressFormat);
                 case "geoapify" -> new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                 case "geocodejson" -> new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "autonavi" -> new AutoNaviGeocoder(client, key, cacheSize, addressFormat);
+                case "baidu" -> new BaiduGeocoder(client, key, language, cacheSize, addressFormat);
+                case "tencent" -> new TencentGeocoder(client, key, cacheSize, addressFormat);
                 default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);
@@ -300,6 +309,30 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static MapMatcher provideMapMatcher(Config config, Client client) {
+        if (config.getBoolean(Keys.MAP_MATCHER_ENABLE)) {
+            String type = config.getString(Keys.MAP_MATCHER_TYPE);
+            String url = config.getString(Keys.MAP_MATCHER_URL);
+            String key = config.getString(Keys.MAP_MATCHER_KEY);
+            return switch (type) {
+                case "traccar" -> new TraccarMapMatcher(client, url, key);
+                default -> throw new IllegalArgumentException("Unknown map matcher provider");
+            };
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MapMatcherHandler provideMapMatcherHandler(@Nullable MapMatcher mapMatcher) {
+        if (mapMatcher != null) {
+            return new MapMatcherHandler(mapMatcher);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
             return new SpeedLimitHandler(speedLimitProvider);
@@ -311,7 +344,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CopyAttributesHandler provideCopyAttributesHandler(Config config, CacheManager cacheManager) {
         if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
-            return new CopyAttributesHandler(config, cacheManager);
+            return new CopyAttributesHandler(cacheManager);
         }
         return null;
     }

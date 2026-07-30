@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,19 +45,31 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PATH_REQUEST = 0x000C;
     public static final int MSG_PATH_RESPONSE = 0x000D;
 
-    private String model;
     private String uniqueId;
     private int dataSize;
     private int dataCurrent;
     private boolean video;
-    private ByteBuf media;
 
     private boolean isPacketData() {
-        if (model == null) {
-            return dataSize < 8192;
+        return dataSize < 8192;
+    }
+
+    private Position completeMedia(Channel channel, SocketAddress remoteAddress) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        getLastLocation(position, null);
+        if (video) {
+            position.set(Position.KEY_VIDEO, writeMediaFile(uniqueId, "h265"));
         } else {
-            return !"DSM".equals(model);
+            position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, "jpg"));
         }
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeShort(MSG_INIT_REQUEST);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+        return position;
     }
 
     @Override
@@ -76,7 +88,6 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
-                    model = getDeviceModel(deviceSession);
                     ByteBuf response = Unpooled.buffer();
                     if (BitUtil.check(settings, 25)) {
                         response.writeShort(MSG_PATH_REQUEST);
@@ -110,7 +121,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(); // length
                 dataSize = buf.readInt();
                 dataCurrent = isPacketData() ? 1 : 0;
-                media = Unpooled.buffer();
+                newMediaBuffer();
                 if (channel != null) {
                     ByteBuf response = Unpooled.buffer();
                     response.writeShort(MSG_RESUME);
@@ -121,7 +132,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case MSG_DATA:
                 int length = buf.readUnsignedShort() - 2;
-                media.writeBytes(buf, length);
+                getMediaBuffer().writeBytes(buf, length);
                 boolean finished;
                 if (isPacketData()) {
                     finished = dataCurrent == dataSize;
@@ -131,26 +142,12 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                     dataCurrent += length;
                 }
                 if (finished) {
-                    deviceSession = getDeviceSession(channel, remoteAddress);
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    getLastLocation(position, null);
-                    try {
-                        if (video) {
-                            position.set(Position.KEY_VIDEO, writeMediaFile(uniqueId, media, "h265"));
-                        } else {
-                            position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, media, "jpg"));
-                        }
-                    } finally {
-                        media.release();
-                        media = null;
-                    }
-                    if (channel != null) {
-                        ByteBuf response = Unpooled.buffer();
-                        response.writeShort(MSG_INIT_REQUEST);
-                        channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-                    }
-                    return position;
+                    return completeMedia(channel, remoteAddress);
+                }
+                break;
+            case MSG_COMPLETE:
+                if (getMediaBuffer() != null) {
+                    return completeMedia(channel, remoteAddress);
                 }
                 break;
             case MSG_PATH_RESPONSE:

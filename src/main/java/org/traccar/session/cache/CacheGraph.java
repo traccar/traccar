@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class CacheGraph {
         CacheKey key = new CacheKey(clazz, id);
         CacheNode node = nodes.remove(key);
         if (node != null) {
-            node.getAllLinks(true).forEach(child -> child.getLinks(key.clazz(), false).remove(node));
+            node.getAllLinks(true).forEach(child -> child.removeLink(key.clazz(), false, node));
         }
         roots.remove(key);
     }
@@ -71,11 +71,11 @@ public class CacheGraph {
             return Stream.empty();
         }
 
-        var directSteam = rootNode.getLinks(clazz, forward).stream()
+        var directSteam = rootNode.linkStream(clazz, forward)
                 .map(node -> (T) node.getValue());
 
         var proxyStream = proxies.stream()
-                .flatMap(proxyClass -> rootNode.getLinks(proxyClass, forward).stream()
+                .flatMap(proxyClass -> rootNode.linkStream(proxyClass, forward)
                         .flatMap(node -> getObjectStream(node, clazz, proxies, forward)));
 
         return Stream.concat(directSteam, proxyStream);
@@ -102,8 +102,8 @@ public class CacheGraph {
                 toNode = new CacheNode(objectSupplier.get());
                 nodes.put(toKey, toNode);
             }
-            fromNode.getLinks(toClazz, true).add(toNode);
-            toNode.getLinks(fromClazz, false).add(fromNode);
+            fromNode.addLink(toClazz, true, toNode);
+            toNode.addLink(fromClazz, false, fromNode);
         }
         return stop;
     }
@@ -115,8 +115,8 @@ public class CacheGraph {
         if (fromNode != null) {
             CacheNode toNode = nodes.get(new CacheKey(toClazz, toId));
             if (toNode != null) {
-                fromNode.getLinks(toClazz, true).remove(toNode);
-                toNode.getLinks(fromClazz, false).remove(fromNode);
+                fromNode.removeLink(toClazz, true, toNode);
+                toNode.removeLink(fromClazz, false, fromNode);
             }
         }
     }

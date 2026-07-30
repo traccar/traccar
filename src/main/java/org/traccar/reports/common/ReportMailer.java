@@ -30,6 +30,7 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 public class ReportMailer {
 
@@ -38,18 +39,20 @@ public class ReportMailer {
     private final PermissionsService permissionsService;
     private final MailManager mailManager;
     private final TextTemplateFormatter textTemplateFormatter;
+    private final ExecutorService executorService;
 
     @Inject
     public ReportMailer(
             PermissionsService permissionsService, MailManager mailManager,
-            TextTemplateFormatter textTemplateFormatter) {
+            TextTemplateFormatter textTemplateFormatter, ExecutorService executorService) {
         this.permissionsService = permissionsService;
         this.mailManager = mailManager;
         this.textTemplateFormatter = textTemplateFormatter;
+        this.executorService = executorService;
     }
 
     public void sendAsync(long userId, ReportExecutor executor) {
-        new Thread(() -> {
+        executorService.submit(() -> {
             try {
                 var stream = new ByteArrayOutputStream();
                 executor.execute(stream);
@@ -64,11 +67,11 @@ public class ReportMailer {
             } catch (StorageException | IOException | MessagingException e) {
                 LOGGER.warn("Email report failed", e);
             }
-        }).start();
+        });
     }
 
     public void sendAsync(User user, String url) {
-        new Thread(() -> {
+        executorService.submit(() -> {
             try {
                 var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
                 velocityContext.put("reportUrl", url);
@@ -77,7 +80,7 @@ public class ReportMailer {
             } catch (StorageException | MessagingException e) {
                 LOGGER.warn("Email report failed", e);
             }
-        }).start();
+        });
     }
 
 }

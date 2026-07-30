@@ -33,8 +33,7 @@ public class VideoStreamManager {
     private final Map<String, DeviceStream> streams = new ConcurrentHashMap<>();
 
     @Inject
-    public VideoStreamManager() {
-    }
+    public VideoStreamManager() {}
 
     public void handleFrame(
             long deviceId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {

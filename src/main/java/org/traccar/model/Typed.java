@@ -16,5 +16,4 @@
  */
 package org.traccar.model;
 
-public record Typed(String type) {
-}
+public record Typed(String type) {}

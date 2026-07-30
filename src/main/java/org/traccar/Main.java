@@ -47,8 +47,7 @@ public final class Main {
         return injector;
     }
 
-    private Main() {
-    }
+    private Main() {}
 
     public static void logSystemInfo() {
         try {

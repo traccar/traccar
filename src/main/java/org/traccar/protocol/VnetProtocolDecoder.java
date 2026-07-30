@@ -79,11 +79,11 @@ public class VnetProtocolDecoder extends BaseProtocolDecoder {
 
             value = BcdUtil.readInteger(buf, 8);
             degrees = value / 1000000;
-            double lat = degrees + value % 1000000 * 0.0001 / 60;
+            double lat = degrees + value % 1000000 / 10000.0 / 60;
 
             value = BcdUtil.readInteger(buf, 10);
             degrees = value / 10000000;
-            double lon = degrees + value % 10000000 * 0.00001 / 60;
+            double lon = degrees + value % 10000000 / 100000.0 / 60;
 
             int flags = buf.readUnsignedByte();
             position.setValid(BitUtil.check(flags, 0));

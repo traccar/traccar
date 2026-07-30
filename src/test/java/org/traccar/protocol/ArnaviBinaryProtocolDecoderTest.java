@@ -28,6 +28,9 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "ff23f30c45f5c90f0300"));
 
+        verifyNull(decoder, binary(
+                "ff2515a4ba40d0110300"));
+
         verifyPositions(decoder, binary(
                 "5b01012800a3175f5903513934420447221c42055402781E0900f0c5215b4e0084005c00007c005d0000a300fa3701000029012800a3175f5903513934420447221c42055402781E0900f0c5215b4e0084005c00007c005d0000a300fa37010000295d"),
                 position("2017-07-07 05:09:55.000", true, 45.05597, 39.03347));
@@ -51,6 +54,16 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new ArnaviBinaryProtocolDecoder(null));
+
+        verifyNull(decoder, binary("ff23e9ef782de7120300"));
+
+        verifyPositions(decoder, binary(
+                "5b01013c00fd5aaa5a03958b5e42048fd51442050015770097db000000075fd69b130802fa00180900d0c564010f11ea3a5b070009015c00009c005d00008c00fa32010000a65d"),
+                position("2018-03-15 11:37:33.000", true, 55.63631, 37.20855));
+
+        verifyAttribute(decoder, binary(
+                "5b01013c00fd5aaa5a03958b5e42048fd51442050015770097db000000075fd69b130802fa00180900d0c564010f11ea3a5b070009015c00009c005d00008c00fa32010000a65d"),
+                Position.KEY_HDOP, 2.19);
 
         verifyNull(decoder, binary("ff23ae52a969f30c45f5"));
 

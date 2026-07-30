@@ -24,8 +24,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Network {
 
-    public Network() {
-    }
+    public Network() {}
 
     public Network(CellTower... cellTowers) {
         for (var tower : cellTowers) {

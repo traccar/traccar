@@ -17,8 +17,8 @@
 package org.traccar.helper;
 
 import java.beans.Introspector;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +39,9 @@ import org.traccar.storage.query.Request;
 public final class LogAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
     private final Storage storage;
 
@@ -147,9 +150,8 @@ public final class LogAction {
         action.setActionType(ACTION_REPORT);
         action.set("scheduled", scheduled ? true : null);
         action.set("type", report);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        action.set("from", dateFormat.format(from));
-        action.set("to", dateFormat.format(to));
+        action.set("from", DATE_FORMAT.format(from.toInstant()));
+        action.set("to", DATE_FORMAT.format(to.toInstant()));
         action.set("devices", deviceIds.toString());
         action.set("groups", groupIds.toString());
         storeAction(action);

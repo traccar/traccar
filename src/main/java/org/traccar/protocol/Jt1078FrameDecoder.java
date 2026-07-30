@@ -19,19 +19,25 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BaseProtocol;
 import org.traccar.helper.BitUtil;
 
 public class Jt1078FrameDecoder extends BaseFrameDecoder {
 
+    public Jt1078FrameDecoder() {
+        super(BaseProtocol.MAX_FRAME_LENGTH_LARGE);
+    }
+
     @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 30) {
+        if (buf.readableBytes() < 34) {
             return null;
         }
 
         int startIndex = buf.readerIndex();
-        int index = startIndex + 15; // skip header
+        int idLength = buf.getUnsignedShort(startIndex + 8) == 0 ? 10 : 6;
+        int index = startIndex + 9 + idLength; // skip header
 
         int type = BitUtil.from(buf.getUnsignedByte(index), 4);
         index += 1 + 8; // data type + timestamp

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import java.util.List;
 
 public final class Keys {
 
-    private Keys() {
-    }
+    private Keys() {}
 
     /**
-     * Network interface for the protocol. If not specified, the server will bind to all interfaces.
+     * Network interface for the protocol. If not specified, the server will bind to all interfaces. Multiple addresses
+     * (for example, one IPv4 and one IPv6) can be supplied as a comma-separated list.
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new StringConfigSuffix(
             ".address",
@@ -359,7 +359,8 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new IntegerConfigKey(
             "server.timeout",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            1800);
 
     /**
      * Send device responses immediately before writing it in the database.
@@ -504,6 +505,14 @@ public final class Keys {
             true);
 
     /**
+     * Generate device connection status events (deviceOnline, deviceOffline, deviceUnknown) on status changes.
+     */
+    public static final ConfigKey<Boolean> EVENT_STATUS_ENABLE = new BooleanConfigKey(
+            "event.status.enable",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
@@ -563,11 +572,21 @@ public final class Keys {
             "./schema/changelog-master.xml");
 
     /**
-     * Database connection pool size. Default value is defined by the HikariCP library.
+     * Database connection pool size.
      */
     public static final ConfigKey<Integer> DATABASE_MAX_POOL_SIZE = new IntegerConfigKey(
             "database.maxPoolSize",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            20);
+
+    /**
+     * Number of rows fetched per round trip for streamed queries (position history and exports). On PostgreSQL this
+     * enables a server-side cursor so results are not fully buffered in memory.
+     */
+    public static final ConfigKey<Integer> DATABASE_STREAM_FETCH_SIZE = new IntegerConfigKey(
+            "database.streamFetchSize",
+            List.of(KeyType.CONFIG),
+            1000);
 
     /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
@@ -634,6 +653,33 @@ public final class Keys {
     public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new BooleanConfigKey(
             "database.saveEmpty",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum lifetime in milliseconds of a connection in the pool.
+     */
+    public static final ConfigKey<Integer> DATABASE_MAX_LIFETIME = new IntegerConfigKey(
+            "database.maxLifetime",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * If not zero, enable batching of position inserts. The value is the flush interval in milliseconds; positions
+     * accumulated during this window are written as a single JDBC batch. Trades up to this much latency for
+     * higher throughput on busy servers.
+     */
+    public static final ConfigKey<Long> DATABASE_POSITION_BATCH_INTERVAL = new LongConfigKey(
+            "database.positionBatchInterval",
+            List.of(KeyType.CONFIG),
+            0L);
+
+    /**
+     * Maximum number of positions written in a single batch. Default value is 100, which is safe across all supported
+     * databases including SQL Server (with its 2100 parameter limit). Postgres and MySQL can typically handle much
+     * larger batches; raise this for higher drain rate on busy servers.
+     */
+    public static final ConfigKey<Integer> DATABASE_POSITION_BATCH_SIZE = new IntegerConfigKey(
+            "database.positionBatchSize",
+            List.of(KeyType.CONFIG),
+            100);
 
     /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
@@ -748,6 +794,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Allow new users authenticated via OpenID Connect to be auto-created even when the server
+     * registration setting is disabled. When false, OpenID logins for unknown users are rejected
+     * unless the server has registration enabled.
+     */
+    public static final ConfigKey<Boolean> OPENID_ALLOW_REGISTRATION = new BooleanConfigKey(
+            "openid.allowRegistration",
+            List.of(KeyType.CONFIG));
+
+    /**
      * OpenID Connect Client ID.
      * This is a unique ID assigned to each application you register with your identity provider.
      * Required to enable SSO.
@@ -854,6 +909,15 @@ public final class Keys {
             "./media");
 
     /**
+     * Maximum size in bytes of a single media buffer (photo, audio or video) that a protocol decoder accumulates from
+     * a device. Transfers larger than this limit are dropped. Only one media buffer is kept per connection.
+     */
+    public static final ConfigKey<Integer> MEDIA_BUFFER_SIZE = new IntegerConfigKey(
+            "media.bufferSize",
+            List.of(KeyType.CONFIG),
+            32 * 1024 * 1024);
+
+    /**
      * Optional parameter to specify a network interface for the web interface to bind to. By default, the server will
      * bind to all available interfaces.
      */
@@ -909,14 +973,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Server debug version of the web app. Not recommended to use for performance reasons. It is intended to be used
-     * for development and debugging purposes.
-     */
-    public static final ConfigKey<Boolean> WEB_DEBUG = new BooleanConfigKey(
-            "web.debug",
-            List.of(KeyType.CONFIG));
-
-    /**
      * A token to log in as a virtual admin account. Can be used to restore access in case of issues with regular
      * admin login. For example, if a password is lost and can't be restored.
      */
@@ -967,6 +1023,22 @@ public final class Keys {
     public static final ConfigKey<String> SERVER_FORWARD = new StringConfigKey(
             "server.forward",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Raw data forwarding TCP connect timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "server.forward.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Raw data forwarding TCP write timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_WRITE_TIMEOUT = new IntegerConfigKey(
+            "server.forward.writeTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
 
     /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
@@ -1331,6 +1403,16 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Firebase message delivery mode. Supported values are {@code direct} (notification payload only,
+     * default and current behavior), {@code data} (data-only payload for the client app to handle),
+     * and {@code mixed} (both notification and data payloads).
+     */
+    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_MODE = new StringConfigKey(
+            "notificator.firebase.mode",
+            List.of(KeyType.CONFIG),
+            "direct");
+
+    /**
      * Pushover notification user name.
      */
     public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_USER = new StringConfigKey(
@@ -1363,7 +1445,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new BooleanConfigKey(
             "notificator.telegram.sendLocation",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
      * Telegram notification proxy URL.
@@ -1443,6 +1525,15 @@ public final class Keys {
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum number of positions returned by a single history or export request. Prevents unbounded queries from
+     * loading an entire result set into memory. Set to 0 to disable the limit.
+     */
+    public static final ConfigKey<Integer> REPORT_MAX_POSITIONS = new IntegerConfigKey(
+            "report.maxPositions",
+            List.of(KeyType.CONFIG),
+            50000);
 
     /**
      * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.
@@ -1660,16 +1751,8 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
-     */
-    public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new BooleanConfigKey(
-            "filter.skipAttributes.enable",
-            List.of(KeyType.CONFIG, KeyType.DEVICE));
-
-    /**
-     * Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
+     * List of attributes that prevent filtering. If any attribute mentioned in this config key changed value
+     * since the last position, the position is not filtered out.
      */
     public static final ConfigKey<String> FILTER_SKIP_ATTRIBUTES = new StringConfigKey(
             "filter.skipAttributes",
@@ -1681,7 +1764,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> TIME_OVERRIDE = new StringConfigKey(
             "time.override",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * List of protocols to enable. If not specified, Traccar enables all protocols that have port numbers listed.
@@ -1864,6 +1947,36 @@ public final class Keys {
             "geocoder.onRequest",
             List.of(KeyType.CONFIG),
             true);
+
+    /**
+     * Boolean flag to enable map matcher. When enabled, position coordinates are aligned to the nearest road segment
+     * before further processing.
+     */
+    public static final ConfigKey<Boolean> MAP_MATCHER_ENABLE = new BooleanConfigKey(
+            "mapMatcher.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Map matcher provider type. Currently only "traccar" is supported.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_TYPE = new StringConfigKey(
+            "mapMatcher.type",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Map matcher service URL.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_URL = new StringConfigKey(
+            "mapMatcher.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Map matcher provider API key.
+     */
+    public static final ConfigKey<String> MAP_MATCHER_KEY = new StringConfigKey(
+            "mapMatcher.key",
+            List.of(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable LBS location resolution. Some devices send cell tower information and Wi-Fi points when

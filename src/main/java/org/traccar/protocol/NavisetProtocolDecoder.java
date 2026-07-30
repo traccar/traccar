@@ -83,9 +83,9 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_STATUS, buf.readUnsignedByte());
                 position.setValid(true);
                 position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
-                position.setLatitude(buf.readUnsignedIntLE() * 0.000001);
-                position.setLongitude(buf.readUnsignedIntLE() * 0.000001);
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
+                position.setLatitude(buf.readUnsignedIntLE() / 1000000.0);
+                position.setLongitude(buf.readUnsignedIntLE() / 1000000.0);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() / 10.0));
 
                 if (BitUtil.check(blockMask, 0)) {
                     int dataMask = buf.readUnsignedByte();
@@ -95,17 +95,17 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_SATELLITES, BitUtil.to(satellites, 7));
                     }
                     if (BitUtil.check(dataMask, 1)) {
-                        position.setCourse(buf.readUnsignedShortLE() * 0.1);
+                        position.setCourse(buf.readUnsignedShortLE() / 10.0);
                     }
                     if (BitUtil.check(dataMask, 2)) {
                         position.setAltitude(buf.readShortLE());
                     }
                     if (BitUtil.check(dataMask, 3)) {
-                        position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                        position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
                     }
                     if (BitUtil.check(dataMask, 4)) {
-                        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
-                        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                        position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
                     }
                     if (BitUtil.check(dataMask, 5)) {
                         position.set(Position.KEY_INPUT, buf.readUnsignedByte());

@@ -95,7 +95,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+        position.set(Position.KEY_BATTERY, parser.nextInt() / 100.0);
 
         int index = sentence.lastIndexOf('+');
         if (index > 0 && channel instanceof DatagramChannel) {

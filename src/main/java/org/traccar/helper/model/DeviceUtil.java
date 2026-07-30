@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
 
 public final class DeviceUtil {
 
-    private DeviceUtil() {
-    }
+    private DeviceUtil() {}
 
     public static void resetStatus(Storage storage) throws StorageException {
         storage.updateObject(new Device(), new Request(new Columns.Include("status")));

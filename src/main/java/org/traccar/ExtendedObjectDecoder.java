@@ -50,8 +50,7 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
     /**
      * Method called when config is initialized.
      */
-    protected void init() {
-    }
+    protected void init() {}
 
     private void saveOriginal(Object decodedMessage, Object originalMessage) {
         if (getConfig().getBoolean(Keys.DATABASE_SAVE_ORIGINAL) && decodedMessage instanceof Position position) {
@@ -96,8 +95,7 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
     }
 
     protected void onMessageEvent(
-            Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {
-    }
+            Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {}
 
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         return null;

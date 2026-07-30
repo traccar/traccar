@@ -22,8 +22,7 @@ public final class OverspeedProcessor {
 
     public static final String ATTRIBUTE_SPEED = "speed";
 
-    private OverspeedProcessor() {
-    }
+    private OverspeedProcessor() {}
 
     public static void updateState(
             OverspeedState state, Position position,

@@ -28,8 +28,7 @@ public final class SessionHelper {
     public static final String EXPIRATION_KEY = "expiration";
     public static final String ORIGIN_KEY = "origin";
 
-    private SessionHelper() {
-    }
+    private SessionHelper() {}
 
     public static void userLogin(LogAction actionLogger, HttpServletRequest request, User user, Date expiration) {
         request.getSession().invalidate();

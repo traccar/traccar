@@ -118,8 +118,8 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 2, parser.nextDouble());
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_OBD_SPEED, parser.nextInt());
-            position.set(Position.KEY_THROTTLE, parser.nextInt() * 0.1);
-            position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
+            position.set(Position.KEY_THROTTLE, parser.nextInt() / 10.0);
+            position.set(Position.KEY_POWER, parser.nextInt() / 10.0);
         }
 
         if (parser.hasNext()) {

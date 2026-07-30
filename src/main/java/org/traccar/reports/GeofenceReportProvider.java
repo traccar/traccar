@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public class GeofenceReportProvider {
 
@@ -45,8 +46,8 @@ public class GeofenceReportProvider {
         this.storage = storage;
     }
 
-    private Collection<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Event.class, new Request(
+    private Stream<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
+        return storage.getObjectsStream(Event.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
@@ -66,21 +67,24 @@ public class GeofenceReportProvider {
         var result = new ArrayList<GeofenceReportItem>();
         for (Device device : DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             var openEvents = new HashMap<Long, Event>();
-            for (Event event : getEvents(device.getId(), from, to)) {
-                long geofenceId = event.getGeofenceId();
-                if (geofenceIds.contains(geofenceId)) {
-                    if (Event.TYPE_GEOFENCE_ENTER.equals(event.getType())) {
-                        openEvents.put(geofenceId, event);
-                    } else if (Event.TYPE_GEOFENCE_EXIT.equals(event.getType())) {
-                        Event enterEvent = openEvents.remove(geofenceId);
-                        if (enterEvent != null && !event.getEventTime().before(enterEvent.getEventTime())) {
-                            GeofenceReportItem item = new GeofenceReportItem();
-                            item.setDeviceId(device.getId());
-                            item.setDeviceName(device.getName());
-                            item.setGeofenceId(geofenceId);
-                            item.setStartTime(enterEvent.getEventTime());
-                            item.setEndTime(event.getEventTime());
-                            result.add(item);
+            try (Stream<Event> events = getEvents(device.getId(), from, to)) {
+                for (var iterator = events.iterator(); iterator.hasNext();) {
+                    Event event = iterator.next();
+                    long geofenceId = event.getGeofenceId();
+                    if (geofenceIds.contains(geofenceId)) {
+                        if (Event.TYPE_GEOFENCE_ENTER.equals(event.getType())) {
+                            openEvents.put(geofenceId, event);
+                        } else if (Event.TYPE_GEOFENCE_EXIT.equals(event.getType())) {
+                            Event enterEvent = openEvents.remove(geofenceId);
+                            if (enterEvent != null && !event.getEventTime().before(enterEvent.getEventTime())) {
+                                GeofenceReportItem item = new GeofenceReportItem();
+                                item.setDeviceId(device.getId());
+                                item.setDeviceName(device.getName());
+                                item.setGeofenceId(geofenceId);
+                                item.setStartTime(enterEvent.getEventTime());
+                                item.setEndTime(event.getEventTime());
+                                result.add(item);
+                            }
                         }
                     }
                 }

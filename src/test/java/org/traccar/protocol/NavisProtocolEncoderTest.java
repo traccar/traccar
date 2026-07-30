@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-public class NavtelecomProtocolEncoderTest extends ProtocolTest {
+public class NavisProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new NavtelecomProtocolEncoder(null));
+        var encoder = inject(new NavisProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

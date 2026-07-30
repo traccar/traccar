@@ -33,11 +33,9 @@ public class TaskClearStatus implements ScheduleTask {
     }
 
     @Override
-    public void schedule(ScheduledExecutorService executor) {
-    }
+    public void schedule(ScheduledExecutorService executor) {}
 
     @Override
-    public void run() {
-    }
+    public void run() {}
 
 }

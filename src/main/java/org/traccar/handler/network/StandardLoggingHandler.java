@@ -103,14 +103,12 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
                 LOGGER.info("[{}] logging throttled", NetworkUtil.session(ctx.channel()));
             }
             if (logLimit <= 0 || logCount <= logLimit) {
-                StringBuilder message = new StringBuilder();
-                message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
-                message.append(protocol);
-                message.append(downstream ? " > " : " < ");
-                message.append(record.getAddress().getHostString());
-                message.append("] ");
-                message.append(record.getData());
-                LOGGER.info(message.toString());
+                LOGGER.info("[{}: {}{}{}] {}",
+                        NetworkUtil.session(ctx.channel()),
+                        protocol,
+                        downstream ? " > " : " < ",
+                        record.getAddress().getHostString(),
+                        record.getData());
             }
         }
     }

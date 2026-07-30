@@ -52,8 +52,7 @@ public class WebRequestLog extends ContainerLifeCycle implements RequestLog {
                     request.getConnectionMetaData().getProtocol(),
                     response.getStatus(),
                     Response.getContentBytesWritten(response)));
-        } catch (Throwable ignored) {
-        }
+        } catch (Throwable ignored) {}
     }
 
 }

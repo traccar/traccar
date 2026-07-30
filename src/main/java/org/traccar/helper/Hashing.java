@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ public final class Hashing {
     public static final int SALT_SIZE = 24;
     public static final int HASH_SIZE = 24;
 
-    private static SecretKeyFactory factory;
+    private static final SecretKeyFactory FACTORY;
     static {
         try {
-            factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            FACTORY = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -55,13 +55,12 @@ public final class Hashing {
         }
     }
 
-    private Hashing() {
-    }
+    private Hashing() {}
 
     private static byte[] function(char[] password, byte[] salt) {
         try {
             PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, HASH_SIZE * Byte.SIZE);
-            return factory.generateSecret(spec).getEncoded();
+            return FACTORY.generateSecret(spec).getEncoded();
         } catch (InvalidKeySpecException e) {
             throw new SecurityException(e);
         }

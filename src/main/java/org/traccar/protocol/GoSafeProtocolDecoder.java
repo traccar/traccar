@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -33,14 +34,17 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("HHmmssddMMyy").withZone(ZoneId.systemDefault());
 
     public GoSafeProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -183,7 +187,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodeTextPosition(DeviceSession deviceSession, String sentence) throws ParseException {
+    private Position decodeTextPosition(DeviceSession deviceSession, String sentence) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -191,8 +195,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         int index = 0;
         String[] fragments = sentence.split(",");
 
-        if (fragments[index].matches("[0-9]{12}")) {
-            position.setTime(new SimpleDateFormat("HHmmssddMMyy").parse(fragments[index++]));
+        if (fragments[index].matches("\\d{10}[1-9]\\d")) {
+            position.setTime(DateUtil.parse(DATE_FORMAT, fragments[index++]));
         } else {
             getLastLocation(position, null);
             position.set(Position.KEY_RESULT, fragments[index++]);

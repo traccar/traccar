@@ -30,8 +30,7 @@ import java.util.jar.JarFile;
 
 public final class ClassScanner {
 
-    private ClassScanner() {
-    }
+    private ClassScanner() {}
 
     public static List<Class<?>> findSubclasses(
             Class<?> baseClass) throws IOException, URISyntaxException, ReflectiveOperationException {

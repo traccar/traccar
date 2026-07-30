@@ -30,8 +30,7 @@ import java.util.TimeZone;
 
 public final class UserUtil {
 
-    private UserUtil() {
-    }
+    private UserUtil() {}
 
     public static boolean isEmpty(Storage storage) throws StorageException {
         return storage.getObjects(User.class, new Request(

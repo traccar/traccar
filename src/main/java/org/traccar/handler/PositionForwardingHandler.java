@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,12 +90,12 @@ public class PositionForwardingHandler extends BasePositionHandler {
                 }
             } finally {
                 int pending = scheduled ? deliveryPending.get() : deliveryPending.decrementAndGet();
-                LOGGER.warn("Position forwarding failed: " + pending + " pending", throwable);
+                LOGGER.warn("Position forwarding failed: {} pending", pending, throwable);
             }
         }
 
         private void schedule() {
-            timer.newTimeout(this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+            timer.newTimeout(this, retryDelay * (1L << retries++), TimeUnit.MILLISECONDS);
         }
 
         @Override

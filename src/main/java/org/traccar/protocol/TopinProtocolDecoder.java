@@ -95,7 +95,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         int degrees = buf.readUnsignedByte();
         boolean negative = (buf.getUnsignedByte(buf.readerIndex()) & 0xf0) > 0;
         int decimal = buf.readUnsignedMedium() & 0x0fffff;
-        double result = degrees + decimal * 0.000001;
+        double result = degrees + decimal / 1000000.0;
         return negative ? -result : result;
     }
 

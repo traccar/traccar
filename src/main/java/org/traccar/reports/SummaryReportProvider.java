@@ -77,15 +77,17 @@ public class SummaryReportProvider {
             first = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
             last = PositionUtil.getEdgePosition(storage, device.getId(), from, to, true);
         } else {
-            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-            for (Position position : positions) {
-                if (first == null) {
-                    first = position;
+            try (var positions = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+                for (var iterator = positions.iterator(); iterator.hasNext();) {
+                    Position position = iterator.next();
+                    if (first == null) {
+                        first = position;
+                    }
+                    if (position.getSpeed() > result.getMaxSpeed()) {
+                        result.setMaxSpeed(position.getSpeed());
+                    }
+                    last = position;
                 }
-                if (position.getSpeed() > result.getMaxSpeed()) {
-                    result.setMaxSpeed(position.getSpeed());
-                }
-                last = position;
             }
         }
 

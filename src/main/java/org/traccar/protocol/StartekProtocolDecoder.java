@@ -187,13 +187,13 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, input);
         position.set(Position.KEY_OUTPUT, output);
 
-        position.set(Position.KEY_POWER, parser.nextHexInt() * 0.01);
-        position.set(Position.KEY_BATTERY, parser.nextHexInt() * 0.01);
+        position.set(Position.KEY_POWER, parser.nextHexInt() / 100.0);
+        position.set(Position.KEY_BATTERY, parser.nextHexInt() / 100.0);
 
         if (parser.hasNext()) {
             String[] adc = parser.next().split("\\|");
             for (int i = 1; i < adc.length; i++) {
-                position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) * 0.01);
+                position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(adc[i], 16) / 100.0);
             }
         }
 
@@ -202,7 +202,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             for (String fuel : fuels) {
                 int index = Integer.parseInt(fuel.substring(0, 2));
                 int value = Integer.parseInt(fuel.substring(2), 16);
-                position.set("fuel" + index, value * 0.1);
+                position.set("fuel" + index, value / 10.0);
             }
         }
 
@@ -215,7 +215,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(value, 15)) {
                     convertedValue = -convertedValue;
                 }
-                position.set(Position.PREFIX_TEMP + index, convertedValue * 0.1);
+                position.set(Position.PREFIX_TEMP + index, convertedValue / 10.0);
             }
         }
 
@@ -232,7 +232,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_COOLANT_TEMP, parser.nextInt() - 40);
             }
             if (parser.hasNext()) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
+                position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() / 10.0);
             }
             position.set(Position.KEY_FUEL, parser.nextInt());
         }

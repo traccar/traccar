@@ -91,7 +91,7 @@ public class PortmanProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_STATUS, parser.nextHexLong());
         if (parser.hasNext()) {
-            position.set(Position.KEY_FUEL, parser.nextInt() * 0.1);
+            position.set(Position.KEY_FUEL, parser.nextInt() / 10.0);
         }
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 

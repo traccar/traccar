@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.StatisticsManager;
 
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.InvocationCallback;
 
@@ -59,8 +62,31 @@ public abstract class JsonGeocoder implements Geocoder {
     }
 
     protected String readValue(JsonObject object, String key) {
-        if (object.containsKey(key) && !object.isNull(key)) {
-            return object.getString(key);
+        if (object != null && object.containsKey(key) && !object.isNull(key)) {
+            JsonValue value = object.get(key);
+            if (value.getValueType() == JsonValue.ValueType.STRING) {
+                return ((JsonString) value).getString();
+            }
+        }
+        return null;
+    }
+
+    protected JsonObject readObject(JsonObject object, String key) {
+        if (object != null && object.containsKey(key) && !object.isNull(key)) {
+            JsonValue value = object.get(key);
+            if (value.getValueType() == JsonValue.ValueType.OBJECT) {
+                return (JsonObject) value;
+            }
+        }
+        return null;
+    }
+
+    protected JsonArray readArray(JsonObject object, String key) {
+        if (object != null && object.containsKey(key) && !object.isNull(key)) {
+            JsonValue value = object.get(key);
+            if (value.getValueType() == JsonValue.ValueType.ARRAY) {
+                return (JsonArray) value;
+            }
         }
         return null;
     }
@@ -81,7 +107,7 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             String msg = "Empty address. Error: " + parseError(json);
             if (callback != null) {
-                callback.onFailure(new GeocoderException(msg));
+                callback.onFailure(new IllegalStateException(msg));
             } else {
                 LOGGER.warn(msg);
             }

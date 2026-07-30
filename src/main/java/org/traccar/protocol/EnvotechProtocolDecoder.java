@@ -89,8 +89,8 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
+        position.set(Position.KEY_POWER, parser.nextInt() / 100.0);
+        position.set(Position.KEY_BATTERY, parser.nextInt() / 100.0);
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.PREFIX_OUT, parser.nextHexInt());
         position.set(Position.KEY_FUEL, parser.nextHexInt());

@@ -133,7 +133,7 @@ public class ReportResource extends SimpleObjectResource<Report> {
 
     @Path("route")
     @GET
-    public Collection<Position> getRoute(
+    public Stream<Position> getRoute(
             @QueryParam("deviceId") List<Long> deviceIds,
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("from") Date from,

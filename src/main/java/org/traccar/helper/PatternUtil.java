@@ -27,8 +27,7 @@ public final class PatternUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternUtil.class);
 
-    private PatternUtil() {
-    }
+    private PatternUtil() {}
 
     public static class MatchResult {
         private String patternMatch;

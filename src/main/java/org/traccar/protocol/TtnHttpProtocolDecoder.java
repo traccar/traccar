@@ -151,8 +151,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             case NUMBER -> position.set(key, ((JsonNumber) value).doubleValue());
             case TRUE -> position.set(key, true);
             case FALSE -> position.set(key, false);
-            default -> {
-            }
+            default -> {}
         }
     }
 

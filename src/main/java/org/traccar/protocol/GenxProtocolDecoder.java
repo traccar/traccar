@@ -20,13 +20,18 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.config.Keys;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class GenxProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("MM/dd/yyyy HH:mm:ss").withZone(ZoneId.systemDefault());
 
     private int[] reportColumns;
 
@@ -64,7 +69,7 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }
                 }
-                case 2 -> position.setTime(new SimpleDateFormat("MM/dd/yy HH:mm:ss").parse(values[i]));
+                case 2 -> position.setTime(DateUtil.parse(DATE_FORMAT, values[i]));
                 case 3 -> position.setLatitude(Double.parseDouble(values[i]));
                 case 4 -> position.setLongitude(Double.parseDouble(values[i]));
                 case 11 -> position.set(Position.KEY_IGNITION, values[i].equals("ON"));

@@ -30,7 +30,7 @@ public class ObdDongleProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1099, 20, 2, 3, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH_LARGE, 20, 2, 3, 0));
                 pipeline.addLast(new ObdDongleProtocolDecoder(ObdDongleProtocol.this));
             }
         });

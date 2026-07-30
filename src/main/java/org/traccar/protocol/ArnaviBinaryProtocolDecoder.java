@@ -41,6 +41,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
     private static final int HEADER_VERSION_1 = 0x22;
     private static final int HEADER_VERSION_2 = 0x23;
     private static final int HEADER_VERSION_3 = 0x24;
+    private static final int HEADER_VERSION_2_WIFI = 0x25;
 
     private static final int RECORD_PING = 0x00;
     private static final int RECORD_DATA = 0x01;
@@ -60,7 +61,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             if (version == HEADER_VERSION_1) {
                 response.writeByte(0x00);
                 response.writeByte((byte) index);
-            } else if (version == HEADER_VERSION_2) {
+            } else if (version == HEADER_VERSION_2 || version == HEADER_VERSION_2_WIFI) {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
                 ByteBuf timeBytes = Unpooled.buffer(4);
@@ -96,6 +97,10 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     if (power != 0x0000 && power != 0xffff) {
                         position.set(Position.KEY_POWER, power / 1000.0);
                     }
+                    break;
+
+                case 2:
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
                     break;
 
                 case 3:
@@ -147,6 +152,32 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
                     break;
 
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                    position.set(Position.PREFIX_ADC + (tag - 29), buf.readUnsignedShortLE() / 1000.0);
+                    buf.skipBytes(2);
+                    break;
+
+                case 40:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                    position.set(Position.PREFIX_TEMP + (tag - 39), buf.readShortLE() / 100.0);
+                    buf.skipBytes(2);
+                    break;
+
                 case 51:
                     position.set("canStatus", buf.readUnsignedIntLE());
                     break;
@@ -193,6 +224,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     position.set("axleLoad" + (tag - 59), buf.readUnsignedIntLE());
                     break;
 
+                case 67:
+                    position.set("adBlueLevel", buf.readUnsignedShortLE() / 10.0);
+                    buf.skipBytes(2);
+                    break;
+
                 case 69:
                     position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
@@ -216,6 +252,14 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.set("llsLevel" + (tag - 70), level);
                         position.set("llsTemp" + (tag - 70), (buf.readUnsignedShortLE() - 100.0) / 10.0);
                     }
+                    break;
+
+                case 100:
+                    position.set("tachographOdometer", buf.readUnsignedIntLE() * 10);
+                    break;
+
+                case 102:
+                    position.set("tachographPower", buf.readUnsignedIntLE() / 1000.0);
                     break;
 
                 case 151:

@@ -36,6 +36,7 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeofenceHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
+import org.traccar.handler.MapMatcherHandler;
 import org.traccar.handler.MotionHandler;
 import org.traccar.handler.OutdatedHandler;
 import org.traccar.handler.PositionForwardingHandler;
@@ -80,9 +81,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     private final List<BaseEventHandler> eventHandlers;
     private final PostProcessHandler postProcessHandler;
 
-    private final Map<Long, Queue<Position>> queues = new HashMap<>();
+    private record QueuedPosition(ChannelHandlerContext ctx, Position position) {}
 
-    private synchronized Queue<Position> getQueue(long deviceId) {
+    private final Map<Long, Queue<QueuedPosition>> queues = new HashMap<>();
+
+    private synchronized Queue<QueuedPosition> getQueue(long deviceId) {
         return queues.computeIfAbsent(deviceId, k -> new LinkedList<>());
     }
 
@@ -101,6 +104,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 TimeHandler.class,
                 GeolocationHandler.class,
                 HemisphereHandler.class,
+                MapMatcherHandler.class,
                 DistanceHandler.class,
                 FilterHandler.class,
                 GeofenceHandler.class,
@@ -149,11 +153,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
 
     @Override
     public void onReleased(ChannelHandlerContext context, Position position) {
-        Queue<Position> queue = getQueue(position.getDeviceId());
+        Queue<QueuedPosition> queue = getQueue(position.getDeviceId());
         boolean queued;
         synchronized (queue) {
             queued = !queue.isEmpty();
-            queue.offer(position);
+            queue.offer(new QueuedPosition(context, position));
         }
         if (!queued) {
             processPositionHandlers(context, position);
@@ -196,24 +200,24 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             postProcessHandler.handlePosition(position, ignore -> {
                 positionLogger.log(ctx, position);
                 ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
-                processNextPosition(ctx, position.getDeviceId());
+                processNextPosition(position.getDeviceId());
             });
         } else {
             ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
-            processNextPosition(ctx, position.getDeviceId());
+            processNextPosition(position.getDeviceId());
         }
         cacheManager.removeDevice(position.getDeviceId(), position);
     }
 
-    private void processNextPosition(ChannelHandlerContext ctx, long deviceId) {
-        Queue<Position> queue = getQueue(deviceId);
-        Position nextPosition;
+    private void processNextPosition(long deviceId) {
+        Queue<QueuedPosition> queue = getQueue(deviceId);
+        QueuedPosition next;
         synchronized (queue) {
             queue.poll(); // remove current position
-            nextPosition = queue.peek();
+            next = queue.peek();
         }
-        if (nextPosition != null) {
-            ctx.executor().execute(() -> processPositionHandlers(ctx, nextPosition));
+        if (next != null) {
+            next.ctx().executor().execute(() -> processPositionHandlers(next.ctx(), next.position()));
         }
     }
 

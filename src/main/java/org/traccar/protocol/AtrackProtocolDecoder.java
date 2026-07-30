@@ -27,6 +27,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -36,19 +37,20 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
     private static final int MIN_DATA_LENGTH = 40;
 
@@ -57,8 +59,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean custom;
     private int frameMask;
     private String form;
-
-    private ByteBuf photo;
 
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
@@ -203,8 +203,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 0; i < Math.min(keys.length, values.length); i++) {
             switch (keys[i]) {
                 case "SA" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
-                case "MV" -> position.set(Position.KEY_POWER, Integer.parseInt(values[i]) * 0.1);
-                case "BV" -> position.set(Position.KEY_BATTERY, Integer.parseInt(values[i]) * 0.1);
+                case "MV" -> position.set(Position.KEY_POWER, Integer.parseInt(values[i]) / 10.0);
+                case "BV" -> position.set(Position.KEY_BATTERY, Integer.parseInt(values[i]) / 10.0);
                 case "GQ" -> cellTower.setSignalStrength(Integer.parseInt(values[i]));
                 case "CE" -> cellTower.setCellId(Long.parseLong(values[i]));
                 case "LC" -> cellTower.setLocationAreaCode(Integer.parseInt(values[i]));
@@ -226,8 +226,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "FC" -> position.set(Position.KEY_FUEL_CONSUMPTION, Integer.parseInt(values[i]));
                 case "AV1" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[i]));
                 case "CD" -> position.set(Position.KEY_ICCID, values[i]);
-                case "EH" ->
-                        position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i]) * 0.1));
+                case "EH" -> position.set(
+                        Position.KEY_HOURS, UnitsConverter.msFromHours(Integer.parseInt(values[i]) / 10.0));
                 case "IA" -> position.set("intakeTemp", Integer.parseInt(values[i]));
                 case "EL" -> position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(values[i]));
                 case "HA" -> {
@@ -269,8 +269,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                                 Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
                     }
                 }
-                default -> {
-                }
+                default -> {}
             }
         }
 
@@ -291,8 +290,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             switch (key) {
                 case "SA" -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                 case "MT" -> position.set(Position.KEY_MOTION, buf.readUnsignedByte() > 0);
-                case "MV" -> position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
-                case "BV" -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
+                case "MV" -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
+                case "BV" -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 10.0);
                 case "GQ" -> cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 case "CE" -> cellTower.setCellId(buf.readUnsignedInt());
                 case "LC" -> cellTower.setLocationAreaCode(buf.readUnsignedShort());
@@ -377,12 +376,12 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "JH8" -> position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShort() * 5);
                 case "JH9" -> buf.readUnsignedShort(); // tachograph speed
                 case "JH10" -> buf.readUnsignedShort(); // ambient air temperature
-                case "JH11" -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.05);
+                case "JH11" -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 20.0);
                 case "JH12" -> buf.readUnsignedShort(); // fuel economy
                 case "JL1" -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
                 case "JL2" -> position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 5 * 36000);
                 case "JL3" -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
-                case "JL4" -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.001);
+                case "JL4" -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 1000.0);
                 case "JS1" -> position.set(Position.KEY_VIN, readString(buf));
                 case "JS2" -> readString(buf); // fms version supported
                 case "JS3" -> position.set("driver1", readString(buf));
@@ -455,8 +454,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("model", parser.next());
             position.set(Position.KEY_VERSION_FW, parser.next());
-            position.set(Position.KEY_POWER, parser.nextInt() * 0.1);
-            position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+            position.set(Position.KEY_POWER, parser.nextInt() / 10.0);
+            position.set(Position.KEY_BATTERY, parser.nextInt() / 10.0);
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
 
@@ -497,6 +496,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.*)")                  // custom data
             .optional(2)
             .compile();
+
+    private static final Pattern PATTERN_FULS = Pattern.compile(
+            "FULS:F=(\\p{XDigit}+) t=(\\p{XDigit}+) N=(\\p{XDigit}+)");
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
@@ -544,24 +546,18 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         String time = parser.next();
         if (time.length() >= 14) {
-            try {
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                position.setTime(dateFormat.parse(time));
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
+            position.setTime(DateUtil.parse(DATE_FORMAT, time));
         } else {
             position.setTime(new Date(Long.parseLong(time) * 1000));
         }
 
-        position.setLongitude(parser.nextInt() * 0.000001);
-        position.setLatitude(parser.nextInt() * 0.000001);
+        position.setLongitude(parser.nextInt() / 1000000.0);
+        position.setLatitude(parser.nextInt() / 1000000.0);
         position.setCourse(parser.nextInt());
 
         position.set(Position.KEY_EVENT, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 100);
-        position.set(Position.KEY_HDOP, parser.nextInt() * 0.1);
+        position.set(Position.KEY_HDOP, parser.nextInt() / 10.0);
         position.set(Position.KEY_INPUT, parser.nextInt());
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
@@ -595,10 +591,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
-        if (photo == null) {
-            photo = Unpooled.buffer();
+        if (getMediaBuffer() == null) {
+            newMediaBuffer();
         }
-        photo.writeBytes(buf.readSlice(buf.readUnsignedShort()));
+        getMediaBuffer().writeBytes(buf, buf.readUnsignedShort());
 
         if (index == count - 1) {
             Position position = new Position(getProtocolName());
@@ -606,9 +602,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
-            photo.release();
-            photo = null;
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), "jpg"));
 
             return position;
         }
@@ -641,8 +635,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.setValid(true);
-            position.setLongitude(buf.readInt() * 0.000001);
-            position.setLatitude(buf.readInt() * 0.000001);
+            position.setLongitude(buf.readInt() / 1000000.0);
+            position.setLatitude(buf.readInt() / 1000000.0);
             position.setCourse(buf.readUnsignedShort());
 
             int type = buf.readUnsignedByte();
@@ -650,26 +644,25 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.addAlarm(alarmMap.get(type));
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
-            position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() / 1000.0);
 
             position.set(Position.KEY_DRIVER_UNIQUE_ID, readString(buf));
 
-            position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
-            position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);
+            position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
+            position.set(Position.PREFIX_TEMP + 2, buf.readShort() / 10.0);
 
             String message = readString(buf);
             if (message != null && !message.isEmpty()) {
-                Pattern pattern = Pattern.compile("FULS:F=(\\p{XDigit}+) t=(\\p{XDigit}+) N=(\\p{XDigit}+)");
-                Matcher matcher = pattern.matcher(message);
+                Matcher matcher = PATTERN_FULS.matcher(message);
                 if (matcher.find()) {
                     int value = Integer.parseInt(matcher.group(3), decimalFuel ? 10 : 16);
-                    position.set(Position.KEY_FUEL, value * 0.1);
+                    position.set(Position.KEY_FUEL, value / 10.0);
                 } else {
                     position.set("message", message);
                 }

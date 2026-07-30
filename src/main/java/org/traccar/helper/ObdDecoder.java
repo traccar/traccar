@@ -22,8 +22,7 @@ import java.util.Map;
 
 public final class ObdDecoder {
 
-    private ObdDecoder() {
-    }
+    private ObdDecoder() {}
 
     private static final int MODE_CURRENT = 0x01;
     private static final int MODE_FREEZE_FRAME = 0x02;

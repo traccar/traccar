@@ -29,6 +29,7 @@ import org.traccar.session.cache.CacheManager;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class FilterHandler extends BasePositionHandler {
 
@@ -147,14 +148,14 @@ public class FilterHandler extends BasePositionHandler {
         return false;
     }
 
-    private boolean skipAttributes(Position position) {
-        Boolean skipAttributes = AttributeUtil.lookup(
-                cacheManager, Keys.FILTER_SKIP_ATTRIBUTES_ENABLE, position.getDeviceId());
-        if (Boolean.TRUE.equals(skipAttributes)) {
-            String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
-            if (string != null) {
-                for (String attribute : string.split("[ ,]")) {
-                    if (position.hasAttribute(attribute)) {
+    private boolean skipAttributes(Position position, Position last) {
+        String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
+        if (string != null) {
+            for (String attribute : string.split("[ ,]")) {
+                if (position.hasAttribute(attribute)) {
+                    Object value = position.getAttributes().get(attribute);
+                    Object lastValue = last != null ? last.getAttributes().get(attribute) : null;
+                    if (!Objects.equals(value, lastValue)) {
                         return true;
                     }
                 }
@@ -193,13 +194,13 @@ public class FilterHandler extends BasePositionHandler {
         // filter out excessive data
         long deviceId = position.getDeviceId();
         Position last = cacheManager.getPosition(deviceId);
-        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Duplicate");
         }
-        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Static");
         }
-        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Distance");
         }
         if (filterMaxSpeed(position, last)) {

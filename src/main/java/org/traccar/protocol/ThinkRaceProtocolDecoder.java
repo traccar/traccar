@@ -42,7 +42,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
 
     private static double convertCoordinate(long raw, boolean negative) {
         long degrees = raw / 1000000;
-        double minutes = (raw % 1000000) * 0.0001;
+        double minutes = (raw % 1000000) / 10000.0;
         double result = degrees + minutes / 60;
         if (negative) {
             result = -result;

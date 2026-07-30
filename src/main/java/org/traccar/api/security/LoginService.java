@@ -22,6 +22,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -35,6 +36,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 import java.util.Objects;
 
 @Singleton
@@ -48,6 +50,7 @@ public class LoginService {
     private final String serviceAccountToken;
     private final boolean forceLdap;
     private final boolean forceOpenId;
+    private final boolean allowOpenIdRegistration;
 
     @Inject
     public LoginService(
@@ -59,11 +62,12 @@ public class LoginService {
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
+        allowOpenIdRegistration = config.getBoolean(Keys.OPENID_ALLOW_REGISTRATION);
     }
 
     public LoginResult login(
             String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
-        switch (scheme.toLowerCase()) {
+        switch (scheme.toLowerCase(Locale.ROOT)) {
             case "bearer":
                 return login(credentials);
             case "basic":
@@ -93,7 +97,7 @@ public class LoginService {
             return null;
         }
 
-        email = email.trim().toLowerCase();
+        email = email.trim().toLowerCase(Locale.ROOT);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
@@ -121,9 +125,16 @@ public class LoginService {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("LOWER(email)", email.toLowerCase())));
+                new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
 
         if (user == null) {
+
+            if (!allowOpenIdRegistration && !UserUtil.isEmpty(storage)) {
+                Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+                if (!server.getRegistration()) {
+                    throw new SecurityException("Registration disabled");
+                }
+            }
 
             user = new User();
             UserUtil.setUserDefaults(user, config);

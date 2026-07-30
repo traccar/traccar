@@ -27,6 +27,7 @@ import org.traccar.model.Permission;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -104,8 +105,15 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             skipReadonly = permissionsService.getUser(getUserId())
                     .compare(after, "notificationTokens", "termsAccepted");
         } else if (entity instanceof Group group) {
-            if (group.getId() == group.getGroupId()) {
-                throw new IllegalArgumentException("Cycle in group hierarchy");
+            long parentId = group.getGroupId();
+            int depth = Storage.MAX_GROUP_DEPTH;
+            while (parentId > 0 && depth-- > 0) {
+                if (parentId == group.getId()) {
+                    throw new IllegalArgumentException("Cycle in group hierarchy");
+                }
+                Group parent = storage.getObject(Group.class, new Request(
+                        new Columns.Include("groupId"), new Condition.Equals("id", parentId)));
+                parentId = parent != null ? parent.getGroupId() : 0;
             }
         }
 

@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.Locale;
 
 import org.traccar.api.BaseResource;
 import org.traccar.api.signature.TokenManager;
@@ -75,7 +76,7 @@ public class ShareResource extends BaseResource {
         if (clazz == Device.class) {
             shareEmail = user.getEmail() + ":" + ((Device) object).getUniqueId();
         } else {
-            shareEmail = user.getEmail() + ":" + clazz.getSimpleName().toLowerCase() + ":" + object.getId();
+            shareEmail = user.getEmail() + ":" + clazz.getSimpleName().toLowerCase(Locale.ROOT) + ":" + object.getId();
         }
 
         User share = storage.getObject(User.class, new Request(

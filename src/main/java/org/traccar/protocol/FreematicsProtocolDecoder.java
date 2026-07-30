@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,17 +42,19 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = null;
         String event = null;
         String time = null;
+        String vin = null;
 
         for (String pair : sentence.split(",")) {
             String[] data = pair.split("=");
             String key = data[0];
             String value = data[1];
             switch (key) {
-                case "ID", "VIN" -> {
+                case "ID" -> {
                     if (deviceSession == null) {
                         deviceSession = getDeviceSession(channel, remoteAddress, value);
                     }
                 }
+                case "VIN" -> vin = value;
                 case "EV" -> event = value;
                 case "TS" -> time = value;
             }
@@ -62,6 +64,14 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
             String message = String.format("1#EV=%s,RX=1,TS=%s", event, time);
             message += '*' + Checksum.sum(message);
             channel.writeAndFlush(new NetworkMessage(message, remoteAddress));
+        }
+
+        if (deviceSession != null && vin != null) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_VIN, vin);
+            return position;
         }
 
         return null;
@@ -127,9 +137,9 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                     case 0xF -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
                     case 0x12 -> position.set(Position.KEY_HDOP, Integer.parseInt(value));
                     case 0x20 -> position.set(Position.KEY_ACCELERATION, value);
-                    case 0x24 -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.01);
+                    case 0x24 -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) / 100.0);
                     case 0x81 -> position.set(Position.KEY_RSSI, Integer.parseInt(value));
-                    case 0x82 -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value) * 0.1);
+                    case 0x82 -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value) / 10.0);
                     case 0x104 -> position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(value));
                     case 0x105 -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(value));
                     case 0x10c -> position.set(Position.KEY_RPM, Integer.parseInt(value));

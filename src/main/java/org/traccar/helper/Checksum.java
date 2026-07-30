@@ -17,11 +17,11 @@ package org.traccar.helper;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public final class Checksum {
 
-    private Checksum() {
-    }
+    private Checksum() {}
 
     public static final Algorithm CRC8_EGTS = new Algorithm(8, 0x31, 0xFF, false, false, 0x00);
     public static final Algorithm CRC8_ROHC = new Algorithm(8, 0x07, 0xFF, true, true, 0x00);
@@ -208,7 +208,7 @@ public final class Checksum {
         for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
             checksum += b;
         }
-        return String.format("%02X", checksum).toUpperCase();
+        return String.format("%02X", checksum).toUpperCase(Locale.ROOT);
     }
 
     public static long luhn(long imei) {

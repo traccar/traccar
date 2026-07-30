@@ -89,8 +89,8 @@ public class PositrexProtocolDecoder extends BaseProtocolDecoder {
             int longitude = buf.readMedium();
 
             position.setValid(BitUtil.check(latitude, 23));
-            position.setLatitude(BitUtil.to(latitude, 23) * 0.000025);
-            position.setLongitude(longitude * 0.000025);
+            position.setLatitude(BitUtil.to(latitude, 23) / 40000.0);
+            position.setLongitude(longitude / 40000.0);
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedByte() * 2);
@@ -102,8 +102,8 @@ public class PositrexProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedInt(); // number of records
 
             if (buf.isReadable()) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
             }
 
             return position;

@@ -26,8 +26,7 @@ public final class UnitsConverter {
     private static final long MILLISECONDS_TO_HOURS_RATIO = 3600000;
     private static final long MILLISECONDS_TO_MINUTES_RATIO = 60000;
 
-    private UnitsConverter() {
-    }
+    private UnitsConverter() {}
 
     public static double knotsFromKph(double value) { // km/h
         return value * KNOTS_TO_KPH_RATIO;

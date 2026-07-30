@@ -55,7 +55,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Path("commands")
@@ -181,7 +180,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                     return protocol.getSupportedDataCommands().stream().map(Typed::new).toList();
                 }
             } else {
-                return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
+                return List.of(new Typed(Command.TYPE_CUSTOM));
             }
         } else {
             List<Typed> result = new ArrayList<>();

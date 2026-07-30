@@ -70,7 +70,7 @@ public class DingtekProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte());
             position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
             position.set(Position.KEY_RSSI, buf.readFloat());
             position.set(Position.KEY_INDEX, buf.readUnsignedShort());
 

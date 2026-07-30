@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -32,14 +33,19 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class WristbandProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmm").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter RESPONSE_DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd-HH-mm-ss").withZone(ZoneId.systemDefault());
 
     public WristbandProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -74,7 +80,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
             .text("\r\n")
             .compile();
 
-    private Position decodePosition(DeviceSession deviceSession, String sentence) throws ParseException {
+    private Position decodePosition(DeviceSession deviceSession, String sentence) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -84,7 +90,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         position.setLongitude(Double.parseDouble(values[0]));
         position.setLatitude(Double.parseDouble(values[1]));
-        position.setTime(new SimpleDateFormat("yyyyMMddHHmm").parse(values[2]));
+        position.setTime(DateUtil.parse(DATE_FORMAT, values[2]));
         position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[3])));
 
         return position;
@@ -135,7 +141,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeMessage(
-            Channel channel, SocketAddress remoteAddress, String sentence) throws ParseException {
+            Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -157,7 +163,7 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case 90 -> sendResponse(channel, imei, version, type, getServer(channel, ','));
             case 91 -> {
-                String time = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+                String time = RESPONSE_DATE_FORMAT.format(Instant.now());
                 sendResponse(channel, imei, version, type, time + "|" + getServer(channel, ','));
             }
             case 1 -> {

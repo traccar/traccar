@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Path;
 
 public class DatabaseModule extends AbstractModule {
 
@@ -72,17 +73,20 @@ public class DatabaseModule extends AbstractModule {
         hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION));
         hikariConfig.setIdleTimeout(600000);
 
-        int maxPoolSize = config.getInteger(Keys.DATABASE_MAX_POOL_SIZE);
-        if (maxPoolSize != 0) {
-            hikariConfig.setMaximumPoolSize(maxPoolSize);
+        int maxLifetime = config.getInteger(Keys.DATABASE_MAX_LIFETIME);
+        if (maxLifetime != 0) {
+            hikariConfig.setMaxLifetime(maxLifetime);
         }
+        hikariConfig.setMaximumPoolSize(config.getInteger(Keys.DATABASE_MAX_POOL_SIZE));
 
         DataSource dataSource = new HikariDataSource(hikariConfig);
 
         String changelog = config.getString(Keys.DATABASE_CHANGELOG);
         if (changelog != null && !changelog.isEmpty()) {
 
-            ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(new File("."));
+            Path changelogPath = Path.of(changelog).toAbsolutePath().normalize();
+            ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(changelogPath.getParent());
+            String changelogName = changelogPath.getFileName().toString();
 
             System.setProperty("liquibase.changelogLockWaitTimeInMinutes", "1");
             System.setProperty("liquibase.analytics.enabled", "false");
@@ -95,7 +99,7 @@ public class DatabaseModule extends AbstractModule {
                         config.getString(Keys.DATABASE_DRIVER),
                         null, null, null, resourceAccessor);
 
-                try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
+                try (Liquibase liquibase = new Liquibase(changelogName, resourceAccessor, database)) {
                     liquibase.clearCheckSums();
                     liquibase.update(new Contexts());
                 }

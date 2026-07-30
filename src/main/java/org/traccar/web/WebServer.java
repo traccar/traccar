@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,12 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BaseProtocol;
 import org.traccar.LifecycleObject;
 import org.traccar.api.CorsResponseFilter;
+import org.traccar.protocol.OsmAndProtocol;
 import org.traccar.api.DateParameterConverterProvider;
+import org.traccar.api.MediaFilter;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.StreamWriter;
 import org.traccar.api.resource.ServerResource;
@@ -62,6 +65,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.Locale;
 
 public class WebServer implements LifecycleObject {
 
@@ -112,7 +116,8 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initClientProxy(ServletContextHandler servletHandler) {
-        int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
+        int port = config.getInteger(
+                Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(OsmAndProtocol.class)));
         if (port > 0) {
             ServletHolder proxy = new ServletHolder(AsyncProxyServlet.Transparent.class);
             proxy.setInitParameter("proxyTo", "http://localhost:" + port);
@@ -154,16 +159,16 @@ public class WebServer implements LifecycleObject {
         filterHolder.setInitParameter("overridePath", overrideReal.toString());
         servletHandler.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        if (config.getBoolean(Keys.WEB_DEBUG)) {
-            servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
-        } else {
-            servletHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
-        }
+        servletHandler.setWelcomeFiles(new String[] {"index.html"});
     }
 
     private void initApi(ServletContextHandler servletHandler) {
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
+            servletHandler.addFilter(
+                    new FilterHolder(injector.getInstance(MediaFilter.class)),
+                    "/api/media/*", EnumSet.of(DispatcherType.REQUEST));
+
             ServletHolder servletHolder = new ServletHolder(ResourceServlet.class);
             servletHolder.setInitParameter("baseResource", Path.of(mediaPath).toUri().toString());
             servletHolder.setInitParameter("dirAllowed", "false");
@@ -221,7 +226,7 @@ public class WebServer implements LifecycleObject {
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
         if (sameSiteCookie != null) {
-            switch (sameSiteCookie.toLowerCase()) {
+            switch (sameSiteCookie.toLowerCase(Locale.ROOT)) {
                 case "lax":
                     sessionHandler.setSameSite(HttpCookie.SameSite.LAX);
                     break;

@@ -31,7 +31,8 @@ public class RitiProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 105, 2, 3, 0, true));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(
+                        ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 105, 2, 3, 0, true));
                 pipeline.addLast(new RitiProtocolDecoder(RitiProtocol.this));
             }
         });

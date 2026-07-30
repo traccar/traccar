@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
@@ -35,8 +34,6 @@ import java.util.regex.Pattern;
 public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int MAX_CHUNK_SIZE = 960;
-
-    private ByteBuf photo;
 
     public Pt502ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -56,8 +53,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)?,")                 // course
             .number("(dd)(dd)(dd),,,?")          // date (ddmmyy)
             .expression(".?/")
-            .expression("([01])+,")              // input
-            .expression("([01])+/")              // output
+            .expression("([01]+),")              // input
+            .expression("([01]+)/")              // output
             .expression("([^/]+)?/")             // adc
             .number("(d+)")                      // odometer
             .expression("/([^/]+)?/")            // rfid
@@ -108,8 +105,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_INPUT, parser.nextBinInt());
+        position.set(Position.KEY_OUTPUT, parser.nextBinInt());
 
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
@@ -133,6 +130,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private void requestPhotoFragment(Channel channel) {
         if (channel != null) {
+            ByteBuf photo = getMediaBuffer();
             int offset = photo.writerIndex();
             int size = Math.min(photo.writableBytes(), MAX_CHUNK_SIZE);
             channel.writeAndFlush(new NetworkMessage("#PHD" + offset + "," + size + "\r\n", channel.remoteAddress()));
@@ -153,9 +151,10 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             int dataIndex = buf.indexOf(typeEndIndex + 1, buf.writerIndex(), (byte) ',') + 1;
             buf.readerIndex(dataIndex);
 
+            ByteBuf photo = getMediaBuffer();
             if (photo != null) {
 
-                photo.writeBytes(buf.readSlice(buf.readableBytes()));
+                photo.writeBytes(buf);
 
                 if (photo.writableBytes() > 0) {
 
@@ -170,9 +169,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
 
                     return position;
 
@@ -185,7 +182,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             if (type.startsWith("$PHO")) {
                 int size = Integer.parseInt(type.split("-")[0].substring(4));
                 if (size > 0) {
-                    photo = Unpooled.buffer(size);
+                    newMediaBuffer(size);
                     requestPhotoFragment(channel);
                 }
             }

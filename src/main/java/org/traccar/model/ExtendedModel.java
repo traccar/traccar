@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  */
 package org.traccar.model;
 
-import java.util.LinkedHashMap;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.Map;
-import java.util.Objects;
 
 public class ExtendedModel extends BaseModel {
 
-    private Map<String, Object> attributes = new LinkedHashMap<>();
+    @JsonDeserialize(as = AttributeMap.class)
+    private AttributeMap attributes = new AttributeMap();
 
     public boolean hasAttribute(String key) {
         return attributes.containsKey(key);
@@ -31,8 +32,8 @@ public class ExtendedModel extends BaseModel {
         return attributes;
     }
 
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = Objects.requireNonNullElseGet(attributes, LinkedHashMap::new);
+    public void setAttributes(AttributeMap attributes) {
+        this.attributes = attributes != null ? attributes : new AttributeMap();
     }
 
     public void set(String key, Boolean value) {
