@@ -88,6 +88,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_GPS = 0x34;
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
+    public static final int MSG_LOCATION_RFID = 0x36;      // TRX16i
     public static final int MSG_STATUS_2 = 0x36;           // Jimi IoT 4G
     public static final int MSG_ALARM_MODULE = 0x39;       // Jimi IoT 4G
     public static final int MSG_WIFI_ALARM = 0xA9;         // Jimi IoT 4G
@@ -142,6 +143,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         SEEWORLD,
         RFID,
         LW4G,
+        TRX16I,
     }
 
     private Variant variant;
@@ -387,7 +389,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
         } else if (type == MSG_GPS_LBS_6 || type == MSG_IBUTTON || type == MSG_GPS_LBS_DRIVER
-                || variant == Variant.SEEWORLD) {
+                || variant == Variant.SEEWORLD || (variant == Variant.TRX16I && type == MSG_LOCATION_RFID)) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
@@ -452,21 +454,23 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x04 -> Position.ALARM_GEOFENCE_ENTER;
             case 0x05 -> Position.ALARM_GEOFENCE_EXIT;
             case 0x06 -> Position.ALARM_OVERSPEED;
-            case 0x09 -> modelVL ? Position.ALARM_TOW : Position.ALARM_VIBRATION;
-            case 0x0E, 0x0F -> Position.ALARM_LOW_BATTERY;
+            case 0x09 -> variant == Variant.TRX16I ? Position.ALARM_GEOFENCE
+                    : modelVL ? Position.ALARM_TOW : Position.ALARM_VIBRATION;
+            case 0x0E -> variant == Variant.TRX16I ? Position.ALARM_LOW_POWER : Position.ALARM_LOW_BATTERY;
+            case 0x0F -> Position.ALARM_LOW_BATTERY;
             case 0x11 -> Position.ALARM_POWER_OFF;
             case 0x0C, 0x13, 0x25, 0x32 -> Position.ALARM_TAMPERING;
             case 0x14 -> Position.ALARM_DOOR;
             case 0x18 -> modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
             case 0x19 -> modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
-            case 0x1A, 0x27 -> Position.ALARM_BRAKING;
+            case 0x1A, 0x27, 0xF1 -> Position.ALARM_BRAKING;
             case 0x1B, 0x2A, 0x2B, 0x2E -> Position.ALARM_CORNERING;
             case 0x23 -> Position.ALARM_FALL_DOWN;
-            case 0x26 -> Position.ALARM_ACCELERATION;
+            case 0x26, 0xF0 -> Position.ALARM_ACCELERATION;
             case 0x28 -> modelSW ? Position.ALARM_CORNERING
                     : modelVL ? Position.ALARM_POWER_OFF : Position.ALARM_BRAKING;
             case 0x29 -> modelSW ? Position.ALARM_ACCIDENT : Position.ALARM_ACCELERATION;
-            case 0x2C -> Position.ALARM_ACCIDENT;
+            case 0x2C, 0xF2 -> Position.ALARM_ACCIDENT;
             case 0x30 -> modelVL ? Position.ALARM_BRAKING : Position.ALARM_JAMMING;
             case 0x33 -> Position.ALARM_LOCK;
             case 0x34 -> Position.ALARM_UNLOCK;
@@ -869,6 +873,26 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             long driverUniqueId = (buf.readUnsignedInt() << 16) | buf.readUnsignedShort();
             position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(driverUniqueId));
 
+        } else if (type == MSG_LOCATION_RFID && variant == Variant.TRX16I) {
+
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+
+            decodeLbs(position, buf, type, false);
+
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+            position.set("uploadMode", buf.readUnsignedByte());
+            position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // unit unconfirmed
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() / 10.0);
+            position.set(Position.KEY_HOURS, buf.readUnsignedMedium() * 60 * 1000L);
+
+            String rfid = ByteBufUtil.hexDump(buf.readSlice(8));
+            if (!rfid.matches("0+")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
+            }
+
         } else if (isSupported(type, model)
                 && !(extended && (type == MSG_GPS_LBS_STATUS_4 || type == MSG_STATUS_2))) {
 
@@ -965,6 +989,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
                             position.addAlarm(decodeAlarm(extension, modelLW, modelSW, modelVL));
+                            if (variant == Variant.TRX16I) {
+                                position.set(Position.KEY_EVENT, extension);
+                            }
                         }
                     }
                 }
@@ -974,6 +1001,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     || type == MSG_FENCE_MULTI || type == MSG_ALARM_MODULE
                     || modelNT && (type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_DRIVER)) {
                 buf.readUnsignedByte(); // language
+            }
+
+            if (type == MSG_GPS_LBS_STATUS_1 && variant == Variant.TRX16I) {
+                buf.readUnsignedByte(); // language
+                String rfid = ByteBufUtil.hexDump(buf.readSlice(8));
+                if (!rfid.matches("0+")) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
+                }
             }
 
             if (type == MSG_STATUS_2 || type == MSG_ALARM_MODULE) {
@@ -1658,6 +1693,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.RFID;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_5 && length == 0x40) {
             variant = Variant.LW4G;
+        } else if (header == 0x7878 && type == MSG_LOCATION_RFID && length == 0x35) {
+            variant = Variant.TRX16I;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x2D) {
+            variant = Variant.TRX16I;
         } else {
             variant = Variant.STANDARD;
         }
