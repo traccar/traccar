@@ -28,6 +28,7 @@ import com.nimbusds.oauth2.sdk.GeneralException;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
+import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
 import org.traccar.broadcast.RedisBroadcastService;
@@ -156,10 +157,19 @@ public class MainModule extends AbstractModule {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
+    @Provides
+    public static ClientBuilder provideClientBuilder(
+            Config config, ObjectMapperContextResolver objectMapperContextResolver) {
+        return ClientBuilder.newBuilder()
+                .register(objectMapperContextResolver)
+                .property(ClientProperties.CONNECT_TIMEOUT, config.getInteger(Keys.CLIENT_CONNECT_TIMEOUT))
+                .property(ClientProperties.READ_TIMEOUT, config.getInteger(Keys.CLIENT_READ_TIMEOUT));
+    }
+
     @Singleton
     @Provides
-    public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
-        return ClientBuilder.newClient().register(objectMapperContextResolver);
+    public static Client provideClient(ClientBuilder clientBuilder) {
+        return clientBuilder.build();
     }
 
     @Singleton

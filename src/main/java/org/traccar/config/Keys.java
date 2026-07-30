@@ -1041,6 +1041,24 @@ public final class Keys {
             5000);
 
     /**
+     * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "client.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Read timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_READ_TIMEOUT = new IntegerConfigKey(
+            "client.readTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
      */
     public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(

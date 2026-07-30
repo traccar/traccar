@@ -18,6 +18,7 @@ package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -25,7 +26,6 @@ import jakarta.ws.rs.client.Entity;
 import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -68,7 +68,7 @@ public class NotificatorTelegram extends Notificator {
 
     @Inject
     public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
-            Client client, ObjectMapperContextResolver objectMapperContextResolver) {
+            Client client, Provider<ClientBuilder> clientBuilderProvider) {
         super(notificationFormatter);
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
@@ -79,8 +79,7 @@ public class NotificatorTelegram extends Notificator {
 
         String proxyUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_URL);
         if (proxyUrl != null) {
-            ClientBuilder clientBuilder = ClientBuilder.newBuilder()
-                    .register(objectMapperContextResolver)
+            ClientBuilder clientBuilder = clientBuilderProvider.get()
                     .property(ClientProperties.PROXY_URI, proxyUrl);
             String userInfo = URI.create(proxyUrl).getUserInfo();
             if (userInfo != null) {
