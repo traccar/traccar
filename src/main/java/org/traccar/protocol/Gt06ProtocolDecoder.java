@@ -923,6 +923,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (mode == 4) {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                     }
+                } else if (variant == Variant.SEEWORLD && length == 0x18) {
+                    buf.readUnsignedShort(); // extension bit status
+                    buf.readUnsignedByte(); // voltage level
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set(Position.KEY_POWER, (double) buf.readUnsignedByte());
+                    buf.readUnsignedByte(); // language
+                    buf.readUnsignedByte(); // sound switch
+                    buf.readUnsignedByte(); // light switch
+                    position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 1);
+                    position.set(Position.KEY_MOTION, buf.readUnsignedByte() == 1);
                 } else {
                     if (type == MSG_GPS_LBS_STATUS_5
                             || (modelNT && (type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_DRIVER))) {
@@ -1639,6 +1651,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_STATUS_3 && length == 0x0c) {
+            variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_STATUS_3 && length == 0x18) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && length == 0x28) {
             variant = Variant.RFID;

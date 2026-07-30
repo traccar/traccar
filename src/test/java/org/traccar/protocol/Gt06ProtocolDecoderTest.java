@@ -44,6 +44,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780ca346000106640c01123d5f5e0d0a"));
 
         verifyAttribute(decoder, binary(
+                "787818a300000005321e020000000002584f000100060000008f920d0a"),
+                Position.KEY_STEPS, 600L);
+
+        verifyAttribute(decoder, binary(
                 "7979000e941e000000d5000002ee00f59b850d0a"),
                 Position.KEY_HUMIDITY, 75.0);
 
