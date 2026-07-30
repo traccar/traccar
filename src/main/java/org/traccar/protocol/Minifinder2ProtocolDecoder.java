@@ -331,12 +331,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 0x2A:
-                        buf.readUnsignedByte(); // flags
+                        int wifiFlags = buf.readUnsignedByte();
                         buf.skipBytes(6); // mac
                         buf.readUnsignedByte(); // rssi
-                        position.setLatitude(buf.readIntLE() / 10000000.0);
-                        position.setLongitude(buf.readIntLE() / 10000000.0);
-                        position.setValid(true);
+                        if (BitUtil.check(wifiFlags, 7)) {
+                            position.setLatitude(buf.readIntLE() / 10000000.0);
+                            position.setLongitude(buf.readIntLE() / 10000000.0);
+                            position.setValid(true);
+                        }
                         if (endIndex > buf.readerIndex()) {
                             position.set("description", buf.readCharSequence(
                                     endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
