@@ -44,15 +44,16 @@ public class NotificatorSms extends Notificator {
 
     @Override
     public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
-        if (user.getPhone() != null) {
-            try {
-                statisticsManager.registerSms();
-                smsManager.sendMessage(user.getPhone(), message.digest(), false);
-            } catch (Exception e) {
-                return CompletableFuture.failedFuture(e);
-            }
+        if (user.getPhone() == null) {
+            return CompletableFuture.completedFuture(null);
         }
-        return CompletableFuture.completedFuture(null);
+        try {
+            statisticsManager.registerSms();
+            smsManager.sendMessage(user.getPhone(), message.digest(), false);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
 }

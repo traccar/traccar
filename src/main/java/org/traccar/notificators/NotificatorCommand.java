@@ -56,10 +56,10 @@ public class NotificatorCommand extends Notificator {
                     new Columns.All(), new Condition.Equals("id", notification.getCommandId())));
             command.setDeviceId(event.getDeviceId());
             commandsManager.sendCommand(command);
+            return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
-        return CompletableFuture.completedFuture(null);
     }
 
 }
