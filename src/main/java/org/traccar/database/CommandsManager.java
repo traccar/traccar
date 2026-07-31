@@ -81,7 +81,6 @@ public class CommandsManager implements BroadcastInterface {
                 new Columns.All(), new Condition.Equals("id", deviceId)));
         String data = command.getString(Command.KEY_DATA);
         if (data != null && data.contains("{uniqueId}")) {
-            command = QueuedCommand.fromCommand(command).toCommand();
             command.set(Command.KEY_DATA, data.replace("{uniqueId}", device.getUniqueId()));
         }
         Position position = storage.getObject(Position.class, new Request(
