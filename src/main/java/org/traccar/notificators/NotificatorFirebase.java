@@ -143,36 +143,41 @@ public class NotificatorFirebase extends Notificator {
         ApiFutures.addCallback(apiFuture, new ApiFutureCallback<>() {
             @Override
             public void onSuccess(BatchResponse result) {
-                List<String> failedTokens = new LinkedList<>();
-                var iterator = result.getResponses().listIterator();
-                while (iterator.hasNext()) {
-                    int index = iterator.nextIndex();
-                    var response = iterator.next();
-                    if (!response.isSuccessful()) {
-                        MessagingErrorCode error = response.getException().getMessagingErrorCode();
-                        if (error == MessagingErrorCode.INVALID_ARGUMENT || error == MessagingErrorCode.UNREGISTERED) {
-                            failedTokens.add(registrationTokens.get(index));
+                try {
+                    List<String> failedTokens = new LinkedList<>();
+                    var iterator = result.getResponses().listIterator();
+                    while (iterator.hasNext()) {
+                        int index = iterator.nextIndex();
+                        var response = iterator.next();
+                        if (!response.isSuccessful()) {
+                            MessagingErrorCode error = response.getException().getMessagingErrorCode();
+                            if (error == MessagingErrorCode.INVALID_ARGUMENT
+                                    || error == MessagingErrorCode.UNREGISTERED) {
+                                failedTokens.add(registrationTokens.get(index));
+                            }
+                            LOGGER.warn("Firebase user {} error", user.getId(), response.getException());
                         }
-                        LOGGER.warn("Firebase user {} error", user.getId(), response.getException());
                     }
+                    if (!failedTokens.isEmpty()) {
+                        registrationTokens.removeAll(failedTokens);
+                        if (registrationTokens.isEmpty()) {
+                            user.removeAttribute("notificationTokens");
+                        } else {
+                            user.set("notificationTokens", String.join(",", registrationTokens));
+                        }
+                        try {
+                            storage.updateObject(user, new Request(
+                                new Columns.Include("attributes"),
+                                new Condition.Equals("id", user.getId())));
+                            cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
+                        } catch (Exception e) {
+                            LOGGER.warn("Firebase token cleanup error", e);
+                        }
+                    }
+                    future.complete(null);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
                 }
-                if (!failedTokens.isEmpty()) {
-                    registrationTokens.removeAll(failedTokens);
-                    if (registrationTokens.isEmpty()) {
-                        user.removeAttribute("notificationTokens");
-                    } else {
-                        user.set("notificationTokens", String.join(",", registrationTokens));
-                    }
-                    try {
-                        storage.updateObject(user, new Request(
-                            new Columns.Include("attributes"),
-                            new Condition.Equals("id", user.getId())));
-                        cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
-                    } catch (Exception e) {
-                        LOGGER.warn("Firebase token cleanup error", e);
-                    }
-                }
-                future.complete(null);
             }
 
             @Override
