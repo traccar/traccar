@@ -23,6 +23,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class EventForwarderAmqp implements EventForwarder {
 
@@ -40,14 +41,14 @@ public class EventForwarderAmqp implements EventForwarder {
     }
 
     @Override
-    public void forward(EventData eventData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(EventData eventData) {
         try {
             String value = objectMapper.writeValueAsString(eventData);
             amqpClient.publishMessage(value);
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
             LOGGER.warn("Event forwarding error", e);
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 }
