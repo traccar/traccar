@@ -20,7 +20,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Response;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
@@ -81,7 +80,7 @@ public class NotificatorPushover extends Notificator {
         message.title = shortMessage.subject();
         message.message = shortMessage.digest();
 
-        return post(client.target(url).request(), Entity.json(message)).thenAccept(Response::close);
+        return post(client.target(url).request(), Entity.json(message), response -> null);
     }
 
 }
