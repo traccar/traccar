@@ -23,6 +23,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderAmqp implements PositionForwarder {
 
@@ -40,14 +41,14 @@ public class PositionForwarderAmqp implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
         try {
             String value = objectMapper.writeValueAsString(positionData);
             amqpClient.publishMessage(value);
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
             LOGGER.warn("Position forwarding error", e);
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 }
