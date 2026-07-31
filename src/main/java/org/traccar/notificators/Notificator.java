@@ -16,6 +16,10 @@
  */
 package org.traccar.notificators;
 
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.InvocationCallback;
+import jakarta.ws.rs.core.Response;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
@@ -59,6 +63,22 @@ public abstract class Notificator {
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
+    }
+
+    protected static CompletableFuture<Response> post(Invocation.Builder request, Entity<?> entity) {
+        var future = new CompletableFuture<Response>();
+        request.async().post(entity, new InvocationCallback<Response>() {
+            @Override
+            public void completed(Response response) {
+                future.complete(response);
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        });
+        return future;
     }
 
 }
