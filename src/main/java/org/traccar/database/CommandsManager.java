@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
+import org.traccar.helper.model.CommandUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -79,6 +80,7 @@ public class CommandsManager implements BroadcastInterface {
         long deviceId = command.getDeviceId();
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", deviceId)));
+        CommandUtil.expandPlaceholders(command, device);
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
