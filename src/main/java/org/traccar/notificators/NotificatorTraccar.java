@@ -37,11 +37,11 @@ import jakarta.inject.Singleton;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorTraccar extends Notificator {
@@ -88,56 +88,60 @@ public class NotificatorTraccar extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
-        if (user.hasAttribute("notificationTokens")) {
+    public CompletableFuture<Void> sendAsync(
+            User user, NotificationMessage shortMessage, Event event, Position position) {
+        if (!user.hasAttribute("notificationTokens")) {
+            return CompletableFuture.completedFuture(null);
+        }
 
-            NotificationObject item = new NotificationObject();
-            item.title = shortMessage.subject();
-            item.body = shortMessage.digest();
-            item.sound = "default";
+        NotificationObject item = new NotificationObject();
+        item.title = shortMessage.subject();
+        item.body = shortMessage.digest();
+        item.sound = "default";
 
-            String[] tokenArray = user.getString("notificationTokens").split("[, ]");
-            List<String> registrationTokens = new ArrayList<>(Arrays.asList(tokenArray));
+        String[] tokenArray = user.getString("notificationTokens").split("[, ]");
+        List<String> registrationTokens = new ArrayList<>(Arrays.asList(tokenArray));
 
-            Message message = new Message();
-            message.type = "manager";
-            message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = item;
-            message.priority = shortMessage.priority();
+        Message message = new Message();
+        message.type = "manager";
+        message.tokens = tokenArray;
+        message.notification = item;
+        message.priority = shortMessage.priority();
 
-            var request = client.target(url).request().header("Authorization", "key=" + key);
-            try (Response result = request.post(Entity.json(message))) {
-                var json = result.readEntity(JsonObject.class);
-                List<String> failedTokens = new LinkedList<>();
-                var responses = json.getJsonArray("responses");
-                for (int i = 0; i < responses.size(); i++) {
-                    var response = responses.getJsonObject(i);
-                    if (!response.getBoolean("success")) {
-                        var error = response.getJsonObject("error");
-                        String errorCode = error.getString("code");
-                        if (errorCode.equals("messaging/invalid-argument")
-                                || errorCode.equals("messaging/registration-token-not-registered")) {
-                            failedTokens.add(registrationTokens.get(i));
-                        }
-                        LOGGER.warn("Push user {} error - {}", user.getId(), error.getString("message"));
+        var request = client.target(url).request().header("Authorization", "key=" + key);
+        return post(request, Entity.json(message), rawResponse -> {
+            var json = rawResponse.readEntity(JsonObject.class);
+            List<String> failedTokens = new LinkedList<>();
+            var responses = json.getJsonArray("responses");
+            for (int i = 0; i < responses.size(); i++) {
+                var response = responses.getJsonObject(i);
+                if (!response.getBoolean("success")) {
+                    var error = response.getJsonObject("error");
+                    String errorCode = error.getString("code");
+                    if (errorCode.equals("messaging/invalid-argument")
+                            || errorCode.equals("messaging/registration-token-not-registered")) {
+                        failedTokens.add(registrationTokens.get(i));
                     }
+                    LOGGER.warn("Push user {} error - {}", user.getId(), error.getString("message"));
                 }
-                if (!failedTokens.isEmpty()) {
-                    registrationTokens.removeAll(failedTokens);
-                    if (registrationTokens.isEmpty()) {
-                        user.removeAttribute("notificationTokens");
-                    } else {
-                        user.set("notificationTokens", String.join(",", registrationTokens));
-                    }
+            }
+            if (!failedTokens.isEmpty()) {
+                registrationTokens.removeAll(failedTokens);
+                if (registrationTokens.isEmpty()) {
+                    user.removeAttribute("notificationTokens");
+                } else {
+                    user.set("notificationTokens", String.join(",", registrationTokens));
+                }
+                try {
                     storage.updateObject(user, new Request(
                             new Columns.Include("attributes"),
                             new Condition.Equals("id", user.getId())));
                     cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
+                } catch (Exception e) {
+                    LOGGER.warn("Notification token cleanup error", e);
                 }
-            } catch (Exception e) {
-                LOGGER.warn("Notification push error", e);
             }
-        }
+        });
     }
 
 }
