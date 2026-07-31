@@ -24,7 +24,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
@@ -39,31 +38,17 @@ public abstract class Notificator {
         this.notificationFormatter = notificationFormatter;
     }
 
-    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
-        var message = notificationFormatter.formatMessage(notification, user, event, position);
-        send(user, message, event, position);
-    }
-
-    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
-        throw new UnsupportedOperationException();
-    }
-
     public CompletableFuture<Void> sendAsync(Notification notification, User user, Event event, Position position) {
         try {
-            send(notification, user, event, position);
-            return CompletableFuture.completedFuture(null);
+            var message = notificationFormatter.formatMessage(notification, user, event, position);
+            return sendAsync(user, message, event, position);
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
     }
 
     public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
-        try {
-            send(user, message, event, position);
-            return CompletableFuture.completedFuture(null);
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     protected static CompletableFuture<Void> post(
