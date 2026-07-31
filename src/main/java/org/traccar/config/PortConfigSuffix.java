@@ -119,6 +119,7 @@ import org.traccar.protocol.Hyn600Protocol;
 import org.traccar.protocol.IdplProtocol;
 import org.traccar.protocol.IntellitracProtocol;
 import org.traccar.protocol.IotmProtocol;
+import org.traccar.protocol.Itr120Protocol;
 import org.traccar.protocol.ItsProtocol;
 import org.traccar.protocol.Ivt401Protocol;
 import org.traccar.protocol.JidoProtocol;
@@ -562,6 +563,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(RadshidProtocol.class, 5265);
         put(R16hProtocol.class, 5266);
         put(JimiPhotoProtocol.class, 5267);
+        put(Itr120Protocol.class, 5268);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {
