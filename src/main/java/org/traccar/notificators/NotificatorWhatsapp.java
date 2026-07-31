@@ -20,7 +20,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Response;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
@@ -31,6 +30,7 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorWhatsapp extends Notificator {
@@ -91,15 +91,15 @@ public class NotificatorWhatsapp extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage shortMessage, Event event, Position position)
-            throws MessageException {
+    public CompletableFuture<Void> sendAsync(
+            User user, NotificationMessage shortMessage, Event event, Position position) {
         String recipient = user.getPhone();
         if (recipient == null || recipient.isBlank()) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
 
         if (token == null || phoneNumberId == null || templateName == null) {
-            throw new MessageException("Missing WhatsApp configuration");
+            return CompletableFuture.failedFuture(new MessageException("Missing WhatsApp configuration"));
         }
 
         Parameter parameter = new Parameter();
@@ -113,13 +113,13 @@ public class NotificatorWhatsapp extends Notificator {
         message.template.language.code = templateLanguage;
         message.template.components = List.of(component);
 
-        try (Response response = client.target(String.format(
-                "https://graph.facebook.com/v22.0/%s/messages", phoneNumberId))
-                .request().header("Authorization", "Bearer " + token).post(Entity.json(message))) {
+        var request = client.target(String.format("https://graph.facebook.com/v22.0/%s/messages", phoneNumberId))
+                .request().header("Authorization", "Bearer " + token);
+        return post(request, Entity.json(message), response -> {
             if (response.getStatus() / 100 != 2) {
                 throw new MessageException(response.readEntity(String.class));
             }
-        }
+        });
     }
 
 }

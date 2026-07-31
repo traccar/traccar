@@ -29,7 +29,7 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 public abstract class Notificator {
 
@@ -66,14 +66,15 @@ public abstract class Notificator {
         }
     }
 
-    protected static <T> CompletableFuture<T> post(
-            Invocation.Builder request, Entity<?> entity, Function<Response, T> handler) {
-        var future = new CompletableFuture<T>();
+    protected static CompletableFuture<Void> post(
+            Invocation.Builder request, Entity<?> entity, Consumer<Response> handler) {
+        var future = new CompletableFuture<Void>();
         request.async().post(entity, new InvocationCallback<Response>() {
             @Override
             public void completed(Response response) {
                 try (response) {
-                    future.complete(handler.apply(response));
+                    handler.accept(response);
+                    future.complete(null);
                 } catch (Exception e) {
                     future.completeExceptionally(e);
                 }

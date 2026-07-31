@@ -80,7 +80,7 @@ public class NotificatorPushover extends Notificator {
         message.title = shortMessage.subject();
         message.message = shortMessage.digest();
 
-        return post(client.target(url).request(), Entity.json(message), response -> null);
+        return post(client.target(url).request(), Entity.json(message), response -> {});
     }
 
 }
