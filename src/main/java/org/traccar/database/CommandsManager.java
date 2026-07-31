@@ -22,7 +22,6 @@ import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
-import org.traccar.helper.model.CommandUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -80,7 +79,11 @@ public class CommandsManager implements BroadcastInterface {
         long deviceId = command.getDeviceId();
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", deviceId)));
-        CommandUtil.expandPlaceholders(command, device);
+        String data = command.getString(Command.KEY_DATA);
+        if (data != null && data.contains("{uniqueId}")) {
+            command = QueuedCommand.fromCommand(command).toCommand();
+            command.set(Command.KEY_DATA, data.replace("{uniqueId}", device.getUniqueId()));
+        }
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
