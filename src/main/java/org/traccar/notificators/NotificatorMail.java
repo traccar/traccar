@@ -18,14 +18,14 @@ package org.traccar.notificators;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.mail.MessagingException;
 import org.traccar.mail.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorMail extends Notificator {
@@ -39,11 +39,12 @@ public class NotificatorMail extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
+    public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
         try {
             mailManager.sendMessage(user, false, message.subject(), message.body());
-        } catch (MessagingException e) {
-            throw new MessageException(e);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
         }
     }
 
