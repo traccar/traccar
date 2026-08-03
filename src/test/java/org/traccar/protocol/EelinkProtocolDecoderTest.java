@@ -4,7 +4,27 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class EelinkProtocolDecoderTest extends ProtocolTest {
+
+    private static final String ITR120_LOGIN =
+            "28280100180005035254407167747100200205020500010432000088BD";
+    private static final String ITR120_REPORT_ON =
+            "282815003200345defaf8903fd09f63bfac900ad0005000000000702d40005060c000028963b01046f0000007000031fa1115505670000";
+    private static final String ITR120_REPORT_OFF =
+            "282815003200345defaf8903fd09f63bfac900ad0005000000000702d40005060c000028963b02046f0000007000031fa1115505670000";
+    private static final String ITR120_IDLE_TIME =
+            "28283B002B001D63E5387003FD09FF75FAC8A87C0000000000360502D4000604180000CFC83E047F11A205080000001E";
+
+    // iTR120 compatibility checks
+
+    private EelinkProtocolDecoder loginItr120() throws Exception {
+        var decoder = inject(new EelinkProtocolDecoder(null));
+        verifyNull(decoder, binary(ITR120_LOGIN));
+        return decoder;
+    }
 
     @Test
     public void testDecode() throws Exception {
@@ -123,6 +143,55 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "676702001b03c5538086df0190c1790b3482df0f0157020800013beb00342401"));
 
+    }
+
+    @Test
+    public void testDecodeItr120Login() throws Exception {
+        loginItr120();
+    }
+
+    @Test
+    public void testDecodeItr120ReportIgnitionOn() throws Exception {
+        var decoder = loginItr120();
+
+        verifyPosition(decoder, binary(ITR120_REPORT_ON));
+        verifyAttribute(decoder, binary(ITR120_REPORT_ON), Position.KEY_IGNITION, true);
+        verifyAttribute(decoder, binary(ITR120_REPORT_ON), Position.KEY_BATTERY, 4.437);
+        verifyAttribute(decoder, binary(ITR120_REPORT_ON), Position.KEY_ODOMETER, 112L);
+        verifyAttribute(decoder, binary(ITR120_REPORT_ON), Position.KEY_HOURS, 204705000L);
+    }
+
+    @Test
+    public void testDecodeItr120ReportIgnitionOff() throws Exception {
+        var decoder = loginItr120();
+
+        verifyPosition(decoder, binary(ITR120_REPORT_OFF));
+        verifyAttribute(decoder, binary(ITR120_REPORT_OFF), Position.KEY_IGNITION, false);
+        verifyAttribute(decoder, binary(ITR120_REPORT_OFF), Position.KEY_BATTERY, 4.437);
+    }
+
+    @Test
+    public void testDecodeItr120IdleTime() throws Exception {
+        var decoder = loginItr120();
+
+        verifyPosition(decoder, binary(ITR120_IDLE_TIME));
+        verifyAttribute(decoder, binary(ITR120_IDLE_TIME), Position.KEY_BATTERY, 4.514);
+        verifyAttribute(decoder, binary(ITR120_IDLE_TIME), "idleTime", 30);
+    }
+
+    @Test
+    public void testItr120IgnitionOnBit() {
+        assertEquals(Boolean.TRUE, EelinkProtocolDecoder.decodeIgnition(0x01));
+    }
+
+    @Test
+    public void testItr120IgnitionOffBit() {
+        assertEquals(Boolean.FALSE, EelinkProtocolDecoder.decodeIgnition(0x02));
+    }
+
+    @Test
+    public void testItr120IgnitionIgnoredWhenNotCar() {
+        assertNull(EelinkProtocolDecoder.decodeIgnition(0x03));
     }
 
 }
