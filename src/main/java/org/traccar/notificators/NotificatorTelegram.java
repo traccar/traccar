@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,6 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
 import java.net.URI;
-import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorTelegram extends Notificator {
@@ -107,8 +106,7 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Override
-    public CompletableFuture<Void> sendAsync(
-            User user, NotificationMessage shortMessage, Event event, Position position) {
+    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
@@ -116,18 +114,14 @@ public class NotificatorTelegram extends Notificator {
             message.chatId = chatId;
         }
         message.text = shortMessage.digest();
-
+        client.target(urlSendText).request().post(Entity.json(message)).close();
         boolean sendUserLocation = user.hasAttribute(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
                 ? user.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
                 : sendLocation;
-
-        return post(client.target(urlSendText).request(), Entity.json(message), response -> {}).thenCompose(v -> {
-            if (sendUserLocation && position != null) {
-                return post(client.target(urlSendLocation).request(),
-                        Entity.json(createLocationMessage(message.chatId, position)), response -> {});
-            }
-            return CompletableFuture.completedFuture(null);
-        });
+        if (sendUserLocation && position != null) {
+            client.target(urlSendLocation).request().post(
+                    Entity.json(createLocationMessage(message.chatId, position))).close();
+        }
     }
 
 }
