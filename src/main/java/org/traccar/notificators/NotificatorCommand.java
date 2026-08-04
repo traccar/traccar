@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorCommand extends Notificator {
@@ -45,10 +44,10 @@ public class NotificatorCommand extends Notificator {
     }
 
     @Override
-    public CompletableFuture<Void> sendAsync(Notification notification, User user, Event event, Position position) {
+    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
 
         if (notification == null || notification.getCommandId() <= 0) {
-            return CompletableFuture.failedFuture(new MessageException("Saved command not provided"));
+            throw new MessageException("Saved command not provided");
         }
 
         try {
@@ -56,9 +55,8 @@ public class NotificatorCommand extends Notificator {
                     new Columns.All(), new Condition.Equals("id", notification.getCommandId())));
             command.setDeviceId(event.getDeviceId());
             commandsManager.sendCommand(command);
-            return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
+            throw new MessageException(e);
         }
     }
 

@@ -18,20 +18,29 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.session.ConnectionManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.session.DeviceSession;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
     private boolean connectionless;
+    private ConnectionManager connectionManager;
 
     public EelinkProtocolEncoder(Protocol protocol, boolean connectionless) {
         super(protocol);
         this.connectionless = connectionless;
+    }
+
+    @jakarta.inject.Inject
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 
     public static int checksum(ByteBuffer buf) {
@@ -87,17 +96,65 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
-    @Override
-    protected Object encodeCommand(Command command) {
+    private boolean isItr120Device(long deviceId) {
+        if (connectionManager != null) {
+            DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
+            if (deviceSession != null && deviceSession.contains(EelinkProtocolDecoder.KEY_ITR120_SESSION)) {
+                return true;
+            }
+        }
+        String model = getDeviceModel(deviceId);
+        return model != null && model.toUpperCase(Locale.ROOT).contains("ITR120");
+    }
 
+    private ByteBuf encodeItr120Command(long sequence, String content) {
+        byte[] data = content.getBytes(StandardCharsets.US_ASCII);
+        ByteBuf buf = Unpooled.buffer();
+
+        buf.writeByte(0x28);
+        buf.writeByte(0x28);
+        buf.writeByte(EelinkProtocolDecoder.MSG_DOWNLINK);
+        buf.writeShort(2 + 1 + 4 + data.length);
+        buf.writeShort((int) sequence);
+        buf.writeByte(0x01);
+        buf.writeInt((int) sequence);
+        buf.writeBytes(data);
+
+        return buf;
+    }
+
+    private String getItr120Content(Command command) {
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), "WHERE#");
-            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), "RELAY,1#");
-            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), "RELAY,0#");
-            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), "RESET#");
+            case Command.TYPE_ENGINE_STOP -> "RELAY,1#";
+            case Command.TYPE_ENGINE_RESUME -> "RELAY,0#";
+            case Command.TYPE_CUSTOM -> command.getString(Command.KEY_DATA);
             default -> null;
         };
+    }
+
+    private String getClassicContent(Command command) {
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> command.getString(Command.KEY_DATA);
+            case Command.TYPE_POSITION_SINGLE -> "WHERE#";
+            case Command.TYPE_ENGINE_STOP -> "RELAY,1#";
+            case Command.TYPE_ENGINE_RESUME -> "RELAY,0#";
+            case Command.TYPE_REBOOT_DEVICE -> "RESET#";
+            default -> null;
+        };
+    }
+
+    @Override
+    protected Object encodeCommand(Command command) {
+        boolean itr120 = isItr120Device(command.getDeviceId());
+        String content = itr120 ? getItr120Content(command) : getClassicContent(command);
+        if (content == null) {
+            return null;
+        }
+        if (itr120) {
+            long sequence = command.getDeviceId() & 0xffffL;
+            return encodeItr120Command(sequence != 0 ? sequence : 1, content);
+        }
+        return encodeContent(command.getDeviceId(), content);
     }
 
 }
