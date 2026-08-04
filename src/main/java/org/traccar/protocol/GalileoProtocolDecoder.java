@@ -113,16 +113,22 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     static {
+        for (int tag = 0x0001; tag <= 0x0080; tag++) {
+        EXTENDED_TAG_LENGTH_MAP.put(tag, 4);
+        }
         addExtendedTagLength(2, 0x0081, 0x0082, 0x0083, 0x0084);
-        addExtendedTagLength(1, 0x0085, 0x0093, 0x00a6, 0x00a7, 0x00a8, 0x00b0, 0x00b1, 0x00b2, 0x00fc);
+        addExtendedTagLength(1, 0x0085, 0x0093, 0x00a4, 0x00a5, 0x00a6, 0x00a7, 0x00a8, 0x00b0, 0x00b1, 0x00b2, 0x00fc);
         for (int tag = 0x0086; tag <= 0x0091; tag++) {
             EXTENDED_TAG_LENGTH_MAP.put(tag, 4);
         }
         EXTENDED_TAG_LENGTH_MAP.put(0x0092, 15);
         EXTENDED_TAG_LENGTH_MAP.put(0x0094, 20);
+        EXTENDED_TAG_LENGTH_MAP.put(0x0095, 4);
+        EXTENDED_TAG_LENGTH_MAP.put(0x00a9, 4);
+        EXTENDED_TAG_LENGTH_MAP.put(0x00ab, 12);
+        EXTENDED_TAG_LENGTH_MAP.put(0x00ac, 4);
         addExtendedTagLength(6, 0x00ad, 0x00ae, 0x00b4, 0x00b5, 0x00b6);
         EXTENDED_TAG_LENGTH_MAP.put(0x00af, 14);
-        EXTENDED_TAG_LENGTH_MAP.put(0x00ab, 12);
         EXTENDED_TAG_LENGTH_MAP.put(0x00b3, 12);
         addExtendedTagLength(8, 0x00fd, 0x00fe);
     }
@@ -165,20 +171,48 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(1);
         int status = buf.readUnsignedShortLE();
         int length = 3;
-        if (BitUtil.check(status, 1)) length += 10;
-        if (BitUtil.check(status, 2)) length += 10;
-        if (BitUtil.check(status, 3)) length += 10;
-        if (BitUtil.check(status, 4)) length += 2;
-        if (BitUtil.check(status, 5)) length += 2;
-        if (BitUtil.check(status, 6)) length += 2;
-        if (BitUtil.check(status, 7)) length += 2;
-        if (BitUtil.check(status, 8)) length += 2;
-        if (BitUtil.check(status, 9)) length += 2;
-        if (BitUtil.check(status, 10)) length += 32;
-        if (BitUtil.check(status, 11)) length += 20;
-        if (BitUtil.check(status, 12)) length += 12;
-        if (BitUtil.check(status, 13)) length += 2;
-        if (BitUtil.check(status, 14)) length += 2;
+        if (BitUtil.check(status, 1)) {
+            length += 10;
+        }
+        if (BitUtil.check(status, 2)) {
+            length += 10;
+        }
+        if (BitUtil.check(status, 3)) {
+            length += 10;
+        }
+        if (BitUtil.check(status, 4)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 5)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 6)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 7)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 8)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 9)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 10)) {
+            length += 32;
+        }
+        if (BitUtil.check(status, 11)) {
+            length += 20;
+        }
+        if (BitUtil.check(status, 12)) {
+            length += 12;
+        }
+        if (BitUtil.check(status, 13)) {
+            length += 2;
+        }
+        if (BitUtil.check(status, 14)) {
+            length += 2;
+        }
 
         buf.readerIndex(start);
         String hex = ByteBufUtil.hexDump(buf.readSlice(length));
@@ -218,15 +252,18 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         boolean[] hasCellData = {false};
         while (buf.readerIndex() < endIndex) {
             int tag = buf.readUnsignedShortLE();
-            decodeExtendedTag(position, buf, tag, cellData, hasCellData);
+            if (!decodeExtendedTag(position, buf, tag, cellData, hasCellData)) {
+            break;
+            }
         }
+        buf.readerIndex(endIndex);
         if (hasCellData[0]) {
         position.setNetwork(new Network(CellTower.from(
                 cellData[2], cellData[3], cellData[1], cellData[0], cellData[4])));
         }
     }
 
-    private void decodeExtendedTag(Position position, ByteBuf buf, int tag, int[] cellData, boolean[] hasCellData) {
+    private boolean decodeExtendedTag(Position position, ByteBuf buf, int tag, int[] cellData, boolean[] hasCellData) {
         switch (tag) {
             case 0x0081 -> {
             cellData[0] = buf.readUnsignedShortLE();
@@ -245,11 +282,12 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             default -> {
                 Integer length = EXTENDED_TAG_LENGTH_MAP.get(tag);
                 if (length == null) {
-                    throw new IllegalArgumentException(String.format("Unknown extended tag: 0x%04x", tag));
+                    return false;
                 }
                 buf.skipBytes(length);
             }
         }
+        return true;
     }
 
     private void decodeTagOther(Position position, ByteBuf buf, int tag) {
