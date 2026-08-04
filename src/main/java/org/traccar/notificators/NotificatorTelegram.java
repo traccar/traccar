@@ -49,8 +49,6 @@ public class NotificatorTelegram extends Notificator {
         private String chatId;
         @JsonProperty("text")
         private String text;
-        @JsonProperty("parse_mode")
-        private String parseMode = "html";
     }
 
     public static class LocationMessage {
