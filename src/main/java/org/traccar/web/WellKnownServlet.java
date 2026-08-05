@@ -33,6 +33,9 @@ import java.util.Map;
 @Singleton
 public class WellKnownServlet extends HttpServlet {
 
+    private static final String OIDC_PATH_SUFFIX = "/api/oidc";
+    private static final String MCP_PATH_SUFFIX = "/api/mcp";
+
     private final Config config;
     private final ObjectMapper objectMapper;
 
@@ -44,7 +47,7 @@ public class WellKnownServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getPathInfo();
+        String path = normalizePath(req.getPathInfo());
         Map<String, Object> payload = switch (path) {
             case "/openid-configuration" -> openIdConfiguration();
             case "/oauth-authorization-server" -> authorizationServerConfiguration();
@@ -57,6 +60,22 @@ public class WellKnownServlet extends HttpServlet {
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    String normalizePath(String path) {
+        if (path == null) {
+            return "";
+        }
+        if (path.equals("/openid-configuration" + OIDC_PATH_SUFFIX)) {
+            return "/openid-configuration";
+        }
+        if (path.equals("/oauth-authorization-server" + OIDC_PATH_SUFFIX)) {
+            return "/oauth-authorization-server";
+        }
+        if (path.equals("/oauth-protected-resource" + MCP_PATH_SUFFIX)) {
+            return "/oauth-protected-resource";
+        }
+        return path;
     }
 
     private String issuer() {

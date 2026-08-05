@@ -173,12 +173,22 @@ public class OidcResource extends BaseResource {
         }
         Map<String, ClientConfig> clients = new LinkedHashMap<>();
         for (String entry : value.split(",")) {
-            String[] values = entry.split(":", 3);
+            String[] values = parseClientEntry(entry);
             clients.put(values[0], new ClientConfig(values[1], Arrays.stream(values[2].split("\\|"))
                     .map(URI::create)
                     .collect(Collectors.toSet())));
         }
         return clients;
+    }
+
+    static String[] parseClientEntry(String entry) {
+        String[] values = entry.split(":", 3);
+        if (values.length != 3 || values[0].isBlank() || values[1].isBlank() || values[2].isBlank()) {
+            throw new IllegalArgumentException(
+                    "Invalid openid.clients entry '" + entry
+                            + "': expected format 'clientId:clientSecret:redirectUri'");
+        }
+        return values;
     }
 
 }
