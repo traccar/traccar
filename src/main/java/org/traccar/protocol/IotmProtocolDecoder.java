@@ -139,9 +139,12 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
     protected Object decode(
             DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
-        List<Position> positions = new LinkedList<>();
+        return decodePayload(deviceSession, message.payload());
+    }
 
-        ByteBuf buf = message.payload();
+    private Object decodePayload(DeviceSession deviceSession, ByteBuf buf) {
+
+        List<Position> positions = new LinkedList<>();
 
         buf.readUnsignedByte(); // structure version
 
