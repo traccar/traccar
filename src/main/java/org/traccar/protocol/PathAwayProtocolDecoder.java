@@ -32,6 +32,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
@@ -63,13 +64,23 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
         FullHttpRequest request = (FullHttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
 
+        List<String> userNames = decoder.parameters().get("UserName");
+        if (userNames == null || userNames.isEmpty()) {
+            return null;
+        }
+
         DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, decoder.parameters().get("UserName").get(0));
+                channel, remoteAddress, userNames.get(0));
         if (deviceSession == null) {
             return null;
         }
 
-        Parser parser = new Parser(PATTERN, decoder.parameters().get("LOC").get(0));
+        List<String> locations = decoder.parameters().get("LOC");
+        if (locations == null || locations.isEmpty()) {
+            return null;
+        }
+
+        Parser parser = new Parser(PATTERN, locations.get(0));
         if (!parser.matches()) {
             return null;
         }
