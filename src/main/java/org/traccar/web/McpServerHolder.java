@@ -34,8 +34,12 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.DateUtil;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.reports.SummaryReportProvider;
+import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -43,8 +47,13 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
+import java.time.format.DateTimeParseException;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Singleton
@@ -52,10 +61,14 @@ public class McpServerHolder implements AutoCloseable {
 
     public static final String PATH = "/api/mcp";
 
+    private static final McpSchema.ToolAnnotations READ_ONLY_ANNOTATIONS = new McpSchema.ToolAnnotations(
+            null, true, false, true, false, null);
+
     private final Storage storage;
     private final Provider<PermissionsService> permissionsService;
     private final Geocoder geocoder;
     private final boolean geocodeOnRequest;
+    private final Provider<SummaryReportProvider> summaryReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -63,11 +76,13 @@ public class McpServerHolder implements AutoCloseable {
     @Inject
     public McpServerHolder(
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
-            Config config, @Nullable Geocoder geocoder) {
+            Config config, @Nullable Geocoder geocoder,
+            Provider<SummaryReportProvider> summaryReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
+        this.summaryReportProvider = summaryReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -85,7 +100,9 @@ public class McpServerHolder implements AutoCloseable {
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool())
+                .tools(
+                        createVersionTool(), createDevicePositionTool(), createDeviceListTool(),
+                        createDeviceSummaryTool())
                 .build();
     }
 
@@ -101,6 +118,22 @@ public class McpServerHolder implements AutoCloseable {
         return McpTransportContext.create(contextData);
     }
 
+    private Map<String, Object> schemaProperty(String type, String description) {
+        return Map.of("type", type, "description", description);
+    }
+
+    private McpSchema.JsonSchema deviceRangeInputSchema(Map<String, Object> extraProperties) {
+        var properties = new LinkedHashMap<String, Object>();
+        properties.put("deviceId", schemaProperty("number", "Device id, see device-list for available ids"));
+        properties.put("from", schemaProperty("string", "Start of the time range, ISO-8601, e.g. "
+                + "2024-01-01T00:00:00Z"));
+        properties.put("to", schemaProperty("string", "End of the time range, ISO-8601, e.g. "
+                + "2024-01-02T00:00:00Z"));
+        properties.putAll(extraProperties);
+        return new McpSchema.JsonSchema(
+                "object", properties, List.of("deviceId", "from", "to"), null, null, null);
+    }
+
     private McpServerFeatures.AsyncToolSpecification createVersionTool() {
 
         var inputSchema = new McpSchema.JsonSchema(
@@ -109,7 +142,9 @@ public class McpServerHolder implements AutoCloseable {
         var toolSchema = McpSchema.Tool.builder()
                 .name("traccar-version")
                 .title("Returns server version name")
+                .description("Returns the Traccar server version string.")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
@@ -125,19 +160,20 @@ public class McpServerHolder implements AutoCloseable {
 
     private McpServerFeatures.AsyncToolSpecification createDevicePositionTool() {
 
-        var deviceIdSchema = new McpSchema.JsonSchema(
-                "number", Map.of(), null, null, null, null);
-
         var inputSchema = new McpSchema.JsonSchema(
                 "object",
-                Map.of("deviceId", deviceIdSchema),
+                Map.of("deviceId", schemaProperty("number", "Device id, see device-list for available ids")),
                 List.of("deviceId"),
                 null, null, null);
 
         var toolSchema = McpSchema.Tool.builder()
                 .name("device-position")
                 .title("Returns latest device position with address and other parameters")
+                .description(
+                        "Returns the latest known position for a single device, including address, "
+                                + "coordinates and raw protocol attributes. Speed is reported in knots.")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
@@ -146,11 +182,91 @@ public class McpServerHolder implements AutoCloseable {
                 .build();
     }
 
+    private McpServerFeatures.AsyncToolSpecification createDeviceListTool() {
+
+        var inputSchema = new McpSchema.JsonSchema(
+                "object",
+                Map.of(
+                        "name", schemaProperty("string", "Case-insensitive substring filter on device name"),
+                        "limit", schemaProperty("integer", "Maximum number of devices to return, default 200")),
+                null, null, null, null);
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-list")
+                .title("Lists accessible devices, optionally filtered by name")
+                .description(
+                        "Lists devices accessible to the current user with id, name, uniqueId, status "
+                                + "and lastUpdate. Use the returned id as deviceId in other tools.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceList)
+                .build();
+    }
+
+    private McpServerFeatures.AsyncToolSpecification createDeviceSummaryTool() {
+
+        var inputSchema = deviceRangeInputSchema(Map.of(
+                "daily", schemaProperty("boolean",
+                        "Return one summary per day instead of one for the whole range, default false"),
+                "limit", schemaProperty("integer",
+                        "Maximum summaries to return, relevant when daily is true, default 60, clamped to "
+                                + "1-1000")));
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-summary")
+                .title("Returns aggregate distance/duration for a device over a time range")
+                .description(
+                        "Returns a single summary (or one per day if daily is true) with total distance, "
+                                + "average/max speed, fuel, odometer and engine hours. Use this when you need "
+                                + "totals for a long range rather than a leg-by-leg breakdown. When daily is "
+                                + "true the result count is bounded by limit.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceSummary)
+                .build();
+    }
+
     private McpSchema.CallToolResult errorResult(String message) {
         return McpSchema.CallToolResult.builder()
                 .addTextContent(message)
                 .isError(true)
                 .build();
+    }
+
+    private record DeviceRange(long deviceId, Date from, Date to) {
+    }
+
+    private DeviceRange parseDeviceRange(McpSchema.CallToolRequest request) {
+        Object deviceIdValue = request.arguments().get("deviceId");
+        if (!(deviceIdValue instanceof Number deviceIdNumber)) {
+            throw new IllegalArgumentException("deviceId argument is required");
+        }
+        Object fromValue = request.arguments().get("from");
+        Object toValue = request.arguments().get("to");
+        if (!(fromValue instanceof String fromText) || !(toValue instanceof String toText)) {
+            throw new IllegalArgumentException("from and to arguments are required");
+        }
+        try {
+            return new DeviceRange(
+                    deviceIdNumber.longValue(), DateUtil.parseDate(fromText), DateUtil.parseDate(toText));
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Invalid from/to date-time: expected ISO-8601, e.g. 2024-01-01T00:00:00Z");
+        }
+    }
+
+    private int limitArgument(McpSchema.CallToolRequest request, int defaultValue, int maximum) {
+        Object limitValue = request.arguments().get("limit");
+        int limit = limitValue instanceof Number number ? number.intValue() : defaultValue;
+        return Math.max(1, Math.min(limit, maximum));
     }
 
     private Mono<McpSchema.CallToolResult> getDevicePosition(
@@ -187,6 +303,89 @@ public class McpServerHolder implements AutoCloseable {
                     .structuredContent(position)
                     .build());
         } catch (StorageException | SecurityException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceList(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        Object nameValue = request.arguments().get("name");
+        String nameFilter = nameValue instanceof String s && !s.isBlank()
+                ? s.toLowerCase(Locale.ROOT) : null;
+
+        int limit = limitArgument(request, 200, 1000);
+
+        try {
+            Collection<Device> devices = DeviceUtil.getAccessibleDevices(storage, userId, List.of(), List.of());
+            List<Map<String, Object>> result = devices.stream()
+                    .filter(device -> nameFilter == null || device.getName() != null
+                            && device.getName().toLowerCase(Locale.ROOT).contains(nameFilter))
+                    .map(device -> {
+                        Map<String, Object> item = new LinkedHashMap<>();
+                        item.put("id", device.getId());
+                        item.put("name", device.getName());
+                        item.put("uniqueId", device.getUniqueId());
+                        item.put("status", device.getStatus());
+                        item.put("lastUpdate", device.getLastUpdate());
+                        return item;
+                    })
+                    .limit(limit)
+                    .toList();
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of("devices", result))
+                    .build());
+        } catch (StorageException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceSummary(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        Object dailyValue = request.arguments().get("daily");
+        boolean daily = dailyValue instanceof Boolean dailyBoolean && dailyBoolean;
+        int limit = limitArgument(request, 60, 1000);
+
+        try {
+            DeviceRange range = parseDeviceRange(request);
+            permissionsService.get().checkPermission(Device.class, userId, range.deviceId());
+
+            Collection<SummaryReportItem> summaries = summaryReportProvider.get().getObjects(
+                    userId, List.of(range.deviceId()), List.of(), range.from(), range.to(), daily);
+
+            List<Map<String, Object>> curated = summaries.stream().limit(limit).map(summary -> {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("startTime", summary.getStartTime());
+                item.put("endTime", summary.getEndTime());
+                item.put("distance", summary.getDistance());
+                item.put("averageSpeed", summary.getAverageSpeed());
+                item.put("maxSpeed", summary.getMaxSpeed());
+                item.put("spentFuel", summary.getSpentFuel());
+                item.put("startOdometer", summary.getStartOdometer());
+                item.put("endOdometer", summary.getEndOdometer());
+                item.put("engineHours", summary.getEngineHours());
+                return item;
+            }).toList();
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of(
+                            "summaries", curated,
+                            "returnedCount", curated.size(),
+                            "rawCount", summaries.size()))
+                    .build());
+        } catch (StorageException | SecurityException | IllegalArgumentException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
     }
