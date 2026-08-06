@@ -34,6 +34,7 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
@@ -43,8 +44,10 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Singleton
@@ -88,7 +91,7 @@ public class McpServerHolder implements AutoCloseable {
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool())
+                .tools(createVersionTool(), createDevicePositionTool(), createDeviceListTool())
                 .build();
     }
 
@@ -135,7 +138,7 @@ public class McpServerHolder implements AutoCloseable {
 
         var inputSchema = new McpSchema.JsonSchema(
                 "object",
-                Map.of("deviceId", schemaProperty("number", "Device id")),
+                Map.of("deviceId", schemaProperty("number", "Device id, see device-list for available ids")),
                 List.of("deviceId"),
                 null, null, null);
 
@@ -151,6 +154,30 @@ public class McpServerHolder implements AutoCloseable {
         return McpServerFeatures.AsyncToolSpecification.builder()
                 .tool(toolSchema)
                 .callHandler(this::getDevicePosition)
+                .build();
+    }
+
+    private McpServerFeatures.AsyncToolSpecification createDeviceListTool() {
+
+        var inputSchema = new McpSchema.JsonSchema(
+                "object",
+                Map.of(
+                        "name", schemaProperty("string", "Case-insensitive substring filter on device name"),
+                        "limit", schemaProperty("integer", "Maximum number of devices to return, default 200")),
+                null, null, null, null);
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-list")
+                .description(
+                        "Lists devices accessible to the current user, same format as the /api/devices "
+                                + "endpoint. Use the returned id as deviceId in other tools.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceList)
                 .build();
     }
 
@@ -195,6 +222,38 @@ public class McpServerHolder implements AutoCloseable {
                     .structuredContent(position)
                     .build());
         } catch (StorageException | SecurityException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceList(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        Object nameValue = request.arguments().get("name");
+        String nameFilter = nameValue instanceof String s && !s.isBlank()
+                ? s.toLowerCase(Locale.ROOT) : null;
+
+        Object limitValue = request.arguments().get("limit");
+        int limit = limitValue instanceof Number number ? number.intValue() : 200;
+        limit = Math.max(1, Math.min(limit, 1000));
+
+        try {
+            Collection<Device> devices = DeviceUtil.getAccessibleDevices(storage, userId, List.of(), List.of());
+            List<Device> result = devices.stream()
+                    .filter(device -> nameFilter == null || device.getName() != null
+                            && device.getName().toLowerCase(Locale.ROOT).contains(nameFilter))
+                    .limit(limit)
+                    .toList();
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of("devices", result))
+                    .build());
+        } catch (StorageException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
     }
