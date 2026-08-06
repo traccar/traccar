@@ -39,7 +39,9 @@ import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.SummaryReportProvider;
+import org.traccar.reports.TripsReportProvider;
 import org.traccar.reports.model.SummaryReportItem;
+import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -69,6 +71,7 @@ public class McpServerHolder implements AutoCloseable {
     private final Geocoder geocoder;
     private final boolean geocodeOnRequest;
     private final Provider<SummaryReportProvider> summaryReportProvider;
+    private final Provider<TripsReportProvider> tripsReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -77,12 +80,14 @@ public class McpServerHolder implements AutoCloseable {
     public McpServerHolder(
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
             Config config, @Nullable Geocoder geocoder,
-            Provider<SummaryReportProvider> summaryReportProvider) {
+            Provider<SummaryReportProvider> summaryReportProvider,
+            Provider<TripsReportProvider> tripsReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
         this.summaryReportProvider = summaryReportProvider;
+        this.tripsReportProvider = tripsReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -102,7 +107,7 @@ public class McpServerHolder implements AutoCloseable {
                 .capabilities(capabilities)
                 .tools(
                         createVersionTool(), createDevicePositionTool(), createDeviceListTool(),
-                        createDeviceSummaryTool())
+                        createDeviceSummaryTool(), createDeviceTripsTool())
                 .build();
     }
 
@@ -231,6 +236,28 @@ public class McpServerHolder implements AutoCloseable {
                 .build();
     }
 
+    private McpServerFeatures.AsyncToolSpecification createDeviceTripsTool() {
+
+        var inputSchema = deviceRangeInputSchema(Map.of(
+                "limit", schemaProperty("integer", "Maximum trips to return, default 100, clamped to 1-1000")));
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-trips")
+                .description(
+                        "Returns detected trips (motion-based segments) for a device within a time range, "
+                                + "same format as the /api/reports/trips endpoint. Use device-summary instead "
+                                + "if you only need totals for a long range rather than a leg-by-leg "
+                                + "breakdown.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceTrips)
+                .build();
+    }
+
     private McpSchema.CallToolResult errorResult(String message) {
         return McpSchema.CallToolResult.builder()
                 .addTextContent(message)
@@ -330,6 +357,36 @@ public class McpServerHolder implements AutoCloseable {
                     .structuredContent(Map.of("devices", result))
                     .build());
         } catch (StorageException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceTrips(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        int limit = limitArgument(request, 100, 1000);
+
+        try {
+            DeviceRange range = parseDeviceRange(request);
+            permissionsService.get().checkPermission(Device.class, userId, range.deviceId());
+
+            Collection<TripReportItem> trips = tripsReportProvider.get().getObjects(
+                    userId, List.of(range.deviceId()), List.of(), range.from(), range.to());
+
+            List<TripReportItem> result = trips.stream().limit(limit).toList();
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of(
+                            "trips", result,
+                            "returnedCount", result.size(),
+                            "rawCount", trips.size()))
+                    .build());
+        } catch (StorageException | SecurityException | IllegalArgumentException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
     }
