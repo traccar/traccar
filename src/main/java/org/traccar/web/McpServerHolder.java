@@ -52,6 +52,9 @@ public class McpServerHolder implements AutoCloseable {
 
     public static final String PATH = "/api/mcp";
 
+    private static final McpSchema.ToolAnnotations READ_ONLY_ANNOTATIONS = new McpSchema.ToolAnnotations(
+            null, true, false, true, false, null);
+
     private final Storage storage;
     private final Provider<PermissionsService> permissionsService;
     private final Geocoder geocoder;
@@ -101,6 +104,10 @@ public class McpServerHolder implements AutoCloseable {
         return McpTransportContext.create(contextData);
     }
 
+    private Map<String, Object> schemaProperty(String type, String description) {
+        return Map.of("type", type, "description", description);
+    }
+
     private McpServerFeatures.AsyncToolSpecification createVersionTool() {
 
         var inputSchema = new McpSchema.JsonSchema(
@@ -108,8 +115,9 @@ public class McpServerHolder implements AutoCloseable {
 
         var toolSchema = McpSchema.Tool.builder()
                 .name("traccar-version")
-                .title("Returns server version name")
+                .description("Returns server version name")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
@@ -125,19 +133,19 @@ public class McpServerHolder implements AutoCloseable {
 
     private McpServerFeatures.AsyncToolSpecification createDevicePositionTool() {
 
-        var deviceIdSchema = new McpSchema.JsonSchema(
-                "number", Map.of(), null, null, null, null);
-
         var inputSchema = new McpSchema.JsonSchema(
                 "object",
-                Map.of("deviceId", deviceIdSchema),
+                Map.of("deviceId", schemaProperty("number", "Device id")),
                 List.of("deviceId"),
                 null, null, null);
 
         var toolSchema = McpSchema.Tool.builder()
                 .name("device-position")
-                .title("Returns latest device position with address and other parameters")
+                .description(
+                        "Returns the latest known position for a single device, including address, "
+                                + "coordinates and raw protocol attributes. Speed is reported in knots.")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
