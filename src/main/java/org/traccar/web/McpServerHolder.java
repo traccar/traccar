@@ -38,6 +38,7 @@ import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.SummaryReportProvider;
 import org.traccar.reports.TripsReportProvider;
 import org.traccar.reports.model.SummaryReportItem;
@@ -50,6 +51,7 @@ import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Singleton
 public class McpServerHolder implements AutoCloseable {
@@ -72,6 +75,7 @@ public class McpServerHolder implements AutoCloseable {
     private final boolean geocodeOnRequest;
     private final Provider<SummaryReportProvider> summaryReportProvider;
     private final Provider<TripsReportProvider> tripsReportProvider;
+    private final Provider<RouteReportProvider> routeReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -81,13 +85,15 @@ public class McpServerHolder implements AutoCloseable {
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
             Config config, @Nullable Geocoder geocoder,
             Provider<SummaryReportProvider> summaryReportProvider,
-            Provider<TripsReportProvider> tripsReportProvider) {
+            Provider<TripsReportProvider> tripsReportProvider,
+            Provider<RouteReportProvider> routeReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
         this.summaryReportProvider = summaryReportProvider;
         this.tripsReportProvider = tripsReportProvider;
+        this.routeReportProvider = routeReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -107,7 +113,7 @@ public class McpServerHolder implements AutoCloseable {
                 .capabilities(capabilities)
                 .tools(
                         createVersionTool(), createDevicePositionTool(), createDeviceListTool(),
-                        createDeviceSummaryTool(), createDeviceTripsTool())
+                        createDeviceSummaryTool(), createDeviceTripsTool(), createDeviceRouteTool())
                 .build();
     }
 
@@ -258,6 +264,30 @@ public class McpServerHolder implements AutoCloseable {
                 .build();
     }
 
+    private McpServerFeatures.AsyncToolSpecification createDeviceRouteTool() {
+
+        var inputSchema = deviceRangeInputSchema(Map.of(
+                "limit", schemaProperty("integer",
+                        "Maximum positions to return, default 200, clamped to 1-2000")));
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-route")
+                .description(
+                        "Returns recorded positions for a device within a time range, ordered by time, same "
+                                + "format as the /api/reports/route endpoint. When the range holds more than "
+                                + "limit positions the result is downsampled evenly, always keeping the first "
+                                + "and last point. The response includes rawCount and returnedCount so "
+                                + "downsampling is visible to the caller. Speed is reported in knots.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceRoute)
+                .build();
+    }
+
     private McpSchema.CallToolResult errorResult(String message) {
         return McpSchema.CallToolResult.builder()
                 .addTextContent(message)
@@ -357,6 +387,54 @@ public class McpServerHolder implements AutoCloseable {
                     .structuredContent(Map.of("devices", result))
                     .build());
         } catch (StorageException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private List<Position> downsample(List<Position> positions, int limit) {
+        if (positions.size() <= limit) {
+            return positions;
+        }
+        if (limit <= 1) {
+            return List.of(positions.get(0));
+        }
+        List<Position> result = new ArrayList<>(limit);
+        double step = (double) (positions.size() - 1) / (limit - 1);
+        for (int i = 0; i < limit; i++) {
+            result.add(positions.get((int) Math.round(i * step)));
+        }
+        return result;
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceRoute(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        int limit = limitArgument(request, 200, 2000);
+
+        try {
+            DeviceRange range = parseDeviceRange(request);
+            permissionsService.get().checkPermission(Device.class, userId, range.deviceId());
+
+            List<Position> positions;
+            try (Stream<Position> stream = routeReportProvider.get().getObjects(
+                    userId, List.of(range.deviceId()), List.of(), range.from(), range.to())) {
+                positions = stream.toList();
+            }
+
+            List<Position> result = downsample(positions, limit);
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of(
+                            "positions", result,
+                            "returnedCount", result.size(),
+                            "rawCount", positions.size()))
+                    .build());
+        } catch (StorageException | SecurityException | IllegalArgumentException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
     }
