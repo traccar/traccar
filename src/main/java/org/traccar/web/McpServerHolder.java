@@ -52,6 +52,9 @@ public class McpServerHolder implements AutoCloseable {
 
     public static final String PATH = "/api/mcp";
 
+    private static final McpSchema.ToolAnnotations READ_ONLY_ANNOTATIONS = new McpSchema.ToolAnnotations(
+            null, true, false, true, false, null);
+
     private final Storage storage;
     private final Provider<PermissionsService> permissionsService;
     private final Geocoder geocoder;
@@ -110,6 +113,7 @@ public class McpServerHolder implements AutoCloseable {
                 .name("traccar-version")
                 .title("Returns server version name")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
@@ -138,6 +142,7 @@ public class McpServerHolder implements AutoCloseable {
                 .name("device-position")
                 .title("Returns latest device position with address and other parameters")
                 .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
