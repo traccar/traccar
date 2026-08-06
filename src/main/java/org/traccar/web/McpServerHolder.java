@@ -38,6 +38,7 @@ import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.SummaryReportProvider;
 import org.traccar.reports.TripsReportProvider;
 import org.traccar.reports.model.SummaryReportItem;
@@ -50,6 +51,7 @@ import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Singleton
 public class McpServerHolder implements AutoCloseable {
@@ -72,6 +75,7 @@ public class McpServerHolder implements AutoCloseable {
     private final boolean geocodeOnRequest;
     private final Provider<SummaryReportProvider> summaryReportProvider;
     private final Provider<TripsReportProvider> tripsReportProvider;
+    private final Provider<RouteReportProvider> routeReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -81,13 +85,15 @@ public class McpServerHolder implements AutoCloseable {
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
             Config config, @Nullable Geocoder geocoder,
             Provider<SummaryReportProvider> summaryReportProvider,
-            Provider<TripsReportProvider> tripsReportProvider) {
+            Provider<TripsReportProvider> tripsReportProvider,
+            Provider<RouteReportProvider> routeReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
         this.summaryReportProvider = summaryReportProvider;
         this.tripsReportProvider = tripsReportProvider;
+        this.routeReportProvider = routeReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -107,7 +113,7 @@ public class McpServerHolder implements AutoCloseable {
                 .capabilities(capabilities)
                 .tools(
                         createVersionTool(), createDevicePositionTool(), createDeviceListTool(),
-                        createDeviceSummaryTool(), createDeviceTripsTool())
+                        createDeviceSummaryTool(), createDeviceTripsTool(), createDeviceRouteTool())
                 .build();
     }
 
@@ -262,6 +268,39 @@ public class McpServerHolder implements AutoCloseable {
                 .build();
     }
 
+    private McpServerFeatures.AsyncToolSpecification createDeviceRouteTool() {
+
+        var inputSchema = deviceRangeInputSchema(Map.of(
+                "limit", schemaProperty("integer",
+                        "Maximum positions to return after filtering, default 200, clamped to 1-2000"),
+                "dedup", schemaProperty("boolean",
+                        "Collapse consecutive stationary positions to first/last of each run, default true. "
+                                + "Set false for raw fidelity within the same limit, e.g. diagnosing a flaky "
+                                + "tracker or verifying a reported distance.")));
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-route")
+                .title("Returns recorded positions for a device within a time range")
+                .description(
+                        "Returns recorded positions for a device within a time range, ordered by time. "
+                                + "Consecutive stationary positions (motion attribute false) are collapsed to "
+                                + "just the first and last of each stationary run unless dedup is false, and "
+                                + "the result is downsampled to at most limit points while always keeping the "
+                                + "first and last point. Speed is reported in knots. The response includes "
+                                + "rawCount (positions returned by the server before this tool's own filtering, "
+                                + "itself capped by the server's report.maxPositions setting for very large "
+                                + "ranges) and returnedCount so filtering is visible to the caller. For bulk or "
+                                + "full-fidelity export, use the Reports page GPX/KML/XLSX export instead.")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceRoute)
+                .build();
+    }
+
     private McpSchema.CallToolResult errorResult(String message) {
         return McpSchema.CallToolResult.builder()
                 .addTextContent(message)
@@ -374,6 +413,72 @@ public class McpServerHolder implements AutoCloseable {
         }
     }
 
+    private boolean isKnownStationary(Position position) {
+        return position.hasAttribute(Position.KEY_MOTION) && !position.getBoolean(Position.KEY_MOTION);
+    }
+
+    private List<Position> collapseStationaryRuns(List<Position> positions) {
+        List<Position> result = new ArrayList<>();
+        int i = 0;
+        while (i < positions.size()) {
+            if (!isKnownStationary(positions.get(i))) {
+                result.add(positions.get(i));
+                i++;
+                continue;
+            }
+            int runStart = i;
+            while (i < positions.size() && isKnownStationary(positions.get(i))) {
+                i++;
+            }
+            result.add(positions.get(runStart));
+            if (i - 1 > runStart) {
+                result.add(positions.get(i - 1));
+            }
+        }
+        return result;
+    }
+
+    private List<Position> downsample(List<Position> positions, int limit) {
+        if (positions.size() <= limit) {
+            return positions;
+        }
+        if (limit <= 1) {
+            return List.of(positions.get(0));
+        }
+        List<Position> result = new ArrayList<>(limit);
+        double step = (double) (positions.size() - 1) / (limit - 1);
+        for (int i = 0; i < limit; i++) {
+            result.add(positions.get((int) Math.round(i * step)));
+        }
+        return result;
+    }
+
+    private Map<String, Object> curateRoutePosition(Position position) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("latitude", position.getLatitude());
+        item.put("longitude", position.getLongitude());
+        item.put("speed", position.getSpeed());
+        item.put("course", position.getCourse());
+        item.put("fixTime", position.getFixTime());
+        item.put("valid", position.getValid());
+        item.put("address", position.getAddress());
+
+        Map<String, Object> attributes = position.getAttributes();
+        Object ignition = attributes.get(Position.KEY_IGNITION);
+        if (ignition != null) {
+            item.put("ignition", ignition);
+        }
+        Object batteryLevel = attributes.get(Position.KEY_BATTERY_LEVEL);
+        if (batteryLevel != null) {
+            item.put("batteryLevel", batteryLevel);
+        }
+        Object totalDistance = attributes.get(Position.KEY_TOTAL_DISTANCE);
+        if (totalDistance != null) {
+            item.put("totalDistance", totalDistance);
+        }
+        return item;
+    }
+
     private Map<String, Object> curateTrip(TripReportItem trip) {
         Map<String, Object> item = new LinkedHashMap<>();
         item.put("startTime", trip.getStartTime());
@@ -398,6 +503,45 @@ public class McpServerHolder implements AutoCloseable {
             item.put("driverName", trip.getDriverName());
         }
         return item;
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceRoute(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        int limit = limitArgument(request, 200, 2000);
+
+        Object dedupValue = request.arguments().get("dedup");
+        boolean dedup = !(dedupValue instanceof Boolean dedupBoolean) || dedupBoolean;
+
+        try {
+            DeviceRange range = parseDeviceRange(request);
+            permissionsService.get().checkPermission(Device.class, userId, range.deviceId());
+
+            List<Position> positions;
+            try (Stream<Position> stream = routeReportProvider.get().getObjects(
+                    userId, List.of(range.deviceId()), List.of(), range.from(), range.to())) {
+                positions = stream.toList();
+            }
+
+            List<Position> filtered = dedup ? collapseStationaryRuns(positions) : positions;
+            List<Map<String, Object>> curated = downsample(filtered, limit).stream()
+                    .map(this::curateRoutePosition)
+                    .toList();
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of(
+                            "positions", curated,
+                            "returnedCount", curated.size(),
+                            "rawCount", positions.size()))
+                    .build());
+        } catch (StorageException | SecurityException | IllegalArgumentException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
     }
 
     private Mono<McpSchema.CallToolResult> getDeviceTrips(
