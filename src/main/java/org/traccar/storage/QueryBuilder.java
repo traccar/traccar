@@ -59,6 +59,8 @@ public final class QueryBuilder implements AutoCloseable {
     private final String query;
     private final boolean returnGeneratedKeys;
 
+    private boolean streamingTransaction;
+
     private QueryBuilder(
             Config config, DataSource dataSource, ObjectMapper objectMapper,
             String query, boolean returnGeneratedKeys) throws SQLException {
@@ -234,10 +236,17 @@ public final class QueryBuilder implements AutoCloseable {
         }
     }
 
-    public <T> Stream<T> executeQueryStreamed(Class<T> clazz) throws SQLException {
+    public <T> Stream<T> executeQueryStreamed(Class<T> clazz, String databaseType) throws SQLException {
         ResultSet resultSet = null;
         try {
             logQuery();
+
+            connection.setAutoCommit(false);
+            streamingTransaction = true;
+            statement.setFetchSize(switch (databaseType) {
+                case "MySQL", "MariaDB" -> Integer.MIN_VALUE;
+                default -> config.getInteger(Keys.DATABASE_STREAM_FETCH_SIZE);
+            });
 
             resultSet = statement.executeQuery();
             ResultSetMetaData resultMetaData = resultSet.getMetaData();
@@ -311,7 +320,15 @@ public final class QueryBuilder implements AutoCloseable {
         try {
             statement.close();
         } finally {
-            connection.close();
+            try {
+                if (streamingTransaction) {
+                    streamingTransaction = false;
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+            } finally {
+                connection.close();
+            }
         }
     }
 

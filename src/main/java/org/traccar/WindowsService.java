@@ -54,6 +54,7 @@ public abstract class WindowsService {
 
         File jar = new File(WindowsService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         String command = javaBinary
+                + " -XX:+ExitOnOutOfMemoryError"
                 + " -Duser.dir=\"" + jar.getParentFile().getAbsolutePath() + "\""
                 + " -jar \"" + jar.getAbsolutePath() + "\""
                 + " --service \"" + config + "\"";

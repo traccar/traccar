@@ -15,6 +15,8 @@
  */
 package org.traccar.reports;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
@@ -41,10 +43,12 @@ public class KmlExportProvider {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
+    private final Config config;
     private final Storage storage;
 
     @Inject
-    public KmlExportProvider(Storage storage) {
+    public KmlExportProvider(Config config, Storage storage) {
+        this.config = config;
         this.storage = storage;
     }
 
@@ -83,7 +87,8 @@ public class KmlExportProvider {
         writer.writeCharacters("absolute");
         writer.writeEndElement();
         writer.writeStartElement("coordinates");
-        try (Stream<Position> positions = PositionUtil.getPositionsStream(storage, deviceId, from, to)
+        try (Stream<Position> positions = PositionUtil.getPositionsStream(
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
                 .filter(position -> geofence == null || geofence.containsPosition(position))) {
             String separator = "";
             for (var iterator = positions.iterator(); iterator.hasNext();) {

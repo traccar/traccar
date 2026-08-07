@@ -76,7 +76,7 @@ public class CombinedReportProvider {
             List<double[]> route = new ArrayList<>();
             List<Position> matchedPositions = new ArrayList<>();
             try (Stream<Position> positions =
-                    PositionUtil.getPositionsStream(storage, device.getId(), from, to)) {
+                    PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
                 positions.forEach(position -> {
                     route.add(new double[] {position.getLongitude(), position.getLatitude()});
                     if (eventPositionIds.contains(position.getId())) {

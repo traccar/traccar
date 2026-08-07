@@ -41,6 +41,7 @@ import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 public class JimiPhotoProtocolDecoder extends BaseHttpProtocolDecoder {
 
@@ -99,14 +100,11 @@ public class JimiPhotoProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_IMAGE, savedName);
             }
 
-            if (body.containsKey("businessType")) {
-                position.set("businessType", body.getString("businessType"));
-            }
-            if (body.containsKey("eventType")) {
-                position.set("eventType", body.getString("eventType"));
-            }
-            if (body.containsKey("instructionId")) {
-                position.set("instructionId", body.getString("instructionId"));
+            for (String key : List.of("businessType", "eventType", "instructionId")) {
+                String value = body.getString(key, null);
+                if (value != null) {
+                    position.set(key, value);
+                }
             }
 
             sendJsonResponse(channel, HttpResponseStatus.OK, 200, "the high success", savedName);

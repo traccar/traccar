@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -580,6 +580,15 @@ public final class Keys {
             20);
 
     /**
+     * Number of rows fetched per round trip for streamed queries (position history and exports). On PostgreSQL this
+     * enables a server-side cursor so results are not fully buffered in memory.
+     */
+    public static final ConfigKey<Integer> DATABASE_STREAM_FETCH_SIZE = new IntegerConfigKey(
+            "database.streamFetchSize",
+            List.of(KeyType.CONFIG),
+            1000);
+
+    /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
      * 'SELECT 1 FROM DUAL'.
      */
@@ -900,6 +909,15 @@ public final class Keys {
             "./media");
 
     /**
+     * Maximum size in bytes of a single media buffer (photo, audio or video) that a protocol decoder accumulates from
+     * a device. Transfers larger than this limit are dropped. Only one media buffer is kept per connection.
+     */
+    public static final ConfigKey<Integer> MEDIA_BUFFER_SIZE = new IntegerConfigKey(
+            "media.bufferSize",
+            List.of(KeyType.CONFIG),
+            32 * 1024 * 1024);
+
+    /**
      * Optional parameter to specify a network interface for the web interface to bind to. By default, the server will
      * bind to all available interfaces.
      */
@@ -1019,6 +1037,24 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> SERVER_FORWARD_WRITE_TIMEOUT = new IntegerConfigKey(
             "server.forward.writeTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "client.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Read timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_READ_TIMEOUT = new IntegerConfigKey(
+            "client.readTimeout",
             List.of(KeyType.CONFIG),
             5000);
 
@@ -1516,6 +1552,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Maximum number of positions returned by a single history or export request. Prevents unbounded queries from
+     * loading an entire result set into memory. Set to 0 to disable the limit.
+     */
+    public static final ConfigKey<Integer> REPORT_MAX_POSITIONS = new IntegerConfigKey(
+            "report.maxPositions",
+            List.of(KeyType.CONFIG),
+            50000);
+
+    /**
      * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.
      * The value is in seconds. One day by default.
      */
@@ -1731,16 +1776,8 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
-     */
-    public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new BooleanConfigKey(
-            "filter.skipAttributes.enable",
-            List.of(KeyType.CONFIG, KeyType.DEVICE));
-
-    /**
-     * Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
+     * List of attributes that prevent filtering. If any attribute mentioned in this config key changed value
+     * since the last position, the position is not filtered out.
      */
     public static final ConfigKey<String> FILTER_SKIP_ATTRIBUTES = new StringConfigKey(
             "filter.skipAttributes",

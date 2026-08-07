@@ -29,6 +29,7 @@ import org.traccar.session.cache.CacheManager;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class FilterHandler extends BasePositionHandler {
 
@@ -75,18 +76,19 @@ public class FilterHandler extends BasePositionHandler {
 
     private boolean filterFuture(Position position) {
         Long filterFuture = AttributeUtil.lookup(cacheManager, Keys.FILTER_FUTURE, position.getDeviceId());
-        return filterFuture != null
+        return filterFuture != null && filterFuture > 0
                 && position.getFixTime().getTime() > System.currentTimeMillis() + filterFuture * 1000;
     }
 
     private boolean filterPast(Position position) {
         Long filterPast = AttributeUtil.lookup(cacheManager, Keys.FILTER_PAST, position.getDeviceId());
-        return filterPast != null && position.getFixTime().getTime() < System.currentTimeMillis() - filterPast * 1000;
+        return filterPast != null && filterPast > 0
+                && position.getFixTime().getTime() < System.currentTimeMillis() - filterPast * 1000;
     }
 
     private boolean filterAccuracy(Position position) {
         Integer filterAccuracy = AttributeUtil.lookup(cacheManager, Keys.FILTER_ACCURACY, position.getDeviceId());
-        return filterAccuracy != null && position.getAccuracy() > filterAccuracy;
+        return filterAccuracy != null && filterAccuracy > 0 && position.getAccuracy() > filterAccuracy;
     }
 
     private boolean filterApproximate(Position position) {
@@ -101,7 +103,7 @@ public class FilterHandler extends BasePositionHandler {
 
     private boolean filterDistance(Position position, Position last) {
         Integer filterDistance = AttributeUtil.lookup(cacheManager, Keys.FILTER_DISTANCE, position.getDeviceId());
-        if (filterDistance != null && last != null) {
+        if (filterDistance != null && filterDistance > 0 && last != null) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }
         return false;
@@ -109,7 +111,7 @@ public class FilterHandler extends BasePositionHandler {
 
     private boolean filterMaxSpeed(Position position, Position last) {
         Integer filterMaxSpeed = AttributeUtil.lookup(cacheManager, Keys.FILTER_MAX_SPEED, position.getDeviceId());
-        if (filterMaxSpeed != null && last != null) {
+        if (filterMaxSpeed != null && filterMaxSpeed > 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return time > 0 && UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
@@ -119,7 +121,7 @@ public class FilterHandler extends BasePositionHandler {
 
     private boolean filterMinPeriod(Position position, Position last) {
         Integer filterMinPeriod = AttributeUtil.lookup(cacheManager, Keys.FILTER_MIN_PERIOD, position.getDeviceId());
-        if (filterMinPeriod != null && last != null) {
+        if (filterMinPeriod != null && filterMinPeriod > 0 && last != null) {
             long time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return time > 0 && time < filterMinPeriod * 1000L;
         }
@@ -129,7 +131,8 @@ public class FilterHandler extends BasePositionHandler {
     private boolean filterDailyLimit(Position position, Position last) {
         long deviceId = position.getDeviceId();
         Integer filterDailyLimit = AttributeUtil.lookup(cacheManager, Keys.FILTER_DAILY_LIMIT, deviceId);
-        if (filterDailyLimit != null && statisticsManager.messageStoredCount(deviceId) >= filterDailyLimit) {
+        if (filterDailyLimit != null && filterDailyLimit > 0
+                && statisticsManager.messageStoredCount(deviceId) >= filterDailyLimit) {
             Integer filterDailyLimitInterval = AttributeUtil.lookup(
                     cacheManager, Keys.FILTER_DAILY_LIMIT_INTERVAL, deviceId);
             long lastTime = last != null ? last.getFixTime().getTime() : 0;
@@ -141,20 +144,20 @@ public class FilterHandler extends BasePositionHandler {
 
     private boolean skipLimit(Position position, Position last) {
         Long skipLimit = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_LIMIT, position.getDeviceId());
-        if (skipLimit != null && last != null) {
+        if (skipLimit != null && skipLimit > 0 && last != null) {
             return (position.getServerTime().getTime() - last.getServerTime().getTime()) > skipLimit * 1000;
         }
         return false;
     }
 
-    private boolean skipAttributes(Position position) {
-        Boolean skipAttributes = AttributeUtil.lookup(
-                cacheManager, Keys.FILTER_SKIP_ATTRIBUTES_ENABLE, position.getDeviceId());
-        if (Boolean.TRUE.equals(skipAttributes)) {
-            String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
-            if (string != null) {
-                for (String attribute : string.split("[ ,]")) {
-                    if (position.hasAttribute(attribute)) {
+    private boolean skipAttributes(Position position, Position last) {
+        String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
+        if (string != null) {
+            for (String attribute : string.split("[ ,]")) {
+                if (position.hasAttribute(attribute)) {
+                    Object value = position.getAttributes().get(attribute);
+                    Object lastValue = last != null ? last.getAttributes().get(attribute) : null;
+                    if (!Objects.equals(value, lastValue)) {
                         return true;
                     }
                 }
@@ -193,13 +196,13 @@ public class FilterHandler extends BasePositionHandler {
         // filter out excessive data
         long deviceId = position.getDeviceId();
         Position last = cacheManager.getPosition(deviceId);
-        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Duplicate");
         }
-        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Static");
         }
-        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position, last)) {
             filterTypes.add("Distance");
         }
         if (filterMaxSpeed(position, last)) {

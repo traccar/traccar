@@ -66,6 +66,7 @@ public abstract class TrackerServer implements TrackerConnector {
                 try {
                     if (isSecure()) {
                         SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        engine.setUseClientMode(false);
                         pipeline.addLast(new SslHandler(engine));
                     }
                 } catch (Exception e) {
@@ -96,6 +97,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
+    @Override
     public int getPort() {
         return port;
     }

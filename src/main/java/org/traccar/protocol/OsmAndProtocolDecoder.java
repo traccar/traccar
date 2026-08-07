@@ -23,7 +23,10 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
@@ -93,24 +96,21 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             for (String value : entry.getValue()) {
                 switch (entry.getKey()) {
-                    case "id":
-                    case "deviceid":
+                    case "id", "deviceid" -> {
                         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                         if (deviceSession == null) {
                             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                             return null;
                         }
                         position.setDeviceId(deviceSession.getDeviceId());
-                        break;
-                    case "notificationToken":
+                    }
+                    case "notificationToken" -> {
                         if (position.getDeviceId() > 0) {
                             getCommandsManager().updateNotificationToken(position.getDeviceId(), value);
                         }
-                        break;
-                    case "valid":
-                        position.setValid(Boolean.parseBoolean(value) || "1".equals(value));
-                        break;
-                    case "timestamp":
+                    }
+                    case "valid" -> position.setValid(Boolean.parseBoolean(value) || "1".equals(value));
+                    case "timestamp" -> {
                         try {
                             long timestamp = Long.parseLong(value);
                             if (timestamp < Integer.MAX_VALUE) {
@@ -124,19 +124,15 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                                 position.setTime(DateUtil.parse(DATE_FORMAT, value));
                             }
                         }
-                        break;
-                    case "lat":
-                        latitude = Double.parseDouble(value);
-                        break;
-                    case "lon":
-                        longitude = Double.parseDouble(value);
-                        break;
-                    case "location":
+                    }
+                    case "lat" -> latitude = Double.parseDouble(value);
+                    case "lon" -> longitude = Double.parseDouble(value);
+                    case "location" -> {
                         String[] location = value.split(",");
                         latitude = Double.parseDouble(location[0]);
                         longitude = Double.parseDouble(location[1]);
-                        break;
-                    case "cell":
+                    }
+                    case "cell" -> {
                         String[] cell = value.split(",");
                         if (cell.length > 4) {
                             network.addCellTower(CellTower.from(
@@ -147,38 +143,21 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                                     Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
                                     Integer.parseInt(cell[2]), Integer.parseInt(cell[3])));
                         }
-                        break;
-                    case "wifi":
+                    }
+                    case "wifi" -> {
                         String[] wifi = value.split(",");
                         network.addWifiAccessPoint(WifiAccessPoint.from(
                                 wifi[0].replace('-', ':'), Integer.parseInt(wifi[1])));
-                        break;
-                    case "speed":
-                        position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
-                        break;
-                    case "bearing":
-                    case "heading":
-                        position.setCourse(Double.parseDouble(value));
-                        break;
-                    case "altitude":
-                        position.setAltitude(Double.parseDouble(value));
-                        break;
-                    case "accuracy":
-                        position.setAccuracy(Double.parseDouble(value));
-                        break;
-                    case "hdop":
-                        position.set(Position.KEY_HDOP, Double.parseDouble(value));
-                        break;
-                    case "batt":
-                        position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
-                        break;
-                    case "driverUniqueId":
-                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
-                        break;
-                    case "charge":
-                        position.set(Position.KEY_CHARGE, Boolean.parseBoolean(value));
-                        break;
-                    default:
+                    }
+                    case "speed" -> position.setSpeed(convertSpeed(Double.parseDouble(value), "kn"));
+                    case "bearing", "heading" -> position.setCourse(Double.parseDouble(value));
+                    case "altitude" -> position.setAltitude(Double.parseDouble(value));
+                    case "accuracy" -> position.setAccuracy(Double.parseDouble(value));
+                    case "hdop" -> position.set(Position.KEY_HDOP, Double.parseDouble(value));
+                    case "batt" -> position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
+                    case "driverUniqueId" -> position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                    case "charge" -> position.set(Position.KEY_CHARGE, Boolean.parseBoolean(value));
+                    default -> {
                         try {
                             position.set(entry.getKey(), Double.parseDouble(value));
                         } catch (NumberFormatException e) {
@@ -188,7 +167,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                                 default -> position.set(entry.getKey(), value);
                             }
                         }
-                        break;
+                    }
                 }
             }
         }
@@ -291,13 +270,29 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_CHARGE, true);
             }
         }
-
         if (location.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, location.getString("alarm"));
-        } else if (location.containsKey("extras")) {
+        }
+        if (location.containsKey("extras")) {
             JsonObject extras = location.getJsonObject("extras");
-            if (extras.containsKey("alarm")) {
-                position.set(Position.KEY_ALARM, extras.getString("alarm"));
+            for (Map.Entry<String, JsonValue> extraEntry : extras.entrySet()) {
+                if (extraEntry.getKey().equals("alarm") && location.containsKey("alarm")) {
+                    continue;
+                }
+                switch (extraEntry.getValue().getValueType()) {
+                    case NUMBER -> {
+                        JsonNumber jsonNumber = (JsonNumber) extraEntry.getValue();
+                        if (jsonNumber.isIntegral()) {
+                            position.set(extraEntry.getKey(), jsonNumber.longValue());
+                        } else {
+                            position.set(extraEntry.getKey(), jsonNumber.doubleValue());
+                        }
+                    }
+                    case TRUE -> position.set(extraEntry.getKey(), true);
+                    case FALSE -> position.set(extraEntry.getKey(), false);
+                    case STRING -> position.set(extraEntry.getKey(), ((JsonString) extraEntry.getValue()).getString());
+                    default -> {}
+                }
             }
         }
 

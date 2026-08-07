@@ -96,7 +96,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class)) {
+             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
             TestEntity entity = results.get(0);
@@ -132,7 +132,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class)) {
+             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
             TestEntity loaded = results.get(0);
@@ -161,7 +161,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity ORDER BY count");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class)) {
+             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(3, results.size());
             assertEquals("row0", results.get(0).getName());

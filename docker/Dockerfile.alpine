@@ -11,5 +11,5 @@ FROM alpine
 COPY --from=package /traccar /opt/traccar
 COPY --from=jdk /jre /opt/traccar/jre
 WORKDIR /opt/traccar
-ENTRYPOINT ["/opt/traccar/jre/bin/java"]
+ENTRYPOINT ["/opt/traccar/jre/bin/java", "-XX:+ExitOnOutOfMemoryError"]
 CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]

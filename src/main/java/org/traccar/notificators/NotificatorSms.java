@@ -22,10 +22,11 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.sms.SmsManager;
+
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorSms extends Notificator {
@@ -42,10 +43,16 @@ public class NotificatorSms extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
-        if (user.getPhone() != null) {
+    public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
+        if (user.getPhone() == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        try {
             statisticsManager.registerSms();
             smsManager.sendMessage(user.getPhone(), message.digest(), false);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
         }
     }
 

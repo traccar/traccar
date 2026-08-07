@@ -17,14 +17,12 @@ package org.traccar.web;
 
 import com.google.inject.servlet.ServletModule;
 import org.traccar.api.AsyncSocketServlet;
-import org.traccar.api.MediaFilter;
 
 public class WebModule extends ServletModule {
 
     @Override
     protected void configureServlets() {
         filter("/*").through(OverrideTextFilter.class);
-        filter("/api/media/*").through(MediaFilter.class);
         serve("/.well-known/*").with(WellKnownServlet.class);
         serve("/api/socket").with(AsyncSocketServlet.class);
     }

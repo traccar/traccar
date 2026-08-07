@@ -30,7 +30,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
-import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
@@ -143,11 +142,11 @@ public class NotificationManager {
                         return;
                     }
                     for (String notificator : notification.getNotificatorsTypes()) {
-                        try {
-                            notificatorManager.getNotificator(notificator).send(notification, user, event, position);
-                        } catch (MessageException exception) {
-                            LOGGER.warn("Notification failed", exception);
-                        }
+                        notificatorManager.getNotificator(notificator).sendAsync(notification, user, event, position)
+                                .exceptionally(throwable -> {
+                                    LOGGER.warn("Notification failed", throwable);
+                                    return null;
+                                });
                     }
                 });
             });
@@ -166,10 +165,9 @@ public class NotificationManager {
             if (event.getMaintenanceId() != 0) {
                 eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
             }
-            eventForwarder.forward(eventData, (success, throwable) -> {
-                if (!success) {
-                    LOGGER.warn("Event forwarding failed", throwable);
-                }
+            eventForwarder.forward(eventData).exceptionally(throwable -> {
+                LOGGER.warn("Event forwarding failed", throwable);
+                return null;
             });
         }
     }
