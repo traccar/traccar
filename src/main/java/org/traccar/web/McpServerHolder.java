@@ -44,6 +44,7 @@ import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -181,10 +182,26 @@ public class McpServerHolder implements AutoCloseable {
             String address = position.getAddress();
             if (address == null && geocoder != null && geocodeOnRequest) {
                 position.setAddress(geocoder.getAddress(position.getLatitude(), position.getLongitude(), null));
+                address = position.getAddress();
             }
 
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("deviceId", position.getDeviceId());
+            result.put("latitude", position.getLatitude());
+            result.put("longitude", position.getLongitude());
+            result.put("altitude", position.getAltitude());
+            result.put("speed", position.getSpeed());
+            result.put("course", position.getCourse());
+            result.put("valid", position.getValid());
+            result.put("address", address);
+            result.put("fixTime", position.getFixTime());
+            if (position.getGeofenceIds() != null && !position.getGeofenceIds().isEmpty()) {
+                result.put("geofenceIds", position.getGeofenceIds());
+            }
+            result.put("attributes", position.getAttributes());
+
             return Mono.just(McpSchema.CallToolResult.builder()
-                    .structuredContent(position)
+                    .structuredContent(result)
                     .build());
         } catch (StorageException | SecurityException e) {
             return Mono.just(errorResult(e.getMessage()));
