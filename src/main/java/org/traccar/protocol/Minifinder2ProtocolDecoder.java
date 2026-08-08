@@ -404,6 +404,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeConfiguration(channel, remoteAddress, buf);
 
+        } else if (type == MSG_SYSTEM_CONTROL) {
+
+            return decodeSystemControl(channel, remoteAddress, buf);
+
         } else if (type == MSG_RESPONSE) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
@@ -527,6 +531,35 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x66 -> position.set("imsi", BufferUtil.readString(buf, length));
                 case 0x75 -> position.set("extraEnableControl", buf.readUnsignedInt());
+            }
+
+            buf.readerIndex(endIndex);
+        }
+
+        return position;
+    }
+
+    private Position decodeSystemControl(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        while (buf.isReadable()) {
+            int length = buf.readUnsignedByte();
+            int endIndex = buf.readerIndex() + length;
+            int key = buf.readUnsignedByte();
+
+            if (key == 0x1F) {
+                buf.readUnsignedByte(); // type
+                position.set(Position.KEY_RESULT, buf.readCharSequence(
+                        endIndex - buf.readerIndex(), StandardCharsets.UTF_8).toString());
             }
 
             buf.readerIndex(endIndex);
