@@ -59,7 +59,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
-	}
+	    }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
