@@ -190,6 +190,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
         Predicate<String> tatXXX = (m) -> m != null && m.matches("T.T...");
+        Predicate<String> ftc9XX = (m) -> m != null && (m.equals("FTC921") || m.equals("FTC305"));
+        Predicate<String> ftc921 = "FTC921"::equals;
+        Predicate<String> ftc305 = "FTC305"::equals;
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, any, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -289,6 +292,24 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
+
+        // FTC921 and FTC305 share the same byte layout for the parameters below.
+        // PIDs 205, 449, 641 and 800 differ from the FM family, so they are scoped to FTC.
+        register(9, ftc921, (p, b) -> p.set(Position.PREFIX_ADC + 1, b.readUnsignedShort() / 1000.0));
+        register(70, ftc9XX, (p, b) -> p.set(Position.KEY_DEVICE_TEMP, b.readShort() / 10.0));
+        register(113, ftc9XX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
+        register(175, ftc9XX, (p, b) -> p.addAlarm(
+                b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT));
+        register(246, ftc9XX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null));
+        register(249, ftc9XX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null));
+        register(251, ftc9XX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null));
+        register(252, ftc9XX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null));
+        register(800, ftc9XX, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() / 1000.0));
+        register(72, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 1, b.readInt() / 10.0));
+        register(73, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 2, b.readInt() / 10.0));
+        register(74, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 3, b.readInt() / 10.0));
+        register(75, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 4, b.readInt() / 10.0));
+        register(669, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 5, b.readInt() / 10.0));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -523,7 +544,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
-                if (id == 256 || id == 325) {
+                if (id == 641) {
+                    position.set(Position.KEY_ICCID,
+                            buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim());
+                } else if (id == 256 || id == 325) {
                     position.set(Position.KEY_VIN,
                             buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                 } else if (id == 281) {
