@@ -59,7 +59,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         } else {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
-	    }
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
@@ -80,9 +80,6 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setLatitude(root.getJsonNumber("lat").doubleValue());
         position.setLongitude(root.getJsonNumber("lon").doubleValue());
 
-        if (root.containsKey("tid")) {
-                position.set("tid", root.getString("tid"));
-        }
         if (root.containsKey("vel")) {
             position.setSpeed(UnitsConverter.knotsFromKph(root.getInt("vel")));
         }
