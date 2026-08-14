@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.traccar.helper;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.traccar.model.User;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,11 +54,21 @@ public final class SessionHelper {
             return false;
         }
         String sessionOrigin = (String) session.getAttribute(ORIGIN_KEY);
-        if (sessionOrigin == null) {
+        String requestOrigin = request.getHeader(HttpHeaderNames.ORIGIN.toString());
+        if (requestOrigin == null) {
             return true;
         }
-        String requestOrigin = request.getHeader(HttpHeaderNames.ORIGIN.toString());
-        return requestOrigin == null || sessionOrigin.equals(requestOrigin);
+        if (sessionOrigin != null) {
+            return sessionOrigin.equals(requestOrigin);
+        }
+        String host = request.getHeader(HttpHeaderNames.HOST.toString());
+        try {
+            String originHost = new URI(requestOrigin).getHost();
+            String requestHost = new URI("//" + host).getHost();
+            return originHost != null && originHost.equalsIgnoreCase(requestHost);
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
 }
