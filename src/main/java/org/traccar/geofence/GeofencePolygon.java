@@ -20,7 +20,6 @@ import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
 import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
-import org.traccar.helper.DistanceCalculator;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -103,13 +102,8 @@ public class GeofencePolygon extends GeofenceGeometry {
     @Override
     protected boolean intersectsSegmentInternal(
             double latitude1, double longitude1, double latitude2, double longitude2) {
-        for (int i = 0, j = coordinates.size() - 1; i < coordinates.size(); j = i++) {
-            if (DistanceCalculator.segmentsIntersect(
-                    latitude1, longitude1, latitude2, longitude2,
-                    coordinates.get(j).lat(), coordinates.get(j).lon(),
-                    coordinates.get(i).lat(), coordinates.get(i).lon())) {
-                return true;
-            }
+        if (intersectsEdges(coordinates, true, latitude1, longitude1, latitude2, longitude2)) {
+            return true;
         }
         return containsPointInternal(latitude1, longitude1);
     }

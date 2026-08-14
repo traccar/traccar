@@ -95,6 +95,20 @@ public abstract class GeofenceGeometry {
         return false;
     }
 
+    protected static boolean intersectsEdges(
+            List<Coordinate> coordinates, boolean closed,
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        for (int i = closed ? 0 : 1, j = closed ? coordinates.size() - 1 : 0; i < coordinates.size(); j = i++) {
+            if (DistanceCalculator.segmentsIntersect(
+                    latitude1, longitude1, latitude2, longitude2,
+                    coordinates.get(j).lat(), coordinates.get(j).lon(),
+                    coordinates.get(i).lat(), coordinates.get(i).lon())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public abstract double calculateArea();
 
     public abstract String toWkt();
