@@ -154,7 +154,15 @@ public class OpenIdProvider {
             throws StorageException, ParseException, IOException, GeneralSecurityException {
 
         String redirectUriOverride = request.getParameter("redirect_uri");
-        URI redirectUri = redirectUriOverride != null ? URI.create(redirectUriOverride) : callbackUrl;
+        URI redirectUri;
+        if (redirectUriOverride != null) {
+            redirectUri = URI.create(redirectUriOverride);
+            if (!"org.traccar.manager".equals(redirectUri.getScheme())) {
+                throw new GeneralSecurityException("Invalid redirect URI");
+            }
+        } else {
+            redirectUri = callbackUrl;
+        }
         AuthorizationResponse response = AuthorizationResponse.parse(
                 redirectUri, URLUtils.parseParameters(queryParameters));
 
