@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
 import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
+import org.traccar.helper.DistanceCalculator;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -97,6 +98,20 @@ public class GeofencePolygon extends GeofenceGeometry {
             }
         }
         return oddNodes;
+    }
+
+    @Override
+    protected boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        for (int i = 0, j = coordinates.size() - 1; i < coordinates.size(); j = i++) {
+            if (DistanceCalculator.segmentsIntersect(
+                    latitude1, longitude1, latitude2, longitude2,
+                    coordinates.get(j).lat(), coordinates.get(j).lon(),
+                    coordinates.get(i).lat(), coordinates.get(i).lon())) {
+                return true;
+            }
+        }
+        return containsPointInternal(latitude1, longitude1);
     }
 
     @Override
