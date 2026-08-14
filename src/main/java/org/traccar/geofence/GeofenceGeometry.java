@@ -90,10 +90,8 @@ public abstract class GeofenceGeometry {
         return intersectsSegmentInternal(latitude1, longitude1, latitude2, longitude2);
     }
 
-    protected boolean intersectsSegmentInternal(
-            double latitude1, double longitude1, double latitude2, double longitude2) {
-        return false;
-    }
+    protected abstract boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2);
 
     protected static boolean intersectsEdges(
             List<Coordinate> coordinates, boolean closed,
