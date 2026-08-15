@@ -98,7 +98,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int RESULT_SUCCESS = 0;
 
     private static final Set<String> ALARM_MODELS_TAMPER = Set.of("G-360P", "G-508P");
-    private static final Set<String> ALARM_MODELS_MOVEMENT = Set.of("AL300", "GL100");
+    private static final Set<String> AOVX_MODELS = Set.of("AL300", "GL100");
     private static final Set<String> JC_MODELS = Set.of("JC371", "JC181", "JC182", "JC450", "JC451");
 
     private int delimiter = 0x7e;
@@ -183,7 +183,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(value, 1)) {
                 position.addAlarm(Position.ALARM_TAMPERING);
             }
-        } else if (model != null && ALARM_MODELS_MOVEMENT.contains(model)) {
+        } else if (model != null && AOVX_MODELS.contains(model)) {
             if (BitUtil.check(value, 16)) {
                 position.addAlarm(Position.ALARM_MOVEMENT);
             }
@@ -671,6 +671,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String model = getDeviceModel(deviceSession);
+        boolean isAovx = model != null && AOVX_MODELS.contains(model);
 
         decodeAlarm(position, model, buf.readUnsignedInt());
 
@@ -1186,42 +1187,99 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     }
                     break;
+                case 0xF0:
+                    if (isAovx) {
+                        while (buf.readerIndex() < endIndex) {
+                            int mcc = buf.readUnsignedShort();
+                            int mnc = buf.readUnsignedShort();
+                            long cid = buf.readUnsignedInt();
+                            int lac = (int) buf.readUnsignedInt();
+                            network.addCellTower(CellTower.from(mcc, mnc, lac, cid, buf.readUnsignedByte()));
+                        }
+                    }
+                    break;
                 case 0xF1:
                     position.set(Position.KEY_POWER, buf.readUnsignedInt() / 1000.0);
                     break;
+                case 0xF2:
+                    if (isAovx) {
+                        position.set(Position.KEY_VERSION_FW, buf.readCharSequence(
+                                length, StandardCharsets.US_ASCII).toString());
+                    }
+                    break;
                 case 0xF3:
-                    while (buf.readerIndex() < endIndex) {
-                        int extendedType = buf.readUnsignedShort();
-                        int extendedLength = buf.readUnsignedByte();
-                        switch (extendedType) {
-                            case 0x0002 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 10.0);
-                            case 0x0003 -> position.set(Position.KEY_RPM, buf.readUnsignedShort());
-                            case 0x0004 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-                            case 0x0005 -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100);
-                            case 0x0007 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 10.0);
-                            case 0x0008 -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedShort() / 10.0);
-                            case 0x0009 -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
-                            case 0x000B -> position.set("intakePressure", buf.readUnsignedShort());
-                            case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
-                            case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
-                            case 0x000E -> position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
-                            case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
-                            case 0x0051 -> {
-                                if (extendedLength > 0) {
-                                    position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
-                                }
+                    if (isAovx) {
+                        int fieldMask = buf.readUnsignedByte();
+                        int index = 0;
+                        while (buf.readerIndex() < endIndex) {
+                            index += 1;
+                            String prefix = "ble" + index;
+                            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                            position.set(prefix + "Mac", mac.substring(0, mac.length() - 1));
+                            position.set(prefix + "Rssi", buf.readByte());
+                            if (BitUtil.check(fieldMask, 0)) {
+                                position.set(prefix + "Name", buf.readCharSequence(
+                                        10, StandardCharsets.US_ASCII).toString().trim());
                             }
-                            case 0x0052 -> {
-                                if (extendedLength > 0) {
-                                    position.set("calid", BufferUtil.readString(buf, extendedLength));
-                                }
+                            if (BitUtil.check(fieldMask, 1)) {
+                                buf.skipBytes(2); // firmware version
                             }
-                            case 0x0100 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() / 10.0);
-                            case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() / 10.0);
-                            case 0x0112 -> position.set("hardAccelerationCount", buf.readUnsignedShort());
-                            case 0x0113 -> position.set("hardDecelerationCount", buf.readUnsignedShort());
-                            case 0x0114 -> position.set("hardCorneringCount", buf.readUnsignedShort());
-                            default -> buf.skipBytes(extendedLength);
+                            if (BitUtil.check(fieldMask, 2)) {
+                                position.set(prefix + "Battery", buf.readUnsignedShort() / 1000.0);
+                            }
+                            if (BitUtil.check(fieldMask, 3)) {
+                                position.set(prefix + "Temp", buf.readShort() / 10.0);
+                            }
+                            if (BitUtil.check(fieldMask, 4)) {
+                                position.set(prefix + "Humidity", buf.readShort() / 10.0);
+                            }
+                            if (BitUtil.check(fieldMask, 5)) {
+                                buf.skipBytes(6); // accelerometer
+                            }
+                            if (BitUtil.check(fieldMask, 6)) {
+                                buf.skipBytes(2); // reserved
+                            }
+                            if (BitUtil.check(fieldMask, 7)) {
+                                buf.skipBytes(2); // reserved
+                            }
+                        }
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedType = buf.readUnsignedShort();
+                            int extendedLength = buf.readUnsignedByte();
+                            switch (extendedType) {
+                                case 0x0002 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 10.0);
+                                case 0x0003 -> position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                case 0x0004 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+                                case 0x0005 -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100);
+                                case 0x0007 ->
+                                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 10.0);
+                                case 0x0008 -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedShort() / 10.0);
+                                case 0x0009 -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
+                                case 0x000B -> position.set("intakePressure", buf.readUnsignedShort());
+                                case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
+                                case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
+                                case 0x000E ->
+                                        position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
+                                case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
+                                case 0x0051 -> {
+                                    if (extendedLength > 0) {
+                                        position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
+                                    }
+                                }
+                                case 0x0052 -> {
+                                    if (extendedLength > 0) {
+                                        position.set("calid", BufferUtil.readString(buf, extendedLength));
+                                    }
+                                }
+                                case 0x0100 ->
+                                        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() / 10.0);
+                                case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() / 10.0);
+                                case 0x0112 -> position.set("hardAccelerationCount", buf.readUnsignedShort());
+                                case 0x0113 -> position.set("hardDecelerationCount", buf.readUnsignedShort());
+                                case 0x0114 -> position.set("hardCorneringCount", buf.readUnsignedShort());
+                                default -> buf.skipBytes(extendedLength);
+                            }
                         }
                     }
                     break;
@@ -1239,9 +1297,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF6:
-                    if (length == 2) {
+                    if (!isAovx && length == 2) {
                         position.set("airPressure", buf.readUnsignedShort());
-                    } else if (length == 8) {
+                    } else if (!isAovx && length == 8) {
                         position.set("imei", ByteBufUtil.hexDump(buf.readSlice(length)).substring(1));
                     } else {
                         event = buf.readUnsignedByte();
@@ -1258,6 +1316,16 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         }
                         if (BitUtil.check(fieldMask, 2)) {
                             position.set(Position.KEY_HUMIDITY, buf.readShort() / 10.0);
+                        }
+                        if (isAovx && BitUtil.check(fieldMask, 3)) {
+                            position.set(Position.KEY_G_SENSOR, String.format(
+                                    "[%d,%d,%d]", buf.readShort(), buf.readShort(), buf.readShort()));
+                        }
+                        if (isAovx && BitUtil.check(fieldMask, 4)) {
+                            buf.skipBytes(10); // threshold configuration
+                        }
+                        if (isAovx && BitUtil.check(fieldMask, 5)) {
+                            position.set("airPressure", buf.readUnsignedShort());
                         }
                     }
                     break;
@@ -1278,10 +1346,38 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF8:
-                    if (model != null && Set.of("C5", "C5L").contains(model)) {
+                    if (isAovx) {
+                        buf.readUnsignedByte(); // working mode
+                        buf.skipBytes(8); // imei
+                        position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+                    } else if (model != null && Set.of("C5", "C5L").contains(model)) {
                         position.set(Position.KEY_STEPS, buf.readUnsignedShort());
                     } else {
                         position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 10.0 - 50);
+                    }
+                    break;
+                case 0xF9:
+                    if (isAovx) {
+                        int mask = buf.readUnsignedShort();
+                        if (BitUtil.check(mask, 0)) {
+                            buf.skipBytes(4); // gnss age
+                        }
+                        if (BitUtil.check(mask, 1)) {
+                            buf.skipBytes(4); // acc on time
+                        }
+                        if (BitUtil.check(mask, 2)) {
+                            position.set(Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
+                        }
+                        if (BitUtil.check(mask, 3)) {
+                            buf.skipBytes(6); // gnss time
+                        }
+                        if (BitUtil.check(mask, 5)) {
+                            buf.skipBytes(8); // sampling and report interval
+                        }
+                        if (BitUtil.check(mask, 6)) {
+                            position.set(Position.PREFIX_TEMP + 3, buf.readShort() / 10.0);
+                            buf.skipBytes(4); // external temperature thresholds
+                        }
                     }
                     break;
                 case 0xFB:
@@ -1479,6 +1575,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeTransparent(DeviceSession deviceSession, ByteBuf buf) {
 
         int type = buf.readUnsignedByte();
+        String model = getDeviceModel(deviceSession);
 
         if (type == 0x40) {
 
@@ -1707,6 +1804,61 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             getLastLocation(position, position.getDeviceTime());
+
+            return position;
+
+        } else if ((type == 0x53 || type == 0x54) && model != null && AOVX_MODELS.contains(model)) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            int status = buf.readInt();
+            position.setValid(BitUtil.check(status, 1));
+            double lat = buf.readUnsignedInt() / 1000000.0;
+            double lon = buf.readUnsignedInt() / 1000000.0;
+            position.setLatitude(BitUtil.check(status, 2) ? -lat : lat);
+            position.setLongitude(BitUtil.check(status, 3) ? -lon : lon);
+            position.setAltitude(buf.readShort());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
+            position.setCourse(buf.readUnsignedShort());
+            position.setTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+
+            if (type == 0x53) {
+
+                int count = buf.readUnsignedByte();
+                for (int i = 1; i <= count; i++) {
+                    buf.readUnsignedByte(); // node index
+                    String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                    position.set("ble" + i + "Mac", mac.substring(0, mac.length() - 1));
+                    position.set("ble" + i + "Rssi", buf.readByte());
+                    int dataLength = buf.readUnsignedByte();
+                    position.set("ble" + i + "Data", ByteBufUtil.hexDump(buf.readSlice(dataLength)));
+                }
+
+            } else {
+
+                while (buf.readableBytes() > 2) {
+                    int mask = buf.readUnsignedShort();
+                    buf.skipBytes(6); // sample time
+                    if (BitUtil.check(mask, 0)) {
+                        position.set("lightSensor", buf.readUnsignedShort());
+                    }
+                    if (BitUtil.check(mask, 1)) {
+                        position.set(Position.KEY_DEVICE_TEMP, buf.readShort() / 10.0);
+                        position.set(Position.KEY_HUMIDITY, buf.readShort() / 10.0);
+                    }
+                    if (BitUtil.check(mask, 2)) {
+                        position.set(Position.PREFIX_TEMP + 3, buf.readShort() / 10.0);
+                    }
+                    if (BitUtil.check(mask, 3)) {
+                        buf.skipBytes(6); // acceleration
+                    }
+                    if (BitUtil.check(mask, 4)) {
+                        position.set("airPressure", buf.readUnsignedShort());
+                    }
+                }
+
+            }
 
             return position;
 
