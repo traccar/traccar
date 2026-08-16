@@ -22,6 +22,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -115,7 +116,7 @@ public class NotificatorWhatsapp extends Notificator {
 
         var request = client.target(String.format("https://graph.facebook.com/v22.0/%s/messages", phoneNumberId))
                 .request().header("Authorization", "Bearer " + token);
-        return post(request, Entity.json(message), response -> {
+        return WebHelper.post(request, Entity.json(message), response -> {
             if (response.getStatus() / 100 != 2) {
                 throw new MessageException(response.readEntity(String.class));
             }
