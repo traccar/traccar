@@ -89,6 +89,11 @@ public final class SmtpMailManager implements MailManager {
             copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM);
             copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM_NAME);
 
+            String timeout = String.valueOf(provider.getInteger(Keys.MAIL_SMTP_TIMEOUT));
+            properties.put("mail.smtp.connectiontimeout", timeout);
+            properties.put("mail.smtp.timeout", timeout);
+            properties.put("mail.smtp.writetimeout", timeout);
+
             return properties;
         }
         return null;

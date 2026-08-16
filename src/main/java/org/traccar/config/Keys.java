@@ -1294,6 +1294,14 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
+     * SMTP connect, read and write timeout in milliseconds.
+     */
+    public static final ConfigKey<Integer> MAIL_SMTP_TIMEOUT = new IntegerConfigKey(
+            "mail.smtp.timeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * SMS API service full URL. Enables SMS commands and notifications.
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new StringConfigKey(
