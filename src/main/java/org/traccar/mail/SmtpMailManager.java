@@ -36,6 +36,7 @@ import jakarta.mail.internet.MimeMultipart;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 public final class SmtpMailManager implements MailManager {
 
@@ -94,14 +95,24 @@ public final class SmtpMailManager implements MailManager {
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body) throws MessagingException {
-        sendMessage(user, system, subject, body, null);
+    public CompletableFuture<Void> sendMessage(User user, boolean system, String subject, String body) {
+        return sendMessage(user, system, subject, body, null);
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+    public CompletableFuture<Void> sendMessage(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) {
+        try {
+            sendMessageBlocking(user, system, subject, body, attachment);
+            return CompletableFuture.completedFuture(null);
+        } catch (MessagingException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
+    private void sendMessageBlocking(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment)
+            throws MessagingException {
 
         Properties properties = null;
         if (!config.getBoolean(Keys.MAIL_SMTP_IGNORE_USER_CONFIG)) {
