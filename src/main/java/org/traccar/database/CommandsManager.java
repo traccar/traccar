@@ -93,7 +93,7 @@ public class CommandsManager implements BroadcastInterface {
             if (position != null) {
                 protocol.sendTextCommand(device.getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                smsManager.sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
+                smsManager.sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true).get();
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
