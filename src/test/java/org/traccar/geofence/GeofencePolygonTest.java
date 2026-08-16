@@ -30,6 +30,14 @@ public class GeofencePolygonTest {
         assertTrue(geofenceGeometry.containsPoint(55.75476, 37.61915));
         assertFalse(geofenceGeometry.containsPoint(55.75545, 37.61921));
     }
+
+    @Test
+    public void testIntersectsPolygon() throws ParseException {
+        GeofenceGeometry geofenceGeometry = new GeofencePolygon(
+                "POLYGON ((55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165))");
+        assertTrue(geofenceGeometry.intersectsSegment(55.7520, 37.61915, 55.7560, 37.61915));
+        assertFalse(geofenceGeometry.intersectsSegment(55.76, 37.61915, 55.77, 37.61915));
+    }
     
     @Test
     public void testContainsPolygon180() throws ParseException {

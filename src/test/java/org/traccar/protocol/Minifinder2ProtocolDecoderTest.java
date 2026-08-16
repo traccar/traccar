@@ -45,6 +45,10 @@ public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_RESULT, "0");
 
         verifyAttribute(decoder, binary(
+                "ab000800c9ea0c0004061f0074657374"),
+                Position.KEY_RESULT, "test");
+
+        verifyAttribute(decoder, binary(
                 "ab102600080f1400011001383633393231303339393833343736092429b347633003a96409020000008027b34763"),
                 "bark", true);
 

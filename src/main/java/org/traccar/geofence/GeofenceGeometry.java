@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,19 +59,53 @@ public abstract class GeofenceGeometry {
         }
     }
 
-    public boolean containsPoint(double latitude, double longitude) {
+    private boolean intersectsBoundary(
+            double minLatitude, double maxLatitude, double minLongitude, double maxLongitude) {
         if (min.lon >= 0 || max.lon < 0) {
-            if (latitude < min.lat || latitude > max.lat) {
+            if (maxLatitude < min.lat || minLatitude > max.lat) {
                 return false;
             }
-            if (longitude < min.lon || longitude > max.lon) {
+            if (maxLongitude < min.lon || minLongitude > max.lon) {
                 return false;
             }
+        }
+        return true;
+    }
+
+    public boolean containsPoint(double latitude, double longitude) {
+        if (!intersectsBoundary(latitude, latitude, longitude, longitude)) {
+            return false;
         }
         return containsPointInternal(latitude, longitude);
     }
 
     protected abstract boolean containsPointInternal(double latitude, double longitude);
+
+    public boolean intersectsSegment(double latitude1, double longitude1, double latitude2, double longitude2) {
+        if (!intersectsBoundary(
+                Math.min(latitude1, latitude2), Math.max(latitude1, latitude2),
+                Math.min(longitude1, longitude2), Math.max(longitude1, longitude2))) {
+            return false;
+        }
+        return intersectsSegmentInternal(latitude1, longitude1, latitude2, longitude2);
+    }
+
+    protected abstract boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2);
+
+    protected static boolean intersectsEdges(
+            List<Coordinate> coordinates, boolean closed,
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        for (int i = closed ? 0 : 1, j = closed ? coordinates.size() - 1 : 0; i < coordinates.size(); j = i++) {
+            if (DistanceCalculator.segmentsIntersect(
+                    latitude1, longitude1, latitude2, longitude2,
+                    coordinates.get(j).lat(), coordinates.get(j).lon(),
+                    coordinates.get(i).lat(), coordinates.get(i).lon())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public abstract double calculateArea();
 
