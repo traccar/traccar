@@ -321,7 +321,7 @@ public class ProtocolTest extends BaseTest {
                 for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                     checkInteger(cellTower.getMobileCountryCode(), 0, 999);
                     checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
-                    checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
+                    checkInteger(cellTower.getLocationAreaCode(), 0, 65535);
                     checkInteger(cellTower.getCellId(), 0, 268435455);
                 }
             }

@@ -90,6 +90,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
     public static final int MSG_STATUS_2 = 0x36;           // Jimi IoT 4G
+    public static final int MSG_IBUTTON = 0x61;            // DT16E
     public static final int MSG_WIFI_2 = 0x69;
     public static final int MSG_GPS_MODULAR = 0x70;
     public static final int MSG_WIFI_4 = 0xF3;
@@ -187,6 +188,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_7:
             case MSG_GPS_LBS_RFID:
             case MSG_FENCE_MULTI:
+            case MSG_IBUTTON:
                 return true;
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant != Variant.SEEWORLD;
@@ -214,6 +216,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
             case MSG_LBS_ADDRESS:
+            case MSG_IBUTTON:
                 return true;
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant != Variant.SEEWORLD;
@@ -372,7 +375,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X
                 || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
+        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD || type == MSG_IBUTTON) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
@@ -817,6 +820,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(8); // imei
                 position.setDeviceTime(decodeDate(buf, deviceSession));
             }
+            if(type == MSG_IBUTTON){
+               buf.skipBytes(8); // imei
+            }
 
             if (hasGps(type)) {
                 decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
@@ -897,6 +903,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
+
+           if (type == MSG_IBUTTON) {
+              position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
+           }
 
             if (type == MSG_GPS_LBS_STATUS_5) {
                 buf.readUnsignedByte(); // language
