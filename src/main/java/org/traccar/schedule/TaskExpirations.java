@@ -27,7 +27,6 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
 import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
