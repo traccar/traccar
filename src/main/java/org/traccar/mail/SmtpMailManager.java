@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
 
 public final class SmtpMailManager implements MailManager {
 
@@ -44,10 +46,12 @@ public final class SmtpMailManager implements MailManager {
 
     private final Config config;
     private final StatisticsManager statisticsManager;
+    private final ExecutorService executorService;
 
-    public SmtpMailManager(Config config, StatisticsManager statisticsManager) {
+    public SmtpMailManager(Config config, StatisticsManager statisticsManager, ExecutorService executorService) {
         this.config = config;
         this.statisticsManager = statisticsManager;
+        this.executorService = executorService;
     }
 
     private static void copyBooleanProperty(
@@ -102,12 +106,13 @@ public final class SmtpMailManager implements MailManager {
     @Override
     public CompletableFuture<Void> sendMessage(
             User user, boolean system, String subject, String body, MimeBodyPart attachment) {
-        try {
-            sendMessageBlocking(user, system, subject, body, attachment);
-            return CompletableFuture.completedFuture(null);
-        } catch (MessagingException e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        return CompletableFuture.runAsync(() -> {
+            try {
+                sendMessageBlocking(user, system, subject, body, attachment);
+            } catch (MessagingException e) {
+                throw new CompletionException(e);
+            }
+        }, executorService);
     }
 
     private void sendMessageBlocking(
