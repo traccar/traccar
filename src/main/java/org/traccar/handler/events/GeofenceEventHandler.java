@@ -16,6 +16,8 @@
 package org.traccar.handler.events;
 
 import jakarta.inject.Inject;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
@@ -29,10 +31,24 @@ import java.util.Set;
 public class GeofenceEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
+    private final boolean segmentCrossingEnabled;
 
     @Inject
-    public GeofenceEventHandler(CacheManager cacheManager) {
+    public GeofenceEventHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
+        segmentCrossingEnabled = config.getBoolean(Keys.EVENT_GEOFENCE_SEGMENT_CROSSING);
+    }
+
+    private void handleEvent(Callback callback, String type, Position position, Geofence geofence) {
+        if (geofence != null) {
+            long calendarId = geofence.getCalendarId();
+            Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
+            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
+                Event event = new Event(type, position);
+                event.setGeofenceId(geofence.getId());
+                callback.eventDetected(event);
+            }
+        }
     }
 
     @Override
@@ -50,30 +66,29 @@ public class GeofenceEventHandler extends BaseEventHandler {
         Set<Long> newGeofences = new HashSet<>();
         if (position.getGeofenceIds() != null) {
             newGeofences.addAll(position.getGeofenceIds());
+        }
+
+        if (segmentCrossingEnabled && lastPosition != null) {
+            for (Geofence geofence : cacheManager.getDeviceObjects(position.getDeviceId(), Geofence.class)) {
+                if (!oldGeofences.contains(geofence.getId()) && !newGeofences.contains(geofence.getId())
+                        && geofence.containsSegment(lastPosition, position)) {
+                    handleEvent(callback, Event.TYPE_GEOFENCE_CROSSED, position, geofence);
+                }
+            }
+        }
+
+        if (position.getGeofenceIds() != null) {
             newGeofences.removeAll(oldGeofences);
             position.getGeofenceIds().forEach(oldGeofences::remove);
         }
 
         for (long geofenceId : oldGeofences) {
             Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
-            if (geofence != null) {
-                long calendarId = geofence.getCalendarId();
-                Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
-                if (calendar == null || calendar.checkMoment(position.getFixTime())) {
-                    Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
-                    event.setGeofenceId(geofenceId);
-                    callback.eventDetected(event);
-                }
-            }
+            handleEvent(callback, Event.TYPE_GEOFENCE_EXIT, position, geofence);
         }
         for (long geofenceId : newGeofences) {
-            long calendarId = cacheManager.getObject(Geofence.class, geofenceId).getCalendarId();
-            Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
-            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
-                Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
-                event.setGeofenceId(geofenceId);
-                callback.eventDetected(event);
-            }
+            Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
+            handleEvent(callback, Event.TYPE_GEOFENCE_ENTER, position, geofence);
         }
     }
 }
