@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -345,10 +344,16 @@ public class ConnectionManager implements BroadcastInterface {
     @Override
     public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
             boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
-        if (link && clazz1.equals(User.class) && clazz2.equals(Device.class)) {
-            if (listeners.containsKey(id1)) {
+        if (clazz1.equals(User.class) && clazz2.equals(Device.class) && listeners.containsKey(id1)) {
+            if (link) {
                 userDevices.get(id1).add(id2);
-                deviceUsers.put(id2, new HashSet<>(List.of(id1)));
+                deviceUsers.computeIfAbsent(id2, id -> new HashSet<>()).add(id1);
+            } else {
+                userDevices.get(id1).remove(id2);
+                deviceUsers.computeIfPresent(id2, (x, userIds) -> {
+                    userIds.remove(id1);
+                    return userIds.isEmpty() ? null : userIds;
+                });
             }
         }
     }
