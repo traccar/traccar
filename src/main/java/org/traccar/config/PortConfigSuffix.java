@@ -18,6 +18,7 @@ package org.traccar.config;
 import org.traccar.BaseProtocol;
 import org.traccar.protocol.AdmProtocol;
 import org.traccar.protocol.AisProtocol;
+import org.traccar.protocol.AkrozProtocol;
 import org.traccar.protocol.AlematicsProtocol;
 import org.traccar.protocol.AnytrekProtocol;
 import org.traccar.protocol.ApelProtocol;
@@ -562,6 +563,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(RadshidProtocol.class, 5265);
         put(R16hProtocol.class, 5266);
         put(JimiPhotoProtocol.class, 5267);
+        put(AkrozProtocol.class, 5268);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {
