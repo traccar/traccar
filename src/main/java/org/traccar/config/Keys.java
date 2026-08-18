@@ -483,6 +483,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Check the straight line segment between consecutive positions for geofence boundary crossings, so a visit is
+     * detected even if no position was received inside the geofence (e.g. long reporting intervals).
+     */
+    public static final ConfigKey<Boolean> EVENT_GEOFENCE_SEGMENT_CROSSING = new BooleanConfigKey(
+            "event.geofence.segmentCrossing",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Driver behavior acceleration threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new DoubleConfigKey(
