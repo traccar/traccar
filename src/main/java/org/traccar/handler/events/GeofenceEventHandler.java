@@ -39,7 +39,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
         segmentCrossingEnabled = config.getBoolean(Keys.EVENT_GEOFENCE_SEGMENT_CROSSING);
     }
 
-    private void handleEvent(Callback callback, String type, Position position, Geofence geofence) {
+    private void handleEvent(String type, Position position, Geofence geofence, Callback callback) {
         if (geofence != null) {
             long calendarId = geofence.getCalendarId();
             Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
@@ -72,7 +72,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             for (Geofence geofence : cacheManager.getDeviceObjects(position.getDeviceId(), Geofence.class)) {
                 if (!oldGeofences.contains(geofence.getId()) && !newGeofences.contains(geofence.getId())
                         && geofence.containsSegment(lastPosition, position)) {
-                    handleEvent(callback, Event.TYPE_GEOFENCE_CROSSED, position, geofence);
+                    handleEvent(Event.TYPE_GEOFENCE_CROSSED, position, geofence, callback);
                 }
             }
         }
@@ -84,11 +84,11 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         for (long geofenceId : oldGeofences) {
             Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
-            handleEvent(callback, Event.TYPE_GEOFENCE_EXIT, position, geofence);
+            handleEvent(Event.TYPE_GEOFENCE_EXIT, position, geofence, callback);
         }
         for (long geofenceId : newGeofences) {
             Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
-            handleEvent(callback, Event.TYPE_GEOFENCE_ENTER, position, geofence);
+            handleEvent(Event.TYPE_GEOFENCE_ENTER, position, geofence, callback);
         }
     }
 }
