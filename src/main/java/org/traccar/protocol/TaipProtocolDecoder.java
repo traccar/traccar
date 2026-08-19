@@ -26,7 +26,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -50,11 +49,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI),?") // type
-            .number("(dd)?")                     // event
-            .number("(dd)(dd)(dd)")              // date (mmddyy)
+            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI|RUV\\d\\d),?") // type
+            .number("(d+)?")                     // event
+            .expression(",?")
+            .expression("(?:[A-Z][A-Z0-9]*,)?")  // protocol
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
             .groupEnd()
+            .groupBegin()
             .groupBegin()
             .number("([-+]dd)(d{5})")            // latitude
             .number("([-+]ddd)(d{5})")           // longitude
@@ -65,7 +67,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
             .groupBegin()
-            .number("([023])")                   // fix mode
+            .number("(d)")                       // fix mode
             .number("xx")                        // data age
             .number("(xx)")                      // input
             .groupBegin()
@@ -106,6 +108,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd()
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -141,45 +144,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         };
     }
 
-    private static final Pattern PATTERN_RUV_STATUS = new PatternBuilder()
-            .text("RUV00")
-            .number("(d+)")                      // event
-            .expression(",[^,]+,")               // protocol
-            .number("(dd)(dd)(dd)")              // date (ddmmyy)
-            .number("(dd)(dd)(dd)")              // time (hhmmss)
-            .number(",(dddd)")                   // battery
-            .number("(dddd)")                    // power
-            .expression(",([^,]*)")              // serial number
-            .expression(",([^,]*)")              // firmware version
-            .expression(",([^,]*)")              // hardware version
-            .expression(",[^,]*")                // script version
-            .expression(",[^,]*")                // peripheral
-            .expression(",[^,]*,[^,]*,[^,]*")    // settings
-            .expression(",([^;,]*)")             // iccid
-            .any()
-            .compile();
-
-    private static final Pattern PATTERN_RUV = new PatternBuilder()
-            .text("RUV")
-            .number("(dd)")                      // format
-            .number("(d+)")                      // event
-            .expression(",[^,]+,")               // protocol
-            .number("(dd)(dd)(dd)")              // date (ddmmyy)
-            .number("(dd)(dd)(dd)")              // time (hhmmss)
-            .number("([-+]d{7})")                // latitude
-            .number("([-+]d{8})")                // longitude
-            .number("(ddd)")                     // speed
-            .number("(ddd)")                     // course
-            .number("(d)")                       // fix status
-            .number("xx")                        // data age
-            .number("(xx)")                      // input
-            .number("dd")                        // reserved
-            .number("(dd)")                      // hdop
-            .expression("[^,]*")                 // reserved
-            .expression(",([^;]+)")              // data
-            .any()
-            .compile();
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -191,18 +155,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        if (sentence.startsWith("RUV")) {
-            sendRuvResponse(channel, remoteAddress, sentence);
-            if (sentence.startsWith("RUV00")) {
-                return decodeRuvStatus(channel, remoteAddress, sentence);
-            }
-            return decodeRuv(channel, remoteAddress, sentence);
-        }
-
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
+
+        boolean akroz = sentence.startsWith("RUV");
 
         Position position = new Position(getProtocolName());
 
@@ -224,22 +182,29 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         }
 
+        boolean located = false;
         if (parser.hasNext(4)) {
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
+            located = true;
         }
         if (parser.hasNext(6)) {
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+            located = true;
         }
 
-        position.setSpeed(convertSpeed(parser.nextDouble(0), "mph"));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), akroz ? "kmh" : "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
-            valid = parser.nextInt() > 0;
+            int fixMode = parser.nextInt();
+            valid = akroz ? fixMode < 8 : fixMode > 0;
             int input = parser.nextHexInt();
             position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
+            if (akroz) {
+                position.set(Position.KEY_CHARGE, BitUtil.check(input, 6));
+            }
             position.set(Position.KEY_INPUT, input);
         }
 
@@ -254,7 +219,10 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(2)) {
-            event = parser.nextInt();
+            int value = parser.nextInt();
+            if (!akroz) {
+                event = value;
+            }
             position.set(Position.KEY_HDOP, parser.nextInt());
         }
 
@@ -276,16 +244,71 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(valid == null || valid);
 
+        if (akroz) {
+            String[] values = sentence.substring(0, sentence.indexOf(';')).split(",", -1);
+            switch (Integer.parseInt(sentence.substring(3, 5))) {
+                case 0 -> {
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[3].substring(0, 4)) * 0.01);
+                    position.set(Position.KEY_POWER, Integer.parseInt(values[3].substring(4)) * 0.01);
+                    position.set("serial", values[4]);
+                    position.set(Position.KEY_VERSION_FW, values[5]);
+                    position.set(Position.KEY_VERSION_HW, values[6]);
+                    if (!values[12].isEmpty()) {
+                        position.set(Position.KEY_ICCID, values[12]);
+                    }
+                }
+                case 1 -> {
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[3].substring(0, 4)) * 0.01);
+                    position.set(Position.KEY_POWER, Integer.parseInt(values[3].substring(4)) * 0.01);
+                    position.set(Position.KEY_HOURS, Long.parseLong(values[7]) * 60000);
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[8]));
+                    position.set(Position.KEY_RPM, Integer.parseInt(values[9]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[10]));
+                    position.set("oilPressure", Integer.parseInt(values[11]));
+                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[12]));
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[16]);
+                }
+                case 2 -> {
+                    position.set("tripTime", Integer.parseInt(values[11]));
+                    position.set("tripDistance", Long.parseLong(values[12]));
+                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[13]) / 10.0);
+                }
+                default -> {
+                    position.set(Position.KEY_THROTTLE, Integer.parseInt(values[3]));
+                    position.set(Position.KEY_HOURS, Long.parseLong(values[4]) * 60000);
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[5]));
+                    position.set(Position.KEY_RPM, Integer.parseInt(values[6]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[7]));
+                    position.set("oilPressure", Integer.parseInt(values[8]));
+                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[9]));
+                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[10]) / 10.0);
+                    position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[12]));
+                    position.set("engineTorque", Integer.parseInt(values[13]));
+                    position.set("engineBrake", Integer.parseInt(values[15]));
+                    position.set("cruiseControl", BitUtil.check(Integer.parseInt(values[19]), 0));
+                    position.set("clutchState", BitUtil.check(Integer.parseInt(values[20]), 6));
+                    position.set("parkingBrake", BitUtil.check(Integer.parseInt(values[21]), 2));
+                    position.set("serviceBrake", BitUtil.check(Integer.parseInt(values[22]), 3));
+                }
+            }
+        }
+
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
-            if (sentence.charAt(5) == ',') {
+            if (akroz) {
+                position.addAlarm(decodeAlarmRuv(event));
+            } else if (sentence.charAt(5) == ',') {
                 position.addAlarm(decodeAlarm2(event));
             } else {
                 position.addAlarm(decodeAlarm(event));
             }
         }
 
-        return decodeAttributes(channel, remoteAddress, position, splitAttributes(sentence), false);
+        Position result = decodeAttributes(channel, remoteAddress, position, splitAttributes(sentence), akroz);
+        if (result != null && !located) {
+            getLastLocation(result, result.getDeviceTime());
+        }
+        return result;
     }
 
     private String[] splitAttributes(String sentence) {
@@ -298,148 +321,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             endIndex = sentence.length();
         }
         return sentence.substring(beginIndex, endIndex).split(";");
-    }
-
-    private void sendRuvResponse(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        if (channel == null) {
-            return;
-        }
-
-        String uniqueId = null;
-        String messageIndex = null;
-        String[] attributes = splitAttributes(sentence);
-        if (attributes != null) {
-            for (String attribute : attributes) {
-                if (attribute.startsWith("ID=")) {
-                    uniqueId = attribute.substring(3);
-                } else if (attribute.startsWith("#")) {
-                    messageIndex = attribute;
-                }
-            }
-        }
-
-        if (uniqueId != null && messageIndex != null) {
-            String response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";";
-            response += String.format("*%02X", Checksum.xor(response)) + "<\r\n";
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-        }
-    }
-
-    private Position decodeRuvStatus(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        Parser parser = new Parser(PATTERN_RUV_STATUS, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-
-        position.set(Position.KEY_EVENT, parser.nextInt());
-        Date time = parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS);
-        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
-        position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
-        position.set("serial", parser.next());
-        position.set(Position.KEY_VERSION_FW, parser.next());
-        position.set(Position.KEY_VERSION_HW, parser.next());
-        String iccid = parser.next();
-        if (!iccid.isEmpty()) {
-            position.set(Position.KEY_ICCID, iccid);
-        }
-
-        Position result = decodeAttributes(channel, remoteAddress, position, splitAttributes(sentence), true);
-        if (result != null) {
-            getLastLocation(result, time);
-        }
-        return result;
-    }
-
-    private Position decodeRuv(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        Parser parser = new Parser(PATTERN_RUV, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-
-        int format = parser.nextInt();
-        int event = parser.nextInt();
-
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
-        position.setLatitude(parser.nextInt() * 0.00001);
-        position.setLongitude(parser.nextInt() * 0.00001);
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
-        position.setCourse(parser.nextInt());
-        position.setValid(parser.nextInt() < 8);
-
-        int input = parser.nextHexInt();
-        position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
-        position.set(Position.KEY_CHARGE, BitUtil.check(input, 6));
-        position.set(Position.KEY_INPUT, input);
-        position.set(Position.KEY_HDOP, parser.nextInt());
-
-        position.set(Position.KEY_EVENT, event);
-        position.addAlarm(decodeAlarmRuv(event));
-
-        String[] values = parser.next().split(",");
-        switch (format) {
-            case 1 -> decodeRuvBasic(position, values);
-            case 2 -> decodeRuvTrip(position, values);
-            case 3 -> decodeRuvCan(position, values);
-            default -> {
-            }
-        }
-
-        return decodeAttributes(channel, remoteAddress, position, splitAttributes(sentence), true);
-    }
-
-    private void decodeRuvBasic(Position position, String[] values) {
-        if (values.length >= 14) {
-            position.set(Position.KEY_BATTERY, Integer.parseInt(values[0].substring(0, 4)) * 0.01);
-            position.set(Position.KEY_POWER, Integer.parseInt(values[0].substring(4)) * 0.01);
-            position.set(Position.KEY_HOURS, Long.parseLong(values[4]) * 60000);
-            long odometer = Long.parseLong(values[5]);
-            if (odometer > 0) {
-                position.set(Position.KEY_ODOMETER, odometer);
-            }
-            position.set(Position.KEY_RPM, Integer.parseInt(values[6]));
-            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[7]));
-            position.set("oilPressure", Integer.parseInt(values[8]));
-            position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[9]));
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, values[13]);
-        }
-    }
-
-    private void decodeRuvTrip(Position position, String[] values) {
-        if (values.length >= 11) {
-            position.set("tripTime", Integer.parseInt(values[8]));
-            position.set("tripDistance", Long.parseLong(values[9]));
-            position.set(Position.KEY_FUEL_USED, Long.parseLong(values[10]) / 10.0);
-        }
-    }
-
-    private void decodeRuvCan(Position position, String[] values) {
-        if (values.length >= 20) {
-            position.set(Position.KEY_THROTTLE, Integer.parseInt(values[0]));
-            position.set(Position.KEY_HOURS, Long.parseLong(values[1]) * 60000);
-            long odometer = Long.parseLong(values[2]);
-            if (odometer > 0) {
-                position.set(Position.KEY_ODOMETER, odometer);
-            }
-            position.set(Position.KEY_RPM, Integer.parseInt(values[3]));
-            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[4]));
-            position.set("oilPressure", Integer.parseInt(values[5]));
-            position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[6]));
-            position.set(Position.KEY_FUEL_USED, Long.parseLong(values[7]) / 10.0);
-            position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[9]));
-            position.set("engineTorque", Integer.parseInt(values[10]));
-            position.set("engineBrake", Integer.parseInt(values[12]));
-            position.set("cruiseControl", Integer.parseInt(values[16]) == 1);
-            position.set("clutchState", Integer.parseInt(values[17]) == 64);
-            position.set("parkingBrake", Integer.parseInt(values[18]) == 4);
-            position.set("serviceBrake", Integer.parseInt(values[19]) == 8);
-        }
     }
 
     private String decodeAlarmRuv(int event) {
@@ -460,7 +341,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeAttributes(
             Channel channel, SocketAddress remoteAddress, Position position, String[] attributes,
-            boolean skipResponse) {
+            boolean plainChecksum) {
 
         String uniqueId = null;
         DeviceSession deviceSession = null;
@@ -504,7 +385,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (deviceSession != null) {
-            if (channel != null && !skipResponse) {
+            if (channel != null) {
                 if (messageIndex != null) {
                     String response;
                     if (messageIndex.startsWith("#IP")) {
