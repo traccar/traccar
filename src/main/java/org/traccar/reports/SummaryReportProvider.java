@@ -25,6 +25,7 @@ import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
@@ -125,17 +126,49 @@ public class SummaryReportProvider {
     }
 
     private Collection<SummaryReportItem> calculateDeviceResults(
-            Device device, ZonedDateTime from, ZonedDateTime to, boolean daily) throws StorageException {
+            Device device, ZonedDateTime from, ZonedDateTime to, ChronoUnit reportInterval) throws StorageException {
 
         boolean fast = Duration.between(from, to).toSeconds() > config.getLong(Keys.REPORT_FAST_THRESHOLD);
         var results = new ArrayList<SummaryReportItem>();
-        if (daily) {
-            while (from.truncatedTo(ChronoUnit.DAYS).isBefore(to.truncatedTo(ChronoUnit.DAYS))) {
-                ZonedDateTime fromDay = from.truncatedTo(ChronoUnit.DAYS);
-                ZonedDateTime nextDay = fromDay.plusDays(1);
-                results.addAll(calculateDeviceResult(
-                        device, Date.from(from.toInstant()), Date.from(nextDay.toInstant()), fast));
-                from = nextDay;
+        if (reportInterval != null) {
+            switch (reportInterval) {
+                case ChronoUnit.DAYS -> {
+                    while (DateUtil.startOfZDTDay(from).isBefore(DateUtil.startOfZDTDay(to))) {
+                        ZonedDateTime fromDay = DateUtil.startOfZDTDay(from);
+                        ZonedDateTime nextDay = fromDay.plusDays(1);
+                        results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()),
+                            Date.from(nextDay.toInstant()), fast));
+                        from = nextDay;
+                    }
+                }
+                case ChronoUnit.WEEKS -> {
+                    while (DateUtil.startOfZDTWeek(from).isBefore(DateUtil.startOfZDTWeek(to))) {
+                        ZonedDateTime fromWeek = DateUtil.startOfZDTWeek(from);
+                        ZonedDateTime nextWeek = fromWeek.plusWeeks(1);
+                        results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()),
+                            Date.from(nextWeek.toInstant()), fast));
+                        from = nextWeek;
+                    }
+                }
+                case ChronoUnit.MONTHS -> {
+                    while (DateUtil.startOfZDTMonth(from).isBefore(DateUtil.startOfZDTMonth(to))) {
+                        ZonedDateTime fromMonth = DateUtil.startOfZDTMonth(from);
+                        ZonedDateTime nextMonth = fromMonth.plusMonths(1);
+                        results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()),
+                            Date.from(nextMonth.toInstant()), fast));
+                        from = nextMonth;
+                    }
+                }
+                case ChronoUnit.YEARS -> {
+                    while (DateUtil.startOfZDTYear(from).isBefore(DateUtil.startOfZDTYear(to))) {
+                        ZonedDateTime fromYear = DateUtil.startOfZDTYear(from);
+                        ZonedDateTime nextYear = fromYear.plusYears(1);
+                        results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()),
+                            Date.from(nextYear.toInstant()), fast));
+                        from = nextYear;
+                    }
+                }
+                default -> {}
             }
         }
         results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
@@ -144,7 +177,7 @@ public class SummaryReportProvider {
 
     public Collection<SummaryReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to, boolean daily) throws StorageException {
+            Date from, Date to, ChronoUnit reportInterval) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
         var tz = UserUtil.getTimezone(permissionsService.getServer(), permissionsService.getUser(userId)).toZoneId();
@@ -152,7 +185,7 @@ public class SummaryReportProvider {
         ArrayList<SummaryReportItem> result = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             var deviceResults = calculateDeviceResults(
-                    device, from.toInstant().atZone(tz), to.toInstant().atZone(tz), daily);
+                    device, from.toInstant().atZone(tz), to.toInstant().atZone(tz), reportInterval);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
                     result.add(summaryReport);
@@ -164,8 +197,9 @@ public class SummaryReportProvider {
 
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to, boolean daily) throws StorageException, IOException {
-        Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
+            Date from, Date to, ChronoUnit reportInterval) throws StorageException, IOException {
+        Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to,
+                reportInterval);
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "summary.xlsx").toFile();
         try (InputStream inputStream = new FileInputStream(file)) {
