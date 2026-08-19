@@ -18,7 +18,6 @@ package org.traccar.handler.events;
 import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -28,14 +27,13 @@ import org.traccar.session.cache.CacheManager;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GeofenceEventHandler extends BaseEventHandler {
+public class GeofenceEventHandler extends BasePositionEventHandler {
 
-    private final CacheManager cacheManager;
     private final boolean segmentCrossingEnabled;
 
     @Inject
     public GeofenceEventHandler(Config config, CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
         segmentCrossingEnabled = config.getBoolean(Keys.EVENT_GEOFENCE_SEGMENT_CROSSING);
     }
 
@@ -52,13 +50,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-        if (!PositionUtil.isLatest(cacheManager, position)) {
-            return;
-        }
-
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
         Set<Long> oldGeofences = new HashSet<>();
-        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition != null && lastPosition.getGeofenceIds() != null) {
             oldGeofences.addAll(lastPosition.getGeofenceIds());
         }

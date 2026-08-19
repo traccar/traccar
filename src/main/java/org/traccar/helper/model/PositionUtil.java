@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -35,11 +34,6 @@ import java.util.stream.Stream;
 public final class PositionUtil {
 
     private PositionUtil() {}
-
-    public static boolean isLatest(CacheManager cacheManager, Position position) {
-        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
-    }
 
     public static double calculateDistance(Position first, Position last, boolean useOdometer) {
         double distance;
