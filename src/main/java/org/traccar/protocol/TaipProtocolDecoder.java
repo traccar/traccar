@@ -160,7 +160,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        boolean akroz = sentence.startsWith("RUV");
+        boolean ruv = sentence.startsWith("RUV");
 
         Position position = new Position(getProtocolName());
 
@@ -194,15 +194,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             located = true;
         }
 
-        position.setSpeed(convertSpeed(parser.nextDouble(0), akroz ? "kmh" : "mph"));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), ruv ? "kmh" : "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
             int fixMode = parser.nextInt();
-            valid = akroz ? fixMode < 8 : fixMode > 0;
+            valid = ruv ? fixMode < 8 : fixMode > 0;
             int input = parser.nextHexInt();
             position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
-            if (akroz) {
+            if (ruv) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(input, 6));
             }
             position.set(Position.KEY_INPUT, input);
@@ -220,7 +220,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(2)) {
             int value = parser.nextInt();
-            if (!akroz) {
+            if (!ruv) {
                 event = value;
             }
             position.set(Position.KEY_HDOP, parser.nextInt());
@@ -244,58 +244,68 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(valid == null || valid);
 
-        if (akroz) {
+        if (ruv) {
             String[] values = sentence.substring(0, sentence.indexOf(';')).split(",", -1);
+            int index = 3;
             switch (Integer.parseInt(sentence.substring(3, 5))) {
                 case 0 -> {
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[3].substring(0, 4)) * 0.01);
-                    position.set(Position.KEY_POWER, Integer.parseInt(values[3].substring(4)) * 0.01);
-                    position.set("serial", values[4]);
-                    position.set(Position.KEY_VERSION_FW, values[5]);
-                    position.set(Position.KEY_VERSION_HW, values[6]);
-                    if (!values[12].isEmpty()) {
-                        position.set(Position.KEY_ICCID, values[12]);
+                    String voltage = values[index++];
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(voltage.substring(0, 4)) * 0.01);
+                    position.set(Position.KEY_POWER, Integer.parseInt(voltage.substring(4)) * 0.01);
+                    position.set("serial", values[index++]);
+                    position.set(Position.KEY_VERSION_FW, values[index++]);
+                    position.set(Position.KEY_VERSION_HW, values[index++]);
+                    index += 5;
+                    if (!values[index].isEmpty()) {
+                        position.set(Position.KEY_ICCID, values[index]);
                     }
                 }
                 case 1 -> {
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(values[3].substring(0, 4)) * 0.01);
-                    position.set(Position.KEY_POWER, Integer.parseInt(values[3].substring(4)) * 0.01);
-                    position.set(Position.KEY_HOURS, Long.parseLong(values[7]) * 60000);
-                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[8]));
-                    position.set(Position.KEY_RPM, Integer.parseInt(values[9]));
-                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[10]));
-                    position.set("oilPressure", Integer.parseInt(values[11]));
-                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[12]));
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[16]);
+                    String voltage = values[index++];
+                    position.set(Position.KEY_BATTERY, Integer.parseInt(voltage.substring(0, 4)) * 0.01);
+                    position.set(Position.KEY_POWER, Integer.parseInt(voltage.substring(4)) * 0.01);
+                    index += 3;
+                    position.set(Position.KEY_HOURS, Long.parseLong(values[index++]) * 60000);
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[index++]));
+                    position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+                    position.set("oilPressure", Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[index++]));
+                    index += 3;
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[index]);
                 }
                 case 2 -> {
-                    position.set("tripTime", Integer.parseInt(values[11]));
-                    position.set("tripDistance", Long.parseLong(values[12]));
-                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[13]) / 10.0);
+                    index += 8;
+                    position.set("tripTime", Integer.parseInt(values[index++]));
+                    position.set("tripDistance", Long.parseLong(values[index++]));
+                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[index]) / 10.0);
                 }
                 default -> {
-                    position.set(Position.KEY_THROTTLE, Integer.parseInt(values[3]));
-                    position.set(Position.KEY_HOURS, Long.parseLong(values[4]) * 60000);
-                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[5]));
-                    position.set(Position.KEY_RPM, Integer.parseInt(values[6]));
-                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[7]));
-                    position.set("oilPressure", Integer.parseInt(values[8]));
-                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[9]));
-                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[10]) / 10.0);
-                    position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[12]));
-                    position.set("engineTorque", Integer.parseInt(values[13]));
-                    position.set("engineBrake", Integer.parseInt(values[15]));
-                    position.set("cruiseControl", BitUtil.check(Integer.parseInt(values[19]), 0));
-                    position.set("clutchState", BitUtil.check(Integer.parseInt(values[20]), 6));
-                    position.set("parkingBrake", BitUtil.check(Integer.parseInt(values[21]), 2));
-                    position.set("serviceBrake", BitUtil.check(Integer.parseInt(values[22]), 3));
+                    position.set(Position.KEY_THROTTLE, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_HOURS, Long.parseLong(values[index++]) * 60000);
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(values[index++]));
+                    position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+                    position.set("oilPressure", Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[index++]));
+                    position.set(Position.KEY_FUEL_USED, Long.parseLong(values[index++]) / 10.0);
+                    index += 1;
+                    position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[index++]));
+                    position.set("engineTorque", Integer.parseInt(values[index++]));
+                    index += 1;
+                    position.set("engineBrake", Integer.parseInt(values[index++]));
+                    index += 3;
+                    position.set("cruiseControl", BitUtil.check(Integer.parseInt(values[index++]), 0));
+                    position.set("clutchState", BitUtil.check(Integer.parseInt(values[index++]), 6));
+                    position.set("parkingBrake", BitUtil.check(Integer.parseInt(values[index++]), 2));
+                    position.set("serviceBrake", BitUtil.check(Integer.parseInt(values[index]), 3));
                 }
             }
         }
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
-            if (akroz) {
+            if (ruv) {
                 position.addAlarm(decodeAlarmRuv(event));
             } else if (sentence.charAt(5) == ',') {
                 position.addAlarm(decodeAlarm2(event));
@@ -304,23 +314,21 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Position result = decodeAttributes(channel, remoteAddress, position, splitAttributes(sentence), akroz);
+        String[] attributes = null;
+        int beginAttributes = sentence.indexOf(';');
+        if (beginAttributes != -1) {
+            int endIndex = sentence.indexOf('<', beginAttributes);
+            if (endIndex == -1) {
+                endIndex = sentence.length();
+            }
+            attributes = sentence.substring(beginAttributes, endIndex).split(";");
+        }
+
+        Position result = decodeAttributes(channel, remoteAddress, position, attributes, ruv);
         if (result != null && !located) {
             getLastLocation(result, result.getDeviceTime());
         }
         return result;
-    }
-
-    private String[] splitAttributes(String sentence) {
-        int beginIndex = sentence.indexOf(';');
-        if (beginIndex == -1) {
-            return null;
-        }
-        int endIndex = sentence.indexOf('<', beginIndex);
-        if (endIndex == -1) {
-            endIndex = sentence.length();
-        }
-        return sentence.substring(beginIndex, endIndex).split(";");
     }
 
     private String decodeAlarmRuv(int event) {
