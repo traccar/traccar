@@ -212,10 +212,10 @@ public class ConnectionManager implements BroadcastInterface {
             Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(connectionKey);
             if (endpointSessions != null) {
                 for (DeviceSession deviceSession : endpointSessions.values()) {
-                    if (supportsOffline) {
+                    boolean removed = sessionsByDeviceId.remove(deviceSession.getDeviceId(), deviceSession);
+                    if (supportsOffline && removed) {
                         updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
                     }
-                    sessionsByDeviceId.remove(deviceSession.getDeviceId());
                     cacheManager.removeDevice(deviceSession.getDeviceId(), connectionKey);
                 }
             }
