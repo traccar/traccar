@@ -75,7 +75,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                 try {
                     String[] auth = authHeader.split(" ");
                     LoginResult loginResult = loginService.login(auth[0], auth[1]);
-                    if (loginResult != null) {
+                    if (loginResult != null && loginResult.getUser() != null) {
                         User user = loginResult.getUser();
                         statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(
