@@ -95,10 +95,6 @@ public class OverspeedEventHandler extends BaseEventHandler {
             speedLimit = geofenceSpeedLimit;
         }
 
-        if (speedLimit == 0) {
-            return;
-        }
-
         OverspeedState state = OverspeedState.fromDevice(device);
         OverspeedProcessor.updateState(state, position, speedLimit, multiplier, minimalDuration, overspeedGeofenceId);
         if (state.isChanged()) {
