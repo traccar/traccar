@@ -49,7 +49,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI|RUV\\d\\d),?") // type
+            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI|RUV[0-9]{2}),?") // type
             .number("(d+)?")                     // event
             .expression(",?")
             .expression("(?:[A-Z][A-Z0-9]*,)?")  // protocol
@@ -160,7 +160,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        boolean ruv = sentence.startsWith("RUV");
+        boolean isAkroz = sentence.startsWith("RUV");
 
         Position position = new Position(getProtocolName());
 
@@ -194,15 +194,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             located = true;
         }
 
-        position.setSpeed(convertSpeed(parser.nextDouble(0), ruv ? "kmh" : "mph"));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), isAkroz ? "kmh" : "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
             int fixMode = parser.nextInt();
-            valid = ruv ? fixMode < 8 : fixMode > 0;
+            valid = isAkroz ? fixMode < 8 : fixMode > 0;
             int input = parser.nextHexInt();
             position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
-            if (ruv) {
+            if (isAkroz) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(input, 6));
             }
             position.set(Position.KEY_INPUT, input);
@@ -220,7 +220,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(2)) {
             int value = parser.nextInt();
-            if (!ruv) {
+            if (!isAkroz) {
                 event = value;
             }
             position.set(Position.KEY_HDOP, parser.nextInt());
@@ -244,7 +244,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(valid == null || valid);
 
-        if (ruv) {
+        if (isAkroz) {
             String[] values = sentence.substring(0, sentence.indexOf(';')).split(",", -1);
             int index = 3;
             switch (Integer.parseInt(sentence.substring(3, 5))) {
@@ -305,8 +305,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
-            if (ruv) {
-                position.addAlarm(decodeAlarmRuv(event));
+            if (isAkroz) {
+                position.addAlarm(decodeAlarmAkroz(event));
             } else if (sentence.charAt(5) == ',') {
                 position.addAlarm(decodeAlarm2(event));
             } else {
@@ -324,14 +324,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             attributes = sentence.substring(beginAttributes, endIndex).split(";");
         }
 
-        Position result = decodeAttributes(channel, remoteAddress, position, attributes, ruv);
+        Position result = decodeAttributes(channel, remoteAddress, position, attributes, isAkroz);
         if (result != null && !located) {
             getLastLocation(result, result.getDeviceTime());
         }
         return result;
     }
 
-    private String decodeAlarmRuv(int event) {
+    private String decodeAlarmAkroz(int event) {
         return switch (event) {
             case 104, 106 -> Position.ALARM_OVERSPEED;
             case 109 -> Position.ALARM_HIGH_RPM;
