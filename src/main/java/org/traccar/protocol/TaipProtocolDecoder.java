@@ -199,7 +199,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(2)) {
             int fixMode = parser.nextInt();
-            valid = isAkroz ? fixMode < 8 : fixMode > 0;
+            valid = isAkroz ? fixMode >= 2 && fixMode < 8 : fixMode > 0;
             int input = parser.nextHexInt();
             position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
             if (isAkroz) {
