@@ -117,6 +117,25 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 ">RPV19105+4538405-0739518900000012;ID=9999;*7A<\r\n"));
 
+        verifyAttribute(decoder, text(
+                ">RUV0000,NT003,190826125922,00111595,39K40156,0B36 F,203 V,V1.5,JMAK,0,0,0,;ID=FWHS;#0004;*03<"),
+                Position.KEY_VERSION_FW, "0B36 F");
+
+        verifyAttribute(decoder, text(
+                ">RUV01120,NT003,190826131202-2353539-046680190500009FFDE0006,00111596,0,0,0,0,50000,500,0,0,0,0,0,4G:0,00000;ID=FWHS;#1A04;*50<"),
+                Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+
+        verifyAttribute(decoder, text(
+                ">RUV01111,NT003,190826132746-2353539-046680190000009FFDE0006,00111585,0,0,0,16,50000,500,0,0,50,0,0,4G:0,00000;ID=FWHS;#1A69;*5A<"),
+                Position.KEY_ALARM, Position.ALARM_IDLE);
+
+        verifyAttribute(decoder, text(
+                ">RUV02108,NT003,190826131734-2353539-046680190000009FF5E0006,384,0,0,0,0,385,0,323,6,50000,51515;ID=FWHS;#1A2A;*31<"),
+                Position.KEY_FUEL_USED, 5151.5);
+
+        verifyPosition(decoder, text(
+                ">RUV03150,NT003,190826131748-2353539-046680190000009FFDE0006,0,6,50000,500,0,0,50,51515,0,0,0,0,0,0,0,0,0,0,0,0;ID=FWHS;#1A2D;*6D<"));
+
     }
 
 }
