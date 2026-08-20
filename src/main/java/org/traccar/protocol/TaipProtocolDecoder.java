@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,22 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             case 23 -> Position.ALARM_BRAKING;
             case 24 -> Position.ALARM_ACCIDENT;
             case 26, 28 -> Position.ALARM_CORNERING;
+            default -> null;
+        };
+    }
+
+    private String decodeAlarmAkroz(int event) {
+        return switch (event) {
+            case 104, 106 -> Position.ALARM_OVERSPEED;
+            case 109 -> Position.ALARM_HIGH_RPM;
+            case 111 -> Position.ALARM_IDLE;
+            case 119 -> Position.ALARM_TEMPERATURE;
+            case 120 -> Position.ALARM_ACCELERATION;
+            case 121 -> Position.ALARM_BRAKING;
+            case 122 -> Position.ALARM_CORNERING;
+            case 127 -> Position.ALARM_POWER_CUT;
+            case 128 -> Position.ALARM_POWER_RESTORED;
+            case 129 -> Position.ALARM_LOW_BATTERY;
             default -> null;
         };
     }
@@ -324,32 +340,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             attributes = sentence.substring(beginAttributes, endIndex).split(";");
         }
 
-        Position result = decodeAttributes(channel, remoteAddress, position, attributes, isAkroz);
+        Position result = decodeAttributes(channel, remoteAddress, position, attributes);
         if (result != null && !located) {
             getLastLocation(result, result.getDeviceTime());
         }
         return result;
     }
 
-    private String decodeAlarmAkroz(int event) {
-        return switch (event) {
-            case 104, 106 -> Position.ALARM_OVERSPEED;
-            case 109 -> Position.ALARM_HIGH_RPM;
-            case 111 -> Position.ALARM_IDLE;
-            case 119 -> Position.ALARM_TEMPERATURE;
-            case 120 -> Position.ALARM_ACCELERATION;
-            case 121 -> Position.ALARM_BRAKING;
-            case 122 -> Position.ALARM_CORNERING;
-            case 127 -> Position.ALARM_POWER_CUT;
-            case 128 -> Position.ALARM_POWER_RESTORED;
-            case 129 -> Position.ALARM_LOW_BATTERY;
-            default -> null;
-        };
-    }
-
     private Position decodeAttributes(
-            Channel channel, SocketAddress remoteAddress, Position position, String[] attributes,
-            boolean plainChecksum) {
+            Channel channel, SocketAddress remoteAddress, Position position, String[] attributes) {
 
         String uniqueId = null;
         DeviceSession deviceSession = null;
