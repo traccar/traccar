@@ -1688,6 +1688,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x02:
                                 position.addAlarm(Position.ALARM_POWER_CUT);
                                 break;
+                            case 0x0E:
+                                position.addAlarm(Position.ALARM_IDLE);
+                                break;
                             case 0x1A:
                                 position.addAlarm(Position.ALARM_ACCELERATION);
                                 break;
