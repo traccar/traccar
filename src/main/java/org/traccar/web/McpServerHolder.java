@@ -84,8 +84,14 @@ public class McpServerHolder implements AutoCloseable {
 
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
+                .instructions(
+                        "Call device-list first to find valid device ids. Prefer device-summary for totals over "
+                                + "long ranges (weeks or more), device-trips for a leg-by-leg breakdown, and "
+                                + "device-route only when the exact path is needed, ideally over a narrow "
+                                + "sub-range - it returns far more data than the other tools.")
                 .capabilities(capabilities)
                 .tools(createVersionTool(), createDevicePositionTool())
+                .prompts(createTripReportPrompt())
                 .build();
     }
 
@@ -144,6 +150,38 @@ public class McpServerHolder implements AutoCloseable {
                 .tool(toolSchema)
                 .callHandler(this::getDevicePosition)
                 .build();
+    }
+
+    private McpServerFeatures.AsyncPromptSpecification createTripReportPrompt() {
+        var prompt = new McpSchema.Prompt(
+                "trip-report",
+                "Summarizes a device's activity over a date range using the most efficient combination of tools",
+                List.of(
+                        new McpSchema.PromptArgument(
+                                "deviceId", "Device id, see device-list for available ids", true),
+                        new McpSchema.PromptArgument("from", "Start of the range, ISO-8601", true),
+                        new McpSchema.PromptArgument("to", "End of the range, ISO-8601", true)));
+
+        return new McpServerFeatures.AsyncPromptSpecification(prompt, this::getTripReportPrompt);
+    }
+
+    private Mono<McpSchema.GetPromptResult> getTripReportPrompt(
+            McpAsyncServerExchange context, McpSchema.GetPromptRequest request) {
+
+        Object deviceIdValue = request.arguments().get("deviceId");
+        Object fromValue = request.arguments().get("from");
+        Object toValue = request.arguments().get("to");
+
+        String text = "Build a trip report for device " + deviceIdValue
+                + " covering " + fromValue + " to " + toValue + ". "
+                + "Call device-summary first for totals (distance, duration, fuel, engine hours). "
+                + "Call device-trips for a leg-by-leg breakdown with start/end addresses and times. "
+                + "Only call device-route, and only for a narrow sub-range, if the user needs the exact "
+                + "path rather than a summary - it returns far more data than the other tools. "
+                + "Present distances in the user's preferred unit if known, otherwise kilometers.";
+
+        var message = new McpSchema.PromptMessage(McpSchema.Role.USER, new McpSchema.TextContent(text));
+        return Mono.just(new McpSchema.GetPromptResult("Trip report workflow guidance", List.of(message)));
     }
 
     private McpSchema.CallToolResult errorResult(String message) {
