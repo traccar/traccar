@@ -70,6 +70,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
+    public static final int MSG_LOCATION_QUERY = 0x8201;
+    public static final int MSG_TEMPORARY_TRACKING = 0x8202;
+    public static final int MSG_ALARM_ACK = 0x8203;
+    public static final int MSG_VEHICLE_CONTROL = 0x8500;
+    public static final int MSG_TAKE_PHOTO = 0x8801;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_TERMINAL_ATTRIBUTES = 0x0107;
     public static final int MSG_LOCATION_REPORT = 0x0200;
