@@ -984,7 +984,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (model.startsWith("GL5")) {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             index += 1; // mode selection
             position.set(Position.KEY_MOTION, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) > 0);
         } else if (model.equals("GV200")) {
@@ -992,12 +993,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             index += 1; // uart device type
         } else if (model.equals("GL320M")) {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             if (BitUtil.check(mask, 7)) {
                 position.set("externalBattery", v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             }
         } else {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             if (!v[index++].isEmpty()) {
                 decodeStatus(position, Long.parseLong(v[index - 1], 16));
             }
