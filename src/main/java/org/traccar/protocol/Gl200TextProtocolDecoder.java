@@ -92,6 +92,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("BD", "CV200"),
             Map.entry("C2", "GV600M"),
             Map.entry("C3", "GL320M"),
+            Map.entry("D4", "GL310MG"),
             Map.entry("DC", "GV600MG"),
             Map.entry("DE", "GL500M"),
             Map.entry("DF", "CV100LG"),
@@ -463,7 +464,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
             }
-        } else if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
+        } else if (!model.matches("GL310MG|GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
                 position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
@@ -960,7 +961,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (index == v.length - 2) {
             return positions;
         }
-        if (!model.startsWith("GL5") && !model.equals("GL320M")) {
+        if (!model.startsWith("GL5") && !model.matches("GL310MG|GL320M")) {
             position.set(Position.KEY_HOURS, parseHours(v[index++]));
             if (!model.startsWith("GV50M") && !v[index++].isEmpty()) {
                 decodeAnalog(position, 1, v[index - 1]);
@@ -982,7 +983,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (model.startsWith("GL5")) {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             index += 1; // mode selection
             position.set(Position.KEY_MOTION, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) > 0);
             if (!extended && model.equals("GL53MG")) {
@@ -994,13 +996,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             index += 1; // uart device type
-        } else if (model.equals("GL320M")) {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+        } else if (model.matches("GL310MG|GL320M")) {
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             if (BitUtil.check(mask, 7)) {
                 position.set("externalBattery", v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             }
         } else {
-            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            position.set(Position.KEY_BATTERY_LEVEL,
+                    v[index++].isEmpty() ? null : (int) Double.parseDouble(v[index - 1]));
             if (!v[index++].isEmpty()) {
                 decodeStatus(position, v[index - 1]);
             }
@@ -1067,7 +1071,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (BitUtil.check(mask, 7) && !model.equals("GL320M")) {
+        if (BitUtil.check(mask, 7) && !model.matches("GL310MG|GL320M")) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // serial number
@@ -1079,7 +1083,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (BitUtil.check(mask, 8) && !model.equals("GL320M")) {
+        if (BitUtil.check(mask, 8) && !model.matches("GL310MG|GL320M")) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // index
