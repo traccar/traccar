@@ -4,7 +4,7 @@ COPY traccar-other-$VERSION.zip /tmp/traccar.zip
 RUN unzip -qo /tmp/traccar.zip -d /traccar
 
 FROM eclipse-temurin:25-alpine AS jdk
-RUN jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported \
+RUN jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported \
     --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
 
 FROM alpine
