@@ -139,22 +139,16 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     }
                 case Command.TYPE_SET_CONNECTION:
                     data.writeByte(2); // number of parameters
-                    byte[] server = command.getString(Command.KEY_SERVER).getBytes(StandardCharsets.US_ASCII);
-                    if (protocolVersion != null) {
-                        data.writeInt(0x0001); // parameter id: primary server address (JT/T 808-2019)
-                        data.writeByte(server.length); // parameter value length
-                        data.writeBytes(server);
-                        data.writeInt(0x0002); // parameter id: primary server port (JT/T 808-2019)
-                        data.writeByte(4); // parameter value length
-                        data.writeInt(command.getInteger(Command.KEY_PORT));
-                    } else {
-                        data.writeInt(0x13); // parameter id: server address (JT/T 808-2013)
-                        data.writeByte(server.length); // parameter value length
-                        data.writeBytes(server);
-                        data.writeInt(0x18); // parameter id: server tcp port (JT/T 808-2013)
-                        data.writeByte(4); // parameter value length
-                        data.writeInt(command.getInteger(Command.KEY_PORT));
-                    }
+                    String server = command.getString(Command.KEY_SERVER);
+                    // 2013 devices use device-specific 0x13/0x18, 2019 uses standard 0x0001/0x0002
+                    int serverId = protocolVersion != null ? 0x0001 : 0x13;
+                    int portId = protocolVersion != null ? 0x0002 : 0x18;
+                    data.writeInt(serverId); // parameter id: server address
+                    data.writeByte(server.length()); // parameter value length
+                    data.writeCharSequence(server, StandardCharsets.US_ASCII);
+                    data.writeInt(portId); // parameter id: server tcp port
+                    data.writeByte(4); // parameter value length
+                    data.writeInt(command.getInteger(Command.KEY_PORT));
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_POWER_OFF:

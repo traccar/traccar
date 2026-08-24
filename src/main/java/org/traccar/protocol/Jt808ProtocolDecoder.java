@@ -117,7 +117,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         return protocolVersion;
     }
 
-    public void setProtocolVersion(Integer protocolVersion) {
+    void setProtocolVersion(Integer protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
