@@ -73,6 +73,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_TERMINAL_ATTRIBUTES = 0x0107;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_QUERY_RESPONSE = 0x0201;
     public static final int MSG_LOCATION_BATCH_2 = 0x0210;
     public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
@@ -458,6 +459,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Position position = decodeLocation(deviceSession, buf);
             requestAttachments(channel, remoteAddress, id, position);
             return position;
+
+        } else if (type == MSG_LOCATION_QUERY_RESPONSE) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            buf.readUnsignedShort(); // response serial number
+
+            return decodeLocation(deviceSession, buf);
 
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 

@@ -432,4 +432,15 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testDecodeLocationQueryResponse() throws Exception {
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+
+        verifyPosition(decoder, binary(
+                "7E0201001E000000000008000100010000000000000002015752A006CB8080000000000000260824153000517E"),
+                position("2026-08-24 07:30:00.000", true, 22.5, 114.0));
+
+    }
+
 }
