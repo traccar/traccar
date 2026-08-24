@@ -86,7 +86,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
     public static final int MSG_TRANSPARENT_DOWNLINK = 0x8900;
-    public static final int MSG_PARAMETER_SETTING = 0x0310;
     public static final int MSG_SEND_TEXT_MESSAGE = 0x8300;
     public static final int MSG_REPORT_TEXT_MESSAGE = 0x6006;
     public static final int MSG_CONFIGURATION_PARAMETERS = 0x8103;
@@ -95,6 +94,15 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
+    public static final int MSG_PARAMETER_QUERY_RESPONSE = 0x0104;
+    public static final int MSG_TERMINAL_UPGRADE_RESULT = 0x0108;
+
+    public static final int MSG_PARAMETER_QUERY_ALL = 0x8104;
+    public static final int MSG_LOCATION_QUERY = 0x8201;
+    public static final int MSG_TEMPORARY_TRACKING = 0x8202;
+    public static final int MSG_ALARM_ACK = 0x8203;
+    public static final int MSG_VEHICLE_CONTROL = 0x8500;
+    public static final int MSG_TAKE_PHOTO = 0x8801;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -107,6 +115,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
     public Integer getProtocolVersion() {
         return protocolVersion;
+    }
+
+    public void setProtocolVersion(Integer protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     public ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
@@ -571,6 +583,62 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             position.set("cardCode", buf.readString(20, StandardCharsets.US_ASCII).trim());
             position.set("cardAgency", buf.readString(buf.readUnsignedByte(), StandardCharsets.US_ASCII));
             position.set("cardValidity", ByteBufUtil.hexDump(buf.readSlice(4)));
+
+            return position;
+
+        } else if (type == MSG_PARAMETER_QUERY_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedShort(); // response serial number
+            buf.readUnsignedByte(); // parameter count
+
+            int endIndex = buf.readerIndex() + bodyLength - 3;
+            while (buf.readerIndex() < endIndex) {
+                int parameterId = buf.readInt();
+                int length = buf.readUnsignedByte();
+                int valueEndIndex = buf.readerIndex() + length;
+                switch (parameterId) {
+                    case 0x0001:
+                    case 0x13:
+                        position.set("server", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        break;
+                    case 0x0002:
+                    case 0x18:
+                        position.set("port", buf.readUnsignedInt());
+                        break;
+                    case 0x0011:
+                        position.set("plateNumber", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        break;
+                    case 0x0021:
+                        position.set("heartbeatInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0028:
+                        position.set("reportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0046:
+                        position.set(Position.KEY_SPEED_LIMIT, buf.readUnsignedShort());
+                        break;
+                    default:
+                        buf.readerIndex(valueEndIndex);
+                        break;
+                }
+            }
+
+            return position;
+
+        } else if (type == MSG_TERMINAL_UPGRADE_RESULT) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set("upgradeType", buf.readUnsignedByte());
+            position.set("upgradeResult", buf.readUnsignedByte());
 
             return position;
 

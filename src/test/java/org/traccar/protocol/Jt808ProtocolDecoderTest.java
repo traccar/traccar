@@ -443,4 +443,53 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testDecodeParameterQueryResponse() throws Exception {
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "7E010400130B3A73CE2FF2000000010200000028040000003C00000046020050407E"),
+                "reportInterval", 60L);
+
+        verifyAttribute(decoder, binary(
+                "7E010400130B3A73CE2FF2000000010200000028040000003C00000046020050407E"),
+                Position.KEY_SPEED_LIMIT, 80);
+
+        verifyAttribute(decoder, binary(
+                "7E010400240B3A73CE2FF200000001010000001313747261636361722E6578616D706C652E636F6D000000180400001397957E"),
+                "server", "traccar.example.com");
+
+        verifyAttribute(decoder, binary(
+                "7E010400240B3A73CE2FF200000001010000001313747261636361722E6578616D706C652E636F6D000000180400001397957E"),
+                "port", 5015L);
+
+    }
+
+    @Test
+    public void testDecodeTerminalUpgradeResult() throws Exception {
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "7E010800020B3A73CE2FF2000064003E7E"),
+                "upgradeResult", 0);
+
+    }
+
+    @Test
+    public void testDecodeVersion2019() throws Exception {
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+
+        verifyPosition(decoder, binary(
+                "7E0200401C030000012345678901234500000000000000000003015752A006CB8080000000000000260824153000F67E"),
+                position("2026-08-24 07:30:00.000", true, 22.5, 114.0));
+
+        verifyAttribute(decoder, binary(
+                "7E010440130300000123456789012345000000010200000028040000003C00000046020050BC7E"),
+                "reportInterval", 60L);
+
+    }
+
 }

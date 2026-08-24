@@ -29,12 +29,24 @@ public class Jt808Protocol extends BaseProtocol {
     public Jt808Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
+                Command.TYPE_CONFIGURATION,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_STOP,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
+                Command.TYPE_ALARM_DISMISS,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_SET_CONNECTION,
+                Command.TYPE_POWER_OFF,
+                Command.TYPE_FACTORY_RESET,
+                Command.TYPE_MESSAGE,
+                Command.TYPE_VOICE_MESSAGE,
+                Command.TYPE_REQUEST_PHOTO,
+                Command.TYPE_SET_SPEED_LIMIT,
+                Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_VIDEO_START,
                 Command.TYPE_VIDEO_STOP);
         addServer(new TrackerServer(config, getName(), false) {
