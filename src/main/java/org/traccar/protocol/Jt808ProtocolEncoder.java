@@ -140,13 +140,13 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_SET_CONNECTION:
                     data.writeByte(2); // number of parameters
                     String server = command.getString(Command.KEY_SERVER);
-                    // 2013 devices use device-specific 0x13/0x18, 2019 uses standard 0x0001/0x0002
-                    int serverId = protocolVersion != null ? 0x0001 : 0x13;
-                    int portId = protocolVersion != null ? 0x0002 : 0x18;
-                    data.writeInt(serverId); // parameter id: server address
+                    // Server address (0x13) and TCP port (0x18) use the same standard parameter
+                    // IDs in both JT/T 808-2013 and 2019; 0x0001 is heartbeat interval and
+                    // 0x0002 is TCP response timeout, so no version-specific branch is needed.
+                    data.writeInt(0x13); // parameter id: server address
                     data.writeByte(server.length()); // parameter value length
                     data.writeCharSequence(server, StandardCharsets.US_ASCII);
-                    data.writeInt(portId); // parameter id: server tcp port
+                    data.writeInt(0x18); // parameter id: server tcp port
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_PORT));
                     return decoder.formatMessage(
@@ -183,10 +183,13 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TAKE_PHOTO, id, false, data);
                 case Command.TYPE_SET_SPEED_LIMIT:
-                    data.writeByte(1); // number of parameters
-                    data.writeInt(0x0046); // parameter id: overspeed alarm speed threshold
-                    data.writeByte(2); // parameter value length
-                    data.writeShort(command.getInteger(Command.KEY_DATA));
+                    data.writeByte(2); // number of parameters
+                    data.writeInt(0x55); // parameter id: overspeed alarm speed threshold
+                    data.writeByte(1); // parameter value length
+                    data.writeByte(command.getInteger(Command.KEY_DATA));
+                    data.writeInt(0x56); // parameter id: overspeed alarm duration
+                    data.writeByte(1); // parameter value length
+                    data.writeByte(30); // default duration (no dedicated traccar command field)
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_OUTPUT_CONTROL:

@@ -137,7 +137,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
         command.set(Command.KEY_DATA, 100);
         verifyFrame(
-            binary("7e810300080b3a73ce2ff200000100000046020064fa7e"),
+            binary("7e8103000d0b3a73ce2ff200000200000055016400000056011ea57e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_OUTPUT_CONTROL);
@@ -213,8 +213,8 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_SERVER, "traccar.example.com");
         command.set(Command.KEY_PORT, 5015);
         verifyFrame(
-            binary("7e8103402203000001234567890123450000020000000113747261636361722e"
-                    + "6578616d706c652e636f6d000000020400001397e27e"),
+            binary("7e8103402203000001234567890123450000020000001313747261636361722e"
+                    + "6578616d706c652e636f6d000000180400001397ea7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_MESSAGE);
@@ -236,7 +236,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
         command.set(Command.KEY_DATA, 100);
         verifyFrame(
-            binary("7e81034008030000012345678901234500000100000046020064067e"),
+            binary("7e8103400d030000012345678901234500000200000055016400000056011e597e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_OUTPUT_CONTROL);

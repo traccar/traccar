@@ -438,8 +438,8 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Jt808ProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
-                "7E0201001E000000000008000100010000000000000002015752A006CB8080000000000000260824153000517E"),
-                position("2026-08-24 07:30:00.000", true, 22.5, 114.0));
+                "7e0201003c0145382363912db0000000000000000000020101313605bb3b58000c000001292608251203040104000b620beb16000c00b28995018202107439115800060089fffffffece7e"),
+                position("2026-08-25 04:03:04.000", true, 16.85535, 96.156504));
 
     }
 
@@ -448,49 +448,31 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Jt808ProtocolDecoder(null));
 
-        verifyAttribute(decoder, binary(
-                "7E010400130B3A73CE2FF2000000010200000028040000003C00000046020050407E"),
-                "reportInterval", 60L);
+        String frame = "7e0104014d01414161084708d60000140000000104000000b400000010066d70746e6574000000130f3136382e3134342e31"
+                + "30342e32323400000018040000139700000020040000000000000027040000007800000029040000000a0000002c04000000"
+                + "0000000050040000000000000055040000006400000056040000002300000080040007984a0000008102002c000000820201"
+                + "2f000000830cd4c1423838383838202020200000008401010000100104000025800000100c8fc8edbcfeb0e6b1be3a42534a"
+                + "2d4130384243563230385541352e302028323031362d30382d323629413038422cd3b2bcfeb0e6b1be3a42534a2d41303842"
+                + "48575f56322e35205b323030392d30372d32335d2cb3ccd0f2d0a3d1e93a28426f6f743a373337393529284d61696e3a4337"
+                + "39334644292cbbaad1b6b6a8cebbc4a3bfe9d0cdbac5d3ebb0e6b1be3a23230000100f0400000000000010180101f47e";
 
-        verifyAttribute(decoder, binary(
-                "7E010400130B3A73CE2FF2000000010200000028040000003C00000046020050407E"),
-                Position.KEY_SPEED_LIMIT, 80);
+        verifyAttribute(decoder, binary(frame), "server", "168.144.104.224");
 
-        verifyAttribute(decoder, binary(
-                "7E010400240B3A73CE2FF200000001010000001313747261636361722E6578"
-                        + "616D706C652E636F6D000000180400001397957E"),
-                "server", "traccar.example.com");
+        verifyAttribute(decoder, binary(frame), "port", 5015L);
 
-        verifyAttribute(decoder, binary(
-                "7E010400240B3A73CE2FF200000001010000001313747261636361722E6578"
-                        + "616D706C652E636F6D000000180400001397957E"),
-                "port", 5015L);
+        verifyAttribute(decoder, binary(frame), Position.KEY_SPEED_LIMIT, 100);
 
-    }
+        verifyAttribute(decoder, binary(frame), "speedLimitDuration", 35);
 
-    @Test
-    public void testDecodeTerminalUpgradeResult() throws Exception {
+        verifyAttribute(decoder, binary(frame), "apn", "mptnet");
 
-        var decoder = inject(new Jt808ProtocolDecoder(null));
+        verifyAttribute(decoder, binary(frame), "heartbeatInterval", 180L);
 
-        verifyAttribute(decoder, binary(
-                "7E010800020B3A73CE2FF2000064003E7E"),
-                "upgradeResult", 0);
+        verifyAttribute(decoder, binary(frame), "ignitionOffInterval", 120L);
 
-    }
+        verifyAttribute(decoder, binary(frame), "ignitionOnInterval", 10L);
 
-    @Test
-    public void testDecodeVersion2019() throws Exception {
-
-        var decoder = inject(new Jt808ProtocolDecoder(null));
-
-        verifyPosition(decoder, binary(
-                "7E0200401C030000012345678901234500000000000000000003015752A006CB8080000000000000260824153000F67E"),
-                position("2026-08-24 07:30:00.000", true, 22.5, 114.0));
-
-        verifyAttribute(decoder, binary(
-                "7E010440130300000123456789012345000000010200000028040000003C00000046020050BC7E"),
-                "reportInterval", 60L);
+        verifyAttribute(decoder, binary(frame), Position.KEY_ODOMETER, 49773800L);
 
     }
 

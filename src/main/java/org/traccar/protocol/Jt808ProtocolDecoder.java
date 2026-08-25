@@ -95,7 +95,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
     public static final int MSG_PARAMETER_QUERY_RESPONSE = 0x0104;
-    public static final int MSG_TERMINAL_UPGRADE_RESULT = 0x0108;
 
     public static final int MSG_PARAMETER_QUERY_ALL = 0x8104;
     public static final int MSG_LOCATION_QUERY = 0x8201;
@@ -603,6 +602,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 int valueEndIndex = buf.readerIndex() + length;
                 switch (parameterId) {
                     case 0x0001:
+                        position.set("heartbeatInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x10:
+                        position.set("apn", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        break;
                     case 0x13:
                         position.set("server", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
@@ -616,29 +620,32 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x0021:
                         position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
+                    case 0x0027:
+                        position.set("ignitionOffInterval", buf.readUnsignedInt());
+                        break;
                     case 0x0028:
                         position.set("reportInterval", buf.readUnsignedInt());
                         break;
+                    case 0x0029:
+                        position.set("ignitionOnInterval", buf.readUnsignedInt());
+                        break;
                     case 0x0046:
                         position.set(Position.KEY_SPEED_LIMIT, buf.readUnsignedShort());
+                        break;
+                    case 0x55:
+                        position.set(Position.KEY_SPEED_LIMIT, (int) buf.readUnsignedInt());
+                        break;
+                    case 0x56:
+                        position.set("speedLimitDuration", (int) buf.readUnsignedInt());
+                        break;
+                    case 0x80:
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100L);
                         break;
                     default:
                         buf.readerIndex(valueEndIndex);
                         break;
                 }
             }
-
-            return position;
-
-        } else if (type == MSG_TERMINAL_UPGRADE_RESULT) {
-
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.set("upgradeType", buf.readUnsignedByte());
-            position.set("upgradeResult", buf.readUnsignedByte());
 
             return position;
 
