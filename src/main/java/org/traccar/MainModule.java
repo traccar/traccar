@@ -185,11 +185,12 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
+    public static MailManager provideMailManager(
+            Config config, StatisticsManager statisticsManager, ExecutorService executorService) {
         if (config.getBoolean(Keys.MAIL_DEBUG)) {
             return new LogMailManager();
         } else {
-            return new SmtpMailManager(config, statisticsManager);
+            return new SmtpMailManager(config, statisticsManager, executorService);
         }
     }
 

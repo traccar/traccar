@@ -40,12 +40,7 @@ public class NotificatorMail extends Notificator {
 
     @Override
     public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
-        try {
-            mailManager.sendMessage(user, false, message.subject(), message.body());
-            return CompletableFuture.completedFuture(null);
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        return mailManager.sendMessage(user, false, message.subject(), message.body());
     }
 
 }

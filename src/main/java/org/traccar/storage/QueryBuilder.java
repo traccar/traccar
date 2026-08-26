@@ -244,7 +244,7 @@ public final class QueryBuilder implements AutoCloseable {
             connection.setAutoCommit(false);
             streamingTransaction = true;
             statement.setFetchSize(switch (databaseType) {
-                case "MySQL", "MariaDB" -> Integer.MIN_VALUE;
+                case "MySQL" -> Integer.MIN_VALUE;
                 default -> config.getInteger(Keys.DATABASE_STREAM_FETCH_SIZE);
             });
 

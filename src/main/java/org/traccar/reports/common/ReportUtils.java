@@ -425,7 +425,7 @@ public class ReportUtils {
                 new Order("eventTime")));
 
         Position startPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
-        if (startPosition != null && !startPosition.getBoolean(Position.KEY_MOTION)) {
+        if (startPosition != null && startPosition.getBoolean(Position.KEY_MOTION) != trips) {
             startPosition = null;
         }
 

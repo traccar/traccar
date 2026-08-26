@@ -47,13 +47,8 @@ public class NotificatorSms extends Notificator {
         if (user.getPhone() == null) {
             return CompletableFuture.completedFuture(null);
         }
-        try {
-            statisticsManager.registerSms();
-            smsManager.sendMessage(user.getPhone(), message.digest(), false);
-            return CompletableFuture.completedFuture(null);
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        statisticsManager.registerSms();
+        return smsManager.sendMessage(user.getPhone(), message.digest(), false);
     }
 
 }

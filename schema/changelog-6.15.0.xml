@@ -10,10 +10,16 @@
 
     <modifyDataType tableName="tc_devices" columnName="positionid" newDataType="BIGINT" />
     <modifyDataType tableName="tc_devices" columnName="motionpositionid" newDataType="BIGINT" />
-    <modifyDataType tableName="tc_devices" columnName="overspeedgeofenceid" newDataType="BIGINT" />
 
     <modifyDataType tableName="tc_actions" columnName="userid" newDataType="BIGINT" />
     <modifyDataType tableName="tc_actions" columnName="objectid" newDataType="BIGINT" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.15.0-overspeedgeofenceid">
+
+    <dropDefaultValue tableName="tc_devices" columnName="overspeedgeofenceid" />
+    <modifyDataType tableName="tc_devices" columnName="overspeedgeofenceid" newDataType="BIGINT" />
 
   </changeSet>
 

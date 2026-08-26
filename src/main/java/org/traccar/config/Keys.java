@@ -483,6 +483,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Check the straight line segment between consecutive positions for geofence boundary crossings, so a visit is
+     * detected even if no position was received inside the geofence (e.g. long reporting intervals).
+     */
+    public static final ConfigKey<Boolean> EVENT_GEOFENCE_SEGMENT_CROSSING = new BooleanConfigKey(
+            "event.geofence.segmentCrossing",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Driver behavior acceleration threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new DoubleConfigKey(
@@ -1292,6 +1301,14 @@ public final class Keys {
     public static final ConfigKey<String> MAIL_SMTP_FROM_NAME = new StringConfigKey(
             "mail.smtp.fromName",
             List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * SMTP connect, read and write timeout in milliseconds.
+     */
+    public static final ConfigKey<Integer> MAIL_SMTP_TIMEOUT = new IntegerConfigKey(
+            "mail.smtp.timeout",
+            List.of(KeyType.CONFIG),
+            5000);
 
     /**
      * SMS API service full URL. Enables SMS commands and notifications.

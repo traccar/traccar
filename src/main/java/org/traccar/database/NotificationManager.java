@@ -137,7 +137,7 @@ public class NotificationManager {
 
             notifications.forEach(notification -> {
                 cacheManager.getNotificationUsers(notification.getId(), event.getDeviceId()).forEach(user -> {
-                    if (blockedUsers.contains(user.getId())) {
+                    if (blockedUsers.contains(user.getId()) || user.getDisabled()) {
                         LOGGER.info("User {} notification blocked", user.getId());
                         return;
                     }

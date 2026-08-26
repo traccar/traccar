@@ -16,10 +16,6 @@
  */
 package org.traccar.notificators;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.InvocationCallback;
-import jakarta.ws.rs.core.Response;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
@@ -28,7 +24,6 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public abstract class Notificator {
 
@@ -49,28 +44,6 @@ public abstract class Notificator {
 
     public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
         throw new UnsupportedOperationException();
-    }
-
-    protected static CompletableFuture<Void> post(
-            Invocation.Builder request, Entity<?> entity, Consumer<Response> handler) {
-        var future = new CompletableFuture<Void>();
-        request.async().post(entity, new InvocationCallback<Response>() {
-            @Override
-            public void completed(Response response) {
-                try (response) {
-                    handler.accept(response);
-                    future.complete(null);
-                } catch (Exception e) {
-                    future.completeExceptionally(e);
-                }
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-        });
-        return future;
     }
 
 }

@@ -21,6 +21,7 @@ import org.traccar.model.User;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeBodyPart;
+import java.util.concurrent.CompletableFuture;
 
 public class LogMailManager implements MailManager {
 
@@ -32,17 +33,21 @@ public class LogMailManager implements MailManager {
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body) throws MessagingException {
-        sendMessage(user, system, subject, body, null);
+    public CompletableFuture<Void> sendMessage(User user, boolean system, String subject, String body) {
+        return sendMessage(user, system, subject, body, null);
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
-        LOGGER.info(
-                "Email sent\nTo: {}\nSubject: {}\nAttachment: {}\nBody:\n{}",
-                user.getEmail(), subject, attachment != null ? attachment.getFileName() : null, body);
+    public CompletableFuture<Void> sendMessage(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) {
+        try {
+            LOGGER.info(
+                    "Email sent\nTo: {}\nSubject: {}\nAttachment: {}\nBody:\n{}",
+                    user.getEmail(), subject, attachment != null ? attachment.getFileName() : null, body);
+            return CompletableFuture.completedFuture(null);
+        } catch (MessagingException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
 }

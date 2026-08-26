@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.model.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -109,7 +110,7 @@ public class NotificatorTraccar extends Notificator {
         message.priority = shortMessage.priority();
 
         var request = client.target(url).request().header("Authorization", "key=" + key);
-        return post(request, Entity.json(message), rawResponse -> {
+        return WebHelper.post(request, Entity.json(message), rawResponse -> {
             var json = rawResponse.readEntity(JsonObject.class);
             List<String> failedTokens = new LinkedList<>();
             var responses = json.getJsonArray("responses");

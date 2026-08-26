@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,20 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class BehaviorEventHandler extends BaseEventHandler {
+public class BehaviorEventHandler extends BasePositionEventHandler {
 
     private final double accelerationThreshold;
     private final double brakingThreshold;
 
-    private final CacheManager cacheManager;
-
     @Inject
     public BehaviorEventHandler(Config config, CacheManager cacheManager) {
+        super(cacheManager);
         accelerationThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_ACCELERATION_THRESHOLD);
         brakingThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_BRAKING_THRESHOLD);
-        this.cacheManager = cacheManager;
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-
-        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
         if (lastPosition != null && !position.getFixTime().equals(lastPosition.getFixTime())) {
             double acceleration = UnitsConverter.mpsFromKnots(position.getSpeed() - lastPosition.getSpeed()) * 1000
                     / (position.getFixTime().getTime() - lastPosition.getFixTime().getTime());
