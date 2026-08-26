@@ -71,12 +71,12 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_POSITION_STOP);
         verifyFrame(
-            binary("7e820200040b3a73ce2ff2000000000000d57e"),
+            binary("7e820200060b3a73ce2ff20000000000000000d77e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_ALARM_DISMISS);
         verifyFrame(
-            binary("7e820300040b3a73ce2ff2000000000000d47e"),
+            binary("7e820300060b3a73ce2ff20000000000000000d67e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_POWER_OFF);
@@ -86,7 +86,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_FACTORY_RESET);
         verifyFrame(
-            binary("7e810500010b3a73ce2ff2000003d77e"),
+            binary("7e810500010b3a73ce2ff2000001d57e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_REBOOT_DEVICE);
@@ -95,9 +95,9 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 60);
+        command.set(Command.KEY_FREQUENCY, 10);
         verifyFrame(
-            binary("7e8103000a0b3a73ce2ff200000100000028040000003cc87e"),
+            binary("7e8103000a0b3a73ce2ff200000100000029040000000aff7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_ALARM_ARM);
@@ -111,11 +111,10 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_SET_CONNECTION);
-        command.set(Command.KEY_SERVER, "traccar.example.com");
+        command.set(Command.KEY_SERVER, "168.144.104.224");
         command.set(Command.KEY_PORT, 5015);
         verifyFrame(
-            binary("7e810300220b3a73ce2ff20000020000001313747261636361722e"
-                    + "6578616d706c652e636f6d000000180400001397167e"),
+            binary("7e8103001e0b3a73ce2ff2000002000000130f3136382e3134342e3130342e3232340000001804000013976a7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_MESSAGE);
@@ -137,13 +136,13 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
         command.set(Command.KEY_DATA, 100);
         verifyFrame(
-            binary("7e8103000d0b3a73ce2ff200000200000055016400000056011ea57e"),
+            binary("7e810300130b3a73ce2ff2000002000000550400000064000000560400000023867e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_OUTPUT_CONTROL);
         command.set(Command.KEY_INDEX, 1);
         verifyFrame(
-            binary("7e850000020b3a73ce2ff200000101d67e"),
+            binary("7e850000010b3a73ce2ff2000001d47e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_CONFIGURATION);
@@ -170,12 +169,12 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_POSITION_STOP);
         verifyFrame(
-            binary("7e820240040300000123456789012345000000000000297e"),
+            binary("7e82024006030000012345678901234500000000000000002b7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_ALARM_DISMISS);
         verifyFrame(
-            binary("7e820340040300000123456789012345000000000000287e"),
+            binary("7e82034006030000012345678901234500000000000000002a7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_POWER_OFF);
@@ -185,7 +184,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_FACTORY_RESET);
         verifyFrame(
-            binary("7e8105400103000001234567890123450000032b7e"),
+            binary("7e810540010300000123456789012345000001297e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_REBOOT_DEVICE);
@@ -194,9 +193,9 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 60);
+        command.set(Command.KEY_FREQUENCY, 10);
         verifyFrame(
-            binary("7e8103400a030000012345678901234500000100000028040000003c347e"),
+            binary("7e8103400a030000012345678901234500000100000029040000000a037e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_ALARM_ARM);
@@ -210,11 +209,10 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_SET_CONNECTION);
-        command.set(Command.KEY_SERVER, "traccar.example.com");
+        command.set(Command.KEY_SERVER, "168.144.104.224");
         command.set(Command.KEY_PORT, 5015);
         verifyFrame(
-            binary("7e8103402203000001234567890123450000020000001313747261636361722e"
-                    + "6578616d706c652e636f6d000000180400001397ea7e"),
+            binary("7e8103401e0300000123456789012345000002000000130f3136382e3134342e3130342e323234000000180400001397967e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_MESSAGE);
@@ -236,13 +234,13 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
         command.set(Command.KEY_DATA, 100);
         verifyFrame(
-            binary("7e8103400d030000012345678901234500000200000055016400000056011e597e"),
+            binary("7e8103401303000001234567890123450000020000005504000000640000005604000000237a7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_OUTPUT_CONTROL);
         command.set(Command.KEY_INDEX, 1);
         verifyFrame(
-            binary("7e850040020300000123456789012345000001012a7e"),
+            binary("7e850040010300000123456789012345000001287e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_CONFIGURATION);

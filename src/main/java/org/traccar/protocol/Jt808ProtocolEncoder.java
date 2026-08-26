@@ -61,6 +61,10 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
             ByteBuf data = Unpooled.buffer();
             var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
+            // References:
+            // - JT/T 808 standard: 道路运输车辆卫星定位系统 终端通信协议及数据格式 (2013 & 2019 editions)
+            // - EMQX JT/T 808 gateway data exchange format (parameter value types):
+            //   https://docs.emqx.com/en/emqx/latest/gateway/jt808_data_exchange.html
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
                     if (model != null && Set.of("AL300", "GL100", "VL300").contains(model)) {
@@ -90,7 +94,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_POSITION_PERIODIC:
                     data.writeByte(1); // number of parameters
-                    data.writeInt(0x0028); // parameter id: position report interval
+                    data.writeInt(0x0029); // parameter id: default report interval
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_FREQUENCY));
                     return decoder.formatMessage(
@@ -100,7 +104,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                             Jt808ProtocolDecoder.MSG_LOCATION_QUERY, id, false, data);
                 case Command.TYPE_POSITION_STOP:
                     data.writeShort(0); // time interval
-                    data.writeShort(0); // validity period
+                    data.writeInt(0); // validity period (dword)
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TEMPORARY_TRACKING, id, false, data);
                 case Command.TYPE_ALARM_ARM:
@@ -114,8 +118,8 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_ALARM_DISMISS:
-                    data.writeShort(0); // message serial number
-                    data.writeShort(0); // alarm type (0 = confirm all normal alarms)
+                    data.writeShort(0); // response serial number
+                    data.writeInt(0); // alarm type (dword, 0 = confirm all normal alarms)
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_ALARM_ACK, id, false, data);
                 case Command.TYPE_ENGINE_STOP:
@@ -156,7 +160,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_FACTORY_RESET:
-                    data.writeByte(0x03); // terminal control: restore factory settings
+                    data.writeByte(0x01); // terminal control: restore factory settings
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_MESSAGE:
@@ -184,17 +188,16 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                             Jt808ProtocolDecoder.MSG_TAKE_PHOTO, id, false, data);
                 case Command.TYPE_SET_SPEED_LIMIT:
                     data.writeByte(2); // number of parameters
-                    data.writeInt(0x55); // parameter id: overspeed alarm speed threshold
-                    data.writeByte(1); // parameter value length
-                    data.writeByte(command.getInteger(Command.KEY_DATA));
-                    data.writeInt(0x56); // parameter id: overspeed alarm duration
-                    data.writeByte(1); // parameter value length
-                    data.writeByte(30); // default duration (no dedicated traccar command field)
+                    data.writeInt(0x0055); // parameter id: overspeed alarm speed threshold
+                    data.writeByte(4); // parameter value length
+                    data.writeInt(command.getInteger(Command.KEY_DATA));
+                    data.writeInt(0x0056); // parameter id: overspeed alarm duration
+                    data.writeByte(4); // parameter value length
+                    data.writeInt(35); // default duration in seconds (no dedicated traccar command field)
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_OUTPUT_CONTROL:
-                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // control flag
-                    data.writeByte(0x01); // control type: control
+                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // control flag (2013: single byte)
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_VEHICLE_CONTROL, id, false, data);
                 case Command.TYPE_CONFIGURATION:
