@@ -463,8 +463,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOCATION_QUERY_RESPONSE) {
 
-            sendGeneralResponse(channel, remoteAddress, id, type, index);
-
             buf.readUnsignedShort(); // response serial number
 
             return decodeLocation(deviceSession, buf);
@@ -594,42 +592,36 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x0001:
                         position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
-                    case 0x10:
+                    case 0x0010:
                         position.set("apn", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
-                    case 0x13:
+                    case 0x0013:
                         position.set("server", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                         break;
-                    case 0x0002:
-                    case 0x18:
+                    case 0x0018:
                         position.set("port", buf.readUnsignedInt());
                         break;
-                    case 0x0011:
-                        position.set("plateNumber", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
-                        break;
-                    case 0x0021:
-                        position.set("heartbeatInterval", buf.readUnsignedInt());
-                        break;
                     case 0x0027:
-                        position.set("ignitionOffInterval", buf.readUnsignedInt());
+                        position.set("sleepReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0028:
-                        position.set("reportInterval", buf.readUnsignedInt());
+                        position.set("emergencyReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0029:
-                        position.set("ignitionOnInterval", buf.readUnsignedInt());
+                        position.set("defaultReportInterval", buf.readUnsignedInt());
                         break;
-                    case 0x0046:
-                        position.set(Position.KEY_SPEED_LIMIT, buf.readUnsignedShort());
-                        break;
-                    case 0x55:
+                    case 0x0055:
                         position.set(Position.KEY_SPEED_LIMIT, (int) buf.readUnsignedInt());
                         break;
-                    case 0x56:
+                    case 0x0056:
                         position.set("speedLimitDuration", (int) buf.readUnsignedInt());
                         break;
-                    case 0x80:
+                    case 0x0080:
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100L);
+                        break;
+                    case 0x0083:
+                        position.set("plateNumber", buf.readCharSequence(length, Charset.isSupported("GBK")
+                                ? Charset.forName("GBK") : StandardCharsets.US_ASCII).toString().trim());
                         break;
                     default:
                         buf.readerIndex(valueEndIndex);
