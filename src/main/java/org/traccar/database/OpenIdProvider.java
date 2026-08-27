@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2023 Daniel Raper (me@danr.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,7 +154,15 @@ public class OpenIdProvider {
             throws StorageException, ParseException, IOException, GeneralSecurityException {
 
         String redirectUriOverride = request.getParameter("redirect_uri");
-        URI redirectUri = redirectUriOverride != null ? URI.create(redirectUriOverride) : callbackUrl;
+        URI redirectUri;
+        if (redirectUriOverride != null) {
+            redirectUri = URI.create(redirectUriOverride);
+            if (!"org.traccar.manager".equals(redirectUri.getScheme())) {
+                throw new GeneralSecurityException("Invalid redirect URI");
+            }
+        } else {
+            redirectUri = callbackUrl;
+        }
         AuthorizationResponse response = AuthorizationResponse.parse(
                 redirectUri, URLUtils.parseParameters(queryParameters));
 
@@ -174,9 +182,10 @@ public class OpenIdProvider {
         UserInfo userInfo = getUserInfo(bearerToken);
 
         List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
-        boolean administrator = adminGroup != null && userGroups.contains(adminGroup);
+        Boolean administrator = adminGroup != null && userGroups != null ? userGroups.contains(adminGroup) : null;
 
-        if (!(administrator || allowGroup == null || userGroups.contains(allowGroup))) {
+        if (!(Boolean.TRUE.equals(administrator) || allowGroup == null
+                || (userGroups != null && userGroups.contains(allowGroup)))) {
             throw new GeneralSecurityException("Your OpenID Groups do not permit access");
         }
 

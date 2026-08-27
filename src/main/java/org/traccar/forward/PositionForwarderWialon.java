@@ -31,15 +31,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 
 public class PositionForwarderWialon implements PositionForwarder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("ddMMyy;HHmmss").withZone(ZoneOffset.UTC);
 
     private final String version;
     private final boolean useCompression;
@@ -76,17 +79,14 @@ public class PositionForwarderWialon implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
-
-        DateFormat dateFormat = new SimpleDateFormat("ddMMyy;HHmmss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    public CompletableFuture<Void> forward(PositionData positionData) {
 
         Position position = positionData.getPosition();
         String uniqueId = positionData.getDevice().getUniqueId();
 
         String payload = String.format(
                 "%s;%02d%.5f;%s;%03d%.5f;%s;%d;%d;%d;NA;NA;NA;NA;;%s;%s",
-                dateFormat.format(position.getFixTime()),
+                DATE_FORMAT.format(position.getFixTime().toInstant()),
                 (int) Math.abs(position.getLatitude()),
                 Math.abs(position.getLatitude()) % 1 * 60,
                 position.getLatitude() >= 0 ? "N" : "S",
@@ -109,7 +109,7 @@ public class PositionForwarderWialon implements PositionForwarder {
             message = uniqueId + "#D#" + payload + "\r\n";
         }
 
-        byte[] buffer = message.getBytes();
+        byte[] buffer = message.getBytes(StandardCharsets.US_ASCII);
         DatagramPacket packet;
 
         if (useCompression) {
@@ -121,9 +121,9 @@ public class PositionForwarderWialon implements PositionForwarder {
 
         try {
             socket.send(packet);
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

@@ -18,5 +18,4 @@ package org.traccar.model;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_revoked_tokens")
-public class RevokedToken extends BaseModel {
-}
+public class RevokedToken extends BaseModel {}

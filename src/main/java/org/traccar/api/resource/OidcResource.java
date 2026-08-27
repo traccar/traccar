@@ -56,8 +56,7 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class OidcResource extends BaseResource {
 
-    private record ClientConfig(String secret, Set<URI> redirectUris) {
-    }
+    private record ClientConfig(String secret, Set<URI> redirectUris) {}
 
     @Inject
     private Config config;
@@ -68,7 +67,6 @@ public class OidcResource extends BaseResource {
     @Inject
     private OidcSessionManager sessionManager;
 
-    @PermitAll
     @GET
     @Path("authorize")
     public Response authorize(

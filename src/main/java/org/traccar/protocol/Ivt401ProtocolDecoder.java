@@ -162,8 +162,7 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
                 case 1 -> position.addAlarm(Position.ALARM_ACCELERATION);
                 case 2 -> position.addAlarm(Position.ALARM_BRAKING);
                 case 3 -> position.addAlarm(Position.ALARM_CORNERING);
-                default -> {
-                }
+                default -> {}
             }
             position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_LOW_BATTERY : null);
             position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_POWER_CUT : null);

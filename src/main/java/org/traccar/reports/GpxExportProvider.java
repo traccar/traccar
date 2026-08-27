@@ -15,9 +15,13 @@
  */
 package org.traccar.reports;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Geofence;
+import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -28,26 +32,31 @@ import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class GpxExportProvider {
 
+    private final Config config;
     private final Storage storage;
 
     @Inject
-    public GpxExportProvider(Storage storage) {
+    public GpxExportProvider(Config config, Storage storage) {
+        this.config = config;
         this.storage = storage;
     }
 
     public void generate(
-            OutputStream outputStream, long deviceId, Date from, Date to)
+            OutputStream outputStream, long deviceId, long geofenceId, Date from, Date to)
             throws StorageException, XMLStreamException {
 
         var device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", deviceId)));
-        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+
+        Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
+                new Columns.All(), new Condition.Equals("id", geofenceId)));
 
         XMLStreamWriter writer = XMLOutputFactory.newFactory()
                 .createXMLStreamWriter(outputStream, StandardCharsets.UTF_8.name());
@@ -60,17 +69,22 @@ public class GpxExportProvider {
         writer.writeCharacters(device.getName());
         writer.writeEndElement();
         writer.writeStartElement("trkseg");
-        for (var position : positions) {
-            writer.writeStartElement("trkpt");
-            writer.writeAttribute("lat", Double.toString(position.getLatitude()));
-            writer.writeAttribute("lon", Double.toString(position.getLongitude()));
-            writer.writeStartElement("ele");
-            writer.writeCharacters(Double.toString(position.getAltitude()));
-            writer.writeEndElement();
-            writer.writeStartElement("time");
-            writer.writeCharacters(DateUtil.formatDate(position.getFixTime()));
-            writer.writeEndElement();
-            writer.writeEndElement();
+        try (Stream<Position> positions = PositionUtil.getPositionsStream(
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
+                .filter(position -> geofence == null || geofence.containsPosition(position))) {
+            for (var iterator = positions.iterator(); iterator.hasNext();) {
+                Position position = iterator.next();
+                writer.writeStartElement("trkpt");
+                writer.writeAttribute("lat", Double.toString(position.getLatitude()));
+                writer.writeAttribute("lon", Double.toString(position.getLongitude()));
+                writer.writeStartElement("ele");
+                writer.writeCharacters(Double.toString(position.getAltitude()));
+                writer.writeEndElement();
+                writer.writeStartElement("time");
+                writer.writeCharacters(DateUtil.formatDate(position.getFixTime()));
+                writer.writeEndElement();
+                writer.writeEndElement();
+            }
         }
         writer.writeEndElement();
         writer.writeEndElement();

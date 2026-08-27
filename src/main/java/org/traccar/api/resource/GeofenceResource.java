@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.api.resource;
 
+import java.util.List;
+
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Geofence;
 
@@ -29,7 +31,7 @@ import jakarta.ws.rs.core.MediaType;
 public class GeofenceResource extends ExtendedObjectResource<Geofence> {
 
     public GeofenceResource() {
-        super(Geofence.class, "name");
+        super(Geofence.class, "name", List.of("name"));
     }
 
 }

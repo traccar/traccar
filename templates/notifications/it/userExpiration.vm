@@ -1,5 +1,5 @@
 #set($subject = "Account Scaduto")
-#set($digest = Account Scaduto")
+#set($digest = "Account Scaduto")
 <!DOCTYPE html>
 <html>
 <body>

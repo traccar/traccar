@@ -31,11 +31,9 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AcknowledgementHandler.class);
 
-    public interface Event {
-    }
+    public interface Event {}
 
-    public static class EventReceived implements Event {
-    }
+    public static class EventReceived implements Event {}
 
     public static class EventDecoded implements Event {
         private final Collection<Object> objects;

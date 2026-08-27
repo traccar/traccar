@@ -18,8 +18,14 @@ package org.traccar.helper;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.InvocationCallback;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.config.Config;
@@ -29,8 +35,7 @@ public final class WebHelper {
 
     private static final List<String> PROXY_HEADERS = List.of("CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For");
 
-    private WebHelper() {
-    }
+    private WebHelper() {}
 
     public static String retrieveRemoteAddress(HttpServletRequest request) {
         if (request != null) {
@@ -59,6 +64,28 @@ public final class WebHelper {
             }
             return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT));
         }
+    }
+
+    public static CompletableFuture<Void> post(
+            Invocation.Builder request, Entity<?> entity, Consumer<Response> handler) {
+        var future = new CompletableFuture<Void>();
+        request.async().post(entity, new InvocationCallback<Response>() {
+            @Override
+            public void completed(Response response) {
+                try (response) {
+                    handler.accept(response);
+                    future.complete(null);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                }
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        });
+        return future;
     }
 
 }

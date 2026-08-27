@@ -1,5 +1,5 @@
 #set($subject = "Напоминание об истечении срока действия устройства")
-#set($digest = "Срок действия устройства $esc.html($device.name) истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+#set($digest = "Срок действия устройства $device.name истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

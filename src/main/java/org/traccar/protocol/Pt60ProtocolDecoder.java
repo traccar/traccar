@@ -27,11 +27,15 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmss").withZone(ZoneId.systemDefault());
 
     public Pt60ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -63,7 +67,7 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String format, int type, String imei) {
         if (channel != null) {
             String message;
-            String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            String time = DATE_FORMAT.format(Instant.now());
             if (format.equals("G")) {
                 message = String.format("@G#@,V01,38,%s,@R#@", time);
             } else {

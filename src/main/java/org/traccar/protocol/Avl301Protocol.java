@@ -30,7 +30,7 @@ public class Avl301Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 2, 1, -3, 0));
                 pipeline.addLast(new Avl301ProtocolDecoder(Avl301Protocol.this));
             }
         });

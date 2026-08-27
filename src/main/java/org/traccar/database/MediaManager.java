@@ -32,13 +32,17 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Singleton
 public class MediaManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaManager.class);
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmss").withZone(ZoneId.systemDefault());
 
     private final Path path;
 
@@ -67,7 +71,7 @@ public class MediaManager {
     public String writeFile(String uniqueId, ByteBuf buf, String extension) {
         if (path != null) {
             int size = buf.readableBytes();
-            String name = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "." + extension;
+            String name = DATE_FORMAT.format(Instant.now()) + "." + extension;
             try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
                     FileChannel fileChannel = output.getChannel()) {
                     ByteBuffer byteBuffer = buf.nioBuffer();

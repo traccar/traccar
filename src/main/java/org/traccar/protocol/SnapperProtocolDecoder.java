@@ -25,6 +25,7 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -32,12 +33,14 @@ import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class SnapperProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("ddMMyyHHmmss").withZone(ZoneOffset.UTC);
 
     public SnapperProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -94,7 +97,7 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             int type = buf.readUnsignedByte();
             switch (type) {
                 case 0x00 -> {
-                    position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
+                    position.set(Position.KEY_POWER, buf.readUnsignedByte() / 10.0);
                     position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 }
@@ -126,9 +129,7 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(-position.getLongitude());
         }
 
-        DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        position.setTime(dateFormat.parse(json.getString("d") + json.getString("t").split("\\.")[0]));
+        position.setTime(DateUtil.parse(DATE_FORMAT, json.getString("d") + json.getString("t").split("\\.")[0]));
 
         String lat = json.getString("la");
         position.setLatitude(Integer.parseInt(lat.substring(0, 2)) + Double.parseDouble(lat.substring(2)) / 60);

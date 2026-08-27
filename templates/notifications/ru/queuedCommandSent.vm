@@ -1,11 +1,11 @@
 #set($subject = "$esc.html($device.name): отправленная команда в очереди")
-#set($digest = "Команда, поставленная в очередь, отправлена на устройство $esc.html($device.name) в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Команда, поставленная в очередь, отправлена на устройство $device.name в $dateTool.format('dd.MM.yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Устройство: $esc.html($device.name)<br>
 Отправленная команда в очереди<br>
-Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Время: $dateTool.format('dd.MM.yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Отписаться</a>
 </body>

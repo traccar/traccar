@@ -67,10 +67,10 @@ public class Mavlink2ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readIntLE() / 1000.0);
             position.set("relativeAltitude", buf.readIntLE() / 1000.0);
 
-            int groundSpeedX = buf.readShortLE();
-            int groundSpeedY = buf.readShortLE();
+            long groundSpeedX = buf.readShortLE();
+            long groundSpeedY = buf.readShortLE();
             buf.readShortLE(); // ground speed z
-            double speed = Math.sqrt(Math.pow(groundSpeedX, 2) + Math.pow(groundSpeedY, 2));
+            double speed = Math.sqrt(groundSpeedX * groundSpeedX + groundSpeedY * groundSpeedY);
             position.setSpeed(UnitsConverter.knotsFromCps(speed));
 
             position.setCourse(buf.readUnsignedShortLE() / 100.0);

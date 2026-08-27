@@ -140,10 +140,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         Double temperature = null;
         if (parser.hasNext(5)) {
             door = parser.nextInt() == 1;
-            adc = parser.nextInt() * 0.1;
-            power = parser.nextInt() * 0.1;
-            battery = parser.nextInt() * 0.1;
-            temperature = parser.nextInt() * 0.1;
+            adc = parser.nextInt() / 10.0;
+            power = parser.nextInt() / 10.0;
+            battery = parser.nextInt() / 10.0;
+            temperature = parser.nextInt() / 10.0;
         }
 
         String status = parser.next();
@@ -165,7 +165,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
                     if (parser.hasNext()) {
                         int voltage = parser.nextInt();
-                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage / 1000.0 : voltage / 10.0);
                     }
 
                     if (parser.hasNext(4)) {
@@ -207,7 +207,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
                     if (parser.hasNext()) {
                         int voltage = parser.nextInt();
-                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage / 1000.0 : voltage / 10.0);
                     }
 
                     Network network = new Network();

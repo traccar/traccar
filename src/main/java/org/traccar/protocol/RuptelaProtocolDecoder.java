@@ -36,8 +36,6 @@ import java.util.List;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
-    private ByteBuf photo;
-
     public RuptelaProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -107,14 +105,14 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 21 -> position.set(Position.PREFIX_ADC + 4, readValue(buf, length, false));
             case 22 -> position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
             case 23 -> position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
-            case 29 -> position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
-            case 30 -> position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+            case 29 -> position.set(Position.KEY_POWER, readValue(buf, length, false) / 1000.0);
+            case 30 -> position.set(Position.KEY_BATTERY, readValue(buf, length, false) / 1000.0);
             case 32 -> position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
             case 34 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(length)));
             case 39 -> position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
             case 65 -> position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
-            case 74 -> position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
-            case 78, 79, 80 -> position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
+            case 74 -> position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) / 10.0);
+            case 78, 79, 80 -> position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) / 10.0);
             case 88 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.addAlarm(Position.ALARM_JAMMING);
@@ -208,7 +206,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                         if (positions.size() == 0) {
                             getLastLocation(position, null);
                         } else {
-                            position = positions.remove(positions.size() - 1);
+                            position = positions.removeLast();
                         }
                     }
                 }
@@ -327,10 +325,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf filename = buf.readSlice(8);
                 int total = buf.readUnsignedShort();
                 int current = buf.readUnsignedShort();
-                if (photo == null) {
-                    photo = Unpooled.buffer();
+                if (getMediaBuffer() == null) {
+                    newMediaBuffer();
                 }
-                photo.writeBytes(buf.readSlice(buf.readableBytes() - 2));
+                getMediaBuffer().writeBytes(buf, buf.readableBytes() - 2);
                 if (current < total - 1) {
                     ByteBuf content = Unpooled.buffer();
                     content.writeByte(subtype);
@@ -346,9 +344,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
                     getLastLocation(position, null);
-                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
                     return position;
                 }
             }

@@ -155,7 +155,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(infoGroups, 6)) {
-                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.001);
+                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
                 position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE());
             }
 

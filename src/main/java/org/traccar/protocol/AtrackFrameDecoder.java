@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.BaseProtocol;
 import org.traccar.helper.BufferUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,10 @@ import java.nio.charset.StandardCharsets;
 public class AtrackFrameDecoder extends BaseFrameDecoder {
 
     private static final int KEEPALIVE_LENGTH = 12;
+
+    public AtrackFrameDecoder() {
+        super(BaseProtocol.MAX_FRAME_LENGTH_LARGE);
+    }
 
     @Override
     protected Object decode(

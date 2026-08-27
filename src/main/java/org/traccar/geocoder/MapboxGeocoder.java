@@ -37,7 +37,7 @@ public class MapboxGeocoder extends JsonGeocoder {
         if (!features.isEmpty()) {
             Address address = new Address();
 
-            JsonObject mostSpecificFeature = (JsonObject) features.get(0);
+            JsonObject mostSpecificFeature = (JsonObject) features.getFirst();
 
             if (mostSpecificFeature.containsKey("place_name")) {
                 address.setFormattedAddress(mostSpecificFeature.getString("place_name"));

@@ -35,7 +35,7 @@ public class LeafSpyProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
-                pipeline.addLast(new HttpObjectAggregator(16384));
+                pipeline.addLast(new HttpObjectAggregator(MAX_HTTP_LENGTH));
                 pipeline.addLast(new LeafSpyProtocolDecoder(LeafSpyProtocol.this));
             }
         });

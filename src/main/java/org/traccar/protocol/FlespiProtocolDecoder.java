@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonArray result = Json.createReader(new StringReader(request.content().toString(StandardCharsets.UTF_8)))
                 .readArray();
         List<Position> positions = new LinkedList<>();
-        for (int i = 0; i < result.size(); i++) {
-            JsonObject message = result.getJsonObject(i);
+        for (JsonObject message : result.getValuesAs(JsonObject.class)) {
             JsonString identifier = message.getJsonString("ident");
             if (identifier == null) {
                 continue;
@@ -268,7 +267,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             }
             case "external.powersource.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.addAlarm(Position.ALARM_POWER_CUT);
+                    position.set(Position.KEY_CHARGE, true);
                 }
                 yield true;
             }
@@ -289,17 +288,19 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private void decodeUnknownParam(String name, JsonValue value, Position position) {
-        if (value instanceof JsonNumber jsonNumber) {
-            if (jsonNumber.isIntegral()) {
-                position.set(name, jsonNumber.longValue());
-            } else {
+        switch (value) {
+            case JsonNumber jsonNumber -> {
+                if (jsonNumber.isIntegral()) {
+                    position.set(name, jsonNumber.longValue());
+                } else {
+                    position.set(name, jsonNumber.doubleValue());
+                }
                 position.set(name, jsonNumber.doubleValue());
             }
-            position.set(name, jsonNumber.doubleValue());
-        } else if (value instanceof JsonString jsonString) {
-            position.set(name, jsonString.getString());
-        } else if (value == JsonValue.TRUE || value == JsonValue.FALSE) {
-            position.set(name, value == JsonValue.TRUE);
+            case JsonString jsonString -> position.set(name, jsonString.getString());
+            case JsonValue v when v == JsonValue.TRUE || v == JsonValue.FALSE ->
+                    position.set(name, v == JsonValue.TRUE);
+            default -> {}
         }
     }
 

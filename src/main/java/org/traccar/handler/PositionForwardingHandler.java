@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.forward.PositionData;
 import org.traccar.forward.PositionForwarder;
-import org.traccar.forward.ResultHandler;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
@@ -66,7 +65,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
         this.deliveryPending = new AtomicInteger();
     }
 
-    class AsyncRequestAndCallback implements ResultHandler, TimerTask {
+    class AsyncRequestAndCallback implements TimerTask {
 
         private final PositionData positionData;
 
@@ -78,7 +77,13 @@ public class PositionForwardingHandler extends BasePositionHandler {
         }
 
         private void send() {
-            positionForwarder.forward(positionData, this);
+            positionForwarder.forward(positionData).whenComplete((result, throwable) -> {
+                if (throwable == null) {
+                    deliveryPending.decrementAndGet();
+                } else {
+                    retry(throwable);
+                }
+            });
         }
 
         private void retry(Throwable throwable) {
@@ -90,21 +95,12 @@ public class PositionForwardingHandler extends BasePositionHandler {
                 }
             } finally {
                 int pending = scheduled ? deliveryPending.get() : deliveryPending.decrementAndGet();
-                LOGGER.warn("Position forwarding failed: " + pending + " pending", throwable);
+                LOGGER.warn("Position forwarding failed: {} pending", pending, throwable);
             }
         }
 
         private void schedule() {
-            timer.newTimeout(this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public void onResult(boolean success, Throwable throwable) {
-            if (success) {
-                deliveryPending.decrementAndGet();
-            } else {
-                retry(throwable);
-            }
+            timer.newTimeout(this, retryDelay * (1L << retries++), TimeUnit.MILLISECONDS);
         }
 
         @Override

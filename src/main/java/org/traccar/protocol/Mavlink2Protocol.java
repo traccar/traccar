@@ -30,7 +30,7 @@ public class Mavlink2Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 1, 10, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 1, 1, 10, 0));
                 pipeline.addLast(new Mavlink2ProtocolDecoder(Mavlink2Protocol.this));
             }
         });

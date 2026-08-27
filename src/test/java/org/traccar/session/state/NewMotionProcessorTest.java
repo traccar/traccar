@@ -236,6 +236,38 @@ public class NewMotionProcessorTest extends BaseTest {
     }
 
     @Test
+    public void testTripStartBacktrack() throws ParseException {
+        double minDistance = 500;
+        long minDuration = 300000;
+
+        double latitude = 0.0;
+
+        Position stop = position("2017-01-01 00:00:00", latitude, 0.0);
+        Deque<Position> positions = new ArrayDeque<>();
+        positions.add(stop);
+        positions.add(position("2017-01-01 00:01:00", latitude, 0.0));
+        Position departure = position("2017-01-01 00:02:00", latitude, 0.0);
+        positions.add(departure);
+        positions.add(position("2017-01-01 00:03:00", latitude,
+                DistanceCalculator.getLongitudeDelta(120, latitude)));
+        positions.add(position("2017-01-01 00:04:00", latitude,
+                DistanceCalculator.getLongitudeDelta(300, latitude)));
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setEventPosition(stop);
+
+        Position current = position("2017-01-01 00:05:00", latitude,
+                DistanceCalculator.getLongitudeDelta(600, latitude));
+        NewMotionProcessor.updateState(state, current, minDistance, minDuration, Long.MAX_VALUE);
+
+        assertTrue(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
+        assertEquals(departure.getFixTime(), state.getEvents().get(0).getEventTime());
+    }
+
+    @Test
     public void testEventsAreChronological() throws ParseException {
         double minDistance = 200;
         long minDuration = 180000;
@@ -277,7 +309,7 @@ public class NewMotionProcessorTest extends BaseTest {
 
         assertEquals(3, events.size());
         assertEquals(Event.TYPE_DEVICE_MOVING, events.get(0).getType());
-        assertEquals(input.get(4).getFixTime(), events.get(0).getEventTime());
+        assertEquals(input.get(2).getFixTime(), events.get(0).getEventTime());
         assertEquals(Event.TYPE_DEVICE_STOPPED, events.get(1).getType());
         assertEquals(input.get(6).getFixTime(), events.get(1).getEventTime());
         assertEquals(Event.TYPE_DEVICE_MOVING, events.get(2).getType());

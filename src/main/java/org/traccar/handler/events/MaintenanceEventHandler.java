@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,19 +22,16 @@ import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class MaintenanceEventHandler extends BaseEventHandler {
-
-    private final CacheManager cacheManager;
+public class MaintenanceEventHandler extends BasePositionEventHandler {
 
     @Inject
     public MaintenanceEventHandler(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) < 0) {
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
+        if (lastPosition == null) {
             return;
         }
 

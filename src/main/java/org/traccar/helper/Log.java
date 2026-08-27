@@ -31,10 +31,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -45,8 +48,7 @@ import java.util.stream.Stream;
 
 public final class Log {
 
-    private Log() {
-    }
+    private Log() {}
 
     private static final String STACK_PACKAGE = "org.traccar";
     private static final int STACK_LIMIT = 4;
@@ -57,12 +59,14 @@ public final class Log {
         private String suffix;
         private Writer writer;
         private final boolean rotate;
-        private final String template;
+        private final DateTimeFormatter template;
 
         RollingFileHandler(String name, boolean rotate, String rotateInterval) {
             this.name = name;
             this.rotate = rotate;
-            this.template = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
+            this.template = DateTimeFormatter
+                    .ofPattern(rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd")
+                    .withZone(ZoneId.systemDefault());
         }
 
         @Override
@@ -71,7 +75,7 @@ public final class Log {
                 try {
                     String suffix = "";
                     if (rotate) {
-                        suffix = new SimpleDateFormat(template).format(new Date(record.getMillis()));
+                        suffix = template.format(Instant.ofEpochMilli(record.getMillis()));
                         if (writer != null && !suffix.equals(this.suffix)) {
                             writer.close();
                             writer = null;
@@ -205,7 +209,7 @@ public final class Log {
 
         handler.setFormatter(new LogFormatter(fullStackTraces));
 
-        Level level = Level.parse(levelString.toUpperCase());
+        Level level = Level.parse(levelString.toUpperCase(Locale.ROOT));
         rootLogger.setLevel(level);
         handler.setLevel(level);
         handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
@@ -280,8 +284,7 @@ public final class Log {
                 if (totalSpace > 1_000_000_000) {
                     stores.add(new Pair<>(usableSpace, totalSpace));
                 }
-            } catch (IOException ignored) {
-            }
+            } catch (IOException ignored) {}
         }
         return stores.stream()
                 .sorted(Comparator.comparingDouble(p -> p.first() / (double) p.second()))

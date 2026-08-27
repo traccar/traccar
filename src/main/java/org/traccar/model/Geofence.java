@@ -101,17 +101,32 @@ public class Geofence extends ExtendedModel implements Schedulable {
     }
 
     public boolean containsPosition(Position position) {
-        double floor = position.getDouble("floor");
+        double floor = getDouble("floor");
         if (floor != 0 && position.getAltitude() < floor) {
             return false;
         }
 
-        double ceiling = position.getDouble("ceiling");
+        double ceiling = getDouble("ceiling");
         if (ceiling != 0 && position.getAltitude() > ceiling) {
             return false;
         }
 
         return getGeometry().containsPoint(position.getLatitude(), position.getLongitude());
+    }
+
+    public boolean containsSegment(Position from, Position to) {
+        double floor = getDouble("floor");
+        if (floor != 0 && from.getAltitude() < floor && to.getAltitude() < floor) {
+            return false;
+        }
+
+        double ceiling = getDouble("ceiling");
+        if (ceiling != 0 && from.getAltitude() > ceiling && to.getAltitude() > ceiling) {
+            return false;
+        }
+
+        return getGeometry().intersectsSegment(
+                from.getLatitude(), from.getLongitude(), to.getLatitude(), to.getLongitude());
     }
 
 }

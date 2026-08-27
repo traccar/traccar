@@ -36,7 +36,7 @@ public class PortmanProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new LineBasedFrameDecoder(MAX_FRAME_LENGTH));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new PortmanProtocolEncoder(PortmanProtocol.this));

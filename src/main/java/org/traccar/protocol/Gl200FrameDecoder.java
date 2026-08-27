@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,19 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class Gl200FrameDecoder extends BaseFrameDecoder {
 
     private static final int MINIMUM_LENGTH = 11;
 
-    private static final Set<String> BINARY_HEADERS = new HashSet<>(
-            Arrays.asList("+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN"));
+    private static final Set<String> BINARY_HEADERS = Set.of(
+            "+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN");
 
     public static boolean isBinary(ByteBuf buf) {
+        if (buf.getByte(buf.readerIndex() + 1) == 0) {
+            return true;
+        }
         String header = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
         if (header.equals("+ACK")) {
             return buf.getByte(buf.readerIndex() + header.length()) != (byte) ':';
@@ -52,13 +53,18 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
 
         if (isBinary(buf)) {
 
-            int length = switch (buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII)) {
-                case "+ACK" -> buf.getUnsignedByte(buf.readerIndex() + 6);
-                case "+INF", "+BNF" -> buf.getUnsignedShort(buf.readerIndex() + 7);
-                case "+HBD" -> buf.getUnsignedByte(buf.readerIndex() + 5);
-                case "+CRD", "+BRD", "+LGN" -> buf.getUnsignedShort(buf.readerIndex() + 6);
-                default -> buf.getUnsignedShort(buf.readerIndex() + 9);
-            };
+            int length;
+            if (buf.getByte(buf.readerIndex() + 1) == 0) {
+                length = buf.getUnsignedShort(buf.readerIndex() + 2);
+            } else {
+                length = switch (buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII)) {
+                    case "+ACK" -> buf.getUnsignedByte(buf.readerIndex() + 6);
+                    case "+INF", "+BNF" -> buf.getUnsignedShort(buf.readerIndex() + 7);
+                    case "+HBD" -> buf.getUnsignedByte(buf.readerIndex() + 5);
+                    case "+CRD", "+BRD", "+LGN" -> buf.getUnsignedShort(buf.readerIndex() + 6);
+                    default -> buf.getUnsignedShort(buf.readerIndex() + 9);
+                };
+            }
 
             if (buf.readableBytes() >= length) {
                 return buf.readRetainedSlice(length);

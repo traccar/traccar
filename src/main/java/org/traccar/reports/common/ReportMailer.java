@@ -21,15 +21,13 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
-import org.traccar.storage.StorageException;
 
 import jakarta.activation.DataHandler;
 import jakarta.inject.Inject;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 public class ReportMailer {
 
@@ -38,18 +36,20 @@ public class ReportMailer {
     private final PermissionsService permissionsService;
     private final MailManager mailManager;
     private final TextTemplateFormatter textTemplateFormatter;
+    private final ExecutorService executorService;
 
     @Inject
     public ReportMailer(
             PermissionsService permissionsService, MailManager mailManager,
-            TextTemplateFormatter textTemplateFormatter) {
+            TextTemplateFormatter textTemplateFormatter, ExecutorService executorService) {
         this.permissionsService = permissionsService;
         this.mailManager = mailManager;
         this.textTemplateFormatter = textTemplateFormatter;
+        this.executorService = executorService;
     }
 
     public void sendAsync(long userId, ReportExecutor executor) {
-        new Thread(() -> {
+        executorService.submit(() -> {
             try {
                 var stream = new ByteArrayOutputStream();
                 executor.execute(stream);
@@ -60,24 +60,24 @@ public class ReportMailer {
                         stream.toByteArray(), "application/octet-stream")));
 
                 User user = permissionsService.getUser(userId);
-                mailManager.sendMessage(user, false, "Report", "The report is in the attachment.", attachment);
-            } catch (StorageException | IOException | MessagingException e) {
+                mailManager.sendMessage(user, false, "Report", "The report is in the attachment.", attachment).get();
+            } catch (Exception e) {
                 LOGGER.warn("Email report failed", e);
             }
-        }).start();
+        });
     }
 
     public void sendAsync(User user, String url) {
-        new Thread(() -> {
+        executorService.submit(() -> {
             try {
                 var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
                 velocityContext.put("reportUrl", url);
                 var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "scheduledReport", false);
-                mailManager.sendMessage(user, false, fullMessage.subject(), fullMessage.body());
-            } catch (StorageException | MessagingException e) {
+                mailManager.sendMessage(user, false, fullMessage.subject(), fullMessage.body()).get();
+            } catch (Exception e) {
                 LOGGER.warn("Email report failed", e);
             }
-        }).start();
+        });
     }
 
 }

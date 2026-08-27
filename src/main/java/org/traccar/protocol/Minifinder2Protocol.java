@@ -36,7 +36,8 @@ public class Minifinder2Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 2048, 2, 2, 4, 0, true));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(
+                        ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH_LARGE, 2, 2, 4, 0, true));
                 pipeline.addLast(new Minifinder2ProtocolEncoder(Minifinder2Protocol.this));
                 pipeline.addLast(new Minifinder2ProtocolDecoder(Minifinder2Protocol.this));
             }

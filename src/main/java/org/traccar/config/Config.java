@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.InvalidPropertiesFormatException;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -35,8 +36,7 @@ public class Config {
 
     private boolean useEnvironmentVariables;
 
-    public Config() {
-    }
+    public Config() {}
 
     @Inject
     public Config(@Named("configFile") String file) throws IOException {
@@ -68,10 +68,15 @@ public class Config {
     }
 
     public String getString(ConfigKey<String> key) {
-        return getString(key.getKey(), key.getDefaultValue());
+        String value = getString(key.getKey());
+        return value != null ? value : key.getDefaultValue();
     }
 
-    @Deprecated
+    public String getString(ConfigKey<String> key, String defaultValue) {
+        String value = getString(key.getKey());
+        return value != null ? value : defaultValue;
+    }
+
     public String getString(String key) {
         if (useEnvironmentVariables) {
             String value = System.getenv(getEnvironmentVariableName(key));
@@ -80,15 +85,6 @@ public class Config {
             }
         }
         return properties.getProperty(key);
-    }
-
-    public String getString(ConfigKey<String> key, String defaultValue) {
-        return getString(key.getKey(), defaultValue);
-    }
-
-    @Deprecated
-    public String getString(String key, String defaultValue) {
-        return hasKey(key) ? getString(key) : defaultValue;
     }
 
     public boolean getBoolean(ConfigKey<Boolean> key) {
@@ -112,12 +108,8 @@ public class Config {
     }
 
     public int getInteger(ConfigKey<Integer> key, int defaultValue) {
-        return getInteger(key.getKey(), defaultValue);
-    }
-
-    @Deprecated
-    public int getInteger(String key, int defaultValue) {
-        return hasKey(key) ? Integer.parseInt(getString(key)) : defaultValue;
+        String value = getString(key.getKey());
+        return value != null ? Integer.parseInt(value) : defaultValue;
     }
 
     public long getLong(ConfigKey<Long> key) {
@@ -146,7 +138,7 @@ public class Config {
     }
 
     static String getEnvironmentVariableName(String key) {
-        return key.replaceAll("\\.", "_").replaceAll("(\\p{Lu})", "_$1").toUpperCase();
+        return key.replaceAll("\\.", "_").replaceAll("(\\p{Lu})", "_$1").toUpperCase(Locale.ROOT);
     }
 
 }

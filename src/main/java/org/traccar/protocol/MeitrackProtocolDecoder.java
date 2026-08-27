@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
@@ -37,12 +36,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
-
-    private ByteBuf photo;
 
     public MeitrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -189,13 +187,17 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
             }
 
-            switch (Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase()) {
+            switch (Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase(Locale.ROOT)) {
                 case "MVT340", "MVT380" -> {
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 1024.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
                 }
                 case "MT90" -> {
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.3 * 2.0 / 4096.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0));
+                }
+                case "MT90G" -> {
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 4096.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0));
                 }
                 case "T1", "T3", "MVT100", "MVT600", "MVT800", "TC68", "TC68S" -> {
@@ -223,7 +225,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             String fuel = parser.next();
             position.set(Position.KEY_FUEL,
-                    Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
+                    Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) / 100.0);
         }
 
         if (parser.hasNext()) {
@@ -231,7 +233,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 int index = Integer.parseInt(temp.substring(0, 2), 16);
                 if (protocol >= 3) {
                     double value = (short) Integer.parseInt(temp.substring(2), 16);
-                    position.set(Position.PREFIX_TEMP + index, value * 0.01);
+                    position.set(Position.PREFIX_TEMP + index, value / 100.0);
                 } else {
                     double value = Byte.parseByte(temp.substring(2, 4), 16);
                     value += (value < 0 ? -0.01 : 0.01) * Integer.parseInt(temp.substring(4), 16);
@@ -291,8 +293,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
-            position.setLatitude(buf.readIntLE() * 0.000001);
-            position.setLongitude(buf.readIntLE() * 0.000001);
+            position.setLatitude(buf.readIntLE() / 1000000.0);
+            position.setLongitude(buf.readIntLE() / 1000000.0);
 
             position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 946684800 = 2000-01-01
 
@@ -304,7 +306,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
             position.setCourse(buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() / 10.0);
 
             position.setAltitude(buf.readUnsignedShortLE());
 
@@ -319,7 +321,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
 
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
             position.set(Position.KEY_POWER, buf.readUnsignedShortLE());
 
             buf.readUnsignedIntLE(); // geo-fence
@@ -360,7 +362,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             Network network = new Network();
 
-            buf.readUnsignedShortLE(); // length
+            int dataLength = buf.readUnsignedShortLE();
+            int dataEnd = buf.readerIndex() + dataLength;
             buf.readUnsignedShortLE(); // index
 
             int paramCount = buf.readUnsignedByte();
@@ -396,11 +399,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x09 -> position.setCourse(buf.readUnsignedShortLE());
                     case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
                     case 0x0B -> position.setAltitude(buf.readShortLE());
-                    case 0x16 -> position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() * 0.01);
-                    case 0x17 -> position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.01);
-                    case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
-                    case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                    case 0x29 -> position.set(Position.KEY_FUEL, buf.readUnsignedShortLE() * 0.01);
+                    case 0x16 -> position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() / 100.0);
+                    case 0x17 -> position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() / 100.0);
+                    case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
+                    case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 100.0);
+                    case 0x29 -> position.set(Position.KEY_FUEL, buf.readUnsignedShortLE() / 100.0);
                     case 0x40 -> position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
                     case 0x91, 0x92 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShortLE());
                     case 0x98 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedShortLE());
@@ -417,15 +420,15 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
-                    case 0x02 -> position.setLatitude(buf.readIntLE() * 0.000001);
-                    case 0x03 -> position.setLongitude(buf.readIntLE() * 0.000001);
+                    case 0x02 -> position.setLatitude(buf.readIntLE() / 1000000.0);
+                    case 0x03 -> position.setLongitude(buf.readIntLE() / 1000000.0);
                     case 0x04 -> position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
                     case 0x0C -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                     case 0x0D -> position.set("runtime", buf.readUnsignedIntLE());
                     case 0x25 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
                     case 0x9B -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedIntLE());
-                    case 0xA0 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
-                    case 0xA2 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
+                    case 0xA0 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() / 1000.0);
+                    case 0xA2 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() / 100.0);
                     case 0xFEF4 -> position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 60000);
                     default -> buf.readUnsignedIntLE();
                 }
@@ -449,7 +452,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     }
                     case 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31 -> {
                         buf.readUnsignedByte(); // label
-                        position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
+                        position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() / 100.0);
                     }
                     case 0x4B -> buf.skipBytes(length); // network information
                     case 0xFE31 -> {
@@ -492,6 +495,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
+            buf.readerIndex(dataEnd);
+
             if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
                 position.setNetwork(network);
             }
@@ -532,8 +537,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 yield null;
             }
             case "D00" -> {
-                if (photo == null) {
-                    photo = Unpooled.buffer();
+                if (getMediaBuffer() == null) {
+                    newMediaBuffer();
                 }
 
                 index = index + 1 + type.length() + 1;
@@ -547,7 +552,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 int current = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
 
                 buf.readerIndex(endIndex + 1);
-                photo.writeBytes(buf.readSlice(buf.readableBytes() - 1 - 2 - 2));
+                getMediaBuffer().writeBytes(buf, buf.readableBytes() - 1 - 2 - 2);
 
                 if (current == total - 1) {
                     Position position = new Position(getProtocolName());
@@ -555,9 +560,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
 
                     yield position;
                 } else {
@@ -568,7 +571,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
             case "D03" -> {
-                photo = Unpooled.buffer();
+                newMediaBuffer();
                 requestPhotoPacket(channel, remoteAddress, imei, "camera_picture.jpg", 0);
                 yield null;
             }

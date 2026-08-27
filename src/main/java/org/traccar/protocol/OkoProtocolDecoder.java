@@ -59,7 +59,7 @@ public class OkoProtocolDecoder extends BaseProtocolDecoder {
         if (value.contains(".")) {
             return Double.parseDouble(value);
         } else {
-            return Integer.parseInt(value, 16) * 0.1;
+            return Integer.parseInt(value, 16) / 10.0;
         }
     }
 

@@ -17,8 +17,7 @@ package org.traccar.helper;
 
 public final class BitUtil {
 
-    private BitUtil() {
-    }
+    private BitUtil() {}
 
     public static boolean check(long number, int index) {
         return (number & (1L << index)) != 0;

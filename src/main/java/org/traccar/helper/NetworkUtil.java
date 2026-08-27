@@ -20,8 +20,7 @@ import io.netty.channel.socket.DatagramChannel;
 
 public final class NetworkUtil {
 
-    private NetworkUtil() {
-    }
+    private NetworkUtil() {}
 
     public static String session(Channel channel) {
         char transport = channel instanceof DatagramChannel ? 'U' : 'T';

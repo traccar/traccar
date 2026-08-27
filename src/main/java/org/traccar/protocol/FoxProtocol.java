@@ -32,7 +32,7 @@ public class FoxProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "</fox>"));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(MAX_FRAME_LENGTH, "</fox>"));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new FoxProtocolDecoder(FoxProtocol.this));

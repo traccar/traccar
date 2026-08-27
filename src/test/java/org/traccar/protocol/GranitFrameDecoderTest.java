@@ -13,6 +13,10 @@ public class GranitFrameDecoderTest extends ProtocolTest {
         var decoder = inject(new GranitFrameDecoder());
 
         assertEquals(
+                binary("2b525243427e1a0003008f201263b060273b7c8ce7a100440000671a0000000000002a4430"),
+                decoder.decode(null, null, binary("2b525243427e1a0003008f201263b060273b7c8ce7a100440000671a0000000000002a44300d0a2b525243427e1a00030074201263b000273b848ce8a100000000671a0000000000002a46380d0a")));
+
+        assertEquals(
                 binary("2b525243427e1a003e2934757c57b8b03c38d279b4e61e9bd7006b000000001c00002a4533"),
                 decoder.decode(null, null, binary("2b525243427e1a003e2934757c57b8b03c38d279b4e61e9bd7006b000000001c00002a45330d0a")));
 

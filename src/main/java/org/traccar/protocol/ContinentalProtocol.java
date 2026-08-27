@@ -30,7 +30,7 @@ public class ContinentalProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 2, 2, -4, 0));
                 pipeline.addLast(new ContinentalProtocolDecoder(ContinentalProtocol.this));
             }
         });

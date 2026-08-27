@@ -30,7 +30,7 @@ public class Tk102Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1 + 1 + 10, 1, 1, 0));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 1 + 1 + 10, 1, 1, 0));
                 pipeline.addLast(new Tk102ProtocolDecoder(Tk102Protocol.this));
             }
         });

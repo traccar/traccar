@@ -30,6 +30,7 @@ import org.traccar.model.Device;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
@@ -76,7 +77,13 @@ public class TraccarCommandSender implements CommandSender {
         Message message = new Message();
         message.type = "client";
         message.tokens = device.getString("notificationTokens").split("[, ]");
-        message.data = Map.of("command", command.getType());
+        Map<String, String> data = new HashMap<>();
+        data.put("command", command.getType());
+        data.put("deviceId", device.getUniqueId());
+        if (command.getType().equals(Command.TYPE_POSITION_PERIODIC)) {
+            data.put("interval", String.valueOf(command.getInteger(Command.KEY_FREQUENCY)));
+        }
+        message.data = data;
 
         var request = client.target(url).request().header("Authorization", "key=" + key);
         try {

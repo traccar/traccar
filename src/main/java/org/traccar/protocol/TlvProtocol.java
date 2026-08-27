@@ -30,7 +30,7 @@ public class TlvProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\0'));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(MAX_FRAME_LENGTH, '\0'));
                 pipeline.addLast(new TlvProtocolDecoder(TlvProtocol.this));
             }
         });

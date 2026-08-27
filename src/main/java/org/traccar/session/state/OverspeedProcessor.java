@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,22 @@ public final class OverspeedProcessor {
 
     public static final String ATTRIBUTE_SPEED = "speed";
 
-    private OverspeedProcessor() {
-    }
+    private OverspeedProcessor() {}
 
     public static void updateState(
             OverspeedState state, Position position,
             double speedLimit, double multiplier, long minimalDuration, long geofenceId) {
 
         state.setEvent(null);
+
+        if (speedLimit == 0) {
+            if (state.getOverspeedState()) {
+                state.setOverspeedState(false);
+                state.setOverspeedTime(null);
+                state.setOverspeedGeofenceId(0);
+            }
+            return;
+        }
 
         boolean oldState = state.getOverspeedState();
         if (oldState) {

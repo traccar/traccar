@@ -306,25 +306,28 @@ public class ReportUtils {
         Map<Long, Position> positionMap = new HashMap<>();
         Position startPosition = null;
         double maxSpeed = 0;
-        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-        if (!positions.isEmpty()) {
-            boolean initialValue = positions.get(0).getBoolean(Position.KEY_MOTION);
-            if (initialValue == trips) {
-                startPosition = positions.get(0);
-                maxSpeed = startPosition.getSpeed();
-            }
+        Position lastPosition = null;
 
-            if (useNewLogic) {
-                double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
-                long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
-                long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
-                Deque<Position> motionPositions = new ArrayDeque<>();
-                NewMotionState motionState = new NewMotionState();
-                motionState.setPositions(motionPositions);
-                motionState.setMotionStreak(initialValue);
-                motionState.setEventPosition(positions.get(0));
+        if (useNewLogic) {
+            double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
+            long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
+            long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
+            Deque<Position> motionPositions = new ArrayDeque<>();
+            NewMotionState motionState = new NewMotionState();
+            motionState.setPositions(motionPositions);
 
-                for (Position position : positions) {
+            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+                for (var iterator = stream.iterator(); iterator.hasNext();) {
+                    Position position = iterator.next();
+                    if (lastPosition == null) {
+                        boolean initialValue = position.getBoolean(Position.KEY_MOTION);
+                        if (initialValue == trips) {
+                            startPosition = position;
+                            maxSpeed = position.getSpeed();
+                        }
+                        motionState.setMotionStreak(initialValue);
+                        motionState.setEventPosition(position);
+                    }
                     maxSpeed = Math.max(maxSpeed, position.getSpeed());
                     positionMap.put(position.getId(), position);
                     NewMotionProcessor.updateState(motionState, position, minDistance, minDuration, stopGap);
@@ -337,9 +340,9 @@ public class ReportUtils {
                     }
                     motionPositions.add(position);
                     while (motionPositions.size() > 1) {
-                        var iterator = motionPositions.iterator();
-                        iterator.next();
-                        Position second = iterator.next();
+                        var motionIterator = motionPositions.iterator();
+                        motionIterator.next();
+                        Position second = motionIterator.next();
                         Position last = motionPositions.peekLast();
                         if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
                             motionPositions.poll();
@@ -347,24 +350,34 @@ public class ReportUtils {
                             break;
                         }
                     }
+                    lastPosition = position;
                 }
-            } else {
-                MotionState motionState = new MotionState();
-                motionState.setMotionStreak(initialValue);
-                motionState.setMotionState(initialValue);
+            }
+        } else {
+            MotionState motionState = new MotionState();
 
-                for (int i = 0; i < positions.size(); i++) {
-                    Position last = i > 0 ? positions.get(i - 1) : null;
-                    Position position = positions.get(i);
+            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+                for (var iterator = stream.iterator(); iterator.hasNext();) {
+                    Position position = iterator.next();
+                    if (lastPosition == null) {
+                        boolean initialValue = position.getBoolean(Position.KEY_MOTION);
+                        if (initialValue == trips) {
+                            startPosition = position;
+                            maxSpeed = position.getSpeed();
+                        }
+                        motionState.setMotionStreak(initialValue);
+                        motionState.setMotionState(initialValue);
+                    }
                     maxSpeed = Math.max(maxSpeed, position.getSpeed());
                     positionMap.put(position.getId(), position);
                     boolean motion = position.getBoolean(Position.KEY_MOTION);
-                    MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
+                    MotionProcessor.updateState(motionState, lastPosition, position, motion, tripsConfig);
                     if (motionState.getEvent() != null) {
                         motionState.getEvent().set("maxSpeed", maxSpeed);
                         events.add(motionState.getEvent());
                         maxSpeed = 0;
                     }
+                    lastPosition = position;
                 }
             }
         }
@@ -385,9 +398,8 @@ public class ReportUtils {
         }
 
         if (startPosition != null) {
-            Position endPosition = positions.get(positions.size() - 1);
             result.add(calculateTripOrStop(
-                    device, startPosition, endPosition, maxSpeed, ignoreOdometer, reportClass));
+                    device, startPosition, lastPosition, maxSpeed, ignoreOdometer, reportClass));
         }
 
         return result;
@@ -413,7 +425,7 @@ public class ReportUtils {
                 new Order("eventTime")));
 
         Position startPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
-        if (startPosition != null && !startPosition.getBoolean(Position.KEY_MOTION)) {
+        if (startPosition != null && startPosition.getBoolean(Position.KEY_MOTION) != trips) {
             startPosition = null;
         }
 
@@ -421,10 +433,16 @@ public class ReportUtils {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
             if (motion == trips) {
                 startPosition = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("deviceId", device.getId()),
+                                new Condition.Equals("id", event.getPositionId()))));
             } else if (startPosition != null) {
                 Position endPosition = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("deviceId", device.getId()),
+                                new Condition.Equals("id", event.getPositionId()))));
                 if (endPosition != null) {
                     result.add(calculateTripOrStop(
                             device, startPosition, endPosition, 0, ignoreOdometer, reportClass));

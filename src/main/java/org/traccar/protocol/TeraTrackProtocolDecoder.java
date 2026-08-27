@@ -20,6 +20,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -27,11 +28,13 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class TeraTrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
 
     public TeraTrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -53,9 +56,7 @@ public class TeraTrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        position.setTime(dateFormat.parse(json.getString("DateTime")));
+        position.setTime(DateUtil.parse(DATE_FORMAT, json.getString("DateTime")));
 
         position.setValid(true);
         position.setLatitude(Double.parseDouble(json.getString("Latitude")));

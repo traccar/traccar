@@ -55,8 +55,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.TimeZone;
 
 @Path("server")
@@ -135,7 +135,7 @@ public class ServerResource extends BaseResource {
     @Path("timezones")
     @GET
     public Collection<String> timezones() {
-        return Arrays.asList(TimeZone.getAvailableIDs());
+        return List.of(TimeZone.getAvailableIDs());
     }
 
     @Path("file/{path}")

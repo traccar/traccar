@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,23 @@ package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+
+import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorTelegram extends Notificator {
@@ -44,8 +51,6 @@ public class NotificatorTelegram extends Notificator {
         private String chatId;
         @JsonProperty("text")
         private String text;
-        @JsonProperty("parse_mode")
-        private String parseMode = "html";
     }
 
     public static class LocationMessage {
@@ -62,15 +67,38 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Inject
-    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
+            Client client, Provider<ClientBuilder> clientBuilderProvider) {
         super(notificationFormatter);
-        this.client = client;
+
+        String baseUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_BASE_URL);
+        if (baseUrl == null) {
+            baseUrl = "https://api.telegram.org/bot";
+        }
+
         urlSendText = String.format(
-                "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+                "%s%s/sendMessage", baseUrl, config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
-                "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+                "%s%s/sendLocation", baseUrl, config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+
+        String proxyUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_URL);
+        if (proxyUrl != null) {
+            ClientBuilder clientBuilder = clientBuilderProvider.get()
+                    .property(ClientProperties.PROXY_URI, proxyUrl);
+            String userInfo = URI.create(proxyUrl).getUserInfo();
+            if (userInfo != null) {
+                String[] credentials = userInfo.split(":", 2);
+                clientBuilder.property(ClientProperties.PROXY_USERNAME, credentials[0]);
+                if (credentials.length > 1) {
+                    clientBuilder.property(ClientProperties.PROXY_PASSWORD, credentials[1]);
+                }
+            }
+            this.client = clientBuilder.build();
+        } else {
+            this.client = client;
+        }
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
@@ -84,7 +112,8 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
+    public CompletableFuture<Void> sendAsync(
+            User user, NotificationMessage shortMessage, Event event, Position position) {
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
@@ -92,11 +121,19 @@ public class NotificatorTelegram extends Notificator {
             message.chatId = chatId;
         }
         message.text = shortMessage.digest();
-        client.target(urlSendText).request().post(Entity.json(message)).close();
-        if (sendLocation && position != null) {
-            client.target(urlSendLocation).request().post(
-                    Entity.json(createLocationMessage(message.chatId, position))).close();
-        }
+
+        boolean sendUserLocation = user.hasAttribute(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
+                ? user.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION.getKey())
+                : sendLocation;
+
+        return WebHelper.post(client.target(urlSendText).request(), Entity.json(message), response -> {})
+                .thenCompose(v -> {
+                    if (sendUserLocation && position != null) {
+                        return WebHelper.post(client.target(urlSendLocation).request(),
+                                Entity.json(createLocationMessage(message.chatId, position)), response -> {});
+                    }
+                    return CompletableFuture.completedFuture(null);
+                });
     }
 
 }

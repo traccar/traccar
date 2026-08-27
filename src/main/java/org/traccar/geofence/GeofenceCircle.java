@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,13 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     @Override
+    protected boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        return DistanceCalculator.distanceToLine(
+                centerLatitude, centerLongitude, latitude1, longitude1, latitude2, longitude2) <= radius;
+    }
+
+    @Override
     public double calculateArea() {
         return Math.PI * radius * radius;
     }
@@ -59,8 +66,7 @@ public class GeofenceCircle extends GeofenceGeometry {
         return wkt;
     }
 
-    public record DecodedCircle(double latitude, double longitude, double radius) {
-    }
+    public record DecodedCircle(double latitude, double longitude, double radius) {}
 
     public DecodedCircle fromWkt(String wkt) throws ParseException {
         if (!wkt.startsWith("CIRCLE")) {

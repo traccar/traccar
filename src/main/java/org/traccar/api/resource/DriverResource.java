@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.List;
+
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Driver;
 
@@ -30,7 +32,7 @@ import org.traccar.model.Driver;
 public class DriverResource extends ExtendedObjectResource<Driver> {
 
     public DriverResource() {
-        super(Driver.class, "name");
+        super(Driver.class, "name", List.of("name", "uniqueId"));
     }
 
 }

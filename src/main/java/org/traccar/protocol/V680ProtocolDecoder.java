@@ -97,11 +97,11 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             boolean south = parser.next().equals("S");
 
             if (lat > 90 || lon > 180) {
-                int lonDegrees = (int) (lon * 0.01);
+                int lonDegrees = (int) (lon / 100.0);
                 lon = (lon - lonDegrees * 100) / 60.0;
                 lon += lonDegrees;
 
-                int latDegrees = (int) (lat * 0.01);
+                int latDegrees = (int) (lat / 100.0);
                 lat = (lat - latDegrees * 100) / 60.0;
                 lat += latDegrees;
             }

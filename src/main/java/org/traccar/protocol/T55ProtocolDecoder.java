@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,25 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // mnc
             .text("*")
             .number("xx")                        // checksum
+            .compile();
+
+    private static final Pattern PATTERN_WMCS = new PatternBuilder()
+            .text("$ID,")
+            .number("(d+),")                     // imei
+            .expression(".*?")
+            .expression("ALARM,(0x[0-9a-fA-F]+),").optional() // alarm
+            .expression(".*?")
+            .text("GPSE").expression("[XHTD],")
+            .expression("([AV])")                // validity
+            .number(",D,(dd)(dd)(dd)").optional() // date (ddmmyy)
+            .number(",T,(dd)(dd)(dd)").optional() // time (hhmmss)
+            .number(",S,(d+):(d+)").optional()   // satellites
+            .number(",La,(-?d+.d+),([NS])").optional() // latitude
+            .number(",Lo,(-?d+.d+),([EW])").optional() // longitude
+            .number(",H,(d+.d+)").optional()     // heading
+            .number(",V,(d+.d+)").optional()     // speed (km/h)
+            .number(",DD,(d+)").optional()       // total distance
+            .any()
             .compile();
 
     private Position position = null;
@@ -442,6 +461,61 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private Position decodeWmcs(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_WMCS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, parser.next());
+        }
+
+        position.setValid(parser.next().equals("A"));
+
+        if (parser.hasNext(6)) {
+            position.setTime(new DateBuilder()
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .getDate());
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+        }
+
+        if (parser.hasNext(2)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        }
+        if (parser.hasNext(2)) {
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        }
+
+        if (parser.hasNext()) {
+            position.setCourse(parser.nextDouble());
+        }
+        if (parser.hasNext()) {
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_TOTAL_DISTANCE, parser.nextDouble());
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -479,6 +553,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             getDeviceSession(channel, remoteAddress, sentence.substring(6));
         } else if (sentence.startsWith("$PSIWMDID")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(10, sentence.lastIndexOf('*')));
+        } else if (sentence.startsWith("$CONNECT,")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(9, sentence.indexOf(',', 9)));
         } else if (sentence.startsWith("$GPFID")) {
             deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7));
             if (deviceSession != null && position != null) {
@@ -507,6 +583,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return decodePubx(channel, remoteAddress, sentence);
         } else if (sentence.startsWith("$GPTXT")) {
             return decodeGptxt(channel, remoteAddress, sentence);
+        } else if (sentence.startsWith("$ID,")) {
+            return decodeWmcs(channel, remoteAddress, sentence);
         }
 
         return null;

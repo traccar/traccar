@@ -33,6 +33,7 @@ public class DeviceSession {
     private final Protocol protocol;
     private final Channel channel;
     private final SocketAddress remoteAddress;
+    private volatile long lastUpdate = System.currentTimeMillis();
 
     public DeviceSession(
             long deviceId, String uniqueId, String model,
@@ -43,6 +44,14 @@ public class DeviceSession {
         this.protocol = protocol;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
+    }
+
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     public long getDeviceId() {

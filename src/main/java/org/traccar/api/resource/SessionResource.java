@@ -79,7 +79,12 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
         if (token != null) {
-            LoginResult loginResult = loginService.login(token);
+            LoginResult loginResult;
+            try {
+                loginResult = loginService.login(token);
+            } catch (SecurityException | GeneralSecurityException e) {
+                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+            }
             if (loginResult != null) {
                 User user = loginResult.getUser();
                 SessionHelper.userLogin(actionLogger, request, user, loginResult.getExpiration());

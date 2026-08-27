@@ -228,12 +228,12 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         int battery = parser.nextInt(0);
         if (battery != 65535) {
-            position.set(Position.KEY_BATTERY, battery * 0.01);
+            position.set(Position.KEY_BATTERY, battery / 100.0);
         }
 
         int power = parser.nextInt(0);
         if (power != 65535) {
-            position.set(Position.KEY_POWER, power * 0.1);
+            position.set(Position.KEY_POWER, power / 10.0);
         }
 
         return position;
@@ -406,13 +406,13 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 1; i <= 24; i++) {
                 int voltage = buf.readUnsignedShortLE();
                 if (i <= batteryCount) {
-                    position.set("battery" + i, voltage * 0.001);
+                    position.set("battery" + i, voltage / 1000.0);
                 }
             }
 
             position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
-            position.set("current", buf.readUnsignedShortLE() * 0.1);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+            position.set("current", buf.readUnsignedShortLE() / 10.0);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
             position.set("batteryOverheat", buf.readUnsignedByte() > 0);
             position.set("chargeProtection", buf.readUnsignedByte() > 0);
@@ -434,7 +434,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            position.set("calibrationCapacity", buf.readUnsignedShortLE() * 0.01);
+            position.set("calibrationCapacity", buf.readUnsignedShortLE() / 100.0);
             position.set("dischargeCapacity", buf.readUnsignedIntLE());
 
         } else {
@@ -446,15 +446,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(pair[1]));
                 switch (key) {
                     case 0x90 -> {
-                        position.set("cumulativeVoltage", buf.readUnsignedShortLE() * 0.1);
-                        position.set("gatherVoltage", buf.readUnsignedShortLE() * 0.1);
-                        position.set("current", (buf.readUnsignedShortLE() - 30000) * 0.1);
-                        position.set("soc", buf.readUnsignedShortLE() * 0.1);
+                        position.set("cumulativeVoltage", buf.readUnsignedShortLE() / 10.0);
+                        position.set("gatherVoltage", buf.readUnsignedShortLE() / 10.0);
+                        position.set("current", (buf.readUnsignedShortLE() - 30000) / 10.0);
+                        position.set("soc", buf.readUnsignedShortLE() / 10.0);
                     }
                     case 0x91 -> {
-                        position.set("maxCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("maxCellVoltage", buf.readUnsignedShortLE() / 1000.0);
                         position.set("maxCellVoltageCount", buf.readUnsignedByte());
-                        position.set("minCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("minCellVoltage", buf.readUnsignedShortLE() / 1000.0);
                         position.set("minCellVoltageCount", buf.readUnsignedByte());
                     }
                     case 0x92 -> {

@@ -31,6 +31,7 @@ import org.traccar.model.Position;
 import org.traccar.helper.BitUtil;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
@@ -205,7 +206,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
         String status = parser.next();
-        String upperCaseStatus = status.toUpperCase();
+        String upperCaseStatus = status.toUpperCase(Locale.ROOT);
         position.setValid(upperCaseStatus.equals("A") || upperCaseStatus.equals("R") || upperCaseStatus.equals("P"));
         position.set(Position.KEY_STATUS, status);
 
@@ -220,13 +221,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         String event = parser.next();
         position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, decodeEvent(event, position, model));
-        position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
+        position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) / 1000.0);
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_GPS, parser.nextInt());
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble() / 1000.0);
 
         if ("AVL110".equals(model) || "AVL120".equals(model)) {
-            position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble() / 1000.0);
         } else {
             parser.next();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -55,7 +55,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Path("commands")
@@ -81,7 +80,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     private HttpServletRequest request;
 
     public CommandResource() {
-        super(Command.class, "description");
+        super(Command.class, "description", List.of("description"));
     }
 
     private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {
@@ -181,7 +180,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                     return protocol.getSupportedDataCommands().stream().map(Typed::new).toList();
                 }
             } else {
-                return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
+                return List.of(new Typed(Command.TYPE_CUSTOM));
             }
         } else {
             List<Typed> result = new ArrayList<>();

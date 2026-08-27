@@ -18,8 +18,16 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "79790026f16318c0000001010100020101000301000004010100050201950006010010000100008021af0d0a"),
+                Position.KEY_POWER, 4.05);
+
+        verifyAttribute(decoder, binary(
+                "78782da41a0509160203cf05be31f80c306530001c0010012ed000007ef40000000006428b074205041302ff0009389c0d0a"),
+                Position.KEY_ALARM, Position.ALARM_TAMPERING);
+
+        verifyAttribute(decoder, binary(
                 "78782e610869412070143950190a1e0d3806c802b0eb0f0561ecdc00d80002d404000004215f0e000001395581000d1ca60d0a"),
-                Position.KEY_DRIVER_UNIQUE_ID, "1345759281165");
+                Position.KEY_DRIVER_UNIQUE_ID, "20534657");
 
         verifyAttribute(decoder, binary(
                 "7979001f70002c00046919c641007f000ec4a82841074a7fff64012201dc071ea430360d0a"),
@@ -34,6 +42,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, binary(
                 "78780ca346000106640c01123d5f5e0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "787818a300000005321e020000000002584f000100060000008f920d0a"),
+                Position.KEY_STEPS, 600L);
 
         verifyAttribute(decoder, binary(
                 "7979000e941e000000d5000002ee00f59b850d0a"),
@@ -584,7 +596,21 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
-                Position.KEY_HOURS, 22140000);
+                Position.KEY_HOURS, 22140000L);
+
+        decoder.setModelOverride("XT40");
+
+        verifyAttribute(decoder, binary(
+                "78783c220109999999999999991a04171433101a041714310fb00288a5a8050754500008000800000000000000000604e32933000200468b000025008d87ce0d0a"),
+                Position.KEY_POWER, 12.51);
+
+        verifyAttribute(decoder, binary(
+                "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
+                Position.KEY_BATTERY, 4.0);
+
+        verifyAttribute(decoder, binary(
+                "78784e25010356354871186947190909100e0f190909100e0fbf02846fe805078c900018000a02d410c80b0c352c17044605112a4700020000000005840f0102353130303635383036424446030113ed780d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "0235313030363538303642444603");
 
         decoder.setModelOverride("G18");
 
@@ -596,6 +622,36 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "7878271208667030665022971a020c0a1e32c601727c1c0f89af002c14fa01366e000100010c003c1fdd0d0a"));
+
+        decoder.setModelOverride("VL103");
+
+        verifyPosition(decoder, binary(
+                "787822221607160f1000cf0225e03f0bd723182c149701cc0075c300933301000002a5f0860d0a"));
+
+        verifyPosition(decoder, binary(
+                "78782aa015041007350eca027ac8a20c4658be00140081cc00000000287d0000000002ea5e010004000009dffc0d0a"));
+
+        verifyNotNull(decoder, binary(
+                "7979007e7000000001020035000100003300126303564e07017004ea01f800f41d5c001466003400060e6303564e000043000b00de00322ae9770600000d0001000808685650500023470002000802225000120407580003000a8939500021051530683600180002019510000001010009000107000a00010c00280001120ce2299a0d0a"));
+
+        verifyPosition(decoder, binary(
+                "78783536190c1d0f1724cf026cc9140c367d4000940001cc0025ef0540e88c01000000000064051428000006c3000001453f9201003477560d0a"));
+
+        verifyAttribute(decoder, binary(
+                "78783536190c1d0f1724cf026cc9140c367d4000940001cc0025ef0540e88c01000000000064051428000006c3000001453f9201003477560d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "c3000001453f9201");
+
+        verifyAttribute(decoder, binary(
+                "78783536190c1d0f2806cf026cc9140c367d4000540001cc0025ef0540e88c00000000000064051e2800001600000000000000006e5bc2660d0a"),
+                Position.KEY_BATTERY, 4.0);
+
+        verifyAttribute(decoder, binary(
+                "78782d16190c1d0e3b03cf026cc8d40c367d800014000801cc0025ef40e88c450604e801c3000001453f920100271e590d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "c3000001453f9201");
+
+        verifyAttribute(decoder, binary(
+                "78782d16190c1d0f0b07cf026cc89c0c367cf00014000801cc0025ef40e88c460604ea01c3000001453f9201000c103a0d0a"),
+                Position.KEY_EVENT, 0xEA);
 
     }
 

@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Ελήφθη αρχείο")
-#set($digest = "Στη Συσκευή $esc.html($device.name) $esc.html($event.getString('media')) Ελήφθη αρχείο: $esc.html($event.getString('file')) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Στη Συσκευή $device.name $event.getString('media') Ελήφθη αρχείο: $event.getString('file') στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

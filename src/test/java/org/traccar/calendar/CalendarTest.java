@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -127,6 +128,34 @@ public class CalendarTest {
 
         assertFalse(calendar.checkMoment(format.parse("2025-08-09 11:30:00+04")));
         assertTrue(calendar.checkMoment(format.parse("2025-08-09 12:30:00+04")));
+    }
+
+    @Test
+    public void testTokyoDailyOccurrence() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                PRODID:-//Traccar//NONSGML Traccar//EN
+                BEGIN:VEVENT
+                UID:00000000-0000-0000-0000-000000000000
+                DTSTART;TZID=Asia/Tokyo:20260518T000000
+                DTEND;TZID=Asia/Tokyo:20260518T060000
+                RRULE:FREQ=DAILY
+                SUMMARY:Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        var periods = calendar.findPeriods(format.parse("2026-05-18 18:00:00+00"));
+        assertEquals(1, periods.size());
+        var period = periods.iterator().next();
+        assertEquals(Instant.parse("2026-05-18T15:00:00Z"), period.getStart());
+        assertEquals(Instant.parse("2026-05-18T21:00:00Z"), period.getEnd());
+        assertFalse(calendar.checkMoment(format.parse("2026-05-18 14:00:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2026-05-18 18:00:00+00")));
+        assertFalse(calendar.checkMoment(format.parse("2026-05-18 22:00:00+00")));
     }
 
     @Test

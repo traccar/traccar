@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): resultado de comando recibido")
-#set($digest = "Resultado de comando de $esc.html($device.name) recibido: $esc.html($position.getString('result')) a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Resultado de comando de $device.name recibido: $position.getString('result') a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

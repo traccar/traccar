@@ -161,13 +161,13 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
         }
 
-        position.setAltitude(buf.readIntLE() * 0.01);
+        position.setAltitude(buf.readIntLE() / 100.0);
 
         if (alternative) {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedIntLE()));
             position.setCourse(buf.readUnsignedShortLE() / 1000.0);
         } else {
-            position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() * 0.01));
+            position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedIntLE() / 100.0));
             position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
         }
 
@@ -212,8 +212,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // satellites
                     position.setLongitude(buf.readIntLE() / Math.PI * 180 / 100000000);
                     position.setLatitude(buf.readIntLE() / Math.PI * 180 / 100000000);
-                    position.setAltitude(buf.readIntLE() * 0.01);
-                    position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedByte() * 0.01));
+                    position.setAltitude(buf.readIntLE() / 100.0);
+                    position.setSpeed(UnitsConverter.knotsFromMps(buf.readUnsignedByte() / 100.0));
                     position.setCourse(buf.readUnsignedShortLE() / Math.PI * 180.0 / 1000.0);
                     break;
                 case 7:

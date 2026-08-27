@@ -30,6 +30,7 @@ import software.amazon.awssdk.services.sns.model.SnsException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
@@ -46,7 +47,7 @@ public class SnsSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessage(String phone, String message, boolean command) {
+    public CompletableFuture<Void> sendMessage(String phone, String message, boolean command) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put(
                 "AWS.SNS.SMS.SenderID",
@@ -69,8 +70,10 @@ public class SnsSmsClient implements SmsManager {
 
         try {
             snsClient.publish(publishRequest);
+            return CompletableFuture.completedFuture(null);
         } catch (SnsException e) {
-            LOGGER.error("SMS send failed", e);
+            LOGGER.warn("SMS send failed", e);
+            return CompletableFuture.completedFuture(null);
         }
     }
 }

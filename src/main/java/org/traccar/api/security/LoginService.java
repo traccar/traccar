@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -35,6 +36,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 import java.util.Objects;
 
 @Singleton
@@ -48,6 +50,7 @@ public class LoginService {
     private final String serviceAccountToken;
     private final boolean forceLdap;
     private final boolean forceOpenId;
+    private final boolean allowOpenIdRegistration;
 
     @Inject
     public LoginService(
@@ -59,17 +62,18 @@ public class LoginService {
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
+        allowOpenIdRegistration = config.getBoolean(Keys.OPENID_ALLOW_REGISTRATION);
     }
 
     public LoginResult login(
             String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
-        switch (scheme.toLowerCase()) {
+        switch (scheme.toLowerCase(Locale.ROOT)) {
             case "bearer":
                 return login(credentials);
             case "basic":
                 byte[] decodedBytes = DataConverter.parseBase64(credentials);
                 String[] auth = new String(decodedBytes, StandardCharsets.US_ASCII).split(":", 2);
-                return login(auth[0], auth[1], null);
+                return login(auth[0], auth[1], (Integer) null);
             default:
                 throw new SecurityException("Unsupported authorization scheme");
         }
@@ -93,12 +97,12 @@ public class LoginService {
             return null;
         }
 
-        email = email.trim();
+        email = email.trim().toLowerCase(Locale.ROOT);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
-                        new Condition.Equals("email", email),
-                        new Condition.Equals("login", email))));
+                        new Condition.Equals("LOWER(email)", email),
+                        new Condition.Equals("LOWER(login)", email))));
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
@@ -117,27 +121,38 @@ public class LoginService {
         return null;
     }
 
-    public LoginResult login(String email, String name, boolean administrator) throws StorageException {
+    public LoginResult login(String email, String name, Boolean administrator) throws StorageException {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("email", email)));
+                new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
 
         if (user == null) {
+
+            if (!allowOpenIdRegistration && !UserUtil.isEmpty(storage)) {
+                Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+                if (!server.getRegistration()) {
+                    throw new SecurityException("Registration disabled");
+                }
+            }
 
             user = new User();
             UserUtil.setUserDefaults(user, config);
             user.setName(name);
             user.setEmail(email);
             user.setFixedEmail(true);
-            user.setAdministrator(administrator);
+            if (administrator != null) {
+                user.setAdministrator(administrator);
+            }
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
 
-        } else if (!Objects.equals(name, user.getName()) || user.getAdministrator() != administrator) {
+        } else if (!Objects.equals(name, user.getName())
+                || administrator != null && user.getAdministrator() != administrator) {
 
             user.setName(name);
-            user.setAdministrator(administrator);
-
+            if (administrator != null) {
+                user.setAdministrator(administrator);
+            }
             storage.updateObject(user, new Request(
                     new Columns.Include("name", "administrator"),
                     new Condition.Equals("id", user.getId())));

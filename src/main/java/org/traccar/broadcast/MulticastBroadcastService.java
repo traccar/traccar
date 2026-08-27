@@ -83,8 +83,7 @@ public class MulticastBroadcastService extends BaseBroadcastService {
     }
 
     @Override
-    public void stop() {
-    }
+    public void stop() {}
 
     private final Runnable receiver = new Runnable() {
         @Override
@@ -97,8 +96,12 @@ public class MulticastBroadcastService extends BaseBroadcastService {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
                     if (networkInterface.inetAddresses().noneMatch(a -> a.equals(packet.getAddress()))) {
-                        String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-                        handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                        try {
+                            String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
+                            handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                        } catch (Exception e) {
+                            LOGGER.warn("Broadcast handleMessage failed", e);
+                        }
                     }
                 }
                 publisherSocket = null;

@@ -28,6 +28,7 @@ import com.nimbusds.oauth2.sdk.GeneralException;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
+import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
 import org.traccar.broadcast.RedisBroadcastService;
@@ -72,6 +73,9 @@ import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
+import org.traccar.geocoder.AutoNaviGeocoder;
+import org.traccar.geocoder.BaiduGeocoder;
+import org.traccar.geocoder.TencentGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -81,7 +85,10 @@ import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
+import org.traccar.handler.MapMatcherHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.mapmatcher.MapMatcher;
+import org.traccar.mapmatcher.TraccarMapMatcher;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
@@ -150,10 +157,19 @@ public class MainModule extends AbstractModule {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
+    @Provides
+    public static ClientBuilder provideClientBuilder(
+            Config config, ObjectMapperContextResolver objectMapperContextResolver) {
+        return ClientBuilder.newBuilder()
+                .register(objectMapperContextResolver)
+                .property(ClientProperties.CONNECT_TIMEOUT, config.getInteger(Keys.CLIENT_CONNECT_TIMEOUT))
+                .property(ClientProperties.READ_TIMEOUT, config.getInteger(Keys.CLIENT_READ_TIMEOUT));
+    }
+
     @Singleton
     @Provides
-    public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
-        return ClientBuilder.newClient().register(objectMapperContextResolver);
+    public static Client provideClient(ClientBuilder clientBuilder) {
+        return clientBuilder.build();
     }
 
     @Singleton
@@ -169,11 +185,12 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
+    public static MailManager provideMailManager(
+            Config config, StatisticsManager statisticsManager, ExecutorService executorService) {
         if (config.getBoolean(Keys.MAIL_DEBUG)) {
             return new LogMailManager();
         } else {
-            return new SmtpMailManager(config, statisticsManager);
+            return new SmtpMailManager(config, statisticsManager, executorService);
         }
     }
 
@@ -238,6 +255,9 @@ public class MainModule extends AbstractModule {
                 case "maptiler" -> new MapTilerGeocoder(client, key, cacheSize, addressFormat);
                 case "geoapify" -> new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                 case "geocodejson" -> new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "autonavi" -> new AutoNaviGeocoder(client, key, cacheSize, addressFormat);
+                case "baidu" -> new BaiduGeocoder(client, key, language, cacheSize, addressFormat);
+                case "tencent" -> new TencentGeocoder(client, key, cacheSize, addressFormat);
                 default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);
@@ -300,6 +320,30 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
+    public static MapMatcher provideMapMatcher(Config config, Client client) {
+        if (config.getBoolean(Keys.MAP_MATCHER_ENABLE)) {
+            String type = config.getString(Keys.MAP_MATCHER_TYPE);
+            String url = config.getString(Keys.MAP_MATCHER_URL);
+            String key = config.getString(Keys.MAP_MATCHER_KEY);
+            return switch (type) {
+                case "traccar" -> new TraccarMapMatcher(client, url, key);
+                default -> throw new IllegalArgumentException("Unknown map matcher provider");
+            };
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MapMatcherHandler provideMapMatcherHandler(@Nullable MapMatcher mapMatcher) {
+        if (mapMatcher != null) {
+            return new MapMatcherHandler(mapMatcher);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
             return new SpeedLimitHandler(speedLimitProvider);
@@ -311,7 +355,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CopyAttributesHandler provideCopyAttributesHandler(Config config, CacheManager cacheManager) {
         if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
-            return new CopyAttributesHandler(config, cacheManager);
+            return new CopyAttributesHandler(cacheManager);
         }
         return null;
     }
@@ -319,9 +363,9 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static FilterHandler provideFilterHandler(
-            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
+            Config config, CacheManager cacheManager, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
-            return new FilterHandler(config, cacheManager, storage, statisticsManager);
+            return new FilterHandler(cacheManager, statisticsManager);
         }
         return null;
     }

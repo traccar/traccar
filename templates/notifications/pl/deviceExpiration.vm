@@ -1,5 +1,5 @@
 #set($subject = "Wygaśnięcie urządzenia")
-#set($digest = "Twoje urządzenie $esc.html($device.name) wygasło")
+#set($digest = "Twoje urządzenie $device.name wygasło")
 <!DOCTYPE html>
 <html>
 <body>

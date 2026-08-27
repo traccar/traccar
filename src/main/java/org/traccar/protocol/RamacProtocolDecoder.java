@@ -23,18 +23,20 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class RamacProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     public RamacProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -60,7 +62,7 @@ public class RamacProtocolDecoder extends BaseHttpProtocolDecoder {
 
         position.set(Position.KEY_TYPE, json.getInt("PacketType"));
         position.set(Position.KEY_INDEX, json.getInt("SeqNumber"));
-        position.setDeviceTime(dateFormat.parse(json.getString("UpdateDate")));
+        position.setDeviceTime(DateUtil.parse(DATE_FORMAT, json.getString("UpdateDate")));
 
         int alert = json.getInt("Alert");
         if (alert > 0) {
@@ -93,7 +95,7 @@ public class RamacProtocolDecoder extends BaseHttpProtocolDecoder {
         if (json.containsKey("Latitude") && json.containsKey("Longitude")) {
             position.setValid(true);
             if (json.containsKey("LocationDateTime")) {
-                position.setFixTime(dateFormat.parse(json.getString("LocationDateTime")));
+                position.setFixTime(DateUtil.parse(DATE_FORMAT, json.getString("LocationDateTime")));
             } else {
                 position.setFixTime(position.getDeviceTime());
             }

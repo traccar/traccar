@@ -77,12 +77,12 @@ public class OutsafeProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private void decodeUnknownParam(String name, JsonValue value, Position position) {
-        if (value instanceof JsonNumber jsonNumber) {
-            position.set(name, jsonNumber.doubleValue());
-        } else if (value instanceof JsonString jsonString) {
-            position.set(name, jsonString.getString());
-        } else if (value == JsonValue.TRUE || value == JsonValue.FALSE) {
-            position.set(name, value == JsonValue.TRUE);
+        switch (value) {
+            case JsonNumber jsonNumber -> position.set(name, jsonNumber.doubleValue());
+            case JsonString jsonString -> position.set(name, jsonString.getString());
+            case JsonValue v when v == JsonValue.TRUE || v == JsonValue.FALSE ->
+                    position.set(name, v == JsonValue.TRUE);
+            default -> {}
         }
     }
 

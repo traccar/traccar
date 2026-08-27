@@ -72,7 +72,7 @@ public class AnytrekProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
-        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         DateBuilder dateBuilder = new DateBuilder()

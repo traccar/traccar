@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
@@ -141,10 +142,10 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setValid(true);
                 position.setTime(new Date(time * 1000));
-                position.setSpeed(UnitsConverter.knotsFromKph(speed * 0.1));
+                position.setSpeed(UnitsConverter.knotsFromKph(speed / 10.0));
                 position.setCourse(heading);
-                position.setLongitude(longitude * 0.000001);
-                position.setLatitude(latitude * 0.000001);
+                position.setLongitude(longitude / 1000000.0);
+                position.setLatitude(latitude / 1000000.0);
 
                 positions.add(position);
 
@@ -167,11 +168,11 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
                 position.setValid(hdop > 0);
                 position.set(Position.KEY_HDOP, hdop);
 
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() * 0.1));
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() / 10.0));
                 position.setCourse(buf.readUnsignedShort());
                 position.setAltitude(buf.readShort());
-                position.setLongitude(buf.readInt() * 0.000001);
-                position.setLatitude(buf.readInt() * 0.000001);
+                position.setLongitude(buf.readInt() / 1000000.0);
+                position.setLatitude(buf.readInt() / 1000000.0);
 
                 position.setTime(decodeTime(buf));
 
@@ -271,11 +272,11 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(hdop > 0);
         position.set(Position.KEY_HDOP, hdop);
 
-        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() * 0.1));
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() / 10.0));
         position.setCourse(buf.readUnsignedShort());
         position.setAltitude(buf.readShort());
-        position.setLongitude(buf.readInt() * 0.000001);
-        position.setLatitude(buf.readInt() * 0.000001);
+        position.setLongitude(buf.readInt() / 1000000.0);
+        position.setLatitude(buf.readInt() / 1000000.0);
 
         position.setTime(decodeTime(buf));
 
@@ -339,8 +340,8 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_INF_BAT) {
             position.set(Position.KEY_CHARGE, buf.readUnsignedByte() != 0);
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
         }
 
@@ -369,11 +370,93 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static int readVariableLength(ByteBuf buf) {
+        int value = buf.readUnsignedByte();
+        if (BitUtil.check(value, 7)) {
+            value = BitUtil.to(value, 7) << 8 | buf.readUnsignedByte();
+        }
+        return value;
+    }
+
+    private List<Position> decodeBinary(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        int frameStart = buf.readerIndex();
+
+        buf.readUnsignedByte(); // header
+        buf.readUnsignedByte(); // identifier
+        int frameLength = buf.readUnsignedShort();
+
+        if (BitUtil.check(buf.readUnsignedByte(), 7)) { // multi-packet flag
+            buf.readUnsignedShort(); // frame count and frame number
+        }
+
+        String imei = ByteBufUtil.hexDump(buf.readSlice(8)).substring(1);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        buf.readUnsignedShort(); // device type
+        buf.readUnsignedShort(); // protocol version
+        buf.readUnsignedByte(); // custom version
+
+        buf.skipBytes(buf.readUnsignedByte()); // reserved field
+
+        List<Position> positions = new LinkedList<>();
+
+        int recordsEnd = frameStart + frameLength - 4; // count number, check byte and tail
+
+        while (buf.readerIndex() < recordsEnd) {
+
+            int recordStart = buf.readerIndex();
+            int recordEnd = recordStart + readVariableLength(buf);
+
+            buf.readUnsignedInt(); // generated time
+            buf.readUnsignedShort(); // record count number
+            buf.readUnsignedByte(); // record id
+            buf.readUnsignedByte(); // event code
+
+            while (buf.readerIndex() < recordEnd) {
+
+                int dataId = readVariableLength(buf);
+                int dataEnd = buf.readerIndex() + readVariableLength(buf);
+
+                if (dataId == 0x52) {
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+
+                    position.setValid(BitUtil.between(buf.readUnsignedByte(), 2, 4) == 0b10);
+                    position.setLongitude(buf.readInt() / 1000000.0);
+                    position.setLatitude(buf.readInt() / 1000000.0);
+                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
+
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                    position.setCourse(buf.readUnsignedShort());
+                    position.setAltitude(buf.readUnsignedMedium() / 10.0);
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+                    positions.add(position);
+                }
+
+                buf.readerIndex(dataEnd);
+            }
+
+            buf.readerIndex(recordEnd);
+        }
+
+        return positions;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
+
+        if (buf.getUnsignedByte(buf.readerIndex() + 1) == 0) {
+            return decodeBinary(channel, remoteAddress, buf);
+        }
 
         return switch (buf.readSlice(4).toString(StandardCharsets.US_ASCII)) {
             case "+RSP" -> decodeLocation(channel, remoteAddress, buf);

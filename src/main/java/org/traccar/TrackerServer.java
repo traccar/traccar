@@ -66,6 +66,7 @@ public abstract class TrackerServer implements TrackerConnector {
                 try {
                     if (isSecure()) {
                         SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        engine.setUseClientMode(false);
                         pipeline.addLast(new SslHandler(engine));
                     }
                 } catch (Exception e) {
@@ -96,6 +97,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
+    @Override
     public int getPort() {
         return port;
     }
@@ -111,13 +113,16 @@ public abstract class TrackerServer implements TrackerConnector {
 
     @Override
     public void start() throws Exception {
-        InetSocketAddress endpoint;
         if (address == null) {
-            endpoint = new InetSocketAddress(port);
+            bind(new InetSocketAddress(port));
         } else {
-            endpoint = new InetSocketAddress(address, port);
+            for (String value : address.split(",")) {
+                bind(new InetSocketAddress(value.trim(), port));
+            }
         }
+    }
 
+    private void bind(InetSocketAddress endpoint) {
         Channel channel = bootstrap.bind(endpoint).syncUninterruptibly().channel();
         if (channel != null) {
             getChannelGroup().add(channel);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.traccar.storage.StorageName;
 
-import java.util.HashMap;
-
 @StorageName("tc_commands_queue")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueuedCommand extends BaseCommand {
@@ -29,7 +27,7 @@ public class QueuedCommand extends BaseCommand {
         queuedCommand.setDeviceId(command.getDeviceId());
         queuedCommand.setType(command.getType());
         queuedCommand.setTextChannel(command.getTextChannel());
-        queuedCommand.setAttributes(new HashMap<>(command.getAttributes()));
+        queuedCommand.setAttributes(new AttributeMap(command.getAttributes()));
         return queuedCommand;
     }
 
@@ -39,7 +37,7 @@ public class QueuedCommand extends BaseCommand {
         command.setType(getType());
         command.setDescription("");
         command.setTextChannel(getTextChannel());
-        command.setAttributes(new HashMap<>(getAttributes()));
+        command.setAttributes(new AttributeMap(getAttributes()));
         return command;
     }
 

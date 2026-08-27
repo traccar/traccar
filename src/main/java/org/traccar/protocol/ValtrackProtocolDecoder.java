@@ -49,9 +49,8 @@ public class ValtrackProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonArray messages = object.getJsonArray("resource");
 
         List<Position> positions = new LinkedList<>();
-        for (int i = 0; i < messages.size(); i++) {
+        for (JsonObject message : messages.getValuesAs(JsonObject.class)) {
 
-            JsonObject message = messages.getJsonObject(i);
             String id = message.getString("devid");
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);

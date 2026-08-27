@@ -20,15 +20,20 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class TelemaxProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyMMddHHmmss").withZone(ZoneId.systemDefault());
 
     public TelemaxProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -94,10 +99,10 @@ public class TelemaxProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude((Integer.parseInt(readValue(sentence, index, 6), 16) - 5400000) / 30000.0);
 
             if (i == 0 | i == count - 1) {
-                time = new SimpleDateFormat("yyMMddHHmmss").parse(readValue(sentence, index, 12));
+                time = DateUtil.parse(DATE_FORMAT, readValue(sentence, index, 12));
                 position.set(Position.KEY_STATUS, readValue(sentence, index, 8));
             } else {
-                time = new Date(time.getTime() + interval * 1000);
+                time = new Date(time.getTime() + interval * 1000L);
             }
 
             position.setTime(time);

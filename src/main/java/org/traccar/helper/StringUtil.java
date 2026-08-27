@@ -17,8 +17,7 @@ package org.traccar.helper;
 
 public final class StringUtil {
 
-    private StringUtil() {
-    }
+    private StringUtil() {}
 
     public static boolean containsHex(String value) {
         for (char c : value.toCharArray()) {
@@ -27,6 +26,22 @@ public final class StringUtil {
             }
         }
         return false;
+    }
+
+    public static String stripLeading(char c, String value) {
+        int start = 0;
+        while (start < value.length() - 1 && value.charAt(start) == c) {
+            start++;
+        }
+        return value.substring(start);
+    }
+
+    public static String stripTrailing(char c, String value) {
+        int end = value.length();
+        while (end > 1 && value.charAt(end - 1) == c) {
+            end--;
+        }
+        return value.substring(0, end);
     }
 
 }

@@ -41,7 +41,7 @@ public class WialonProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
+                pipeline.addLast(new LineBasedFrameDecoder(MAX_FRAME_LENGTH_LARGE));
                 if (config.getBoolean(Keys.PROTOCOL_UTF8.withPrefix(getName()))) {
                     pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));
                     pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));

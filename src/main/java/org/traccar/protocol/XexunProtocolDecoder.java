@@ -25,6 +25,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
@@ -67,7 +68,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, String value) {
         if (value != null) {
-            switch (value.toLowerCase()) {
+            switch (value.toLowerCase(Locale.ROOT)) {
                 case "acc on", "accstart" -> position.set(Position.KEY_IGNITION, true);
                 case "acc off", "accstop" -> position.set(Position.KEY_IGNITION, false);
                 case "help me!", "help me" -> position.addAlarm(Position.ALARM_SOS);
