@@ -295,7 +295,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 } else {
                     position.set(name, jsonNumber.doubleValue());
                 }
-                position.set(name, jsonNumber.doubleValue());
+                
             }
             case JsonString jsonString -> position.set(name, jsonString.getString());
             case JsonValue v when v == JsonValue.TRUE || v == JsonValue.FALSE ->
