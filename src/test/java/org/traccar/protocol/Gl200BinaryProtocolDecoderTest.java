@@ -11,6 +11,9 @@ public class Gl200BinaryProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200BinaryProtocolDecoder(null));
 
         verifyPositions(decoder, binary(
+                "2b000038000865134050947226820300030000216a908d67247f5000521619fa8b85e702ab64326a908d670000050082000aa51da13d0424"));
+
+        verifyPositions(decoder, binary(
                 "2b000038000865134050947226820300030000216a3ed6f101895000521629fa8b28f402ac1a8e6a3ed6f100001600000010f505010ff824"));
 
         verifyPosition(decoder, binary(

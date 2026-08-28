@@ -419,7 +419,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readerIndex() < recordEnd) {
 
                 int dataId = readVariableLength(buf);
-                int dataEnd = buf.readerIndex() + readVariableLength(buf);
+                int dataEnd = readVariableLength(buf) + buf.readerIndex();
 
                 if (dataId == 0x52) {
                     Position position = new Position(getProtocolName());
