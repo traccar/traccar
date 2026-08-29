@@ -39,6 +39,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
+import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.SummaryReportProvider;
 import org.traccar.reports.TripsReportProvider;
 import org.traccar.storage.Storage;
@@ -50,12 +51,14 @@ import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Singleton
 public class McpServerHolder implements AutoCloseable {
@@ -71,6 +74,7 @@ public class McpServerHolder implements AutoCloseable {
     private final boolean geocodeOnRequest;
     private final Provider<SummaryReportProvider> summaryReportProvider;
     private final Provider<TripsReportProvider> tripsReportProvider;
+    private final Provider<RouteReportProvider> routeReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -80,13 +84,15 @@ public class McpServerHolder implements AutoCloseable {
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
             Config config, @Nullable Geocoder geocoder,
             Provider<SummaryReportProvider> summaryReportProvider,
-            Provider<TripsReportProvider> tripsReportProvider) {
+            Provider<TripsReportProvider> tripsReportProvider,
+            Provider<RouteReportProvider> routeReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
         this.summaryReportProvider = summaryReportProvider;
         this.tripsReportProvider = tripsReportProvider;
+        this.routeReportProvider = routeReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -120,7 +126,13 @@ public class McpServerHolder implements AutoCloseable {
                                 "Returns trips for a device over a time range",
                                 Map.of(),
                                 (userId, deviceIds, from, to, arguments) -> tripsReportProvider.get().getObjects(
-                                        userId, deviceIds, List.of(), from, to)))
+                                        userId, deviceIds, List.of(), from, to)),
+                        createReportTool(
+                                "device-route",
+                                "Returns recorded positions for a device over a time range",
+                                Map.of("limit", schemaProperty(
+                                        "integer", "Maximum positions to return, evenly sampled across the range")),
+                                this::getRoute))
                 .build();
     }
 
@@ -279,6 +291,32 @@ public class McpServerHolder implements AutoCloseable {
         } catch (StorageException | SecurityException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
+    }
+
+    private List<Position> getRoute(
+            long userId, List<Long> deviceIds, Date from, Date to,
+            Map<String, Object> arguments) throws StorageException {
+
+        List<Position> positions;
+        try (Stream<Position> stream = routeReportProvider.get().getObjects(
+                userId, deviceIds, List.of(), from, to)) {
+            positions = stream.toList();
+        }
+
+        int limit = arguments.get("limit") instanceof Number number ? number.intValue() : 0;
+        if (limit <= 0 || positions.size() <= limit) {
+            return positions;
+        }
+        if (limit == 1) {
+            return List.of(positions.get(0));
+        }
+
+        List<Position> result = new ArrayList<>(limit);
+        double step = (double) (positions.size() - 1) / (limit - 1);
+        for (int i = 0; i < limit; i++) {
+            result.add(positions.get((int) Math.round(i * step)));
+        }
+        return result;
     }
 
     private McpSchema.CallToolResult errorResult(String message) {
