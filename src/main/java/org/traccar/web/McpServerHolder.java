@@ -40,6 +40,7 @@ import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.SummaryReportProvider;
+import org.traccar.reports.TripsReportProvider;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -69,6 +70,7 @@ public class McpServerHolder implements AutoCloseable {
     private final Geocoder geocoder;
     private final boolean geocodeOnRequest;
     private final Provider<SummaryReportProvider> summaryReportProvider;
+    private final Provider<TripsReportProvider> tripsReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -77,12 +79,14 @@ public class McpServerHolder implements AutoCloseable {
     public McpServerHolder(
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
             Config config, @Nullable Geocoder geocoder,
-            Provider<SummaryReportProvider> summaryReportProvider) {
+            Provider<SummaryReportProvider> summaryReportProvider,
+            Provider<TripsReportProvider> tripsReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
         this.summaryReportProvider = summaryReportProvider;
+        this.tripsReportProvider = tripsReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -110,7 +114,13 @@ public class McpServerHolder implements AutoCloseable {
                                         "boolean", "Return one item per day instead of one for the whole range")),
                                 (userId, deviceIds, from, to, arguments) -> summaryReportProvider.get().getObjects(
                                         userId, deviceIds, List.of(), from, to,
-                                        arguments.get("daily") instanceof Boolean daily && daily)))
+                                        arguments.get("daily") instanceof Boolean daily && daily)),
+                        createReportTool(
+                                "device-trips",
+                                "Returns trips for a device over a time range",
+                                Map.of(),
+                                (userId, deviceIds, from, to, arguments) -> tripsReportProvider.get().getObjects(
+                                        userId, deviceIds, List.of(), from, to)))
                 .build();
     }
 
