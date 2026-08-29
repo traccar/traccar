@@ -3,6 +3,9 @@ package org.traccar.protocol;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
+
+import static org.mockito.Mockito.when;
 
 public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
@@ -86,7 +89,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_FACTORY_RESET);
         verifyFrame(
-            binary("7e810500010b3a73ce2ff2000001d57e"),
+            binary("7e810500010b3a73ce2ff2000003d77e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_REBOOT_DEVICE);
@@ -184,7 +187,7 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_FACTORY_RESET);
         verifyFrame(
-            binary("7e810540010300000123456789012345000001297e"),
+            binary("7e8105400103000001234567890123450000032b7e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_REBOOT_DEVICE);
@@ -246,6 +249,101 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CONFIGURATION);
         verifyFrame(
             binary("7e8104400003000001234567890123450000287e"),
+            encodeCommand(encoder, decoder, command));
+
+    }
+
+    @Test
+    public void testEncodeRealDevice() throws Exception {
+
+        // Verified on a real BSJ KM02 device (uniqueId 024530313349, JT/T 808-2013) on 2026-08-29.
+        // Every frame below is the exact byte sequence that was sent to the device over TCP and
+        // acknowledged with a terminal general response (0x0001, result 0), except 0x8201 which is
+        // answered directly with a location query response (0x0201) and needs no 0x8001 reply.
+
+        var decoder = inject(new Jt808ProtocolDecoder(null));
+        var encoder = inject(new Jt808ProtocolEncoder(null));
+        var device = encoder.getCacheManager().getObject(Device.class, 1);
+        when(device.getUniqueId()).thenReturn("024530313349");
+
+        Command command = new Command();
+        command.setDeviceId(1);
+
+        command.setType(Command.TYPE_REBOOT_DEVICE);
+        verifyFrame(
+            binary("7e81050001024530313349000004bd7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_POSITION_SINGLE);
+        verifyFrame(
+            binary("7e820100000245303133490000bf7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_POSITION_PERIODIC);
+        command.set(Command.KEY_FREQUENCY, 10);
+        verifyFrame(
+            binary("7e8103000a02453031334900000100000029040000000a927e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_SET_SPEED_LIMIT);
+        command.set(Command.KEY_DATA, 100);
+        verifyFrame(
+            binary("7e81030013024530313349000002000000550400000064000000560400000023eb7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_MESSAGE);
+        command.set(Command.KEY_MESSAGE, "Hello");
+        verifyFrame(
+            binary("7e8300000602453031334900000448656c6c6fff7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_VOICE_MESSAGE);
+        verifyFrame(
+            binary("7e8300000602453031334900000848656c6c6ff37e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_POSITION_STOP);
+        verifyFrame(
+            binary("7e820200060245303133490000000000000000ba7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_OUTPUT_CONTROL);
+        command.set(Command.KEY_INDEX, 1);
+        verifyFrame(
+            binary("7e85000001024530313349000001b97e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_ALARM_ARM);
+        verifyFrame(
+            binary("7e8103000b02453031334900000100000024050175736572857e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_ALARM_DISARM);
+        verifyFrame(
+            binary("7e8103000b02453031334900000100000024050075736572847e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_ALARM_DISMISS);
+        verifyFrame(
+            binary("7e820300060245303133490000000000000000bb7e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_REQUEST_PHOTO);
+        command.set(Command.KEY_INDEX, 0); // real device test used default channel 0
+        verifyFrame(
+            binary("7e8801000c0245303133490000000001000000000000000000b87e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_CONFIGURATION);
+        verifyFrame(
+            binary("7e810400000245303133490000b97e"),
+            encodeCommand(encoder, decoder, command));
+
+        command.setType(Command.TYPE_SET_CONNECTION);
+        command.set(Command.KEY_SERVER, "168.144.104.224");
+        command.set(Command.KEY_PORT, 5015);
+        verifyFrame(
+            binary("7e8103001e024530313349000002000000130f3136382e3134342e3130342e323234000000180400001397077e"),
             encodeCommand(encoder, decoder, command));
 
     }

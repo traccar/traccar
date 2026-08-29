@@ -160,7 +160,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_FACTORY_RESET:
-                    data.writeByte(0x01); // terminal control: restore factory settings
+                    data.writeByte(0x03); // terminal control: restore factory settings
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_MESSAGE:
