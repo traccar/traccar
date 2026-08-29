@@ -34,9 +34,12 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.model.UserRestrictions;
+import org.traccar.reports.SummaryReportProvider;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -45,7 +48,10 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
+import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +68,7 @@ public class McpServerHolder implements AutoCloseable {
     private final Provider<PermissionsService> permissionsService;
     private final Geocoder geocoder;
     private final boolean geocodeOnRequest;
+    private final Provider<SummaryReportProvider> summaryReportProvider;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -69,11 +76,13 @@ public class McpServerHolder implements AutoCloseable {
     @Inject
     public McpServerHolder(
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
-            Config config, @Nullable Geocoder geocoder) {
+            Config config, @Nullable Geocoder geocoder,
+            Provider<SummaryReportProvider> summaryReportProvider) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
+        this.summaryReportProvider = summaryReportProvider;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -91,7 +100,17 @@ public class McpServerHolder implements AutoCloseable {
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool(), createDeviceListTool())
+                .tools(
+                        createVersionTool(), createDevicePositionTool(), createDeviceListTool(),
+                        createReportTool(
+                                "device-summary",
+                                "Returns distance, speed, fuel and engine hours totals for a device "
+                                        + "over a time range",
+                                Map.of("daily", schemaProperty(
+                                        "boolean", "Return one item per day instead of one for the whole range")),
+                                (userId, deviceIds, from, to, arguments) -> summaryReportProvider.get().getObjects(
+                                        userId, deviceIds, List.of(), from, to,
+                                        arguments.get("daily") instanceof Boolean daily && daily)))
                 .build();
     }
 
@@ -179,6 +198,77 @@ public class McpServerHolder implements AutoCloseable {
                 .tool(toolSchema)
                 .callHandler(this::getDeviceList)
                 .build();
+    }
+
+    @FunctionalInterface
+    private interface ReportFunction {
+        Object getObjects(
+                long userId, List<Long> deviceIds, Date from, Date to,
+                Map<String, Object> arguments) throws StorageException;
+    }
+
+    private McpServerFeatures.AsyncToolSpecification createReportTool(
+            String name, String title, Map<String, Object> extraProperties, ReportFunction function) {
+
+        var properties = new LinkedHashMap<String, Object>();
+        properties.put("deviceId", schemaProperty("number", "Device id, see device-list for available ids"));
+        properties.put("from", schemaProperty("string", "Start of the time range, ISO-8601"));
+        properties.put("to", schemaProperty("string", "End of the time range, ISO-8601"));
+        properties.putAll(extraProperties);
+
+        var inputSchema = new McpSchema.JsonSchema(
+                "object", properties, List.of("deviceId", "from", "to"), null, null, null);
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name(name)
+                .title(title)
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler((context, request) -> getReport(context, request, function))
+                .build();
+    }
+
+    private Mono<McpSchema.CallToolResult> getReport(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request, ReportFunction function) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        try {
+            Object deviceIdValue = request.arguments().get("deviceId");
+            if (!(deviceIdValue instanceof Number deviceIdNumber)) {
+                return Mono.just(errorResult("deviceId argument is required"));
+            }
+            Object fromValue = request.arguments().get("from");
+            Object toValue = request.arguments().get("to");
+            if (!(fromValue instanceof String fromText) || !(toValue instanceof String toText)) {
+                return Mono.just(errorResult("from and to arguments are required"));
+            }
+
+            long deviceId = deviceIdNumber.longValue();
+            Date from = DateUtil.parseDate(fromText);
+            Date to = DateUtil.parseDate(toText);
+
+            permissionsService.get().checkRestriction(userId, UserRestrictions::getDisableReports);
+            permissionsService.get().checkPermission(Device.class, userId, deviceId);
+
+            Object items = function.getObjects(
+                    userId, List.of(deviceId), from, to, request.arguments());
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of("items", items))
+                    .build());
+        } catch (DateTimeParseException e) {
+            return Mono.just(errorResult("Invalid from or to value, expected ISO-8601"));
+        } catch (StorageException | SecurityException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
     }
 
     private McpSchema.CallToolResult errorResult(String message) {
