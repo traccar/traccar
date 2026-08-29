@@ -8,8 +8,6 @@ nbactions.xml
 .DS_Store
 .checkstyle
 .gradle
-.gradle-home
-__pycache__
 out
 build
 .vscode
