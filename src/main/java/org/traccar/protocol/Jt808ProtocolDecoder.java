@@ -583,12 +583,18 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // response serial number
             buf.readUnsignedByte(); // parameter count
 
-            int endIndex = buf.readerIndex() + bodyLength - 3;
-            while (buf.readerIndex() < endIndex) {
-                int parameterId = buf.readInt();
+            // Parameter list is a sequence of TLV entries (subtype, length, value), so it is
+            // parsed with the same loop convention as the extension list in decodeLocation:
+            // the two trailing bytes are the checksum and the delimiter.
+            while (buf.readableBytes() > 2) {
+
+                int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
-                int valueEndIndex = buf.readerIndex() + length;
-                switch (parameterId) {
+                int endIndex = buf.readerIndex() + length;
+                if (endIndex > buf.writerIndex()) {
+                    break;
+                }
+                switch (subtype) {
                     case 0x0001:
                         position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
@@ -611,22 +617,22 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("defaultReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0055:
-                        position.set(Position.KEY_SPEED_LIMIT, (int) buf.readUnsignedInt());
+                        position.set(Position.KEY_SPEED_LIMIT, buf.readUnsignedInt());
                         break;
                     case 0x0056:
-                        position.set("speedLimitDuration", (int) buf.readUnsignedInt());
+                        position.set("speedLimitDuration", buf.readUnsignedInt());
                         break;
                     case 0x0080:
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100L);
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100); // 0.1 km units
                         break;
                     case 0x0083:
                         position.set("plateNumber", buf.readCharSequence(length, Charset.isSupported("GBK")
                                 ? Charset.forName("GBK") : StandardCharsets.US_ASCII).toString().trim());
                         break;
                     default:
-                        buf.readerIndex(valueEndIndex);
                         break;
                 }
+                buf.readerIndex(endIndex);
             }
 
             return position;
