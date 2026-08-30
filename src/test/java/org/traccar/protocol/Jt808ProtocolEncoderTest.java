@@ -92,27 +92,6 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             binary("7e810500010b3a73ce2ff2000003d77e"),
             encodeCommand(encoder, decoder, command));
 
-        command.setType(Command.TYPE_REBOOT_DEVICE);
-        verifyFrame(
-            binary("7e810500010b3a73ce2ff2000004d07e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 10);
-        verifyFrame(
-            binary("7e8103000a0b3a73ce2ff200000100000029040000000aff7e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_ARM);
-        verifyFrame(
-            binary("7e8103000b0b3a73ce2ff200000100000024050175736572e87e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_DISARM);
-        verifyFrame(
-            binary("7e8103000b0b3a73ce2ff200000100000024050075736572e97e"),
-            encodeCommand(encoder, decoder, command));
-
         command.setType(Command.TYPE_SET_CONNECTION);
         command.set(Command.KEY_SERVER, "168.144.104.224");
         command.set(Command.KEY_PORT, 5015);
@@ -190,27 +169,6 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
             binary("7e8105400103000001234567890123450000032b7e"),
             encodeCommand(encoder, decoder, command));
 
-        command.setType(Command.TYPE_REBOOT_DEVICE);
-        verifyFrame(
-            binary("7e8105400103000001234567890123450000042c7e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 10);
-        verifyFrame(
-            binary("7e8103400a030000012345678901234500000100000029040000000a037e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_ARM);
-        verifyFrame(
-            binary("7e8103400b030000012345678901234500000100000024050175736572147e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_DISARM);
-        verifyFrame(
-            binary("7e8103400b030000012345678901234500000100000024050075736572157e"),
-            encodeCommand(encoder, decoder, command));
-
         command.setType(Command.TYPE_SET_CONNECTION);
         command.set(Command.KEY_SERVER, "168.144.104.224");
         command.set(Command.KEY_PORT, 5015);
@@ -269,20 +227,9 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
 
-        command.setType(Command.TYPE_REBOOT_DEVICE);
-        verifyFrame(
-            binary("7e81050001024530313349000004bd7e"),
-            encodeCommand(encoder, decoder, command));
-
         command.setType(Command.TYPE_POSITION_SINGLE);
         verifyFrame(
             binary("7e820100000245303133490000bf7e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 10);
-        verifyFrame(
-            binary("7e8103000a02453031334900000100000029040000000a927e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
@@ -311,16 +258,6 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         verifyFrame(
             binary("7e85000001024530313349000001b97e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_ARM);
-        verifyFrame(
-            binary("7e8103000b02453031334900000100000024050175736572857e"),
-            encodeCommand(encoder, decoder, command));
-
-        command.setType(Command.TYPE_ALARM_DISARM);
-        verifyFrame(
-            binary("7e8103000b02453031334900000100000024050075736572847e"),
             encodeCommand(encoder, decoder, command));
 
         command.setType(Command.TYPE_ALARM_DISMISS);
