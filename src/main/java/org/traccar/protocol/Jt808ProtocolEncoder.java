@@ -59,12 +59,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
         String model = getDeviceModel(command.getDeviceId());
         try {
             ByteBuf data = Unpooled.buffer();
-            var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
-            // References:
-            // - JT/T 808 standard: 道路运输车辆卫星定位系统 终端通信协议及数据格式 (2013 & 2019 editions)
-            // - EMQX JT/T 808 gateway data exchange format (parameter value types):
-            //   https://docs.emqx.com/en/emqx/latest/gateway/jt808_data_exchange.html
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
                     if (model != null && Set.of("AL300", "GL100", "VL300").contains(model)) {
@@ -77,6 +72,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                                 Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                     } else if (model != null && Set.of("BSJ", "C5", "C5L").contains(model)) {
                         data.writeByte(1); // flag
+                        var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
@@ -89,16 +85,19 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
                     }
                 case Command.TYPE_REBOOT_DEVICE:
-                    data.writeByte(0x04); // terminal control: reboot
+                    data.writeByte(1); // number of parameters
+                    data.writeByte(0x23); // parameter id
+                    data.writeByte(1); // parameter value length
+                    data.writeByte(0x03); // restart
                     return decoder.formatMessage(
-                            Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
+                            Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_POSITION_PERIODIC:
                     data.writeByte(1); // number of parameters
-                    data.writeInt(0x0029); // parameter id: default report interval
+                    data.writeByte(0x06); // parameter id
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_FREQUENCY));
                     return decoder.formatMessage(
-                            Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                            Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_POSITION_SINGLE:
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_LOCATION_QUERY, id, false, data);
@@ -110,13 +109,13 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_ALARM_ARM:
                 case Command.TYPE_ALARM_DISARM:
                     data.writeByte(1); // number of parameters
-                    data.writeInt(0x0024); // parameter id: arm/disarm
+                    data.writeByte(0x24); // parameter id
                     String username = "user";
                     data.writeByte(1 + username.length()); // parameter value length
                     data.writeByte(command.getType().equals(Command.TYPE_ALARM_ARM) ? 0x01 : 0x00);
                     data.writeCharSequence(username, StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
-                            Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                            Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_ALARM_DISMISS:
                     data.writeShort(0); // response serial number
                     data.writeInt(0); // alarm type (dword, 0 = confirm all normal alarms)
@@ -165,12 +164,14 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_MESSAGE:
                     data.writeByte(0x04); // text flag: display on terminal screen
-                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), charset);
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE),
+                            Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_VOICE_MESSAGE:
                     data.writeByte(0x08); // text flag: TTS voice broadcast
-                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), charset);
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE),
+                            Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_REQUEST_PHOTO:
