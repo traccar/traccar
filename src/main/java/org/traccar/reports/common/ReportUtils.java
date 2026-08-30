@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,17 +107,41 @@ public class ReportUtils {
         }
     }
 
-    public double calculateFuel(Position first, Position last, Device device) {
+    public double calculateFuel(Position first, Position last, Device device, List<Event> fuelEvents) {
         if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
         } else if (first.hasAttribute(Position.KEY_FUEL) && last.hasAttribute(Position.KEY_FUEL)) {
-            return first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
+            double delta = first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
+            return delta + sumFuelEvents(fuelEvents, first.getFixTime(), last.getFixTime());
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)
                 && device.hasAttribute(Keys.FUEL_CAPACITY.getKey())) {
-            return ((first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL)) / 100)
+            double delta = ((first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL)) / 100)
                     * device.getDouble(Keys.FUEL_CAPACITY.getKey());
+            return delta + sumFuelEvents(fuelEvents, first.getFixTime(), last.getFixTime());
         }
         return 0;
+    }
+
+    private double sumFuelEvents(List<Event> fuelEvents, Date from, Date to) {
+        double total = 0;
+        for (Event event : fuelEvents) {
+            Date eventTime = event.getEventTime();
+            if (!eventTime.before(from) && !eventTime.after(to)) {
+                total += event.getDouble("after") - event.getDouble("before");
+            }
+        }
+        return total;
+    }
+
+    public List<Event> getFuelEvents(Device device, Date from, Date to) throws StorageException {
+        return storage.getObjects(Event.class, new Request(
+                new Columns.All(),
+                Condition.merge(List.of(
+                        new Condition.Equals("deviceId", device.getId()),
+                        new Condition.Between("eventTime", from, to),
+                        new Condition.Or(
+                                new Condition.Equals("type", Event.TYPE_DEVICE_FUEL_INCREASE),
+                                new Condition.Equals("type", Event.TYPE_DEVICE_FUEL_DROP))))));
     }
 
     public String findDriver(Position firstPosition, Position lastPosition) {
@@ -173,7 +197,7 @@ public class ReportUtils {
 
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
-            boolean ignoreOdometer) throws StorageException {
+            boolean ignoreOdometer, List<Event> fuelEvents) throws StorageException {
 
         TripReportItem trip = new TripReportItem();
 
@@ -208,7 +232,7 @@ public class ReportUtils {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
         }
         trip.setMaxSpeed(maxSpeed);
-        trip.setSpentFuel(calculateFuel(startTrip, endTrip, device));
+        trip.setSpentFuel(calculateFuel(startTrip, endTrip, device, fuelEvents));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
@@ -227,7 +251,8 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            Device device, Position startStop, Position endStop, boolean ignoreOdometer) {
+            Device device, Position startStop, Position endStop,
+            boolean ignoreOdometer, List<Event> fuelEvents) {
 
         StopReportItem stop = new StopReportItem();
 
@@ -249,7 +274,7 @@ public class ReportUtils {
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();
         stop.setDuration(stopDuration);
-        stop.setSpentFuel(calculateFuel(startStop, endStop, device));
+        stop.setSpentFuel(calculateFuel(startStop, endStop, device, fuelEvents));
 
         if (startStop.hasAttribute(Position.KEY_HOURS) && endStop.hasAttribute(Position.KEY_HOURS)) {
             stop.setEngineHours(endStop.getLong(Position.KEY_HOURS) - startStop.getLong(Position.KEY_HOURS));
@@ -272,12 +297,12 @@ public class ReportUtils {
     @SuppressWarnings("unchecked")
     private <T extends BaseReportItem> T calculateTripOrStop(
             Device device, Position startPosition, Position endPosition, double maxSpeed,
-            boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
+            boolean ignoreOdometer, Class<T> reportClass, List<Event> fuelEvents) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer);
+            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer, fuelEvents);
         } else {
-            return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer);
+            return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer, fuelEvents);
         }
     }
 
@@ -301,6 +326,7 @@ public class ReportUtils {
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
         boolean useNewLogic = config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC);
+        List<Event> fuelEvents = getFuelEvents(device, from, to);
 
         List<Event> events = new ArrayList<>();
         Map<Long, Position> positionMap = new HashMap<>();
@@ -391,7 +417,7 @@ public class ReportUtils {
                 if (endPosition != null) {
                     result.add(calculateTripOrStop(
                             device, startPosition, endPosition,
-                            event.getDouble("maxSpeed"), ignoreOdometer, reportClass));
+                            event.getDouble("maxSpeed"), ignoreOdometer, reportClass, fuelEvents));
                 }
                 startPosition = null;
             }
@@ -399,7 +425,7 @@ public class ReportUtils {
 
         if (startPosition != null) {
             result.add(calculateTripOrStop(
-                    device, startPosition, lastPosition, maxSpeed, ignoreOdometer, reportClass));
+                    device, startPosition, lastPosition, maxSpeed, ignoreOdometer, reportClass, fuelEvents));
         }
 
         return result;
@@ -413,6 +439,7 @@ public class ReportUtils {
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
+        List<Event> fuelEvents = getFuelEvents(device, from, to);
 
         var events = storage.getObjects(Event.class, new Request(
                 new Columns.All(),
@@ -445,7 +472,7 @@ public class ReportUtils {
                                 new Condition.Equals("id", event.getPositionId()))));
                 if (endPosition != null) {
                     result.add(calculateTripOrStop(
-                            device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
+                            device, startPosition, endPosition, 0, ignoreOdometer, reportClass, fuelEvents));
                 }
                 startPosition = null;
             }
@@ -454,7 +481,7 @@ public class ReportUtils {
         if (startPosition != null) {
             Position endPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, true);
             result.add(calculateTripOrStop(
-                    device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
+                    device, startPosition, endPosition, 0, ignoreOdometer, reportClass, fuelEvents));
         }
 
         return result;
