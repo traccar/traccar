@@ -170,7 +170,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         int start = buf.readerIndex();
         buf.skipBytes(1);
         int status = buf.readUnsignedShortLE();
-        int length = 3;
+        int length = 7;
         if (BitUtil.check(status, 1)) {
             length += 10;
         }
