@@ -102,8 +102,8 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_LOCATION_QUERY, id, false, data);
                 case Command.TYPE_POSITION_STOP:
-                    data.writeShort(0); // time interval
-                    data.writeInt(0); // validity period (dword)
+                    data.writeShort(0);
+                    data.writeInt(0);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TEMPORARY_TRACKING, id, false, data);
                 case Command.TYPE_ALARM_ARM:
@@ -117,8 +117,8 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_ALARM_DISMISS:
-                    data.writeShort(0); // response serial number
-                    data.writeInt(0); // alarm type (dword, 0 = confirm all normal alarms)
+                    data.writeShort(0);
+                    data.writeInt(0);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_ALARM_ACK, id, false, data);
                 case Command.TYPE_ENGINE_STOP:
@@ -143,9 +143,6 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_SET_CONNECTION:
                     data.writeByte(2); // number of parameters
                     String server = command.getString(Command.KEY_SERVER);
-                    // Server address (0x13) and TCP port (0x18) use the same standard parameter
-                    // IDs in both JT/T 808-2013 and 2019; 0x0001 is heartbeat interval and
-                    // 0x0002 is TCP response timeout, so no version-specific branch is needed.
                     data.writeInt(0x13); // parameter id: server address
                     data.writeByte(server.length()); // parameter value length
                     data.writeCharSequence(server, StandardCharsets.US_ASCII);
@@ -155,50 +152,50 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_POWER_OFF:
-                    data.writeByte(0x02); // terminal control: power off
+                    data.writeByte(0x02); // power off
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_FACTORY_RESET:
-                    data.writeByte(0x03); // terminal control: restore factory settings
+                    data.writeByte(0x03); // factory reset
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_MESSAGE:
-                    data.writeByte(0x04); // text flag: display on terminal screen
+                    data.writeByte(0x04); // display on terminal
                     data.writeCharSequence(command.getString(Command.KEY_MESSAGE),
                             Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_VOICE_MESSAGE:
-                    data.writeByte(0x08); // text flag: TTS voice broadcast
+                    data.writeByte(0x08); // tts voice broadcast
                     data.writeCharSequence(command.getString(Command.KEY_MESSAGE),
                             Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_REQUEST_PHOTO:
-                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // channel id
-                    data.writeShort(1); // shooting command: take one photo
-                    data.writeShort(0); // photo interval / video duration
-                    data.writeByte(0); // save flag: real-time upload
-                    data.writeByte(0); // resolution
-                    data.writeByte(0); // image quality
-                    data.writeByte(0); // brightness
-                    data.writeByte(0); // contrast
-                    data.writeByte(0); // saturation
-                    data.writeByte(0); // chroma
+                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // channel
+                    data.writeShort(1); // take one photo
+                    data.writeShort(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
+                    data.writeByte(0);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TAKE_PHOTO, id, false, data);
                 case Command.TYPE_SET_SPEED_LIMIT:
                     data.writeByte(2); // number of parameters
-                    data.writeInt(0x0055); // parameter id: overspeed alarm speed threshold
+                    data.writeInt(0x0055); // parameter id: overspeed threshold
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_DATA));
-                    data.writeInt(0x0056); // parameter id: overspeed alarm duration
+                    data.writeInt(0x0056); // parameter id: overspeed duration
                     data.writeByte(4); // parameter value length
-                    data.writeInt(35); // default duration in seconds (no dedicated traccar command field)
+                    data.writeInt(35); // duration in seconds
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_OUTPUT_CONTROL:
-                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // control flag (2013: single byte)
+                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // control flag
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_VEHICLE_CONTROL, id, false, data);
                 case Command.TYPE_CONFIGURATION:
