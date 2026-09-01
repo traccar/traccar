@@ -6,7 +6,9 @@ Traccar is a free, open source GPS tracking platform. This repository contains t
 
 Traccar is built for anyone who needs to track vehicles, assets, or people: fleet operators, GPS tracking resellers running their own white-label platform, and individuals tracking their own devices. You can [self-host it for free](https://www.traccar.org/install-vps/), or use [official managed hosting](https://www.traccar.org/pricing/) if you'd rather not run a server yourself.
 
-![Traccar web dashboard](.github/screenshot.png)
+| Web Dashboard |
+|---|
+| ![Traccar web dashboard](.github/screenshot.png) |
 
 Other parts of the Traccar platform:
 
