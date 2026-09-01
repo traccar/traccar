@@ -1621,6 +1621,9 @@ paths:
                 expiration:
                   type: string
                   format: date-time
+                userId:
+                  type: integer
+                  format: int64
         required: false
       responses:
         '200':
