@@ -36,14 +36,17 @@ import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +91,7 @@ public class McpServerHolder implements AutoCloseable {
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool())
+                .tools(createVersionTool(), createDevicePositionTool(), createDeviceListTool())
                 .build();
     }
 
@@ -102,6 +105,10 @@ public class McpServerHolder implements AutoCloseable {
             return McpTransportContext.EMPTY;
         }
         return McpTransportContext.create(contextData);
+    }
+
+    private Map<String, Object> schemaProperty(String type, String description) {
+        return Map.of("type", type, "description", description);
     }
 
     private McpServerFeatures.AsyncToolSpecification createVersionTool() {
@@ -151,6 +158,29 @@ public class McpServerHolder implements AutoCloseable {
                 .build();
     }
 
+    private McpServerFeatures.AsyncToolSpecification createDeviceListTool() {
+
+        var inputSchema = new McpSchema.JsonSchema(
+                "object",
+                Map.of(
+                        "keyword", schemaProperty("string", "Search across name, unique id, phone, model, contact"),
+                        "limit", schemaProperty("integer", "Maximum number of devices to return"),
+                        "offset", schemaProperty("integer", "Number of devices to skip")),
+                null, null, null, null);
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("device-list")
+                .title("Returns devices accessible to the current user")
+                .inputSchema(inputSchema)
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler(this::getDeviceList)
+                .build();
+    }
+
     private McpSchema.CallToolResult errorResult(String message) {
         return McpSchema.CallToolResult.builder()
                 .addTextContent(message)
@@ -192,6 +222,42 @@ public class McpServerHolder implements AutoCloseable {
                     .structuredContent(position)
                     .build());
         } catch (StorageException | SecurityException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
+    }
+
+    private int intArgument(McpSchema.CallToolRequest request, String name) {
+        return request.arguments().get(name) instanceof Number number ? number.intValue() : 0;
+    }
+
+    private Mono<McpSchema.CallToolResult> getDeviceList(
+            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
+        if (userId == null) {
+            return Mono.just(errorResult("User context is missing"));
+        }
+
+        var conditions = new LinkedList<Condition>();
+        conditions.add(new Condition.Permission(User.class, userId, Device.class));
+
+        Object keyword = request.arguments().get("keyword");
+        if (keyword instanceof String text && !text.isEmpty()) {
+            conditions.add(new Condition.Contains(
+                    List.of("name", "uniqueId", "phone", "model", "contact"), text));
+        }
+
+        var order = new Order(
+                "name", false, intArgument(request, "limit"), intArgument(request, "offset"));
+
+        try {
+            List<Device> devices = storage.getObjects(Device.class, new Request(
+                    new Columns.All(), Condition.merge(conditions), order));
+
+            return Mono.just(McpSchema.CallToolResult.builder()
+                    .structuredContent(Map.of("devices", devices))
+                    .build());
+        } catch (StorageException e) {
             return Mono.just(errorResult(e.getMessage()));
         }
     }
