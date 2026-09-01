@@ -734,7 +734,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0x14:
-                    position.set("videoAlarm", buf.readUnsignedInt());
+                    long videoAlarm = buf.readUnsignedInt();
+                    position.set("videoAlarm", videoAlarm);
+                    if (BitUtil.check(videoAlarm, 2)) {
+                        position.addAlarm(Position.ALARM_STORAGE_FAILURE);
+                    }
+                    break;
+                case 0x17:
+                    position.set("storageAlarm", buf.readUnsignedShort());
                     break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
