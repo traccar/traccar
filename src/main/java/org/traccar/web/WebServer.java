@@ -176,16 +176,6 @@ public class WebServer implements LifecycleObject {
             servletHandler.addServlet(servletHolder, "/api/media/*");
         }
 
-        if (config.getBoolean(Keys.WEB_MCP_ENABLE)) {
-            mcpServerHolder = injector.getInstance(McpServerHolder.class);
-            var mcpServletHolder = new ServletHolder(mcpServerHolder.getServlet());
-            mcpServletHolder.setAsyncSupported(true);
-            servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
-            servletHandler.addFilter(
-                    new FilterHolder(new McpAuthFilter(injector.getInstance(LoginService.class))),
-                    McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
-        }
-
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
         resourceConfig.registerClasses(
@@ -200,7 +190,19 @@ public class WebServer implements LifecycleObject {
         if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
             LOGGER.warn("Failed to load API resources");
         }
-        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
+        var apiContainer = new ServletContainer(resourceConfig);
+        servletHandler.addServlet(new ServletHolder(apiContainer), "/api/*");
+
+        if (config.getBoolean(Keys.WEB_MCP_ENABLE)) {
+            mcpServerHolder = injector.getInstance(McpServerHolder.class);
+            mcpServerHolder.setApiHandler(apiContainer::getApplicationHandler);
+            var mcpServletHolder = new ServletHolder(mcpServerHolder.getServlet());
+            mcpServletHolder.setAsyncSupported(true);
+            servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
+            servletHandler.addFilter(
+                    new FilterHolder(new McpAuthFilter(injector.getInstance(LoginService.class))),
+                    McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
+        }
     }
 
     private void initSessionConfig(ServletContextHandler servletHandler) {
