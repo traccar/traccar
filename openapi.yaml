@@ -2789,6 +2789,7 @@ paths:
         Fetch a list of ReportTrips within the time period for the Devices or
         Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:

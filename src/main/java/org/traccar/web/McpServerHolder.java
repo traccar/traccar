@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ public class McpServerHolder implements AutoCloseable {
     private final Provider<PermissionsService> permissionsService;
     private final Geocoder geocoder;
     private final boolean geocodeOnRequest;
+    private final McpApiInvoker apiInvoker;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
@@ -66,11 +68,12 @@ public class McpServerHolder implements AutoCloseable {
     @Inject
     public McpServerHolder(
             ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
-            Config config, @Nullable Geocoder geocoder) {
+            Config config, @Nullable Geocoder geocoder, McpToolRegistry toolRegistry, McpApiInvoker apiInvoker) {
 
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.geocoder = geocoder;
+        this.apiInvoker = apiInvoker;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
 
         transport = HttpServletStreamableServerTransportProvider.builder()
@@ -85,10 +88,17 @@ public class McpServerHolder implements AutoCloseable {
                 .prompts(true)
                 .build();
 
+        var toolSpecifications = new ArrayList<McpServerFeatures.AsyncToolSpecification>();
+        toolSpecifications.add(createVersionTool());
+        toolSpecifications.add(createDevicePositionTool());
+        for (McpToolRegistry.McpApiTool tool : toolRegistry.getTools()) {
+            toolSpecifications.add(createApiTool(tool));
+        }
+
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool())
+                .tools(toolSpecifications)
                 .build();
     }
 
@@ -97,6 +107,10 @@ public class McpServerHolder implements AutoCloseable {
         Object userId = request.getAttribute(McpAuthFilter.ATTRIBUTE_USER_ID);
         if (userId != null) {
             contextData.put(McpAuthFilter.ATTRIBUTE_USER_ID, userId);
+        }
+        Object authorization = request.getAttribute(McpAuthFilter.ATTRIBUTE_AUTHORIZATION);
+        if (authorization != null) {
+            contextData.put(McpAuthFilter.ATTRIBUTE_AUTHORIZATION, authorization);
         }
         if (contextData.isEmpty()) {
             return McpTransportContext.EMPTY;
@@ -149,6 +163,33 @@ public class McpServerHolder implements AutoCloseable {
                 .tool(toolSchema)
                 .callHandler(this::getDevicePosition)
                 .build();
+    }
+
+    private McpServerFeatures.AsyncToolSpecification createApiTool(McpToolRegistry.McpApiTool tool) {
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name(tool.name())
+                .title(tool.title())
+                .inputSchema(tool.inputSchema())
+                .annotations(READ_ONLY_ANNOTATIONS)
+                .build();
+
+        return McpServerFeatures.AsyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler((context, request) -> invokeApiTool(tool, context, request))
+                .build();
+    }
+
+    private Mono<McpSchema.CallToolResult> invokeApiTool(
+            McpToolRegistry.McpApiTool tool, McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
+
+        try {
+            String authorization = (String) context.transportContext().get(McpAuthFilter.ATTRIBUTE_AUTHORIZATION);
+            String body = apiInvoker.get(tool.path(), request.arguments(), authorization);
+            return Mono.just(McpSchema.CallToolResult.builder().addTextContent(body).build());
+        } catch (RuntimeException e) {
+            return Mono.just(errorResult(e.getMessage()));
+        }
     }
 
     private McpSchema.CallToolResult errorResult(String message) {
