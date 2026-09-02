@@ -70,25 +70,20 @@ public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
         command.setType(Command.TYPE_SET_SPEED_LIMIT);
         command.set(Command.KEY_DATA, 100);
+        verifyFrame(
+            binary("7e8103000a0b3a73ce2ff2000001000000550400000064ed7e"),
+            encodeCommand(encoder, decoder, command));
+
         command.set(Command.KEY_DURATION, 35);
         verifyFrame(
             binary("7e810300130b3a73ce2ff2000002000000550400000064000000560400000023867e"),
             encodeCommand(encoder, decoder, command));
-
-        Command speedLimitCommand = new Command();
-        speedLimitCommand.setDeviceId(1);
-        speedLimitCommand.setType(Command.TYPE_SET_SPEED_LIMIT);
-        speedLimitCommand.set(Command.KEY_DATA, 100);
-        verifyFrame(
-            binary("7e8103000a0b3a73ce2ff2000001000000550400000064ed7e"),
-            encodeCommand(encoder, decoder, speedLimitCommand));
 
         command.setType(Command.TYPE_CONFIGURATION);
         verifyFrame(
             binary("7e810400000b3a73ce2ff20000d47e"),
             encodeCommand(encoder, decoder, command));
 
-        // JT/T 808-2019 protocol (10-byte id)
         decoder.setProtocolVersion(3);
 
         command.setType(Command.TYPE_POSITION_SINGLE);
