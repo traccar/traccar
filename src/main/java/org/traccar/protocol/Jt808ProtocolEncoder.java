@@ -185,13 +185,16 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_TAKE_PHOTO, id, false, data);
                 case Command.TYPE_SET_SPEED_LIMIT:
-                    data.writeByte(2); // number of parameters
+                    boolean hasDuration = command.hasAttribute(Command.KEY_DURATION);
+                    data.writeByte(hasDuration ? 2 : 1); // number of parameters
                     data.writeInt(0x0055); // parameter id: overspeed threshold
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_DATA));
-                    data.writeInt(0x0056); // parameter id: overspeed duration
-                    data.writeByte(4); // parameter value length
-                    data.writeInt(35); // duration in seconds
+                    if (hasDuration) {
+                        data.writeInt(0x0056); // parameter id: overspeed duration
+                        data.writeByte(4); // parameter value length
+                        data.writeInt(command.getInteger(Command.KEY_DURATION));
+                    }
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                 case Command.TYPE_OUTPUT_CONTROL:
