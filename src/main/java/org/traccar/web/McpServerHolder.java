@@ -86,10 +86,8 @@ public class McpServerHolder implements AutoCloseable {
 
     private McpServerFeatures.AsyncToolSpecification createApiTool(McpToolRegistry.McpApiTool tool) {
 
-        var toolSchema = McpSchema.Tool.builder()
-                .name(tool.name())
+        var toolSchema = McpSchema.Tool.builder(tool.name(), tool.inputSchema())
                 .title(tool.title())
-                .inputSchema(tool.inputSchema())
                 .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 

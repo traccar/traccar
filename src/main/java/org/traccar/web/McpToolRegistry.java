@@ -18,7 +18,6 @@ package org.traccar.web;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.modelcontextprotocol.spec.McpSchema;
 import jakarta.inject.Singleton;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ import java.util.Map;
 @Singleton
 public class McpToolRegistry {
 
-    public record McpApiTool(String name, String title, String path, McpSchema.JsonSchema inputSchema) {
+    public record McpApiTool(String name, String title, String path, Map<String, Object> inputSchema) {
     }
 
     private final List<McpApiTool> tools = new ArrayList<>();
@@ -63,8 +62,12 @@ public class McpToolRegistry {
                 required.add(name);
             }
         }
-        var inputSchema = new McpSchema.JsonSchema(
-                "object", properties, required.isEmpty() ? null : required, null, null, null);
+        Map<String, Object> inputSchema = new LinkedHashMap<>();
+        inputSchema.put("type", "object");
+        inputSchema.put("properties", properties);
+        if (!required.isEmpty()) {
+            inputSchema.put("required", required);
+        }
         return new McpApiTool(
                 operation.get("operationId").asText(), operation.path("summary").asText(""), path, inputSchema);
     }
