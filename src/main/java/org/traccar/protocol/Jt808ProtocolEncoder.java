@@ -143,11 +143,11 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_SET_CONNECTION:
                     data.writeByte(2); // number of parameters
                     String server = command.getString(Command.KEY_SERVER);
-                    data.writeInt(0x13); // parameter id: server address
-                    data.writeByte(server.length()); // parameter value length
+                    data.writeInt(0x13); // server address
+                    data.writeByte(server.length());
                     data.writeCharSequence(server, StandardCharsets.US_ASCII);
-                    data.writeInt(0x18); // parameter id: server tcp port
-                    data.writeByte(4); // parameter value length
+                    data.writeInt(0x18); // server tcp port
+                    data.writeByte(4);
                     data.writeInt(command.getInteger(Command.KEY_PORT));
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
