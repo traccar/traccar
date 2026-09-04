@@ -2,6 +2,8 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 public class TopinProtocolDecoderTest extends ProtocolTest {
@@ -19,6 +21,10 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
 
         verifyNotNull(decoder, binary(
                 "787803181604130318491475905bd30e25001e10bbf7635d14759006e626560401cc00000028660090df425f000028660090df576c00002866009487566700002866009ca15667000d0a"));
+
+        verifyAttribute(decoder, binary(
+                "7878001a260902194422030106010000119f01e911056f0000119f01e911056f0000119f01e911056f000d0a"),
+                "network", new Network(CellTower.from(262, 1, 0x119f, 0x01e91105L, 0x6f)));
 
         verifyAttribute(decoder, binary(
                 "7878006921120412565802010601071e4a9764071e4a9864010d0a"),
