@@ -17,9 +17,10 @@
 package org.traccar.api;
 
 import com.google.inject.Provider;
+import org.traccar.api.security.LoginResult;
+import org.traccar.api.security.LoginService;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
-import org.traccar.helper.SessionHelper;
 import org.traccar.model.Device;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -36,7 +37,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Singleton
@@ -44,14 +44,16 @@ public class MediaFilter implements Filter {
 
     private final Storage storage;
     private final StatisticsManager statisticsManager;
+    private final LoginService loginService;
     private final Provider<PermissionsService> permissionsServiceProvider;
 
     @Inject
     public MediaFilter(
-            Storage storage, StatisticsManager statisticsManager,
+            Storage storage, StatisticsManager statisticsManager, LoginService loginService,
             Provider<PermissionsService> permissionsServiceProvider) {
         this.storage = storage;
         this.statisticsManager = statisticsManager;
+        this.loginService = loginService;
         this.permissionsServiceProvider = permissionsServiceProvider;
     }
 
@@ -61,18 +63,14 @@ public class MediaFilter implements Filter {
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
-            Long userId = null;
-            if (SessionHelper.isSessionOriginValid((HttpServletRequest) request)) {
-                HttpSession session = ((HttpServletRequest) request).getSession(false);
-                userId = (Long) session.getAttribute(SessionHelper.USER_ID_KEY);
-                if (userId != null) {
-                    statisticsManager.registerRequest(userId);
-                }
-            }
-            if (userId == null) {
+            PermissionsService permissionsService = permissionsServiceProvider.get();
+            LoginResult loginResult = loginService.login((HttpServletRequest) request);
+            if (loginResult == null || loginResult.getUser() == null) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            long userId = loginResult.getUser().getId();
+            statisticsManager.registerRequest(userId);
 
             String path = ((HttpServletRequest) request).getPathInfo();
             String[] parts = path != null ? path.split("/") : null;
@@ -80,7 +78,7 @@ public class MediaFilter implements Filter {
                 Device device = storage.getObject(Device.class, new Request(
                         new Columns.All(), new Condition.Equals("uniqueId", parts[1])));
                 if (device != null) {
-                    permissionsServiceProvider.get().checkPermission(Device.class, userId, device.getId());
+                    permissionsService.checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);
                     return;
                 }
