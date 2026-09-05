@@ -30,6 +30,7 @@ import java.util.Locale;
 public class McpAuthFilter implements Filter {
 
     public static final String ATTRIBUTE_USER_ID = "userId";
+    public static final String ATTRIBUTE_AUTHORIZATION = "authorization";
 
     private final LoginService loginService;
 
@@ -62,6 +63,7 @@ public class McpAuthFilter implements Filter {
                 return;
             }
             httpRequest.setAttribute(ATTRIBUTE_USER_ID, loginResult.getUser().getId());
+            httpRequest.setAttribute(ATTRIBUTE_AUTHORIZATION, authorization);
         } catch (Exception e) {
             unauthorized(httpResponse, "Invalid access token");
             return;

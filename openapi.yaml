@@ -142,6 +142,7 @@ paths:
     get:
       operationId: getCommands
       summary: Fetch a list of Saved Commands
+      x-mcp: true
       tags:
         - Commands
       description: Without params, it returns a list of Saved Commands the user has access to
@@ -408,6 +409,7 @@ paths:
       operationId: getOrders
       summary: Fetch a list of Orders
       description: Without params, it returns a list of Orders the user has access to
+      x-mcp: true
       tags:
         - Orders
       parameters:
@@ -555,6 +557,7 @@ paths:
       operationId: getDevices
       summary: Fetch a list of Devices
       description: Without any params, returns a list of the user's devices
+      x-mcp: true
       tags:
         - Devices
       parameters:
@@ -841,6 +844,7 @@ paths:
       operationId: getGroups
       summary: Fetch a list of Groups
       description: Without any params, returns a list of the Groups the user belongs to
+      x-mcp: true
       tags:
         - Groups
       parameters:
@@ -1140,6 +1144,7 @@ paths:
         polling positions endpoint. Without any params, it returns a list of
         last known positions for all the user's Devices. _from_ and _to_ fields
         are not required with _id_.
+      x-mcp: true
       tags:
         - Positions
       parameters:
@@ -1357,6 +1362,7 @@ paths:
     get:
       operationId: getServer
       summary: Fetch Server information
+      x-mcp: true
       tags:
         - Server
       security: []
@@ -1695,6 +1701,7 @@ paths:
     get:
       operationId: getUsers
       summary: Fetch a list of Users
+      x-mcp: true
       tags:
         - Users
       parameters:
@@ -1851,6 +1858,7 @@ paths:
       description: >-
         Without params, it returns a list of Notifications the user has access
         to
+      x-mcp: true
       tags:
         - Notifications
       parameters:
@@ -2118,6 +2126,7 @@ paths:
       operationId: getGeofences
       summary: Fetch a list of Geofences
       description: Without params, it returns a list of Geofences the user has access to
+      x-mcp: true
       tags:
         - Geofences
       parameters:
@@ -2304,6 +2313,7 @@ paths:
       operationId: getReportsCombined
       summary: Fetch a combined route, Events and Positions report for the Devices or Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2354,6 +2364,7 @@ paths:
         Fetch a list of Positions within the time period for the Devices or
         Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2468,6 +2479,7 @@ paths:
       operationId: getReportsEvents
       summary: Fetch a list of Events within the time period for the Devices or Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2611,6 +2623,7 @@ paths:
         Fetch geofence enter/exit intervals within the time period for Devices
         or Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2668,6 +2681,7 @@ paths:
         Fetch a list of ReportSummary within the time period for the Devices or
         Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2789,6 +2803,7 @@ paths:
         Fetch a list of ReportTrips within the time period for the Devices or
         Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -2905,6 +2920,7 @@ paths:
         Fetch a list of ReportStops within the time period for the Devices or
         Groups
       description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
       tags:
         - Reports
       parameters:
@@ -3145,6 +3161,7 @@ paths:
       operationId: getCalendars
       summary: Fetch a list of Calendars
       description: Without params, it returns a list of Calendars the user has access to
+      x-mcp: true
       tags:
         - Calendars
       parameters:
@@ -3287,6 +3304,7 @@ paths:
       operationId: getAttributesComputed
       summary: Fetch a list of Attributes
       description: Without params, it returns a list of Attributes the user has access to
+      x-mcp: true
       tags:
         - Attributes
       parameters:
@@ -3485,6 +3503,7 @@ paths:
       operationId: getDrivers
       summary: Fetch a list of Drivers
       description: Without params, it returns a list of Drivers the user has access to
+      x-mcp: true
       tags:
         - Drivers
       parameters:
@@ -3645,6 +3664,7 @@ paths:
       operationId: getMaintenance
       summary: Fetch a list of Maintenance tasks
       description: Without params, it returns a list of Maintenance tasks the user has access to
+      x-mcp: true
       tags:
         - Maintenance
       parameters:

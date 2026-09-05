@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,33 +19,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.json.jackson2.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.server.McpAsyncServerExchange;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
-import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import org.traccar.api.security.PermissionsService;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-import org.traccar.geocoder.Geocoder;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class McpServerHolder implements AutoCloseable {
@@ -55,23 +39,15 @@ public class McpServerHolder implements AutoCloseable {
     private static final McpSchema.ToolAnnotations READ_ONLY_ANNOTATIONS = new McpSchema.ToolAnnotations(
             null, true, false, true, false, null);
 
-    private final Storage storage;
-    private final Provider<PermissionsService> permissionsService;
-    private final Geocoder geocoder;
-    private final boolean geocodeOnRequest;
+    private final McpApiInvoker apiInvoker;
 
     private final HttpServletStreamableServerTransportProvider transport;
     private final McpAsyncServer server;
 
     @Inject
-    public McpServerHolder(
-            ObjectMapper objectMapper, Storage storage, Provider<PermissionsService> permissionsService,
-            Config config, @Nullable Geocoder geocoder) {
+    public McpServerHolder(ObjectMapper objectMapper, McpToolRegistry toolRegistry, McpApiInvoker apiInvoker) {
 
-        this.storage = storage;
-        this.permissionsService = permissionsService;
-        this.geocoder = geocoder;
-        geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
+        this.apiInvoker = apiInvoker;
 
         transport = HttpServletStreamableServerTransportProvider.builder()
                 .mcpEndpoint(PATH)
@@ -88,7 +64,7 @@ public class McpServerHolder implements AutoCloseable {
         server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools(createVersionTool(), createDevicePositionTool())
+                .tools(toolRegistry.getTools().stream().map(this::createApiTool).toList())
                 .build();
     }
 
@@ -98,102 +74,39 @@ public class McpServerHolder implements AutoCloseable {
         if (userId != null) {
             contextData.put(McpAuthFilter.ATTRIBUTE_USER_ID, userId);
         }
+        Object authorization = request.getAttribute(McpAuthFilter.ATTRIBUTE_AUTHORIZATION);
+        if (authorization != null) {
+            contextData.put(McpAuthFilter.ATTRIBUTE_AUTHORIZATION, authorization);
+        }
         if (contextData.isEmpty()) {
             return McpTransportContext.EMPTY;
         }
         return McpTransportContext.create(contextData);
     }
 
-    private McpServerFeatures.AsyncToolSpecification createVersionTool() {
+    private McpServerFeatures.AsyncToolSpecification createApiTool(McpToolRegistry.McpApiTool tool) {
 
-        var inputSchema = new McpSchema.JsonSchema(
-                "object", Map.of(), null, null, null, null);
-
-        var toolSchema = McpSchema.Tool.builder()
-                .name("traccar-version")
-                .title("Returns server version name")
-                .inputSchema(inputSchema)
+        var toolSchema = McpSchema.Tool.builder(tool.name(), tool.inputSchema())
+                .title(tool.title())
                 .annotations(READ_ONLY_ANNOTATIONS)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()
                 .tool(toolSchema)
                 .callHandler((context, request) -> {
-                    String version = getClass().getPackage().getImplementationVersion();
-                    return Mono.just(McpSchema.CallToolResult.builder()
-                            .addTextContent(version != null ? version : "Unknown")
-                            .build());
+                    try {
+                        String authorization =
+                                (String) context.transportContext().get(McpAuthFilter.ATTRIBUTE_AUTHORIZATION);
+                        String body = apiInvoker.get(tool.path(), request.arguments(), authorization);
+                        return Mono.just(McpSchema.CallToolResult.builder().addTextContent(body).build());
+                    } catch (RuntimeException e) {
+                        return Mono.just(McpSchema.CallToolResult.builder()
+                                .addTextContent(e.getMessage())
+                                .isError(true)
+                                .build());
+                    }
                 })
                 .build();
-    }
-
-    private McpServerFeatures.AsyncToolSpecification createDevicePositionTool() {
-
-        var deviceIdSchema = new McpSchema.JsonSchema(
-                "number", Map.of(), null, null, null, null);
-
-        var inputSchema = new McpSchema.JsonSchema(
-                "object",
-                Map.of("deviceId", deviceIdSchema),
-                List.of("deviceId"),
-                null, null, null);
-
-        var toolSchema = McpSchema.Tool.builder()
-                .name("device-position")
-                .title("Returns latest device position with address and other parameters")
-                .inputSchema(inputSchema)
-                .annotations(READ_ONLY_ANNOTATIONS)
-                .build();
-
-        return McpServerFeatures.AsyncToolSpecification.builder()
-                .tool(toolSchema)
-                .callHandler(this::getDevicePosition)
-                .build();
-    }
-
-    private McpSchema.CallToolResult errorResult(String message) {
-        return McpSchema.CallToolResult.builder()
-                .addTextContent(message)
-                .isError(true)
-                .build();
-    }
-
-    private Mono<McpSchema.CallToolResult> getDevicePosition(
-            McpAsyncServerExchange context, McpSchema.CallToolRequest request) {
-
-        Long userId = (Long) context.transportContext().get(McpAuthFilter.ATTRIBUTE_USER_ID);
-        if (userId == null) {
-            return Mono.just(errorResult("User context is missing"));
-        }
-
-        Object deviceIdValue = request.arguments().get("deviceId");
-        if (!(deviceIdValue instanceof Number deviceIdNumber)) {
-            return Mono.just(errorResult("deviceId argument is required"));
-        }
-
-        long deviceId = deviceIdNumber.longValue();
-
-        try {
-            permissionsService.get().checkPermission(Device.class, userId, deviceId);
-
-            Position position = storage.getObject(Position.class, new Request(
-                    new Columns.All(), new Condition.LatestPositions(deviceId)));
-
-            if (position == null) {
-                return Mono.just(errorResult("No position available for device"));
-            }
-
-            String address = position.getAddress();
-            if (address == null && geocoder != null && geocodeOnRequest) {
-                position.setAddress(geocoder.getAddress(position.getLatitude(), position.getLongitude(), null));
-            }
-
-            return Mono.just(McpSchema.CallToolResult.builder()
-                    .structuredContent(position)
-                    .build());
-        } catch (StorageException | SecurityException e) {
-            return Mono.just(errorResult(e.getMessage()));
-        }
     }
 
     public HttpServlet getServlet() {

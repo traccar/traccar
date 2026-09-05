@@ -38,6 +38,7 @@ public abstract class BaseProtocol implements Protocol {
     public static final int MAX_FRAME_LENGTH = 1024;
     public static final int MAX_FRAME_LENGTH_LARGE = 32 * 1024;
     public static final int MAX_HTTP_LENGTH = 64 * 1024;
+    public static final int MAX_HTTP_LENGTH_LARGE = 1024 * 1024;
 
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();

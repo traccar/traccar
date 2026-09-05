@@ -37,25 +37,20 @@ import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
 import org.eclipse.jetty.session.SessionCache;
 import org.eclipse.jetty.util.resource.ResourceFactory;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.LifecycleObject;
+import org.traccar.api.ApiResourceConfig;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.protocol.OsmAndProtocol;
-import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.api.MediaFilter;
-import org.traccar.api.ResourceErrorHandler;
-import org.traccar.api.StreamWriter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.security.LoginService;
-import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.ObjectMapperContextResolver;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -186,17 +181,8 @@ public class WebServer implements LifecycleObject {
                     McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
         }
 
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
-        resourceConfig.registerClasses(
-                JacksonFeature.class,
-                ObjectMapperContextResolver.class,
-                DateParameterConverterProvider.class,
-                SecurityRequestFilter.class,
-                CorsResponseFilter.class,
-                ResourceErrorHandler.class,
-                StreamWriter.class);
-        resourceConfig.packages(ServerResource.class.getPackage().getName());
+        ResourceConfig resourceConfig = ApiResourceConfig.create();
+        resourceConfig.registerClasses(CorsResponseFilter.class);
         if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
             LOGGER.warn("Failed to load API resources");
         }
