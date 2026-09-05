@@ -156,6 +156,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .text(")")
             .compile();
 
+    private static final Pattern PATTERN_HANDSHAKE = new PatternBuilder()
+            .text("(")
+            .expression("(.{12})")               // device id
+            .text("BP00")
+            .number("d*")                        // imei
+            .text("HSOP")
+            .number("(xx)")                      // battery level
+            .text(")")
+            .compile();
+
     private String decodeAlarm(int value) {
         return switch (value) {
             case 1 -> Position.ALARM_ACCIDENT;
@@ -380,6 +390,27 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeHandshake(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_HANDSHAKE, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextHexInt());
+
+        return position;
+    }
+
     private Position decodeBms(Channel channel, SocketAddress remoteAddress, String sentence) {
         String id = sentence.substring(1, 13);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
@@ -489,7 +520,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             String type = sentence.substring(13, 17);
             if (type.equals("BP00")) {
                 channel.writeAndFlush(new NetworkMessage("(" + id + "AP01HSO)", remoteAddress));
-                return null;
             } else if (type.equals("BP05")) {
                 channel.writeAndFlush(new NetworkMessage("(" + id + "AP05)", remoteAddress));
             }
@@ -509,6 +539,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeVin(channel, remoteAddress, sentence);
         } else if (sentence.contains("BS50") || sentence.contains("BS51")) {
             return decodeBms(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BP00")) {
+            return decodeHandshake(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);
