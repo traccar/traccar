@@ -73,6 +73,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_TERMINAL_ATTRIBUTES = 0x0107;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_QUERY_RESPONSE = 0x0201;
     public static final int MSG_LOCATION_BATCH_2 = 0x0210;
     public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
@@ -94,6 +95,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
+    public static final int MSG_PARAMETER_QUERY_RESPONSE = 0x0104;
     public static final int MSG_PARAMETER_QUERY_ALL = 0x8104;
     public static final int MSG_LOCATION_QUERY = 0x8201;
     public static final int MSG_TEMPORARY_TRACKING = 0x8202;
@@ -469,6 +471,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             requestAttachments(channel, remoteAddress, id, position);
             return position;
 
+        } else if (type == MSG_LOCATION_QUERY_RESPONSE) {
+
+            buf.readUnsignedShort(); // response serial number
+
+            return decodeLocation(deviceSession, buf);
+
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 
             if (BitUtil.check(attribute, 15)) {
@@ -572,6 +580,67 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             position.set("cardCode", buf.readString(20, StandardCharsets.US_ASCII).trim());
             position.set("cardAgency", buf.readString(buf.readUnsignedByte(), StandardCharsets.US_ASCII));
             position.set("cardValidity", ByteBufUtil.hexDump(buf.readSlice(4)));
+
+            return position;
+
+        } else if (type == MSG_PARAMETER_QUERY_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedShort(); // response serial number
+            buf.readUnsignedByte(); // parameter count
+
+            while (buf.readableBytes() >= 5) {
+
+                int subtype = buf.readInt();
+                int length = buf.readUnsignedByte();
+                int endIndex = buf.readerIndex() + length;
+                if (endIndex > buf.writerIndex()) {
+                    break;
+                }
+                switch (subtype) {
+                    case 0x0001:
+                        position.set("heartbeatInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0010:
+                        position.set("apn", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        break;
+                    case 0x0013:
+                        position.set("server", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        break;
+                    case 0x0018:
+                        position.set("port", buf.readUnsignedInt());
+                        break;
+                    case 0x0027:
+                        position.set("sleepReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0028:
+                        position.set("emergencyReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0029:
+                        position.set("defaultReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0055:
+                        position.set("overspeedThreshold", buf.readUnsignedInt());
+                        break;
+                    case 0x0056:
+                        position.set("speedLimitDuration", buf.readUnsignedInt());
+                        break;
+                    case 0x0080:
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100); // 0.1 km units
+                        break;
+                    case 0x0083:
+                        position.set("plateNumber", buf.readCharSequence(length, Charset.isSupported("GBK")
+                                ? Charset.forName("GBK") : StandardCharsets.US_ASCII).toString().trim());
+                        break;
+                    default:
+                        break;
+                }
+                buf.readerIndex(endIndex);
+            }
 
             return position;
 
