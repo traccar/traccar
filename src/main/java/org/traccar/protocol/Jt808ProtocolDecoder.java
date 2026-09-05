@@ -593,9 +593,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // response serial number
             buf.readUnsignedByte(); // parameter count
 
-            // Parameter list is a sequence of TLV entries (subtype, length, value), so it is
-            // parsed with the same loop convention as the extension list in decodeLocation:
-            // the two trailing bytes are the checksum and the delimiter.
             while (buf.readableBytes() > 2) {
 
                 int subtype = buf.readInt();
