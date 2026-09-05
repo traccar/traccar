@@ -593,7 +593,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // response serial number
             buf.readUnsignedByte(); // parameter count
 
-            while (buf.readableBytes() > 2) {
+            while (buf.readableBytes() >= 5) {
 
                 int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
