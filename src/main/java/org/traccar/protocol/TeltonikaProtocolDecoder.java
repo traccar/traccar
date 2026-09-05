@@ -275,6 +275,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         });
         register(636, fmbXXX.or(tatXXX), (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
+        register(800, any, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() / 1000.0));
         register(10644, fmbXXX, (p, b) -> p.set("tempProbe1", b.readShort() / 100.0));
         register(10645, fmbXXX, (p, b) -> p.set("tempProbe2", b.readShort() / 100.0));
         register(10646, fmbXXX, (p, b) -> p.set("tempProbe3", b.readShort() / 100.0));
