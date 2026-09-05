@@ -627,7 +627,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("defaultReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0055:
-                        position.set(Position.KEY_SPEED_LIMIT, buf.readUnsignedInt());
+                        position.set("overspeedThreshold", buf.readUnsignedInt());
                         break;
                     case 0x0056:
                         position.set("speedLimitDuration", buf.readUnsignedInt());
