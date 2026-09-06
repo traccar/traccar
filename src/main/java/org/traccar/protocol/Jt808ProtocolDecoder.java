@@ -595,7 +595,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
-            while (buf.readableBytes() >= 5) {
+            while (buf.readableBytes() - 2 >= 5) {
 
                 int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
