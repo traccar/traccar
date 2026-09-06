@@ -600,7 +600,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
                 int endIndex = buf.readerIndex() + length;
-                if (endIndex > buf.writerIndex()) {
+                if (endIndex > buf.writerIndex() - 2) {
                     break;
                 }
                 switch (subtype) {
