@@ -278,6 +278,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(636, fmbXXX.or(tatXXX), (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
         register(800, ftXXX, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() / 1000.0));
+        register(1429, ftXXX, (p, b) -> {
+            p.set("crashAverageX", b.readShort());
+            p.set("crashAverageY", b.readShort());
+            p.set("crashAverageZ", b.readShort());
+            p.set("crashAverageMagnitude", b.readUnsignedShort());
+            p.addAlarm(Position.ALARM_ACCIDENT);
+        });
+        register(1432, ftXXX, (p, b) -> {
+            p.set("crashMaximumX", b.readShort());
+            p.set("crashMaximumY", b.readShort());
+            p.set("crashMaximumZ", b.readShort());
+            p.set("crashMaximumMagnitude", b.readUnsignedShort());
+        });
         register(10644, fmbXXX, (p, b) -> p.set("tempProbe1", b.readShort() / 100.0));
         register(10645, fmbXXX, (p, b) -> p.set("tempProbe2", b.readShort() / 100.0));
         register(10646, fmbXXX, (p, b) -> p.set("tempProbe3", b.readShort() / 100.0));
