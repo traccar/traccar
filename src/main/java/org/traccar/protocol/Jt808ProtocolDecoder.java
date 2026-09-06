@@ -599,48 +599,63 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
                 int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
-                int endIndex = buf.readerIndex() + length;
-                if (endIndex > buf.writerIndex() - 2) {
+                if (length > buf.readableBytes() - 2) {
                     break;
                 }
+                ByteBuf value = buf.readSlice(length);
                 switch (subtype) {
                     case 0x0001:
-                        position.set("heartbeatInterval", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("heartbeatInterval", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0010:
-                        position.set("apn", buf.readCharSequence(length, charset).toString());
+                        position.set("apn", value.toString(charset));
                         break;
                     case 0x0013:
-                        position.set("server", buf.readCharSequence(length, charset).toString());
+                        position.set("server", value.toString(charset));
                         break;
                     case 0x0018:
-                        position.set("port", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("port", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0027:
-                        position.set("sleepReportInterval", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("sleepReportInterval", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0028:
-                        position.set("emergencyReportInterval", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("emergencyReportInterval", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0029:
-                        position.set("defaultReportInterval", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("defaultReportInterval", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0055:
-                        position.set("overspeedThreshold", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("overspeedThreshold", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0056:
-                        position.set("speedLimitDuration", buf.readUnsignedInt());
+                        if (length == 4) {
+                            position.set("speedLimitDuration", value.readUnsignedInt());
+                        }
                         break;
                     case 0x0080:
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100); // 0.1 km units
+                        if (length == 4) {
+                            position.set(Position.KEY_ODOMETER, value.readUnsignedInt() * 100); // 0.1 km units
+                        }
                         break;
                     case 0x0083:
-                        position.set("plateNumber", buf.readCharSequence(length, charset).toString().trim());
+                        position.set("plateNumber", value.toString(charset).trim());
                         break;
                     default:
                         break;
                 }
-                buf.readerIndex(endIndex);
             }
 
             return position;
