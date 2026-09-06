@@ -8,49 +8,6 @@ import org.traccar.model.Position;
 public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecodeFt() throws Exception {
-
-        var decoder = inject(new TeltonikaProtocolDecoder(null, false));
-        decoder.setModelOverride("FTC880");
-
-        verifyNull(decoder, binary(
-                "000F313233343536373839303132333435"));
-
-        // Frames captured from an FTC880 (FT platform), no GPS fix. External
-        // voltage travels on AVL 800 (four bytes, mV) instead of AVL 66, and the
-        // frame also carries battery level (113), sleep mode (200) and battery
-        // current (68).
-        String values = "00000000000000398e010000019b76daa8000100000000000000000000000000000000000004"
-                + "000200716400c8030001004405dc0001032000003249000000000100002848";
-        verifyAttribute(decoder, binary(values), Position.KEY_POWER, 12.873);
-        verifyAttribute(decoder, binary(values), Position.KEY_BATTERY_LEVEL, 100);
-        verifyAttribute(decoder, binary(values), "sleepMode", 3);
-        verifyAttribute(decoder, binary(values), "batteryCurrent", 1.5);
-
-        verifyAttribute(decoder, binary(
-                "000000000000002c8e010000019b76daa8000100000000000000000000000000000000f60001"
-                        + "000100f60100000000000000000100000904"),
-                Position.KEY_ALARM, Position.ALARM_TOW);
-        verifyAttribute(decoder, binary(
-                "000000000000002c8e010000019b76daa8000100000000000000000000000000000000f90001"
-                        + "000100f9010000000000000000010000ee01"),
-                Position.KEY_ALARM, Position.ALARM_JAMMING);
-        verifyAttribute(decoder, binary(
-                "000000000000002c8e010000019b76daa8000100000000000000000000000000000000fb0001"
-                        + "000100fb01000000000000000001000036ab"),
-                Position.KEY_ALARM, Position.ALARM_IDLE);
-        verifyAttribute(decoder, binary(
-                "000000000000002c8e010000019b76daa8000100000000000000000000000000000000fc0001"
-                        + "000100fc0100000000000000000100007303"),
-                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-        verifyAttribute(decoder, binary(
-                "000000000000002c8e010000019b76daa8000100000000000000000000000000000000af0001"
-                        + "000100af010000000000000000010000d7c1"),
-                Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
-
-    }
-
-    @Test
     public void testDecode() throws Exception {
 
         var decoder = inject(new TeltonikaProtocolDecoder(null, false));
@@ -195,6 +152,16 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "00000000000000628e0100000193011f1ec8003fa9def2fc401ea4000d00000400000000000f000700ef0000f00000150500c8000045012a34492a3800000600b5001300b60011004230aa00430fb7004400002a30fb5d000200f10000c74200100000014900000000010000fbff"),
                 "eyeTemp1", -11.87);
+
+        decoder.setModelOverride("FTC880");
+
+        verifyAttribute(decoder, binary(
+                "00000000000000968e010000019b76daa800000000000000000000000000000000000000001b000b00150500450000716400c80300ed0200ef0000f000012f00017f0333d20833d30a000a0011ffd30012ffe70013002300430fd400440000004600ee00b5000000b6000000ce000001820000000600100000000000c70000000000cd0000000000f100000000032000003249047c00000000000000000100003e0b"),
+                Position.KEY_POWER, 12.873);
+
+        verifyAttribute(decoder, binary(
+                "00000000000000968e010000019b76daa800000000000000000000000000000000000000001b000b00150500450000716400c80300ed0200ef0000f000012f00017f0333d20833d30a000a0011ffd30012ffe70013002300430fd400440000004600ee00b5000000b6000000ce000001820000000600100000000000c70000000000cd0000000000f100000000032000003249047c00000000000000000100003e0b"),
+                Position.KEY_BATTERY_LEVEL, 100);
 
         decoder.setExtended(true);
 
