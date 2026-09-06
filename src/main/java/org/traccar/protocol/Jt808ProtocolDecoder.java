@@ -593,6 +593,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // response serial number
             buf.readUnsignedByte(); // parameter count
 
+            Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+
             while (buf.readableBytes() >= 5) {
 
                 int subtype = buf.readInt();
@@ -606,10 +608,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
                     case 0x0010:
-                        position.set("apn", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        position.set("apn", buf.readCharSequence(length, charset).toString());
                         break;
                     case 0x0013:
-                        position.set("server", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        position.set("server", buf.readCharSequence(length, charset).toString());
                         break;
                     case 0x0018:
                         position.set("port", buf.readUnsignedInt());
@@ -633,8 +635,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100); // 0.1 km units
                         break;
                     case 0x0083:
-                        position.set("plateNumber", buf.readCharSequence(length, Charset.isSupported("GBK")
-                                ? Charset.forName("GBK") : StandardCharsets.US_ASCII).toString().trim());
+                        position.set("plateNumber", buf.readCharSequence(length, charset).toString().trim());
                         break;
                     default:
                         break;
