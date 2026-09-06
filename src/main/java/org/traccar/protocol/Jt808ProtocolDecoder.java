@@ -57,6 +57,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
+    private static final Charset CHARSET_GBK =
+            Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+
     public Jt808ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -403,9 +406,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             buf.readUnsignedByte(); // encoding
-            Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
-            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, charset).toString());
+            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, CHARSET_GBK).toString());
 
             return position;
 
@@ -593,69 +595,52 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // response serial number
             buf.readUnsignedByte(); // parameter count
 
-            Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
-
             while (buf.readableBytes() - 2 >= 5) {
 
                 int subtype = buf.readInt();
                 int length = buf.readUnsignedByte();
-                if (length > buf.readableBytes() - 2) {
+                int endIndex = buf.readerIndex() + length;
+                if (endIndex > buf.writerIndex() - 2) {
                     break;
                 }
-                ByteBuf value = buf.readSlice(length);
                 switch (subtype) {
                     case 0x0001:
-                        if (length == 4) {
-                            position.set("heartbeatInterval", value.readUnsignedInt());
-                        }
+                        position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
                     case 0x0010:
-                        position.set("apn", value.toString(charset));
+                        position.set("apn", buf.readCharSequence(length, CHARSET_GBK).toString());
                         break;
                     case 0x0013:
-                        position.set("server", value.toString(charset));
+                        position.set("server", buf.readCharSequence(length, CHARSET_GBK).toString());
                         break;
                     case 0x0018:
-                        if (length == 4) {
-                            position.set("port", value.readUnsignedInt());
-                        }
+                        position.set("port", buf.readUnsignedInt());
                         break;
                     case 0x0027:
-                        if (length == 4) {
-                            position.set("sleepReportInterval", value.readUnsignedInt());
-                        }
+                        position.set("sleepReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0028:
-                        if (length == 4) {
-                            position.set("emergencyReportInterval", value.readUnsignedInt());
-                        }
+                        position.set("emergencyReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0029:
-                        if (length == 4) {
-                            position.set("defaultReportInterval", value.readUnsignedInt());
-                        }
+                        position.set("defaultReportInterval", buf.readUnsignedInt());
                         break;
                     case 0x0055:
-                        if (length == 4) {
-                            position.set("overspeedThreshold", value.readUnsignedInt());
-                        }
+                        position.set("overspeedThreshold", buf.readUnsignedInt());
                         break;
                     case 0x0056:
-                        if (length == 4) {
-                            position.set("speedLimitDuration", value.readUnsignedInt());
-                        }
+                        position.set("speedLimitDuration", buf.readUnsignedInt());
                         break;
                     case 0x0080:
-                        if (length == 4) {
-                            position.set(Position.KEY_ODOMETER, value.readUnsignedInt() * 100); // 0.1 km units
-                        }
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
                         break;
                     case 0x0083:
-                        position.set("plateNumber", value.toString(charset).trim());
+                        position.set("plateNumber", buf.readCharSequence(length, CHARSET_GBK).toString().trim());
                         break;
                     default:
                         break;
                 }
+                buf.readerIndex(endIndex);
             }
 
             return position;
