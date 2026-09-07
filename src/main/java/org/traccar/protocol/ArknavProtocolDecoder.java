@@ -35,8 +35,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .number("ddd,")                      // status
-            .number("Lddd,")                     // version
+            .number("(ddd),")                    // status
+            .expression("(.{4}),")               // device model
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -47,6 +47,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
+            .expression("(.{4}),")               // firmware version
+            .number("(xx)")                      // battery level
             .any()
             .compile();
 
@@ -67,16 +69,34 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
+        position.set(Position.KEY_STATUS, parser.next());
+        String model = parser.next();
+        position.set("model", model);
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
         position.setSpeed(parser.nextDouble(0));
         position.setCourse(parser.nextDouble(0));
-
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
-
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-
+        position.set(Position.KEY_VERSION_FW, parser.next());
+        if (model.equals("PT33")) {
+            String status = position.getString(Position.KEY_STATUS);
+            switch (status.charAt(0)) {
+                case '1' -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+                case '2' -> position.addAlarm(Position.ALARM_MOVEMENT);
+                case '4' -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            }
+            switch (status.charAt(1)) {
+                case '1' -> position.addAlarm(Position.ALARM_SOS);
+            }
+            switch (status.charAt(2)) {
+                case '1' -> position.addAlarm(Position.ALARM_OVERSPEED);
+            }
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        } else {
+            parser.next();
+        }
         return position;
     }
 
