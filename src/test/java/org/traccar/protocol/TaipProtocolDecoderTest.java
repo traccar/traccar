@@ -107,7 +107,7 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 ">REV481599462982+2578391-0802945201228512;ID=Test"),
                 position("2010-09-02 17:29:42.000", true, 25.78391, -80.29452));
-        
+
         verifyPosition(decoder, text(
                 ">REV131756153215+3359479-0075299001031332;VO=10568798;IO=310;SV=10;BL=4190;CV09=0;AD=0;AL=+47;ID=356612021059680"));
 

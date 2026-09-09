@@ -4,10 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -133,10 +129,10 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "$$m140,013777008931857,AAA,1,54.739580,25.273263,141120144603,V,0,25,0,6,50.0,159,19825,13940,246|1|0065|118A,0100,0000|0000|0000|092A|0001,,*1C"));
-        
+
         verifyPosition(decoder, buffer(
                 "$$X138,862170010187175,AAA,35,-29.960365,-51.655455,130507201625,A,8,9,0,107,0.9,7,169322,126582,724|6|0547|132B,0000,0009|000A||0278|0000,*BE"));
-        
+
         verifyPosition(decoder, buffer(
                 "$$X138,862170010187175,AAA,35,-29.960365,-51.655455,130507201625,A,8,9,0,107,0.9,-7,169322,126582,724|6|0547|132B,0000,0009|000A||0278|0000,*BE"));
 
@@ -154,13 +150,13 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "$$A141,012896005334567,AAA,35,-33.866543,151.190148,121209081758,A,6,27,0,16,1,48,65551,152784,505|2|0B5F|D9D3,0000,0000|0000|0000|0A39|0000,,*5B"));
-        
+
         verifyPosition(decoder, buffer(
                 "$$_128,861074020109479,AAA,34,22.512618,114.057065,090215000318,V,0,31,0,0,0,0,0,733,302|720|3EE4|BBB5,0000,0006|0006||028C|0000,*E3"));
-        
+
         verifyPosition(decoder, buffer(
                 "$$K146,013227004985762,AAA,35,28.618005,-81.246783,131101213828,A,9,22,0,209,1.1,23,80974,1187923,310|260|2A13|634E,0000,0000|0000|0000|09DA|0B34,,*51"));
-        
+
         verifyPosition(decoder, buffer(
                 "$$E150,013777001165479,AAA,35,10.296601,123.872115,140501161505,A,4,22,1,170,1.4,77,39097,393563,515|3|A0CC|ED96,0000,0008|0003|0000|09D5|0000,,,1,0009*1E"));
 

@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BitUtilTest {
-    
+
     @Test
     public void testCheck() {
         assertFalse(BitUtil.check(0, 0));
         assertTrue(BitUtil.check(1, 0));
         assertFalse(BitUtil.check(2, 0));
     }
-    
+
     @Test
     public void testBetween() {
         assertEquals(0, BitUtil.between(0, 0, 0));

@@ -22,10 +22,9 @@ public class CarTrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "$$2222234???????&A9955&B102904.000,A,2233.0655,N,11404.9440,E,0.00,,030109,,*17|6.3|&C0100000100&D000024?>&E10000000&Y00100020"));
-        
+
         verifyPosition(decoder, text(
                 "$$2222234???????&A9955&B102904.000,A,2233.0655,N,11404.9440,E,0.00,,030109,,*17|6.3|&C0100000100&D000024?>&E10000000"));
-
 
     }
 

@@ -24,7 +24,7 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, text(
                 "0226$MGV002,860537065044539,,S,020824,120719,V,5339.11529,N,01011.15575,E,00,00,00,99.9,3.255,,52.1,,262,01,FFFE,277A602,14,000,0000,0000,0,,,,,01000,078,Timer,dc15c8984804:65|50e63698d1d5:70|44053fdacd6e:73|e0516314f2a7:88,,0,,;!"),
                 Position.KEY_BATTERY_LEVEL, 78);
-        
+
         verifyPosition(decoder, text(
                 "$MGV002,860719020193193,,S,070521,160748,V,2255.09165,N,11404.01322,E,00,00,00,,,,,,,,,,,,,,,,,,,10,015,Restart;!"));
 
@@ -61,7 +61,7 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "0143$MGV002,869152024261564,,R,220621,120804,V,5152.09429,N,01051.32158,E,00,00,00,99.9,,,,,232,10,A5AE,5A4908,22,0000,0000,0,,,,,,00,093,Timer,,;!"));
-        
+
         verifyPosition(decoder, text(
                 "STX,013950007137061,$GPRMC,191959.000,A,5203.09602,N,00830.77057,E,5.73,255.27,240716,,,A*62,L,Belt Up,imei:013950007137061,0/5,,Battery=52%,,1,262,03,0084,B20E;FD"));
 
@@ -109,7 +109,7 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "STX,GerAL22,$GPRMC,000051.000,A,3637.079590,S,6416.2148,W,1.72,332.98,010109,,,A*52,L,,imei:861785000249353,03,275.3,Battery=68%,,1,722,07,0515,1413;41"));
-        
+
         verifyPosition(decoder, text(
                 "STX,,$GPRMC,001339.000,A,4710.85395,N,02733.58209,E,1.65,238.00,010109,,,A*67,L,Help,imei:013227009737796,0/8,137.1,Battery=100%,,0,226,01,2B9B,BBBF;8D"));
 
@@ -133,7 +133,7 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "LOGSTX,123456789012345,$GPRMC,230739.000,A,3841.81895,N,09494.12409,W,0.00,0.00,270914,,,A*70,L,,imei:123456789012345,0/7,269.7,Battery=100%,,0,,,5856,78A3;78"));
-        
+
     }
 
 }

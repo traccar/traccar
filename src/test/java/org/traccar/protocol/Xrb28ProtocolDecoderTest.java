@@ -27,7 +27,7 @@ public class Xrb28ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "*SCOR,OM,863158022988725,D0,0,124458.00,A,2237.7514,N,11408.6214,E,6,0.21,151216,10,M,A#"));
-        
+
         verifyPosition(decoder, text(
                 "*SCOR,NG,868020030308430,D0,1,020455.00,A,2359.36129,S,04615.24677,W,12,0.72,201119,8.5,M,A#"));
 

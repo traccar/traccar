@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class NiotProtocolDecoderTest extends ProtocolTest {
-    
+
     @Test
     public void testDecode() throws Exception {
 

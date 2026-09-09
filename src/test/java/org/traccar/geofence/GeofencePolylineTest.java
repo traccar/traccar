@@ -45,7 +45,7 @@ public class GeofencePolylineTest {
         assertFalse(geofenceGeometry.containsPoint(56.83861, 60.60822));
 
     }
-    
+
     @Test
     public void testIntersectsPolyline() throws ParseException {
         GeofenceGeometry geofenceGeometry = new GeofencePolyline(

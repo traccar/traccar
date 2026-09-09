@@ -7,12 +7,12 @@ import org.traccar.model.Position;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GatorProtocolDecoderTest extends ProtocolTest {
-    
+
     @Test
     public void testDecodeId() {
-        
+
         assertEquals("3512345006", GatorProtocolDecoder.decodeId(12, 162, 50, 134));
-        
+
     }
 
     @Test

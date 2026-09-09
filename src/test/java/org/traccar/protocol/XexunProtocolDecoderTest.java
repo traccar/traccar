@@ -71,7 +71,7 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "170607031932,+6282167979090,GPRMC,031932.000,A,0347.2515,N,09841.9433,E,0.00,261.22,070617,,,A*6C,F,ACC OFF, imei:013226004613135,11,23.1,F:4.25V,1,148,44989,510,10,2B34,0268"));
-        
+
         verifyNull(decoder, text(
                 ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));
 
@@ -102,7 +102,7 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "130725134142,,GPRMC,134142.591,A,3845.6283,N,00909.8876,W,2.08,287.33,250713,,,A*71,F,, imei:013227000526784,03,-50.7,L:3.69V,0,128,65337,268,03,177A,119F"));
-        
+
         verifyPosition(decoder, text(
                 "140602152533,TESCO_INFO,GPRMC,152533.000,A,5145.4275,N,00000.3448,E,0.00,0.00,020614,,,A*66,F,, imei:013227002781643,06,35.1,F:4.15V,1,135,38950,234,10,10B4,5235"));
 

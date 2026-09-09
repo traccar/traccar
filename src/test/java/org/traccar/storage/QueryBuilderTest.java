@@ -33,22 +33,69 @@ public class QueryBuilderTest {
         private Date fixTime;
         private byte[] data;
 
-        public long getId() { return id; }
-        public void setId(long id) { this.id = id; }
-        public boolean getActive() { return active; }
-        public void setActive(boolean active) { this.active = active; }
-        public int getCount() { return count; }
-        public void setCount(int count) { this.count = count; }
-        public long getDeviceId() { return deviceId; }
-        public void setDeviceId(long deviceId) { this.deviceId = deviceId; }
-        public double getSpeed() { return speed; }
-        public void setSpeed(double speed) { this.speed = speed; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public Date getFixTime() { return fixTime; }
-        public void setFixTime(Date fixTime) { this.fixTime = fixTime; }
-        public byte[] getData() { return data; }
-        public void setData(byte[] data) { this.data = data; }
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public boolean getActive() {
+            return active;
+        }
+
+        public void setActive(boolean active) {
+            this.active = active;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+
+        public long getDeviceId() {
+            return deviceId;
+        }
+
+        public void setDeviceId(long deviceId) {
+            this.deviceId = deviceId;
+        }
+
+        public double getSpeed() {
+            return speed;
+        }
+
+        public void setSpeed(double speed) {
+            this.speed = speed;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Date getFixTime() {
+            return fixTime;
+        }
+
+        public void setFixTime(Date fixTime) {
+            this.fixTime = fixTime;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
+        public void setData(byte[] data) {
+            this.data = data;
+        }
     }
 
     @BeforeEach

@@ -170,16 +170,16 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "imei:359710040656622,tracker,13/02/27 23:40,,F,125952.000,A,3450.9430,S,13828.6753,E,0.00,0"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359710040565419,tracker,13/05/25 14:23,,F,062209.000,A,0626.0411,N,10149.3904,E,0.00,0"));
 
         verifyPosition(decoder, text(
                 "imei:353451047570260,tracker,1302110948,,F,144807.000,A,0805.6615,S,07859.9763,W,0.00,,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359587016817564,tracker,1301251602,,F,080251.000,A,3223.5832,N,11058.9449,W,0.03,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359587016817564,tracker,1301251602,,F,080251.000,A,3223.5832,N,11058.9449,W,,"));
 
@@ -235,37 +235,37 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "imei:863070010423167,tracker,1211060621,,F,062152.000,A,2220.6914,N,11407.5506,E,15.85,347.84,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:863070012698733,tracker,1303092334,,F,193427.000,A,5139.0369,N,03907.2791,E,0.00,,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:869039001186913,tracker,130925065533,0,F,065533.000,A,5604.11015,N,9232.12238,E,0.0,,329.0,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359710041641581,acc alarm,1402231159,,F,065907.000,A,2456.2591,N,06708.8335,E,7.53,76.10,,1,0,0.03%,,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359710041641581,acc alarm,1402231159,,F,065907.000,A,2456.2591,N,06708.8335,E,7.53,76.10,,1,0,0.03%,,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:313009071131684,tracker,1403211928,,F,112817.000,A,0610.1133,N,00116.5840,E,0.00,,,0,0,0.0,0.0,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:866989771979791,tracker,140527055653,,F,215653.00,A,5050.33113,N,00336.98783,E,0.066,0"));
-        
+
         verifyPosition(decoder, text(
                 "imei:353552045375005,tracker,150401165832,61.0,F,31.0,A,1050.73696,N,10636.49489,E,8.0,,22.0,"));
-        
+
         verifyPosition(decoder, text(
                 "imei:353552045403597,tracker,150420050648,53.0,F,0.0,A,N,5306.64155,E,00700.77848,0.0,,1.0,;"));
-        
+
         verifyPosition(decoder, text(
                 "imei:353552045403597,tracker,150420051153,53.0,F,0.0,A,5306.64155,N,00700.77848,E,0.0,,1.0,;"));
-        
+
         verifyPosition(decoder, text(
                 "imei:359710047424644,tracker,150506224036,,F,154037.000,A,0335.2785,N,09841.1543,E,3.03,337.54,,0,0,45.16%,,;"));
-        
+
         verifyPosition(decoder, text(
                 "imei:865328023776874,acc off,150619152221,,F,072218.000,A,5439.8489,N,02518.5945,E,0.00,,,1,1,0.0,0.0,23.0,;"));
 

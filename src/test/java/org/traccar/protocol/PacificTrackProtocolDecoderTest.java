@@ -12,12 +12,11 @@ public class PacificTrackProtocolDecoderTest extends ProtocolTest {
     public void testReadBitExt() {
 
         assertEquals(0x35, PacificTrackProtocolDecoder.readBitExt(
-                Unpooled.wrappedBuffer(new byte[] { (byte) 0b10110101 })));
+                Unpooled.wrappedBuffer(new byte[] {(byte) 0b10110101})));
 
         assertEquals(0x135, PacificTrackProtocolDecoder.readBitExt(
-                Unpooled.wrappedBuffer(new byte[] { (byte) 0b00000010, (byte) 0b10110101 })));
+                Unpooled.wrappedBuffer(new byte[] {(byte) 0b00000010, (byte) 0b10110101})));
     }
-
 
     @Test
     public void testDecode() throws Exception {
