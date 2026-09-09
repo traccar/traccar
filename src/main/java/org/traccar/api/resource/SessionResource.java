@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class SessionResource extends BaseResource {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
-        SessionHelper.userLogin(actionLogger, request, user, null);
+        SessionHelper.userLogin(actionLogger, request, user, getUserPrincipal().getExpiration());
         return user;
     }
 
@@ -151,8 +151,8 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        Date currentExpiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
-        if (currentExpiration != null && currentExpiration.before(expiration)) {
+        Date currentExpiration = getUserPrincipal().getExpiration();
+        if (currentExpiration != null && (expiration == null || currentExpiration.before(expiration))) {
             expiration = currentExpiration;
         }
         String token = tokenManager.generateToken(getUserId(), expiration);
