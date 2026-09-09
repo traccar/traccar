@@ -21,7 +21,6 @@ jar.destinationDirectory = file("$projectDir/target")
 checkstyle {
     toolVersion = "10.23.1"
     configFile = file("gradle/checkstyle.xml")
-    checkstyleTest.enabled = false
 }
 
 dependencyUpdates {
