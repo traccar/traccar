@@ -263,6 +263,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, Integer.parseInt(v[index - 1]) == 1 ? true : null);
         }
 
+        if (model.equals("GL320M")) {
+            index += 1; // led on
+            index += 1; // gps on need
+            index += 1; // gps antenna type
+            index += 1; // gps antenna state
+            index += 1; // last gps fix time
+            if (v[index].matches("\\d{1,3}")) {
+                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index]));
+            }
+            index += 1; // battery percentage
+        }
+
         if (model.equals("GV310LAU")) {
             index += 1; // led state
             index += 1; // power saving mode
