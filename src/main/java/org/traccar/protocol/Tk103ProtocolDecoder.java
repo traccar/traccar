@@ -160,7 +160,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .text("(")
             .expression("(.{12})")               // device id
             .text("BP00")
-            .number("d*")                        // imei
+            .number("(?:d{15})?")                // imei
             .text("HSOP")
             .number("(xx)")                      // battery level
             .text(")")

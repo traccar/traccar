@@ -12,6 +12,10 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Tk103ProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
+                "(087075108195BP00HSOP55)"),
+                Position.KEY_BATTERY_LEVEL, 85);
+
+        verifyAttribute(decoder, text(
                 "(072105039432BP00352672105039432HSOP4B)"),
                 Position.KEY_BATTERY_LEVEL, 75);
 
