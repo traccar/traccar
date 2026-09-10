@@ -19,6 +19,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 "+RESP:GTINF,C30302,860201067023286,,41,89880000000000000000,20,99,1,0.0,,3.82,1,1,2,,,20260904120120,51,,31.2,,,20260907110117,3E70$"),
                 Position.KEY_BATTERY_LEVEL, 51);
 
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTEPN,C30302,860201067023286,,0,0.0,0,449.0,8.711147,47.507113,20260904120120,0228,0002,9D08,013D9905,,20260907103231,3E6B$"),
+                Position.KEY_CHARGE, true);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTEPF,C30302,860201067023286,,0,0.0,0,449.0,8.711147,47.507113,20260904120120,0228,0002,9D08,013D9905,,20260907112626,3E76$"),
+                Position.KEY_CHARGE, false);
+
         verifyPositions(decoder, buffer(
                 "+RESP:GTFRI,DF0200,868487004353181,cv100,14051,10,1,0,0.0,0,264.1,114.015515,22.537178,20210608064328,0460,0001,25F8,061A7D02,,0.0,,,,100,21,,,,20210608144354,32DB$"));
 

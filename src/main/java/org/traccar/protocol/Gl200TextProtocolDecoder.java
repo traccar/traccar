@@ -1721,8 +1721,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             case "IDL" -> position.addAlarm(Position.ALARM_IDLE);
             case "PNA" -> position.addAlarm(Position.ALARM_POWER_ON);
             case "PFA" -> position.addAlarm(Position.ALARM_POWER_OFF);
-            case "EPN", "MPN" -> position.addAlarm(Position.ALARM_POWER_RESTORED);
-            case "EPF", "MPF" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "EPN" -> {
+                position.addAlarm(Position.ALARM_POWER_RESTORED);
+                position.set(Position.KEY_CHARGE, true);
+            }
+            case "MPN" -> position.addAlarm(Position.ALARM_POWER_RESTORED);
+            case "EPF" -> {
+                position.addAlarm(Position.ALARM_POWER_CUT);
+                position.set(Position.KEY_CHARGE, false);
+            }
+            case "MPF" -> position.addAlarm(Position.ALARM_POWER_CUT);
             case "BPL" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
             case "STT" -> position.addAlarm(Position.ALARM_MOVEMENT);
             case "SWG" -> position.addAlarm(Position.ALARM_GEOFENCE);
