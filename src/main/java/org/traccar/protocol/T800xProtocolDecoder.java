@@ -498,32 +498,49 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
             if (buf.readableBytes() >= 19) {
                 position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
-                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) / 100.0);
-                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_RPM, buf.readUnsignedShort());
-                int value;
+                long fuelUsed = buf.readUnsignedInt();
+                if (fuelUsed != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_USED, fuelUsed / 1000.0);
+                }
+                long fuelConsumption = buf.readUnsignedInt();
+                if (fuelConsumption != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_CONSUMPTION, fuelConsumption / 1000.0);
+                }
+                int value = buf.readUnsignedShort();
+                if (value != 0xffff) {
+                    position.set(Position.KEY_RPM, value);
+                }
                 value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airInput", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airPressure", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_COOLANT_TEMP, value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airTemp", value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_ENGINE_LOAD, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_THROTTLE, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
-                    position.set(Position.KEY_FUEL, value);
+                    if (BitUtil.check(value, 7)) {
+                        position.set(Position.KEY_FUEL, BitUtil.to(value, 7));
+                    } else {
+                        position.set(Position.KEY_FUEL_LEVEL, value);
+                    }
                 }
             }
         }
