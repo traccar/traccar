@@ -445,6 +445,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                             mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
                 }
                 position.setNetwork(network);
+            } else if (header == 0x2626) {
+                buf.skipBytes(12); // cell towers
             }
 
         }
