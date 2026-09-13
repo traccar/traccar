@@ -112,6 +112,24 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         };
     }
 
+    private String decodeAlarm3(int value) {
+        return switch (value) {
+            case 0x01 -> Position.ALARM_POWER_CUT;
+            case 0x02 -> Position.ALARM_LOW_BATTERY;
+            case 0x03 -> Position.ALARM_SOS;
+            case 0x04 -> Position.ALARM_OVERSPEED;
+            case 0x05 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x06 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x07 -> Position.ALARM_TOW;
+            case 0x08 -> Position.ALARM_VIBRATION;
+            case 0x19 -> Position.ALARM_IDLE;
+            case 0x21 -> Position.ALARM_JAMMING;
+            case 0x23 -> Position.ALARM_POWER_RESTORED;
+            case 0x24 -> Position.ALARM_LOW_POWER;
+            default -> null;
+        };
+    }
+
     private Date readDate(ByteBuf buf) {
         return new DateBuilder()
                 .setYear(BcdUtil.readInteger(buf, 2))
@@ -403,7 +421,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int alarm = buf.readUnsignedByte();
-        position.addAlarm(header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
+        position.addAlarm(switch (header) {
+            case 0x2626 -> decodeAlarm3(alarm);
+            case 0x2727 -> decodeAlarm2(alarm);
+            default -> decodeAlarm1(alarm);
+        });
         position.set("alarmCode", alarm);
 
         if (header != 0x2727) {
