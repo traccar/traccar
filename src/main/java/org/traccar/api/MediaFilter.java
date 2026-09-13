@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,7 +89,6 @@ public class MediaFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
         } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            e.printStackTrace(httpResponse.getWriter());
         }
     }
 
