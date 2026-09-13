@@ -15,9 +15,12 @@
  */
 package org.traccar.api;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -25,6 +28,13 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 public class ResourceErrorHandler implements ExceptionMapper<Exception> {
+
+    private final boolean showStackTraces;
+
+    @Inject
+    public ResourceErrorHandler(Config config) {
+        showStackTraces = config.getBoolean(Keys.WEB_SHOW_STACK_TRACES);
+    }
 
     private static boolean isConcurrencyWrapper(Throwable throwable) {
         return throwable instanceof CompletionException || throwable instanceof ExecutionException;
@@ -37,14 +47,20 @@ public class ResourceErrorHandler implements ExceptionMapper<Exception> {
             throwable = throwable.getCause();
         }
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        throwable.printStackTrace(printWriter);
+        String message;
+        if (showStackTraces) {
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            throwable.printStackTrace(printWriter);
+            message = stringWriter.toString();
+        } else {
+            message = throwable.getMessage();
+        }
 
         if (throwable instanceof WebApplicationException webException) {
-            return Response.fromResponse(webException.getResponse()).entity(stringWriter.toString()).build();
+            return Response.fromResponse(webException.getResponse()).entity(message).build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity(stringWriter.toString()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
     }
 
