@@ -11,7 +11,7 @@ services:
       REGISTRATION: "true"
     ports:
       - "3000:8082"
-      - "5000-5100:5000-5100"
+      - "5264:5264"
     volumes:
       - traccar-data:/opt/traccar/data
       - traccar-logs:/opt/traccar/logs
