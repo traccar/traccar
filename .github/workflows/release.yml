@@ -87,7 +87,7 @@ jobs:
         run: |
           mkdir -p out/data out/logs
           cp setup.sh traccar.service out/
-          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported --output out/jre
           makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
           zip -q -j "traccar-linux-64-${{ github.event.inputs.version }}.zip" traccar.run README.txt
       - uses: actions/upload-artifact@v7
@@ -122,7 +122,7 @@ jobs:
         run: |
           mkdir -p out/data out/logs
           cp setup.sh traccar.service out/
-          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported --output out/jre
           makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
           zip -q -j "traccar-linux-arm-${{ github.event.inputs.version }}.zip" traccar.run README.txt
       - uses: actions/upload-artifact@v7
@@ -153,7 +153,7 @@ jobs:
       - name: jlink runtime image
         shell: bash
         working-directory: setup
-        run: jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+        run: jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported --output out/jre
       - name: Build installer
         shell: cmd
         working-directory: setup

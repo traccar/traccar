@@ -32,6 +32,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.StringUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -56,6 +57,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
+    public static final Charset CHARSET_GBK =
+            Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+
     public Jt808ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -72,6 +76,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_TERMINAL_ATTRIBUTES = 0x0107;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_QUERY_RESPONSE = 0x0201;
     public static final int MSG_LOCATION_BATCH_2 = 0x0210;
     public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
@@ -93,11 +98,18 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
+    public static final int MSG_PARAMETER_QUERY_RESPONSE = 0x0104;
+    public static final int MSG_PARAMETER_QUERY_ALL = 0x8104;
+    public static final int MSG_LOCATION_QUERY = 0x8201;
+    public static final int MSG_TEMPORARY_TRACKING = 0x8202;
+    public static final int MSG_ALARM_ACK = 0x8203;
+    public static final int MSG_VEHICLE_CONTROL = 0x8500;
+    public static final int MSG_TAKE_PHOTO = 0x8801;
 
     public static final int RESULT_SUCCESS = 0;
 
-    private static final Set<String> ALARM_MODELS_TAMPER = Set.of("G-360P", "G-508P");
-    private static final Set<String> ALARM_MODELS_MOVEMENT = Set.of("AL300", "GL100");
+    private static final Set<String> PADLOCK_MODELS = Set.of("G-360P", "G-508P");
+    private static final Set<String> AOVX_MODELS = Set.of("AL300", "GL100");
     private static final Set<String> JC_MODELS = Set.of("JC371", "JC181", "JC182", "JC450", "JC451");
 
     private int delimiter = 0x7e;
@@ -105,6 +117,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
     public Integer getProtocolVersion() {
         return protocolVersion;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     public ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
@@ -175,14 +191,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeAlarm(Position position, String model, long value) {
-        if (model != null && ALARM_MODELS_TAMPER.contains(model)) {
+        if (model != null && PADLOCK_MODELS.contains(model)) {
             if (BitUtil.check(value, 0) || BitUtil.check(value, 4)) {
                 position.addAlarm(Position.ALARM_REMOVING);
             }
             if (BitUtil.check(value, 1)) {
                 position.addAlarm(Position.ALARM_TAMPERING);
             }
-        } else if (model != null && ALARM_MODELS_MOVEMENT.contains(model)) {
+        } else if (model != null && AOVX_MODELS.contains(model)) {
             if (BitUtil.check(value, 16)) {
                 position.addAlarm(Position.ALARM_MOVEMENT);
             }
@@ -254,7 +270,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     static String decodeId(ByteBuf id) {
         String serial = ByteBufUtil.hexDump(id);
         if (serial.matches("[0-9]+")) {
-            return id.readableBytes() == 10 ? serial.replaceFirst("^0+", "") : serial;
+            return serial;
         } else {
             long imei = id.getUnsignedShort(0);
             imei = (imei << 32) + id.getUnsignedInt(2);
@@ -356,7 +372,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             index = buf.readUnsignedShort();
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, decodeId(id));
+        String uniqueId = decodeId(id);
+        String strippedId = StringUtil.stripLeading('0', uniqueId);
+        DeviceSession deviceSession = uniqueId.equals(strippedId)
+                ? getDeviceSession(channel, remoteAddress, uniqueId)
+                : getDeviceSession(channel, remoteAddress, strippedId, uniqueId);
         if (deviceSession == null) {
             return null;
         }
@@ -386,9 +406,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             buf.readUnsignedByte(); // encoding
-            Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
-            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, charset).toString());
+            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, CHARSET_GBK).toString());
 
             return position;
 
@@ -453,6 +472,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Position position = decodeLocation(deviceSession, buf);
             requestAttachments(channel, remoteAddress, id, position);
             return position;
+
+        } else if (type == MSG_LOCATION_QUERY_RESPONSE) {
+
+            buf.readUnsignedShort(); // response serial number
+
+            return decodeLocation(deviceSession, buf);
 
         } else if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
 
@@ -557,6 +582,66 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             position.set("cardCode", buf.readString(20, StandardCharsets.US_ASCII).trim());
             position.set("cardAgency", buf.readString(buf.readUnsignedByte(), StandardCharsets.US_ASCII));
             position.set("cardValidity", ByteBufUtil.hexDump(buf.readSlice(4)));
+
+            return position;
+
+        } else if (type == MSG_PARAMETER_QUERY_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedShort(); // response serial number
+            buf.readUnsignedByte(); // parameter count
+
+            while (buf.readableBytes() - 2 >= 5) {
+
+                int subtype = buf.readInt();
+                int length = buf.readUnsignedByte();
+                int endIndex = buf.readerIndex() + length;
+                if (endIndex > buf.writerIndex() - 2) {
+                    break;
+                }
+                switch (subtype) {
+                    case 0x0001:
+                        position.set("heartbeatInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0010:
+                        position.set("apn", buf.readCharSequence(length, CHARSET_GBK).toString());
+                        break;
+                    case 0x0013:
+                        position.set("server", buf.readCharSequence(length, CHARSET_GBK).toString());
+                        break;
+                    case 0x0018:
+                        position.set("port", buf.readUnsignedInt());
+                        break;
+                    case 0x0027:
+                        position.set("sleepReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0028:
+                        position.set("emergencyReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0029:
+                        position.set("defaultReportInterval", buf.readUnsignedInt());
+                        break;
+                    case 0x0055:
+                        position.set("overspeedThreshold", buf.readUnsignedInt());
+                        break;
+                    case 0x0056:
+                        position.set("speedLimitDuration", buf.readUnsignedInt());
+                        break;
+                    case 0x0080:
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
+                        break;
+                    case 0x0083:
+                        position.set("plateNumber", buf.readCharSequence(length, CHARSET_GBK).toString().trim());
+                        break;
+                    default:
+                        break;
+                }
+                buf.readerIndex(endIndex);
+            }
 
             return position;
 
@@ -666,6 +751,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String model = getDeviceModel(deviceSession);
+        boolean isAovx = model != null && AOVX_MODELS.contains(model);
 
         decodeAlarm(position, model, buf.readUnsignedInt());
 
@@ -695,6 +781,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             int subtype = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
             int endIndex = buf.readerIndex() + length;
+            if (endIndex > buf.writerIndex()) {
+                break;
+            }
             String stringValue;
             int event;
             long alarm;
@@ -900,8 +989,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedShort();
                         while (buf.readerIndex() < endIndex) {
-                            network.addCellTower(CellTower.from(
-                                mcc, mnc, buf.readUnsignedMedium(), buf.readUnsignedInt(), buf.readUnsignedByte()));
+                            int lac = buf.readUnsignedMedium();
+                            long cid = buf.readUnsignedInt();
+                            int rssi = buf.readUnsignedByte();
+                            if (lac > 0 && lac <= 0xffff && cid <= 0xfffffff) {
+                                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                            }
                         }
                     } else if (subtype == 0xE1 && length == 2) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
@@ -1046,9 +1139,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xEA:
                     if (length > 2) {
                         buf.readUnsignedByte(); // extended info type
-                        while (buf.readerIndex() < endIndex) {
+                        while (buf.readerIndex() + 2 <= endIndex) {
                             int extendedType = buf.readUnsignedByte();
                             int extendedLength = buf.readUnsignedByte();
+                            if (buf.readerIndex() + extendedLength > endIndex) {
+                                break;
+                            }
                             int extendedEndIndex = buf.readerIndex() + extendedLength;
                             switch (extendedType) {
                                 case 0x11:
@@ -1119,8 +1215,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                     }
                                     break;
                                 case 0x00B2:
-                                    position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
-                                            buf.readSlice(10)).replaceAll("f", ""));
+                                    position.set(Position.KEY_ICCID, StringUtil.stripTrailing(
+                                            'f', ByteBufUtil.hexDump(buf.readSlice(10))));
                                     break;
                                 case 0x00B9:
                                     buf.readUnsignedByte(); // count
@@ -1181,42 +1277,93 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     }
                     break;
+                case 0xF0:
+                    while (buf.readerIndex() < endIndex) {
+                        int mcc = buf.readUnsignedShort();
+                        int mnc = buf.readUnsignedShort();
+                        long cid = buf.readUnsignedInt();
+                        int lac = (int) buf.readUnsignedInt();
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid, buf.readUnsignedByte()));
+                    }
+                    break;
                 case 0xF1:
                     position.set(Position.KEY_POWER, buf.readUnsignedInt() / 1000.0);
                     break;
+                case 0xF2:
+                    position.set(Position.KEY_VERSION_FW, buf.readCharSequence(
+                            length, StandardCharsets.US_ASCII).toString());
+                    break;
                 case 0xF3:
-                    while (buf.readerIndex() < endIndex) {
-                        int extendedType = buf.readUnsignedShort();
-                        int extendedLength = buf.readUnsignedByte();
-                        switch (extendedType) {
-                            case 0x0002 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 10.0);
-                            case 0x0003 -> position.set(Position.KEY_RPM, buf.readUnsignedShort());
-                            case 0x0004 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-                            case 0x0005 -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100);
-                            case 0x0007 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 10.0);
-                            case 0x0008 -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedShort() / 10.0);
-                            case 0x0009 -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
-                            case 0x000B -> position.set("intakePressure", buf.readUnsignedShort());
-                            case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
-                            case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
-                            case 0x000E -> position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
-                            case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
-                            case 0x0051 -> {
-                                if (extendedLength > 0) {
-                                    position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
-                                }
+                    if (isAovx) {
+                        int mask = buf.readUnsignedByte();
+                        int index = 0;
+                        while (buf.readerIndex() < endIndex) {
+                            index += 1;
+                            position.set("tag" + index + "Mac", ByteBufUtil.hexDump(buf.readSlice(6)));
+                            position.set("tag" + index + "Rssi", buf.readByte());
+                            if (BitUtil.check(mask, 0)) {
+                                position.set("tag" + index + "Name", buf.readCharSequence(
+                                        10, StandardCharsets.US_ASCII).toString().trim());
                             }
-                            case 0x0052 -> {
-                                if (extendedLength > 0) {
-                                    position.set("calid", BufferUtil.readString(buf, extendedLength));
-                                }
+                            if (BitUtil.check(mask, 1)) {
+                                buf.skipBytes(2); // firmware version
                             }
-                            case 0x0100 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() / 10.0);
-                            case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() / 10.0);
-                            case 0x0112 -> position.set("hardAccelerationCount", buf.readUnsignedShort());
-                            case 0x0113 -> position.set("hardDecelerationCount", buf.readUnsignedShort());
-                            case 0x0114 -> position.set("hardCorneringCount", buf.readUnsignedShort());
-                            default -> buf.skipBytes(extendedLength);
+                            if (BitUtil.check(mask, 2)) {
+                                position.set("tag" + index + "Battery", buf.readUnsignedShort() / 1000.0);
+                            }
+                            if (BitUtil.check(mask, 3)) {
+                                position.set("tag" + index + "Temp", buf.readShort() / 10.0);
+                            }
+                            if (BitUtil.check(mask, 4)) {
+                                position.set("tag" + index + "Humidity", buf.readShort() / 10.0);
+                            }
+                            if (BitUtil.check(mask, 5)) {
+                                buf.skipBytes(6); // accelerometer
+                            }
+                            if (BitUtil.check(mask, 6)) {
+                                buf.skipBytes(2); // reserved
+                            }
+                            if (BitUtil.check(mask, 7)) {
+                                buf.skipBytes(2); // reserved
+                            }
+                        }
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedType = buf.readUnsignedShort();
+                            int extendedLength = buf.readUnsignedByte();
+                            switch (extendedType) {
+                                case 0x0002 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 10.0);
+                                case 0x0003 -> position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                case 0x0004 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+                                case 0x0005 -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100);
+                                case 0x0007 ->
+                                        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 10.0);
+                                case 0x0008 -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedShort() / 10.0);
+                                case 0x0009 -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
+                                case 0x000B -> position.set("intakePressure", buf.readUnsignedShort());
+                                case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
+                                case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
+                                case 0x000E ->
+                                        position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
+                                case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
+                                case 0x0051 -> {
+                                    if (extendedLength > 0) {
+                                        position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
+                                    }
+                                }
+                                case 0x0052 -> {
+                                    if (extendedLength > 0) {
+                                        position.set("calid", BufferUtil.readString(buf, extendedLength));
+                                    }
+                                }
+                                case 0x0100 ->
+                                        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() / 10.0);
+                                case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() / 10.0);
+                                case 0x0112 -> position.set("hardAccelerationCount", buf.readUnsignedShort());
+                                case 0x0113 -> position.set("hardDecelerationCount", buf.readUnsignedShort());
+                                case 0x0114 -> position.set("hardCorneringCount", buf.readUnsignedShort());
+                                default -> buf.skipBytes(extendedLength);
+                            }
                         }
                     }
                     break;
@@ -1234,9 +1381,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF6:
-                    if (length == 2) {
+                    if (!isAovx && length == 2) {
                         position.set("airPressure", buf.readUnsignedShort());
-                    } else if (length == 8) {
+                    } else if (!isAovx && length == 8) {
                         position.set("imei", ByteBufUtil.hexDump(buf.readSlice(length)).substring(1));
                     } else {
                         event = buf.readUnsignedByte();
@@ -1244,15 +1391,25 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         if (event == 2) {
                             position.set(Position.KEY_MOTION, true);
                         }
-                        int fieldMask = buf.readUnsignedByte();
-                        if (BitUtil.check(fieldMask, 0)) {
+                        int mask = buf.readUnsignedByte();
+                        if (BitUtil.check(mask, 0)) {
                             position.set("lightSensor", buf.readUnsignedShort());
                         }
-                        if (BitUtil.check(fieldMask, 1)) {
+                        if (BitUtil.check(mask, 1)) {
                             position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                         }
-                        if (BitUtil.check(fieldMask, 2)) {
+                        if (BitUtil.check(mask, 2)) {
                             position.set(Position.KEY_HUMIDITY, buf.readShort() / 10.0);
+                        }
+                        if (BitUtil.check(mask, 3)) {
+                            position.set(Position.KEY_G_SENSOR, String.format(
+                                    "[%d,%d,%d]", buf.readShort(), buf.readShort(), buf.readShort()));
+                        }
+                        if (BitUtil.check(mask, 4)) {
+                            buf.skipBytes(10); // threshold configuration
+                        }
+                        if (BitUtil.check(mask, 5)) {
+                            position.set("airPressure", buf.readUnsignedShort());
                         }
                     }
                     break;
@@ -1273,10 +1430,36 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF8:
-                    if (model != null && Set.of("C5", "C5L").contains(model)) {
+                    if (isAovx) {
+                        buf.readUnsignedByte(); // working mode
+                        buf.skipBytes(8); // imei
+                        position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+                    } else if (model != null && Set.of("C5", "C5L").contains(model)) {
                         position.set(Position.KEY_STEPS, buf.readUnsignedShort());
                     } else {
                         position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 10.0 - 50);
+                    }
+                    break;
+                case 0xF9:
+                    int mask = buf.readUnsignedShort();
+                    if (BitUtil.check(mask, 0)) {
+                        buf.skipBytes(4); // gnss age
+                    }
+                    if (BitUtil.check(mask, 1)) {
+                        buf.skipBytes(4); // acc on time
+                    }
+                    if (BitUtil.check(mask, 2)) {
+                        position.set(Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
+                    }
+                    if (BitUtil.check(mask, 3)) {
+                        buf.skipBytes(6); // gnss time
+                    }
+                    if (BitUtil.check(mask, 5)) {
+                        buf.skipBytes(8); // sampling and report interval
+                    }
+                    if (BitUtil.check(mask, 6)) {
+                        position.set(Position.PREFIX_TEMP + 3, buf.readShort() / 10.0);
+                        buf.skipBytes(4); // external temperature thresholds
                     }
                     break;
                 case 0xFB:
@@ -1535,9 +1718,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x012E -> position.set("oilLevel", buf.readUnsignedShort() / 10.0);
                             case 0x052A -> position.set(Position.KEY_FUEL, buf.readUnsignedShort() / 100.0);
                             case 0x0105, 0x052C -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 100.0);
-                            case 0x014A, 0x0537, 0x0538, 0x0539 -> {
+                            case 0x014A, 0x0537, 0x0538, 0x0539 ->
                                 position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
-                            }
                             case 0x052B -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                             case 0x052D -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
                             case 0x052E -> position.set("airTemp", buf.readUnsignedByte() - 40);
@@ -1547,6 +1729,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x053D -> position.set("intakePressure", buf.readUnsignedShort() / 10.0);
                             case 0x0544 -> position.set("liquidLevel", buf.readUnsignedByte());
                             case 0x0547, 0x0548 -> position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+                            case 0xFEEC -> position.set(Position.KEY_VIN,
+                                    buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
                             default -> {
                                 switch (length) {
                                     case 1 -> position.set(Position.PREFIX_IO + id, buf.readUnsignedByte());
@@ -1591,6 +1775,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x02:
                                 position.addAlarm(Position.ALARM_POWER_CUT);
                                 break;
+                            case 0x0E:
+                                position.addAlarm(Position.ALARM_IDLE);
+                                break;
                             case 0x1A:
                                 position.addAlarm(Position.ALARM_ACCELERATION);
                                 break;
@@ -1607,6 +1794,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                             case 0x23:
                                 position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+                                break;
+                            case 0x25:
+                                position.addAlarm(Position.ALARM_OVERSPEED);
                                 break;
                             case 0x26:
                             case 0x27:
@@ -1625,6 +1815,22 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, time);
                     decodeCoordinates(position, deviceSession, buf);
                     position.setTime(time);
+                    break;
+                case 0x04:
+                    int tripProperty = buf.readUnsignedByte();
+                    position.set("tripNumber", buf.readUnsignedInt());
+                    buf.skipBytes(6); // start time
+                    if (tripProperty == 0x02) {
+                        buf.skipBytes(6); // end time
+                        buf.skipBytes(8); // start location
+                        buf.skipBytes(8); // end location
+                        buf.skipBytes(1); // location flags
+                        position.set("idlingCount", buf.readUnsignedShort());
+                        position.set("idlingTime", buf.readUnsignedShort());
+                        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 100L);
+                        position.set("tripFuel", buf.readUnsignedShort() / 100.0);
+                    }
+                    getLastLocation(position, time);
                     break;
                 case 0x0B:
                     if (buf.readUnsignedByte() > 0) {
@@ -1664,6 +1870,76 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // TODO more positions and g sensor data
+
+            return position;
+
+        } else if (type == 0xF3) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            while (buf.readableBytes() > 4) {
+                int subtype = buf.readUnsignedShort();
+                int length = buf.readUnsignedShort();
+                int endIndex = buf.readerIndex() + length;
+                switch (subtype) {
+                    case 0x0002 -> position.set("collision", buf.readUnsignedShort() / 256.0 / 100.0);
+                    case 0x0006 -> position.setDeviceTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+                    default -> {}
+                }
+                buf.readerIndex(endIndex);
+            }
+
+            getLastLocation(position, position.getDeviceTime());
+
+            return position;
+
+        } else if (type == 0x53 || type == 0x54) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            decodeCoordinates(position, deviceSession, buf);
+            position.setAltitude(buf.readShort());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
+            position.setCourse(buf.readUnsignedShort());
+            position.setTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+
+            if (type == 0x53) {
+
+                buf.readUnsignedByte(); // total node count across all subcontracted packets
+                while (buf.readableBytes() > 2) {
+                    int index = buf.readUnsignedByte() + 1;
+                    position.set("tag" + index + "Mac", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("tag" + index + "Rssi", buf.readByte());
+                    int dataLength = buf.readUnsignedByte();
+                    position.set("tag" + index + "Data", ByteBufUtil.hexDump(buf.readSlice(dataLength)));
+                }
+
+            } else {
+
+                while (buf.readableBytes() > 2) {
+                    int mask = buf.readUnsignedShort();
+                    buf.skipBytes(6); // sample time
+                    if (BitUtil.check(mask, 0)) {
+                        position.set("lightSensor", buf.readUnsignedShort());
+                    }
+                    if (BitUtil.check(mask, 1)) {
+                        position.set(Position.KEY_DEVICE_TEMP, buf.readShort() / 10.0);
+                        position.set(Position.KEY_HUMIDITY, buf.readShort() / 10.0);
+                    }
+                    if (BitUtil.check(mask, 2)) {
+                        position.set(Position.PREFIX_TEMP + 3, buf.readShort() / 10.0);
+                    }
+                    if (BitUtil.check(mask, 3)) {
+                        buf.skipBytes(6); // acceleration
+                    }
+                    if (BitUtil.check(mask, 4)) {
+                        position.set("airPressure", buf.readUnsignedShort());
+                    }
+                }
+
+            }
 
             return position;
 

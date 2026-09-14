@@ -9,6 +9,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.StopReportItem;
@@ -99,7 +100,7 @@ public class ReportUtilsTest extends BaseTest {
         Position startPosition = new Position();
         Position endPosition = new Position();
 
-        assertEquals(0.0, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+        assertEquals(0.0, reportUtils.calculateFuel(startPosition, endPosition, device, List.of()), 0.01);
     }
 
     @Test
@@ -112,7 +113,7 @@ public class ReportUtilsTest extends BaseTest {
 
         startPosition.set(Position.KEY_FUEL, 0.7);
         endPosition.set(Position.KEY_FUEL, 0.5);
-        assertEquals(0.2, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+        assertEquals(0.2, reportUtils.calculateFuel(startPosition, endPosition, device, List.of()), 0.01);
     }
 
     @Test
@@ -125,7 +126,7 @@ public class ReportUtilsTest extends BaseTest {
 
         startPosition.set(Position.KEY_FUEL_USED, 10.0);
         endPosition.set(Position.KEY_FUEL_USED, 15.0);
-        assertEquals(5.0, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+        assertEquals(5.0, reportUtils.calculateFuel(startPosition, endPosition, device, List.of()), 0.01);
     }
 
     @Test
@@ -141,7 +142,36 @@ public class ReportUtilsTest extends BaseTest {
 
         startPosition.set(Position.KEY_FUEL_LEVEL, 80.0);
         endPosition.set(Position.KEY_FUEL_LEVEL, 60.0);
-        assertEquals(20.0, reportUtils.calculateFuel(startPosition, endPosition, deviceWithCapacity), 0.01);
+        assertEquals(20.0,
+                reportUtils.calculateFuel(startPosition, endPosition, deviceWithCapacity, List.of()), 0.01);
+    }
+
+    @Test
+    public void testCalculateSpentFuelExcludesFillingsAndDrains() throws Exception {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+        Device device = mock(Device.class);
+
+        Position startPosition = new Position();
+        startPosition.setTime(date("2016-01-01 00:00:00.000"));
+        startPosition.set(Position.KEY_FUEL, 50.0);
+
+        Position endPosition = new Position();
+        endPosition.setTime(date("2016-01-01 01:00:00.000"));
+        endPosition.set(Position.KEY_FUEL, 50.0);
+
+        Event drop = new Event(Event.TYPE_DEVICE_FUEL_DROP, 1);
+        drop.setEventTime(date("2016-01-01 00:20:00.000"));
+        drop.set("before", 50.0);
+        drop.set("after", 30.0);
+
+        Event increase = new Event(Event.TYPE_DEVICE_FUEL_INCREASE, 1);
+        increase.setEventTime(date("2016-01-01 00:40:00.000"));
+        increase.set("before", 30.0);
+        increase.set("after", 55.0);
+
+        assertEquals(5.0,
+                reportUtils.calculateFuel(startPosition, endPosition, device, List.of(drop, increase)), 0.01);
     }
 
     @Test

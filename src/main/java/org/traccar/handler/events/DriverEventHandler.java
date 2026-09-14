@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,29 +17,22 @@
 package org.traccar.handler.events;
 
 import jakarta.inject.Inject;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class DriverEventHandler extends BaseEventHandler {
-
-    private final CacheManager cacheManager;
+public class DriverEventHandler extends BasePositionEventHandler {
 
     @Inject
     public DriverEventHandler(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-        if (!PositionUtil.isLatest(cacheManager, position)) {
-            return;
-        }
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
         String driverUniqueId = position.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
             String oldDriverUniqueId = null;
-            Position lastPosition = cacheManager.getPosition(position.getDeviceId());
             if (lastPosition != null) {
                 oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
             }

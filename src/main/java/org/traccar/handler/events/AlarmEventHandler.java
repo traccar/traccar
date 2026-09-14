@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,24 +26,22 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AlarmEventHandler extends BaseEventHandler {
+public class AlarmEventHandler extends BasePositionEventHandler {
 
-    private final CacheManager cacheManager;
     private final boolean ignoreDuplicates;
 
     @Inject
     public AlarmEventHandler(Config config, CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
         ignoreDuplicates = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
         String alarmString = position.getString(Position.KEY_ALARM);
         if (alarmString != null) {
             Set<String> alarms = new HashSet<>(Arrays.asList(alarmString.split(",")));
             if (ignoreDuplicates) {
-                Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                 if (lastPosition != null) {
                     String lastAlarmString = lastPosition.getString(Position.KEY_ALARM);
                     if (lastAlarmString != null) {

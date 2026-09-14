@@ -12,8 +12,8 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Tlt2hProtocolDecoder(null));
 
         verifyPositions(decoder, false, text(
-                "#862255061752835#MT710#0000#AUTO#1\r\n" +
-                "#4106#$GPRMC,151410.00,A,3010.4103,N,08146.2728,W,,214.90,010324,,,A*58\r\n"));
+                "#862255061752835#MT710#0000#AUTO#1\r\n"
+                    + "#4106#$GPRMC,151410.00,A,3010.4103,N,08146.2728,W,,214.90,010324,,,A*58\r\n"));
 
         verifyPositions(decoder, text(
                 "#868105044690301#MT600+#0000#0#0#143#40#0#AUTO#1\r\n",
@@ -49,13 +49,13 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
                 "#000321901$GPRMC,172030.00,A,4845.2906,N,01910.2742,E,0.01,,041219,,,A*43\r\n"));
 
         verifyAttribute(decoder, text(
-                "#869260042149724#MP90_4G#0000#AUTOLOW#1\r\n" +
-                "#02201be0000$GPRMC,001645.00,A,5333.2920,N,11334.3857,W,0.03,,250419,,,A*5E\r\n"),
+                "#869260042149724#MP90_4G#0000#AUTOLOW#1\r\n"
+                    + "#02201be0000$GPRMC,001645.00,A,5333.2920,N,11334.3857,W,0.03,,250419,,,A*5E\r\n"),
                 Position.KEY_IGNITION, false);
 
         verifyPositions(decoder, text(
-                "#867962040161955#MT600#0000#0#0#137#41#0#AUTO#1\r\n" +
-                "#00019023402$GPRMC,084702.00,A,3228.6772,S,11545.9684,E,,159.80,251018,,,A*56\r\n"));
+                "#867962040161955#MT600#0000#0#0#137#41#0#AUTO#1\r\n"
+                    + "#00019023402$GPRMC,084702.00,A,3228.6772,S,11545.9684,E,,159.80,251018,,,A*56\r\n"));
 
         verifyPositions(decoder, text(
                 "#868323028789359#MT600#0000#AUTOLOW#1\r\n",

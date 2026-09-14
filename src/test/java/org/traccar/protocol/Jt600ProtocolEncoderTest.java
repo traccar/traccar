@@ -7,8 +7,8 @@ import org.traccar.model.Command;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Jt600ProtocolEncoderTest extends ProtocolTest {
-    Jt600ProtocolEncoder encoder = new Jt600ProtocolEncoder(null);
-    Command command = new Command();
+    private Jt600ProtocolEncoder encoder = new Jt600ProtocolEncoder(null);
+    private Command command = new Command();
 
     @Test
     public void testEngineStop() {

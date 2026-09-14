@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -483,6 +483,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Check the straight line segment between consecutive positions for geofence boundary crossings, so a visit is
+     * detected even if no position was received inside the geofence (e.g. long reporting intervals).
+     */
+    public static final ConfigKey<Boolean> EVENT_GEOFENCE_SEGMENT_CROSSING = new BooleanConfigKey(
+            "event.geofence.segmentCrossing",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Driver behavior acceleration threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new DoubleConfigKey(
@@ -578,6 +587,15 @@ public final class Keys {
             "database.maxPoolSize",
             List.of(KeyType.CONFIG),
             20);
+
+    /**
+     * Number of rows fetched per round trip for streamed queries (position history and exports). On PostgreSQL this
+     * enables a server-side cursor so results are not fully buffered in memory.
+     */
+    public static final ConfigKey<Integer> DATABASE_STREAM_FETCH_SIZE = new IntegerConfigKey(
+            "database.streamFetchSize",
+            List.of(KeyType.CONFIG),
+            1000);
 
     /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
@@ -964,6 +982,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Include stack traces in API error responses. Disable to return only error messages.
+     */
+    public static final ConfigKey<Boolean> WEB_SHOW_STACK_TRACES = new BooleanConfigKey(
+            "web.showStackTraces",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
      * A token to log in as a virtual admin account. Can be used to restore access in case of issues with regular
      * admin login. For example, if a password is lost and can't be restored.
      */
@@ -1028,6 +1054,24 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> SERVER_FORWARD_WRITE_TIMEOUT = new IntegerConfigKey(
             "server.forward.writeTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "client.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Read timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_READ_TIMEOUT = new IntegerConfigKey(
+            "client.readTimeout",
             List.of(KeyType.CONFIG),
             5000);
 
@@ -1267,6 +1311,14 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
+     * SMTP connect, read and write timeout in milliseconds.
+     */
+    public static final ConfigKey<Integer> MAIL_SMTP_TIMEOUT = new IntegerConfigKey(
+            "mail.smtp.timeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * SMS API service full URL. Enables SMS commands and notifications.
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new StringConfigKey(
@@ -1346,6 +1398,14 @@ public final class Keys {
     public static final ConfigKey<String> COMMAND_CLIENT_SERVICE_ACCOUNT = new StringConfigKey(
             "command.client.serviceAccount",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Enable Google Find Hub command sender.
+     */
+    public static final ConfigKey<Boolean> COMMAND_FIND_HUB_ENABLE = new BooleanConfigKey(
+            "command.findHub.enable",
+            List.of(KeyType.CONFIG),
+            false);
 
     /**
      * Google Find Hub service URL.
@@ -1446,6 +1506,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Telegram notification base URL.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_BASE_URL = new StringConfigKey(
+            "notificator.telegram.base.url",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
@@ -1516,6 +1583,15 @@ public final class Keys {
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum number of positions returned by a single history or export request. Prevents unbounded queries from
+     * loading an entire result set into memory. Set to 0 to disable the limit.
+     */
+    public static final ConfigKey<Integer> REPORT_MAX_POSITIONS = new IntegerConfigKey(
+            "report.maxPositions",
+            List.of(KeyType.CONFIG),
+            50000);
 
     /**
      * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.

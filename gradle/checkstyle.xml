@@ -7,6 +7,11 @@
 
     <module name="SuppressWarningsFilter"/>
 
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="LineLength"/>
+        <property name="files" value="[\\/]src[\\/]test[\\/]"/>
+    </module>
+
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value="^.*[\\/]protobuf[\\/].*$"/>
     </module>

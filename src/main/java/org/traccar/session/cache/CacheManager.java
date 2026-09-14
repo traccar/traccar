@@ -251,32 +251,29 @@ public class CacheManager implements BroadcastInterface {
                 return;
             }
 
-            switch (after) {
-                case GroupedModel afterGrouped -> {
-                    long beforeGroupId = ((GroupedModel) before).getGroupId();
-                    long afterGroupId = afterGrouped.getGroupId();
-                    if (beforeGroupId != afterGroupId) {
-                        if (beforeGroupId > 0) {
-                            invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
-                        }
-                        if (afterGroupId > 0) {
-                            invalidatePermission(clazz, id, Group.class, afterGroupId, true);
-                        }
+            if (after instanceof GroupedModel afterGrouped) {
+                long beforeGroupId = ((GroupedModel) before).getGroupId();
+                long afterGroupId = afterGrouped.getGroupId();
+                if (beforeGroupId != afterGroupId) {
+                    if (beforeGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                    }
+                    if (afterGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, afterGroupId, true);
                     }
                 }
-                case Schedulable afterSchedulable -> {
-                    long beforeCalendarId = ((Schedulable) before).getCalendarId();
-                    long afterCalendarId = afterSchedulable.getCalendarId();
-                    if (beforeCalendarId != afterCalendarId) {
-                        if (beforeCalendarId > 0) {
-                            invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
-                        }
-                        if (afterCalendarId > 0) {
-                            invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
-                        }
+            }
+            if (after instanceof Schedulable afterSchedulable) {
+                long beforeCalendarId = ((Schedulable) before).getCalendarId();
+                long afterCalendarId = afterSchedulable.getCalendarId();
+                if (beforeCalendarId != afterCalendarId) {
+                    if (beforeCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                    }
+                    if (afterCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
                     }
                 }
-                default -> {}
             }
 
             graph.updateObject(after);

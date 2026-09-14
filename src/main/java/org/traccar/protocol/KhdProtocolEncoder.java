@@ -81,7 +81,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_SET_SPEED_LIMIT -> {
                 ByteBuf content = Unpooled.buffer();
                 content.writeByte(command.getInteger(Command.KEY_DATA));
-                yield encodeCommand(MSG_RESUME_OIL, uniqueId, content);
+                yield encodeCommand(MSG_SET_OVERSPEED, uniqueId, content);
             }
             case Command.TYPE_SET_ODOMETER -> encodeCommand(MSG_DELETE_MILEAGE, uniqueId, null);
             case Command.TYPE_POSITION_SINGLE -> encodeCommand(MSG_ON_DEMAND_TRACK, uniqueId, null);

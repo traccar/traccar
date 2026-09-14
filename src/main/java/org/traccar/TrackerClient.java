@@ -98,6 +98,11 @@ public abstract class TrackerClient implements TrackerConnector {
     }
 
     @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
     public ChannelGroup getChannelGroup() {
         return channelGroup;
     }

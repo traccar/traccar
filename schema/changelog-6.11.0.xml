@@ -31,11 +31,11 @@
 
   </changeSet>
 
-  <changeSet author="author" id="changelog-6.11.0-other">
+  <changeSet author="author" id="changelog-6.11.0-other-new">
 
     <preConditions onFail="MARK_RAN">
       <not>
-        <changeSetExecuted changeLogFile="changelog-6.11.0" id="changelog-6.11.0-timescale" author="author" />
+        <indexExists tableName="tc_actions" indexName="tc_actions_actiontime_idx" />
       </not>
     </preConditions>
 

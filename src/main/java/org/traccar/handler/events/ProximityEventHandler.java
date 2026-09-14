@@ -19,7 +19,6 @@ import jakarta.inject.Inject;
 import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.model.AttributeUtil;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -27,21 +26,15 @@ import org.traccar.session.cache.CacheManager;
 
 import java.util.Set;
 
-public class ProximityEventHandler extends BaseEventHandler {
-
-    private final CacheManager cacheManager;
+public class ProximityEventHandler extends BasePositionEventHandler {
 
     @Inject
     public ProximityEventHandler(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-        if (!PositionUtil.isLatest(cacheManager, position)) {
-            return;
-        }
-
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
         long deviceId = position.getDeviceId();
         Set<Device> linkedDevices = cacheManager.getDeviceObjects(deviceId, Device.class);
         if (linkedDevices.isEmpty()) {
@@ -53,7 +46,6 @@ public class ProximityEventHandler extends BaseEventHandler {
         double exitDistance = AttributeUtil.lookup(attributeProvider, Keys.EVENT_PROXIMITY_EXIT_DISTANCE);
         double unaccompaniedDistance = AttributeUtil.lookup(attributeProvider, Keys.EVENT_UNACCOMPANIED_DISTANCE);
 
-        Position lastPosition = cacheManager.getPosition(deviceId);
         if (lastPosition == null) {
             return;
         }

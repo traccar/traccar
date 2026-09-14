@@ -69,7 +69,7 @@ public class AplicomProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "44c3014645e8e9d29a002d0022ff6d00f455893b4d55893b4c027a7e1500189d710800009e0000000000000000000000023300000000000000009d"));
-        
+
         verifyPosition(decoder, binary(
                 "44C20146B710C158DA002100B09F0700C054CA0EA254CA0E9C03BE0BF6015D7069070000142A600000000000000001"));
 

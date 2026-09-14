@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
@@ -13,7 +12,7 @@ public class BoxProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "H,BT,358281002435893,081028142432,F5813D19,6D6E6DC2"));
-        
+
         verifyNull(decoder, text(
                 "H,BT,N878123,080415081234,D63E6DD9,6D6E6DC2,8944100300825505377"));
 

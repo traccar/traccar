@@ -41,6 +41,7 @@ public class CacheGraph {
         CacheNode node = nodes.remove(key);
         if (node != null) {
             node.getAllLinks(true).forEach(child -> child.removeLink(key.clazz(), false, node));
+            node.getAllLinks(false).forEach(parent -> parent.removeLink(key.clazz(), true, node));
         }
         roots.remove(key);
     }

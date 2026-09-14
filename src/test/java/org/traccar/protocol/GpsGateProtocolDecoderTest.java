@@ -27,13 +27,13 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "$FRLIN,,user1,8IVHF*7A"));
-        
+
         verifyNull(decoder, text(
                 "$FRLIN,,354503026292842,VGZTHKT*0C"));
 
         verifyNull(decoder, text(
                 "$FRLIN,IMEI,1234123412341234,*7B"));
-        
+
         verifyNull(decoder, text(
                 "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
 

@@ -67,7 +67,6 @@ public class OidcResource extends BaseResource {
     @Inject
     private OidcSessionManager sessionManager;
 
-    @PermitAll
     @GET
     @Path("authorize")
     public Response authorize(

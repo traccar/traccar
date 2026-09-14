@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class Minifinder2ProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0xAB); // header
-        buf.writeByte(0x00); // properties
+        buf.writeByte(0x10); // properties (ack)
         buf.writeShortLE(content.readableBytes());
         buf.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
         buf.writeShortLE(1); // index

@@ -33,7 +33,6 @@ import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
-import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.storage.StorageException;
@@ -48,6 +47,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Path("notifications")
@@ -92,10 +92,10 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws MessageException, StorageException {
+    public Response testMessage() throws ExecutionException, InterruptedException, StorageException {
         User user = permissionsService.getUser(getUserId());
         for (Typed method : notificatorManager.getAllNotificatorTypes()) {
-            notificatorManager.getNotificator(method.type()).send(null, user, new Event("test", 0), null);
+            notificatorManager.getNotificator(method.type()).sendAsync(null, user, new Event("test", 0), null).get();
         }
         return Response.noContent().build();
     }
@@ -103,9 +103,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test/{notificator}")
     public Response testMessage(@PathParam("notificator") String notificator)
-            throws MessageException, StorageException {
+            throws ExecutionException, InterruptedException, StorageException {
         User user = permissionsService.getUser(getUserId());
-        notificatorManager.getNotificator(notificator).send(null, user, new Event("test", 0), null);
+        notificatorManager.getNotificator(notificator).sendAsync(null, user, new Event("test", 0), null).get();
         return Response.noContent().build();
     }
 
@@ -113,7 +113,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @Path("send/{notificator}")
     public Response sendMessage(
             @PathParam("notificator") String notificator, @QueryParam("userId") List<Long> userIds,
-            NotificationMessage message) throws MessageException, StorageException {
+            NotificationMessage message) throws ExecutionException, InterruptedException, StorageException {
         permissionsService.checkManager(getUserId());
         List<User> users;
         if (userIds.isEmpty()) {
@@ -138,7 +138,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
         }
         for (User user : users) {
             if (!user.getTemporary()) {
-                notificatorManager.getNotificator(notificator).send(user, message, null, null);
+                notificatorManager.getNotificator(notificator).sendAsync(user, message, null, null).get();
             }
         }
         return Response.noContent().build();

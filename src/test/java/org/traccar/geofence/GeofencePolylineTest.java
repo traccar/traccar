@@ -45,7 +45,15 @@ public class GeofencePolylineTest {
         assertFalse(geofenceGeometry.containsPoint(56.83861, 60.60822));
 
     }
-    
+
+    @Test
+    public void testIntersectsPolyline() throws ParseException {
+        GeofenceGeometry geofenceGeometry = new GeofencePolyline(
+                "LINESTRING (56.83777 60.59833, 56.83766 60.5968)", 0);
+        assertTrue(geofenceGeometry.intersectsSegment(56.837, 60.597565, 56.8384, 60.597565));
+        assertFalse(geofenceGeometry.intersectsSegment(56.8, 60.5, 56.81, 60.51));
+    }
+
     @Test
     public void testContainsPolylineNear180() throws ParseException {
         GeofenceGeometry geofenceGeometry = new GeofencePolyline(

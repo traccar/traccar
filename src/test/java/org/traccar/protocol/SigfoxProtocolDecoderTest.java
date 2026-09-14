@@ -3,10 +3,7 @@ package org.traccar.protocol;
 import io.netty.handler.codec.http.HttpMethod;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
-
-import static org.mockito.Mockito.when;
 
 public class SigfoxProtocolDecoderTest extends ProtocolTest {
 

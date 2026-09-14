@@ -190,6 +190,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
         Predicate<String> tatXXX = (m) -> m != null && m.matches("T.T...");
+        Predicate<String> ftXXX = (m) -> m != null && m.matches("FT[A-Z]\\d{3}");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, any, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -218,7 +219,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(57, fmbXXX, (p, b) -> p.set("hybridBatteryLevel", b.readByte()));
         register(66, any, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedShort() / 1000.0));
         register(67, any, (p, b) -> p.set(Position.KEY_BATTERY, b.readUnsignedShort() / 1000.0));
-        register(68, fmbXXX, (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() / 1000.0));
+        register(68, fmbXXX.or(ftXXX), (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() / 1000.0));
         register(72, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 1, b.readInt() / 10.0));
         register(73, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 2, b.readInt() / 10.0));
         register(74, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 3, b.readInt() / 10.0));
@@ -239,7 +240,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(89, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
         register(107, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() / 10.0));
-        register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
+        register(113, fmbXXX.or(ftXXX), (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
         register(115, fmbXXX, (p, b) -> p.set(Position.KEY_ENGINE_TEMP, b.readShort() / 10.0));
         register(389, "FMB003"::equals, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt() * 1000));
         register(701, fmb6XX, (p, b) -> p.set("bleTemp1", b.readShort() / 10.0));
@@ -251,18 +252,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(181, any, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() / 10.0));
         register(182, any, (p, b) -> p.set(Position.KEY_HDOP, b.readUnsignedShort() / 10.0));
         register(199, any, (p, b) -> p.set(Position.KEY_ODOMETER_TRIP, b.readUnsignedInt()));
-        register(200, fmbXXX, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
+        register(200, fmbXXX.or(ftXXX), (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
         register(205, fmbXXX.or(tatXXX), (p, b) -> p.set("cid2g", b.readUnsignedShort()));
         register(206, fmbXXX.or(tatXXX), (p, b) -> p.set("lac", b.readUnsignedShort()));
         register(236, any, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null));
         register(239, any, (p, b) -> p.set(Position.KEY_IGNITION, b.readUnsignedByte() > 0));
         register(240, any, (p, b) -> p.set(Position.KEY_MOTION, b.readUnsignedByte() > 0));
         register(241, any, (p, b) -> p.set(Position.KEY_OPERATOR, b.readUnsignedInt()));
-        register(246, fmbXXX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null));
+        register(246, fmbXXX.or(ftXXX), (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null));
         register(247, fmbXXX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null));
-        register(249, fmbXXX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null));
-        register(251, fmbXXX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null));
-        register(252, fmbXXX, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null));
+        register(249, fmbXXX.or(ftXXX), (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null));
+        register(251, fmbXXX.or(ftXXX), (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null));
+        register(252, fmbXXX.or(ftXXX), (p, b) ->
+                p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null));
         register(253, any, (p, b) -> {
             switch (b.readUnsignedByte()) {
                 case 1 -> p.addAlarm(Position.ALARM_ACCELERATION);
@@ -270,11 +272,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 case 3 -> p.addAlarm(Position.ALARM_CORNERING);
             }
         });
-        register(175, fmbXXX, (p, b) -> {
+        register(175, fmbXXX.or(ftXXX), (p, b) -> {
             p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
         });
         register(636, fmbXXX.or(tatXXX), (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
+        register(800, ftXXX, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() / 1000.0));
         register(10644, fmbXXX, (p, b) -> p.set("tempProbe1", b.readShort() / 100.0));
         register(10645, fmbXXX, (p, b) -> p.set("tempProbe2", b.readShort() / 100.0));
         register(10646, fmbXXX, (p, b) -> p.set("tempProbe3", b.readShort() / 100.0));

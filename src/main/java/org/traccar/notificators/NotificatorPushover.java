@@ -22,11 +22,14 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class NotificatorPushover extends Notificator {
@@ -60,7 +63,8 @@ public class NotificatorPushover extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
+    public CompletableFuture<Void> sendAsync(
+            User user, NotificationMessage shortMessage, Event event, Position position) {
 
         Message message = new Message();
         message.token = token;
@@ -77,7 +81,7 @@ public class NotificatorPushover extends Notificator {
         message.title = shortMessage.subject();
         message.message = shortMessage.digest();
 
-        client.target(url).request().post(Entity.json(message)).close();
+        return WebHelper.post(client.target(url).request(), Entity.json(message), response -> {});
     }
 
 }

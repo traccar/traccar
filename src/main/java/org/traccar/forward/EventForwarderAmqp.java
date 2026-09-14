@@ -17,12 +17,17 @@ package org.traccar.forward;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class EventForwarderAmqp implements EventForwarder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderAmqp.class);
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
@@ -36,13 +41,14 @@ public class EventForwarderAmqp implements EventForwarder {
     }
 
     @Override
-    public void forward(EventData eventData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(EventData eventData) {
         try {
             String value = objectMapper.writeValueAsString(eventData);
             amqpClient.publishMessage(value);
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
-            resultHandler.onResult(false, e);
+            LOGGER.warn("Event forwarding error", e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 }

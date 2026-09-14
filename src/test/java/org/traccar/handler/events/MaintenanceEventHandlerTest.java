@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MaintenanceEventHandlerTest extends BaseTest {
-    
+
     @Test
     public void testMaintenanceEventHandler() {
         Position lastPosition = new Position();
@@ -38,13 +38,13 @@ public class MaintenanceEventHandlerTest extends BaseTest {
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getDeviceObjects(anyLong(), eq(Maintenance.class))).thenReturn(maintenances);
         when(cacheManager.getPosition(anyLong())).thenReturn(lastPosition);
-        MaintenanceEventHandler eventHandler = new MaintenanceEventHandler(cacheManager);        
+        MaintenanceEventHandler eventHandler = new MaintenanceEventHandler(cacheManager);
 
         when(maintenance.getStart()).thenReturn(10000.0);
         when(maintenance.getPeriod()).thenReturn(2000.0);
 
         List<Event> events = new ArrayList<>();
- 
+
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 1999);
         position.set(Position.KEY_TOTAL_DISTANCE, 2001);
         eventHandler.analyzePosition(position, events::add);

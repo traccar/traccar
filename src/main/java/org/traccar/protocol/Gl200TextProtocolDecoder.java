@@ -260,7 +260,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, Double.parseDouble(v[index - 1]));
         }
         if (!v[index++].isEmpty()) {
-            position.set(Position.KEY_CHARGE, Integer.parseInt(v[index++]) == 1 ? true : null);
+            position.set(Position.KEY_CHARGE, Integer.parseInt(v[index - 1]) == 1 ? true : null);
         }
 
         if (model.equals("GV310LAU")) {

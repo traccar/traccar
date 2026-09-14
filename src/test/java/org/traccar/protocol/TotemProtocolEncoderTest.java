@@ -21,7 +21,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
         assertEquals("$$0020CF000000,0061D", encoder.encodeCommand(command));
 
     }
-    
+
     @Test
     public void testSmsEncode() throws Exception {
 

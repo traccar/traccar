@@ -39,12 +39,12 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "$355632000959420,9,3,160413,230536,E03738.4906,N5546.3148,00000,0.3870,147,07,2.4"));
-        
+
         verifyPosition(decoder, text(
                 "$353681041893264,9,3,240913,100833,E08513.0122,N5232.9395,181.3,22.02,251.30,9,1.00"));
 
         decoder.setFormat0("SPRXYAB27GHKLMmnaefghiotuvwb*U!");
-        
+
         verifyPosition(decoder, text(
                 "GSr,GTR-128,013227006963064,0080,1,a080,3,190615,163816,W07407.7134,N0440.8601,2579,0.01,130,12,0.7,11540mV,0,77,14,\"732,123,0744,2fc1,41,23\",\"732,123,0744,2dfe,05,28\",\"732,123,0744,272a,15,21\",\"732,123,0744,2f02,27,23\"*3b!"));
 

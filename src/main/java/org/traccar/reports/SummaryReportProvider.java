@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.common.TripsConfig;
@@ -77,15 +78,17 @@ public class SummaryReportProvider {
             first = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
             last = PositionUtil.getEdgePosition(storage, device.getId(), from, to, true);
         } else {
-            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-            for (Position position : positions) {
-                if (first == null) {
-                    first = position;
+            try (var positions = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+                for (var iterator = positions.iterator(); iterator.hasNext();) {
+                    Position position = iterator.next();
+                    if (first == null) {
+                        first = position;
+                    }
+                    if (position.getSpeed() > result.getMaxSpeed()) {
+                        result.setMaxSpeed(position.getSpeed());
+                    }
+                    last = position;
                 }
-                if (position.getSpeed() > result.getMaxSpeed()) {
-                    result.setMaxSpeed(position.getSpeed());
-                }
-                last = position;
             }
         }
 
@@ -94,7 +97,8 @@ public class SummaryReportProvider {
                     new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
             boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
-            result.setSpentFuel(reportUtils.calculateFuel(first, last, device));
+            List<Event> fuelEvents = reportUtils.getFuelEvents(device, from, to);
+            result.setSpentFuel(reportUtils.calculateFuel(first, last, device, fuelEvents));
 
             if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
                 result.setStartHours(first.getLong(Position.KEY_HOURS));

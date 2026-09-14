@@ -4,12 +4,12 @@ COPY traccar-other-$VERSION.zip /tmp/traccar.zip
 RUN unzip -qo /tmp/traccar.zip -d /traccar
 
 FROM eclipse-temurin:25 AS jdk
-RUN jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported \
+RUN jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported \
     --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
 
 FROM ubuntu:latest
 COPY --from=package /traccar /opt/traccar
 COPY --from=jdk /jre /opt/traccar/jre
 WORKDIR /opt/traccar
-ENTRYPOINT ["/opt/traccar/jre/bin/java"]
+ENTRYPOINT ["/opt/traccar/jre/bin/java", "-XX:+ExitOnOutOfMemoryError"]
 CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]

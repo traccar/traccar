@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,15 @@ public class GeofencePolygon extends GeofenceGeometry {
             }
         }
         return oddNodes;
+    }
+
+    @Override
+    protected boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        if (intersectsEdges(coordinates, true, latitude1, longitude1, latitude2, longitude2)) {
+            return true;
+        }
+        return containsPointInternal(latitude1, longitude1);
     }
 
     @Override

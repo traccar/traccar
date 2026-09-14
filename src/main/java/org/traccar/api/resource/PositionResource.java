@@ -16,6 +16,8 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
@@ -65,12 +67,16 @@ public class PositionResource extends BaseResource {
     @Inject
     private GpxExportProvider gpxExportProvider;
 
+    @Inject
+    private Config config;
+
     @GET
     public Stream<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("geofenceId") long geofenceId, @QueryParam("from") Date from, @QueryParam("to") Date to)
             throws StorageException {
         if (!positionIds.isEmpty()) {
+            permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
             var positions = new ArrayList<Position>();
             for (long positionId : positionIds) {
                 Position position = storage.getObject(Position.class, new Request(
@@ -87,7 +93,8 @@ public class PositionResource extends BaseResource {
                 Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
                         new Columns.All(), new Condition.Equals("id", geofenceId)));
 
-                return PositionUtil.getPositionsStream(storage, deviceId, from, to)
+                return PositionUtil.getPositionsStream(
+                        storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
                         .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
                 return storage.getObjectsStream(Position.class, new Request(
@@ -137,6 +144,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         StreamingOutput stream = output -> {
             try {
                 if (extension.equals("kmz")) {
@@ -166,6 +174,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         StreamingOutput stream = output -> {
             try {
                 csvExportProvider.generate(output, getUserId(), deviceId, geofenceId, from, to);
@@ -184,6 +193,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         StreamingOutput stream = output -> {
             try {
                 gpxExportProvider.generate(output, deviceId, geofenceId, from, to);

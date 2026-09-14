@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 
 @StorageName("tc_devices")
 public class Device extends GroupedModel implements Disableable, Schedulable {
+
+    private static final Pattern INVALID_UNIQUE_ID = Pattern.compile("[/\\\\]|\\A\\.{0,2}\\z");
 
     private long calendarId;
 
@@ -53,7 +56,11 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     }
 
     public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId.trim();
+        uniqueId = uniqueId.trim();
+        if (INVALID_UNIQUE_ID.matcher(uniqueId).find()) {
+            throw new IllegalArgumentException("Invalid device identifier");
+        }
+        this.uniqueId = uniqueId;
     }
 
     public static final String STATUS_UNKNOWN = "unknown";

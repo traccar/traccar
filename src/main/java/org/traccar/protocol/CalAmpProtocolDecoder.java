@@ -24,6 +24,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.StringUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -166,7 +167,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             int content = buf.readUnsignedByte();
 
             if (BitUtil.check(content, 0)) {
-                String id = ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())).replace("f", "");
+                String id = StringUtil.stripTrailing(
+                        'f', ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
                 getDeviceSession(channel, remoteAddress, id);
             }
 
