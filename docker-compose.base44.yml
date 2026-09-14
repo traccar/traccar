@@ -1,0 +1,21 @@
+services:
+  traccar:
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
+      DATABASE_DRIVER: org.h2.Driver
+      DATABASE_URL: jdbc:h2:/opt/traccar/data/database
+      DATABASE_USER: sa
+      DATABASE_PASSWORD: ""
+      REGISTRATION: "true"
+    ports:
+      - "3000:8082"
+      - "5000-5100:5000-5100"
+    volumes:
+      - traccar-data:/opt/traccar/data
+      - traccar-logs:/opt/traccar/logs
+
+volumes:
+  traccar-data:
+  traccar-logs:
