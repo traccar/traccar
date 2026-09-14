@@ -1,0 +1,17 @@
+FROM traccar/traccar:latest AS runtime
+
+FROM gradle:8-jdk21
+
+# Copy runtime files from prebuilt image (web, schema, templates, config)
+COPY --from=runtime /opt/traccar/web /opt/traccar/web
+COPY --from=runtime /opt/traccar/schema /opt/traccar/schema
+COPY --from=runtime /opt/traccar/templates /opt/traccar/templates
+COPY --from=runtime /opt/traccar/conf /opt/traccar/conf
+
+# Create lib dir (will be filled from Gradle build)
+RUN mkdir -p /opt/traccar/lib
+
+# Init script to copy runtime dependencies after build
+RUN echo 'allprojects { plugins.withId("java") { tasks.register("copyRuntimeLibs", Copy) { from configurations.runtimeClasspath; into "/opt/traccar/lib" } } }' > /init.gradle
+
+WORKDIR /opt/traccar
