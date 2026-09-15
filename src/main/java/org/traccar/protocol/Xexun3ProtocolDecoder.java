@@ -118,15 +118,19 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             switch (subType) {
                 case 0x64 -> {
                     position.setTime(new Date(buf.readUnsignedInt() * 1000));
-                    position.setValid(true);
-                    position.setLatitude(buf.readDouble());
-                    position.setLongitude(buf.readDouble());
+                    double latitude = buf.readDouble();
+                    double longitude = buf.readDouble();
+                    if (Double.isFinite(latitude) && Double.isFinite(longitude)) {
+                        position.setValid(true);
+                        position.setLatitude(latitude);
+                        position.setLongitude(longitude);
+                        hasLocation = true;
+                    }
                     position.setAltitude(buf.readFloat());
                     buf.readUnsignedByte(); // ephemeris
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // signal
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-                    hasLocation = true;
                 }
                 case 0x65 -> {
                     position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
