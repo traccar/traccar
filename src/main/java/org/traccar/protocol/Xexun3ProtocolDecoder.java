@@ -126,6 +126,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // signal
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                    position.setCourse(buf.readUnsignedShort() / 10.0);
                     hasLocation = true;
                 }
                 case 0x65 -> {
