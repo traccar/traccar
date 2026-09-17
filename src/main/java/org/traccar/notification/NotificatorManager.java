@@ -30,6 +30,7 @@ import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorTraccar;
 import org.traccar.notificators.NotificatorWhatsapp;
 import org.traccar.notificators.NotificatorWeb;
+import org.traccar.notificators.NotificatorNtfy;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -51,7 +52,8 @@ public class NotificatorManager {
             "traccar", NotificatorTraccar.class,
             "telegram", NotificatorTelegram.class,
             "whatsapp", NotificatorWhatsapp.class,
-            "pushover", NotificatorPushover.class);
+            "pushover", NotificatorPushover.class,
+            "ntfy", NotificatorNtfy.class);
 
     private final Injector injector;
 
