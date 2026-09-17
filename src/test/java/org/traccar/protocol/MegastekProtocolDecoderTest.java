@@ -12,6 +12,10 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new MegastekProtocolDecoder(null));
 
         verifyPosition(decoder, text(
+                "$MGV002,123456789012345,Name1,R,160926,123456,V,5555.55555,N,00000.00000,E,00,00,00,0.00,,,,,262,02,B444,F44444,44,static,,,,,33.3,45.6,,00,100,Timer,def012345678:67|456789012345:87,,0,,;!"),
+                position("2026-09-16 12:34:56.000", false, 55.92593, 0));
+
+        verifyPosition(decoder, text(
                 "0323$MGV002,861045082971493,,R,090126,134250,V,5231.64780,N,01323.48837,E,00,00,00,7.682,0.227,116.709,42.5,,262,01,5D8,1922400,20,0000,0000,0,,,,,,01,092,Timer,0268eb529865:50|3ca62f1ff798:63|b8bef41b75a0:64|1ced6f4ad291:72|b4f267537963:76|d2f267537963:76|58d7599127f8:82|32cda7ad09f3:83|485d35090af8:87|b0fc88ab407e:88,,0,,;!"));
 
         verifyAttribute(decoder, text(
