@@ -10,11 +10,16 @@ public class Xexun3ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Xexun3ProtocolDecoder(null));
 
+        verifyPosition(decoder, binary(
+                "fc005c032014086259608092620164226aa8261dffffffffffffffffffffffffffffffff00000637004b000641000006913c66116aa8261d01060003000091c400ce5421ff6a1863000116061d000008ffffffffffffff6aa8261d01010000bbfccf"),
+                position("2026-09-14 16:51:41.000", false, 0, 0));
+
         verifyNull(decoder, binary(
                 "fc000b03200108610450803870158318cf"));
 
-        verifyPosition(decoder, binary(
-                "fc0040032006086104508038701564216913f223403693012f635344405c829142b302f7427f33331a2e000000a40011046a1055ffff1f0000000000ffffff04ff09ff1a30cf"));
+        verifyAttribute(decoder, binary(
+                "fc00490320e8086259608092620164226aa92f624049b01fff79c842401c97788f16414443084ccd400e19001c009f000e006a18630000173a2f0001a3ffffffffffffff6aa92f622101000030f4cf"),
+                "course", 15.9);
 
         verifyPosition(decoder, binary(
                 "fc004903203e086259608092620164226aa936754049aff0ff6a6735401c97df94ded82041ab3333400d1c00000000000d006a18630000147e0e0007fdffffffffffffff6aa9367501010000a066cf"))
