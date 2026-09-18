@@ -21,9 +21,9 @@ public class Xexun3ProtocolDecoderTest extends ProtocolTest {
                 "fc00490320e8086259608092620164226aa92f624049b01fff79c842401c97788f16414443084ccd400e19001c009f000e006a18630000173a2f0001a3ffffffffffffff6aa92f622101000030f4cf"),
                 "course", 15.9);
 
-        verifyPosition(decoder, binary(
-                "fc004903203e086259608092620164226aa936754049aff0ff6a6735401c97df94ded82041ab3333400d1c00000000000d006a18630000147e0e0007fdffffffffffffff6aa9367501010000a066cf"))
-                .course(1.3);
+        verifyAttribute(decoder, binary(
+                "fc004903203e086259608092620164226aa936754049aff0ff6a6735401c97df94ded82041ab3333400d1c00000000000d006a18630000147e0e0007fdffffffffffffff6aa9367501010000a066cf"),
+                "course", 1.3);
 
     }
 
