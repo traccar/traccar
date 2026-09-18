@@ -19,7 +19,7 @@ public class Xexun3ProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "fc00490320e8086259608092620164226aa92f624049b01fff79c842401c97788f16414443084ccd400e19001c009f000e006a18630000173a2f0001a3ffffffffffffff6aa92f622101000030f4cf"),
-                position("2026-09-15 11:43:30.000", true, 51.37597649999999, 7.147920833333334));
+                position("2026-09-15 11:43:30.000", true, 51.37597, 7.14792));
 
     }
 
