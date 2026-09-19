@@ -27,7 +27,9 @@ import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
+import org.traccar.model.Device;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
@@ -61,6 +63,18 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.NOT_FOUND);
             return null;
+        }
+
+        Device device = getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
+        if (device != null) {
+            String apiKey = request.headers().get("X-Downlink-Apikey");
+            if (apiKey != null && !apiKey.equals(device.getString(Keys.COMMAND_TTNHTTP_APIKEY.getKey()))) {
+                device.set(Keys.COMMAND_TTNHTTP_APIKEY.getKey(), apiKey);
+            }
+            String push = request.headers().get("X-Downlink-Push");
+            if (push != null && !push.equals(device.getString(Keys.COMMAND_TTNHTTP_PUSHURL.getKey()))) {
+                device.set(Keys.COMMAND_TTNHTTP_PUSHURL.getKey(), push);
+            }
         }
 
         Position position = new Position(getProtocolName());
