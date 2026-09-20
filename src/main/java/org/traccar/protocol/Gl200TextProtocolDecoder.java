@@ -546,10 +546,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, Integer.parseInt(v[index - 1]) > 0);
         }
         if (BitUtil.check(reportMask, 2) && !v[index++].isEmpty()) {
-            position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(v[index - 1].substring(1)));
+            String value = v[index - 1];
+            if (value.startsWith("H")) {
+                position.set(Position.KEY_OBD_ODOMETER, Long.parseLong(value.substring(1)) * 100);
+            }
         }
         if (BitUtil.check(reportMask, 3) && !v[index++].isEmpty()) {
-            position.set(Position.KEY_FUEL_USED, Double.parseDouble(v[index - 1]));
+            String value = v[index - 1];
+            if (!value.startsWith("K")) {
+                position.set(Position.KEY_FUEL_USED, Double.parseDouble(
+                        value.startsWith("L") ? value.substring(1) : value));
+            }
         }
         if (BitUtil.check(reportMask, 5) && !v[index++].isEmpty()) {
             position.set(Position.KEY_RPM, Integer.parseInt(v[index - 1]));
@@ -585,7 +592,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set("idleHours", Double.parseDouble(v[index - 1]));
         }
         if (BitUtil.check(reportMask, 14) && !v[index++].isEmpty()) {
-            position.set("idleFuelConsumption", Double.parseDouble(v[index - 1]));
+            String value = v[index - 1];
+            if (!value.startsWith("K")) {
+                position.set("idleFuelConsumption", Double.parseDouble(
+                        value.startsWith("L") ? value.substring(1) : value));
+            }
         }
         if (BitUtil.check(reportMask, 15) && !v[index++].isEmpty()) {
             position.set(Position.KEY_AXLE_WEIGHT, Integer.parseInt(v[index - 1]));
@@ -618,10 +629,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(reportMask, 24)) {
                 index += 1; // catalyst liquid level
             }
-        } else if ("GV355CEU".equals(model)) {
-            if (BitUtil.check(reportMask, 22)) {
-                index += 1; // impulse distance
-            }
+        } else if (model.matches("GV35.CEU")) {
             if (BitUtil.check(reportMask, 23)) {
                 index += 1; // engine cold starts
             }
@@ -637,9 +645,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(reportMask, 27)) {
                 index += 1; // handbrake applies during ride
             }
-            if (BitUtil.check(reportMask, 28)) {
-                index += 1; // electric report mask
-            }
         }
 
         long reportMaskExt = 0;
@@ -647,7 +652,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             reportMaskExt = Long.parseLong(v[index - 1], 16);
         }
         if (BitUtil.check(reportMaskExt, 0) && !v[index++].isEmpty()) {
-            position.set("adBlueLevel", Double.parseDouble(v[index - 1].substring(1)));
+            String value = v[index - 1];
+            position.set("adBlueLevel", Double.parseDouble(
+                    value.startsWith("L") || value.startsWith("P") ? value.substring(1) : value));
         }
         if (BitUtil.check(reportMaskExt, 1) && !v[index++].isEmpty()) {
             position.set("axleWeight1", Integer.parseInt(v[index - 1]));
@@ -724,14 +731,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMaskExt, 25)) {
             index += 1; // ambient temperature
         }
-        if (BitUtil.check(reportMaskExt, 26)) {
+        if (!model.matches("GV35.CEU") && BitUtil.check(reportMaskExt, 26)) {
             index += 1; // tachograph driver1 working time mask
         }
-        if (BitUtil.check(reportMaskExt, 27)) {
+        if (!model.matches("GV35.CEU") && BitUtil.check(reportMaskExt, 27)) {
             index += 1; // tachograph driver2 working time mask
         }
         if (BitUtil.check(reportMaskExt, 28)) {
-            index += 1; // dtc codes
+            int count = model.matches("GV35.CEU") && !v[index].isEmpty()
+                    ? Integer.parseInt(v[index]) : 0;
+            index += 1 + count; // dtc codes
         }
         if (BitUtil.check(reportMaskExt, 29)) {
             index += 1; // gaseous fuel level
@@ -750,8 +759,43 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMaskCan, 1)) {
             index += 1; // power mode
         }
-        if (BitUtil.check(reportMaskCan, 2)) {
+        if (!model.equals("GV350CEU") && BitUtil.check(reportMaskCan, 2)) {
             index += 1; // tachograph timestamp
+        }
+        if (model.matches("GV35.CEU")) {
+            for (int bit = 4; bit <= 12; bit++) {
+                if (BitUtil.check(reportMaskCan, bit)) {
+                    index += 1;
+                }
+            }
+            if (BitUtil.check(reportMaskCan, 14)) {
+                index += 1; // gross vehicle weight
+            }
+            if (BitUtil.check(reportMaskCan, 15)) {
+                int count = v[index].isEmpty() ? 0 : Integer.parseInt(v[index]);
+                index += 1 + count * 5; // axle, wheel, pressure, temperature, status
+            }
+            for (int bit = 16; bit <= 19; bit++) {
+                if (BitUtil.check(reportMaskCan, bit)) {
+                    index += 1;
+                }
+            }
+            if (BitUtil.check(reportMaskCan, 3)) {
+                long mask = v[index].isEmpty() ? 0 : Long.parseLong(v[index], 16);
+                index += 1 + Long.bitCount(mask); // e-genset data
+            }
+            if (BitUtil.check(reportMask, 28)) {
+                long mask = v[index].isEmpty() ? 0 : Long.parseLong(v[index], 16);
+                index += 1 + Long.bitCount(mask); // electric vehicle data
+            }
+        }
+        if (model.equals("GV355CEU")) {
+            for (int bit = 26; bit <= 27; bit++) {
+                if (BitUtil.check(reportMaskExt, bit)) {
+                    long mask = v[index].isEmpty() ? 0 : Long.parseLong(v[index], 16);
+                    index += 1 + Long.bitCount(mask); // tachograph working time
+                }
+            }
         }
 
         if (!"GV355CEU".equals(model) && BitUtil.check(reportMask, 30)) {
