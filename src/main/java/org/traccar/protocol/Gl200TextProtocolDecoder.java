@@ -447,15 +447,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (!model.equals("GL320M") && !v[index++].isEmpty()) {
-            int appendMask = Integer.parseInt(v[index - 1], 16);
-            if (BitUtil.check(appendMask, 0)) {
-                position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
-            }
-            if (BitUtil.check(appendMask, 1)) {
-                index += 1; // trigger type
-            }
-            if (BitUtil.check(appendMask, 4)) {
-                index += 1; // gnss jamming state
+            String value = v[index - 1];
+            if (value.contains(".")) {
+                position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
+            } else {
+                int appendMask = Integer.parseInt(value, 16);
+                if (BitUtil.check(appendMask, 0)) {
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
+                }
+                if (BitUtil.check(appendMask, 1)) {
+                    index += 1; // trigger type
+                }
+                if (BitUtil.check(appendMask, 4)) {
+                    index += 1; // gnss jamming state
+                }
             }
         }
 
