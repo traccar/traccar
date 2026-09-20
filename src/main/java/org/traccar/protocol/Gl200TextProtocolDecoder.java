@@ -1025,6 +1025,24 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = positions.getLast();
+        if (!v[v.length - 2].isEmpty()) {
+            Date time = DateUtil.parse(DATE_FORMAT, v[v.length - 2]);
+            if (ignoreFixTime) {
+                position.setTime(time);
+                positions.clear();
+                positions.add(position);
+            } else {
+                position.setDeviceTime(time);
+            }
+        }
+
+        if (!extended && model.matches("GL200|GL300(W|VC)?")) {
+            if (!v[index++].isEmpty()) {
+                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
+            }
+            return positions;
+        }
+
         position.set(Position.KEY_POWER, power);
 
         if (!model.startsWith("GL5")) {
@@ -1073,17 +1091,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
                 index += 1; // fuel consumption
                 position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
-            }
-        }
-
-        if (!v[v.length - 2].isEmpty()) {
-            Date time = DateUtil.parse(DATE_FORMAT, v[v.length - 2]);
-            if (ignoreFixTime) {
-                position.setTime(time);
-                positions.clear();
-                positions.add(position);
-            } else {
-                position.setDeviceTime(time);
             }
         }
 
