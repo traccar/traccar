@@ -446,7 +446,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // csq ber
         }
 
-        if (!model.equals("GL320M") && !v[index++].isEmpty()) {
+        if (model.equals("GT500MA") || model.equals("GT501")) {
+            index += 1; // csq rssi
+        } else if (!model.equals("GL320M") && !v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
                 position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
