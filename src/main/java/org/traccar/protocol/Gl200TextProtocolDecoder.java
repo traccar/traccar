@@ -1009,7 +1009,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession, protocolVersion);
         index += 1; // device name
-        long mask = Long.parseLong(v[index++], 16);
+        long mask = v[0].endsWith("ERI") ? Long.parseLong(v[index++], 16) : 0;
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
         index += 1; // report type
 
