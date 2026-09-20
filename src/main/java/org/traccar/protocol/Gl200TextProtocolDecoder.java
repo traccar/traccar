@@ -85,6 +85,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("55", "GL50B"),
             Map.entry("5E", "GV500MAP"),
             Map.entry("6E", "GV310LAU"),
+            Map.entry("74", "GV350CEU"),
             Map.entry("BD", "CV200"),
             Map.entry("C2", "GV600M"),
             Map.entry("C3", "GL320M"),
@@ -436,12 +437,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (!model.equals("GL320M") && !v[index++].isEmpty()) {
-            int appendMask = Integer.parseInt(v[index - 1]);
+            int appendMask = Integer.parseInt(v[index - 1], 16);
             if (BitUtil.check(appendMask, 0)) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
             }
             if (BitUtil.check(appendMask, 1)) {
                 index += 1; // trigger type
+            }
+            if (BitUtil.check(appendMask, 4)) {
+                index += 1; // gnss jamming state
             }
         }
 
@@ -974,12 +978,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 decodeAnalog(position, 2, v[index - 1]);
             }
         }
-        if (model.equals("GV200") || model.equals("GV310LAU")) {
+        if (model.equals("GV200") || model.equals("GV310LAU") || model.equals("GV350CEU")) {
             if (!v[index++].isEmpty()) {
                 decodeAnalog(position, 3, v[index - 1]);
             }
-        }
-        if (model.startsWith("GV3") && model.endsWith("CEU") || model.startsWith("GV600M")) {
+        } else if (model.startsWith("GV3") && model.endsWith("CEU") || model.startsWith("GV600M")) {
             index += 1; // reserved
         }
 
@@ -1017,6 +1020,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
         }
 
+        if (BitUtil.check(mask, 29)) {
+            index += 2; // reserved
+            int dataMask = Integer.parseInt(v[index++], 16);
+            if (BitUtil.check(dataMask, 0) && !v[index++].isEmpty()) {
+                position.set(Position.KEY_FUEL, Long.parseLong(v[index - 1], 16));
+            }
+            if (BitUtil.check(dataMask, 1)) {
+                index += 1; // fuel height
+            }
+        }
+
         if (BitUtil.check(mask, 1)) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
@@ -1049,6 +1063,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 }
                 if (BitUtil.check(mask, 4)) {
                     index += 1; // volume
+                }
+                if (BitUtil.check(mask, 10)) {
+                    index += 1; // fuel temperature
                 }
             }
         }
