@@ -397,7 +397,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private int decodeLocation(Position position, String model, String[] v, int index) {
-        double hdop = v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]);
+        Double hdop = v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]);
         position.set(Position.KEY_HDOP, hdop);
 
         position.setSpeed(UnitsConverter.knotsFromKph(
@@ -405,10 +405,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
         position.setAltitude(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
 
-        if (!v[index].isEmpty()) {
+        if (!v[index].isEmpty() && !v[index + 1].isEmpty() && !v[index + 2].isEmpty()) {
             position.setValid(true);
-            position.setLongitude(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
-            position.setLatitude(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
+            position.setLongitude(Double.parseDouble(v[index++]));
+            position.setLatitude(Double.parseDouble(v[index++]));
             position.setTime(DateUtil.parse(DATE_FORMAT, v[index++]));
         } else {
             index += 3;
@@ -1051,13 +1051,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // reserved / uart device type
         }
 
-        Date time = DateUtil.parse(DATE_FORMAT, v[v.length - 2]);
-        if (ignoreFixTime) {
-            position.setTime(time);
-            positions.clear();
-            positions.add(position);
-        } else {
-            position.setDeviceTime(time);
+        if (!v[v.length - 2].isEmpty()) {
+            Date time = DateUtil.parse(DATE_FORMAT, v[v.length - 2]);
+            if (ignoreFixTime) {
+                position.setTime(time);
+                positions.clear();
+                positions.add(position);
+            } else {
+                position.setDeviceTime(time);
+            }
         }
 
         if (BitUtil.check(mask, 0) && !model.equals("GV350M")) {
