@@ -402,7 +402,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromKph(
                 v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1])));
-        position.setCourse(v[index++].isEmpty() ? 0 : Integer.parseInt(v[index - 1]));
+        position.setCourse(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
         position.setAltitude(v[index++].isEmpty() ? 0 : Double.parseDouble(v[index - 1]));
 
         if (!v[index].isEmpty()) {
