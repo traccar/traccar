@@ -1000,7 +1000,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeEri(Channel channel, SocketAddress remoteAddress, String[] v) {
         int index = 0;
-        index += 1; // header
+        boolean extended = v[index++].endsWith("ERI");
         String protocolVersion = v[index++];
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
         if (deviceSession == null) {
@@ -1008,8 +1008,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String model = getDeviceModel(deviceSession, protocolVersion);
+        String vin = model.equals("GV500") ? v[index++] : null;
         index += 1; // device name
-        long mask = v[0].endsWith("ERI") ? Long.parseLong(v[index++], 16) : 0;
+        long mask = extended ? Long.parseLong(v[index++], 16) : 0;
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
         index += 1; // report type
 
@@ -1018,6 +1019,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 0; i < count; i++) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_VIN, vin);
             index = decodeLocation(position, model, v, index);
             positions.add(position);
         }
@@ -1065,7 +1067,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 decodeStatus(position, Long.parseLong(v[index - 1], 16));
             }
-            index += 1; // reserved / uart device type
+            if (extended) {
+                index += 1; // reserved / uart device type
+            } else {
+                position.set(Position.KEY_RPM, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+                index += 1; // fuel consumption
+                position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            }
         }
 
         if (!v[v.length - 2].isEmpty()) {
