@@ -417,6 +417,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
+        if (v[index + 1].length() == 12) {
+            int count = Integer.parseInt(v[index++]);
+            for (int i = 0; i < count; i++) {
+                String mac = v[index++].replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), Integer.parseInt(v[index++])));
+                index += 3; // reserved
+            }
+        }
+
         if (!v[index].isEmpty()) {
             network.addCellTower(CellTower.from(
                     Integer.parseInt(v[index++]),
