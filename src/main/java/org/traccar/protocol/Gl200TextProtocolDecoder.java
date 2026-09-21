@@ -55,11 +55,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("02", "GL200"),
             Map.entry("04", "GV200"),
             Map.entry("06", "GV300"),
+            Map.entry("07", "GT500"),
             Map.entry("08", "GMT100"),
             Map.entry("09", "GV50P"),
             Map.entry("0F", "GV55"),
             Map.entry("10", "GV55 LITE"),
             Map.entry("11", "GL500"),
+            Map.entry("12", "ATPLUS"),
             Map.entry("1A", "GL300"),
             Map.entry("1F", "GV500"),
             Map.entry("21", "GL200"),
@@ -437,6 +439,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 4;
         }
 
+        if (model.equals("GT500")) {
+            if (!v[index].isEmpty()) {
+                String mac = v[index].replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), Integer.parseInt(v[index + 1])));
+            }
+            index += 2; // mac and rssi
+        }
+
         if (network.getWifiAccessPoints() != null || network.getCellTowers() != null) {
             position.setNetwork(network);
         }
@@ -446,8 +457,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // csq ber
         }
 
-        if (model.equals("GT500MA") || model.equals("GT501") || model.equals("ATWG7")) {
-            index += 1; // csq rssi
+        if (model.equals("GT500MA") || model.equals("GT501") || model.equals("ATWG7") || model.equals("ATPLUS")) {
+            index += 1; // csq rssi / reserved
         } else if (!model.equals("GL320M") && !v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
@@ -1044,7 +1055,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (!extended && model.matches("GL200|GL300(W|VC)?|GT501|ATWG7")) {
+        if (!extended && model.matches("GL200|GL300(W|VC)?|GT50[01]|ATWG7|ATPLUS")) {
             if (model.equals("ATWG7") && reportType != null) {
                 position.set(Position.KEY_MOTION, BitUtil.check(reportType, 0));
             }
