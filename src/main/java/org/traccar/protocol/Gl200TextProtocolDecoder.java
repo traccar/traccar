@@ -446,7 +446,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // csq ber
         }
 
-        if (model.equals("GT500MA") || model.equals("GT501")) {
+        if (model.equals("GT500MA") || model.equals("GT501") || model.equals("ATWG7")) {
             index += 1; // csq rssi
         } else if (!model.equals("GL320M") && !v[index++].isEmpty()) {
             String value = v[index - 1];
@@ -1012,7 +1012,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index += 1; // device name
         long mask = extended ? Long.parseLong(v[index++], 16) : 0;
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
-        index += 1; // report type
+        Integer reportType = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]);
+
+        if (model.equals("ATWG7")) {
+            index += 1; // motion state
+            index += 1; // wms working mode
+        }
 
         int count = Integer.parseInt(v[index++]);
         LinkedList<Position> positions = new LinkedList<>();
@@ -1020,6 +1025,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             position.set(Position.KEY_VIN, vin);
+            if (model.equals("GT501")) {
+                position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
+            }
             index = decodeLocation(position, model, v, index);
             positions.add(position);
         }
@@ -1036,7 +1044,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (!extended && model.matches("GL200|GL300(W|VC)?")) {
+        if (!extended && model.matches("GL200|GL300(W|VC)?|GT501|ATWG7")) {
+            if (model.equals("ATWG7") && reportType != null) {
+                position.set(Position.KEY_MOTION, BitUtil.check(reportType, 0));
+            }
+            if (model.equals("GT501") || model.equals("ATWG7")) {
+                index += 1; // location mode / network
+            }
             if (!v[index++].isEmpty()) {
                 position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
             }
