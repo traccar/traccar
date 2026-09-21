@@ -70,6 +70,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("28", "GL300VC"),
             Map.entry("2C", "GL300W"),
             Map.entry("2D", "GV500VC"),
+            Map.entry("2E", "GL53MG"),
             Map.entry("2F", "GV55"),
             Map.entry("4F", "GV56"),
             Map.entry("30", "GL300"),
@@ -461,7 +462,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
+        if (model.equals("GL53MG")) {
+            if (!v[index++].isEmpty()) {
+                position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
+            }
+        } else if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
                 position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
@@ -863,21 +868,24 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private void decodeStatus(Position position, long value) {
-        long ignition = BitUtil.between(value, 2 * 8, 3 * 8);
+    private void decodeStatus(Position position, String status) {
+        long value = Long.parseLong(status, 16);
+        long ignition = status.length() == 2 ? value : BitUtil.between(value, 2 * 8, 3 * 8);
         if (BitUtil.check(ignition, 4)) {
             position.set(Position.KEY_IGNITION, false);
         } else if (BitUtil.check(ignition, 5)) {
             position.set(Position.KEY_IGNITION, true);
         }
-        long input = BitUtil.between(value, 8, 2 * 8);
-        long output = BitUtil.to(value, 8);
-        position.set(Position.KEY_INPUT, input);
-        position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 1));
-        position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 2));
-        position.set(Position.KEY_OUTPUT, output);
-        position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
-        position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
+        if (status.length() > 2) {
+            long input = BitUtil.between(value, 8, 2 * 8);
+            long output = BitUtil.to(value, 8);
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.PREFIX_IN + 1, BitUtil.check(input, 1));
+            position.set(Position.PREFIX_IN + 2, BitUtil.check(input, 2));
+            position.set(Position.KEY_OUTPUT, output);
+            position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
+            position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
+        }
     }
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
@@ -983,7 +991,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         if (parser.hasNext()) {
-            decodeStatus(position, parser.nextHexLong());
+            decodeStatus(position, parser.next());
         }
 
         position.set(Position.KEY_RPM, parser.nextInt());
@@ -1100,7 +1108,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             index += 1; // mode selection
             position.set(Position.KEY_MOTION, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) > 0);
-            if (!extended && !v[index++].isEmpty()) {
+            if (!extended && model.equals("GL53MG")) {
+                index += 2; // radio access technology and band
+            } else if (!extended && !v[index++].isEmpty()) {
                 position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(v[index - 1]));
             }
         } else if (model.equals("GV200")) {
@@ -1115,7 +1125,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
-                decodeStatus(position, Long.parseLong(v[index - 1], 16));
+                decodeStatus(position, v[index - 1]);
             }
             if (extended) {
                 index += 1; // reserved / uart device type
