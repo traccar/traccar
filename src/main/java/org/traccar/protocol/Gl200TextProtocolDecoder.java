@@ -1053,17 +1053,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 decodeAnalog(position, 1, v[index - 1]);
             }
-        }
-        if (model.startsWith("GV") && !model.startsWith("GV6") && !model.equals("GV350M")) {
-            if (!v[index++].isEmpty()) {
-                decodeAnalog(position, 2, v[index - 1]);
+            if (!extended || model.startsWith("GV") && !model.startsWith("GV6") && !model.equals("GV350M")) {
+                if (!v[index++].isEmpty()) {
+                    decodeAnalog(position, 2, v[index - 1]);
+                }
             }
         }
         if (model.equals("GV200") || model.equals("GV310LAU") || model.equals("GV350CEU")) {
             if (!v[index++].isEmpty()) {
                 decodeAnalog(position, 3, v[index - 1]);
             }
-        } else if (model.startsWith("GV3") && model.endsWith("CEU") || model.startsWith("GV600M")) {
+        } else if (model.startsWith("GV3") && model.endsWith("CEU")
+                || model.startsWith("GV600M") || model.equals("GV58LAU")) {
             index += 1; // reserved
         }
 
@@ -1071,6 +1072,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             index += 1; // mode selection
             position.set(Position.KEY_MOTION, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) > 0);
+            if (!extended && !v[index++].isEmpty()) {
+                position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(v[index - 1]));
+            }
         } else if (model.equals("GV200")) {
             position.set(Position.KEY_INPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
