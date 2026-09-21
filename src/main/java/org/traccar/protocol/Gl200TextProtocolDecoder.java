@@ -1008,7 +1008,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String model = getDeviceModel(deviceSession, protocolVersion);
-        String vin = model.equals("GV500") ? v[index++] : null;
+        String vin = model.startsWith("GV500") ? v[index++] : null;
         index += 1; // device name
         long mask = extended ? Long.parseLong(v[index++], 16) : 0;
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
