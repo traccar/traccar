@@ -1726,7 +1726,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         int index = 0;
         index += 1; // header
-        index += 1; // protocol version
+        String protocolVersion = v[index++];
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
         if (deviceSession == null) {
@@ -1738,6 +1738,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (v[index + 2].matches("\\p{XDigit}{1,2}")) {
             int reportType = Integer.parseInt(v[index + 2], 16);
             switch (type) {
+                case "STR", "CTN" -> {
+                    String battery = v[index + 5];
+                    if (getDeviceModel(deviceSession, protocolVersion).matches("GL5[03]0") && !battery.isEmpty()) {
+                        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(battery));
+                    }
+                }
                 case "NMR" -> position.set(Position.KEY_MOTION, reportType == 1);
                 case "DIS" -> position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
                 case "IGL" -> position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
@@ -1838,7 +1844,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "INF" -> decodeInf(channel, remoteAddress, values);
                 case "OBD" -> decodeObd(channel, remoteAddress, sentence);
                 case "CAN" -> decodeCan(channel, remoteAddress, values);
-                case "CTN", "FRI", "GEO", "RTL", "DOG", "STR" -> decodeFri(channel, remoteAddress, sentence);
+                case "FRI", "GEO", "RTL", "DOG" -> decodeFri(channel, remoteAddress, sentence);
                 case "ERI" -> decodeEri(channel, remoteAddress, values);
                 case "IGN", "IGF", "VGN", "VGF" -> decodeIgn(channel, remoteAddress, values, type);
                 case "LSW", "TSW" -> decodeLsw(channel, remoteAddress, sentence);
