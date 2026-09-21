@@ -452,14 +452,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(network);
         }
 
-        if (model.startsWith("GL5")) {
-            index += 1; // csq rssi
-            index += 1; // csq ber
+        if (model.matches("GL5.*|GT500MA|GT501|ATWG7|ATPLUS")) {
+            if (!v[index++].isEmpty() && !model.equals("ATPLUS")) {
+                position.set(Position.KEY_RSSI, Integer.parseInt(v[index - 1]));
+            }
+            if (model.startsWith("GL5")) {
+                index += 1; // csq ber
+            }
         }
 
-        if (model.equals("GT500MA") || model.equals("GT501") || model.equals("ATWG7") || model.equals("ATPLUS")) {
-            index += 1; // csq rssi / reserved
-        } else if (!model.equals("GL320M") && !v[index++].isEmpty()) {
+        if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
                 position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
@@ -1058,6 +1060,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!extended && model.matches("GL200|GL300(W|VC)?|GT50[01]|ATWG7|ATPLUS")) {
             if (model.equals("ATWG7") && reportType != null) {
                 position.set(Position.KEY_MOTION, BitUtil.check(reportType, 0));
+                position.set(Position.KEY_CHARGE, BitUtil.check(reportType, 1));
             }
             if (model.equals("GT501") || model.equals("ATWG7")) {
                 index += 1; // location mode / network
