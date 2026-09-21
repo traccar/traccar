@@ -1079,7 +1079,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return positions;
         }
 
-        position.set(Position.KEY_POWER, power);
+        if (power != null && power > 0) {
+            position.set(Position.KEY_POWER, power);
+        }
 
         if (!model.startsWith("GL5")) {
             position.set(Position.KEY_ODOMETER, v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]) * 1000);
