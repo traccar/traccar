@@ -130,7 +130,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // ephemeris
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // signal
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() / 10.0));
                     position.setCourse(buf.readUnsignedShort() / 10.0);
                     if (subEnd - buf.readerIndex() >= 2) {
                         int precision = buf.readUnsignedShort();
