@@ -82,7 +82,9 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // header
+        if (buf.readUnsignedByte() != 0xFC) {
+            return null;
+        }
         int length = buf.readUnsignedShort();
         buf.readUnsignedByte(); // version
         int type = buf.readUnsignedByte();
@@ -92,6 +94,15 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, ByteBufUtil.hexDump(imei).substring(1));
         if (deviceSession == null) {
+            return null;
+        }
+
+        if (buf.getUnsignedShort(3 + length) != Checksum.crc16(
+                Checksum.CRC16_CCITT_FALSE, buf.nioBuffer(3, length))) {
+            return null;
+        }
+
+        if (buf.getUnsignedByte(3 + length + 2) != 0xCF) {
             return null;
         }
 
