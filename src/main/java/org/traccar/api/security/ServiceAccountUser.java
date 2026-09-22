@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,5 +26,6 @@ public class ServiceAccountUser extends User {
         setName("Service Account");
         setEmail("none");
         setAdministrator(true);
+        set("termsAccepted", true);
     }
 }
