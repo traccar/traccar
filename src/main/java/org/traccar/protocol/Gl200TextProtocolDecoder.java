@@ -964,7 +964,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 decodeAnalog(position, 1, v[index - 1]);
             }
-            if (!extended || model.startsWith("GV") && !model.startsWith("GV6") && !model.equals("GV350M")) {
+            if (!model.equals("GV350M") && !model.startsWith("GV600M")
+                    && (!extended || model.startsWith("GV") && !model.startsWith("GV6"))) {
                 if (!v[index++].isEmpty()) {
                     decodeAnalog(position, 2, v[index - 1]);
                 }
@@ -1003,8 +1004,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 decodeStatus(position, v[index - 1]);
             }
             if (extended) {
-                index += 1; // reserved / uart device type
-            } else {
+                index += 1; // reserved / uart device type / external power 2
+            } else if (!model.equals("GV350M") && !model.startsWith("GV600M")) {
                 position.set(Position.KEY_RPM, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
                 index += 1; // fuel consumption
                 position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
