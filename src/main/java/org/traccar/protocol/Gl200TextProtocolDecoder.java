@@ -116,7 +116,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private String getDeviceModel(DeviceSession deviceSession, String protocolVersion) {
         String declaredModel = getDeviceModel(deviceSession);
-        if (declaredModel != null) {
+        if (declaredModel != null && !declaredModel.isEmpty()) {
             return declaredModel.toUpperCase(Locale.ROOT);
         }
         String versionPrefix;
