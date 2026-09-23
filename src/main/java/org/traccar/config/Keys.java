@@ -1109,6 +1109,7 @@ public final class Keys {
 
     /**
      * Additional HTTP header that can be used for authorization.
+     * Global headers are only used when forwarding to the globally configured URL.
      */
     public static final ConfigKey<String> FORWARD_HEADER = new StringConfigKey(
             "forward.header",

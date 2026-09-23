@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderJson implements PositionForwarder {
 
+    private final String url;
     private final String header;
 
     private final Client client;
@@ -43,6 +44,7 @@ public class PositionForwarderJson implements PositionForwarder {
         this.client = client;
         this.objectMapper = objectMapper;
         this.cacheManager = cacheManager;
+        this.url = config.getString(Keys.FORWARD_URL);
         this.header = config.getString(Keys.FORWARD_HEADER);
     }
 
@@ -56,7 +58,7 @@ public class PositionForwarderJson implements PositionForwarder {
         var requestBuilder = client.target(url).request();
 
         MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
-        if (header != null && !header.isEmpty()) {
+        if (url.equals(this.url) && header != null && !header.isEmpty()) {
             for (String line: header.split("\\r?\\n")) {
                 String[] values = line.split(":", 2);
                 String headerName = values[0].trim();
