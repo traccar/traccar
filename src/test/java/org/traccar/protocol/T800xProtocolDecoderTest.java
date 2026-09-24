@@ -15,6 +15,14 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
                 "262604005330c40863257069370825001902581e0000003f80c0200505000000041600001b5b2800260908230233ffffffffffffffffffffffffffffffff1212000000000000ffffffffffffffffffffffffff"),
                 Position.KEY_POWER, 12.12);
 
+        verifyAttribute(decoder, binary(
+                "262604005330c50863257069370825001902581e00000045e4c0000500000000042400001b5b280026090900544700000000921d74c2a9010cc2000001231208000000000000ffffffffffffffffffffffffff"),
+                Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+
+        verifyAttribute(decoder, binary(
+                "262604005330c70863257069370825001902581e0000001ed0c0000505000000002300001b5b280026090901122800000000921d74c2a9010cc2000001231274000000000000ffffffffffffffffffffffffff"),
+                Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+
         verifyPositions(decoder, false, binary(
                 "26260500400406086961606257315205250513182132ffffffffffffffffffffffff0000ffff0000250513182137ffffffffffffffffffffffff0770ffff0aec"));
 
