@@ -98,6 +98,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("F1", "GV350M"),
             Map.entry("F8", "GV800W"),
             Map.entry("FC", "GV600W"),
+            Map.entry("FE", "GV50M"),
             Map.entry("802004", "GV58LAU"),
             Map.entry("802005", "GV355CEU"),
             Map.entry("80201E", "GV30CEU"));
@@ -115,7 +116,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private String getDeviceModel(DeviceSession deviceSession, String protocolVersion) {
         String declaredModel = getDeviceModel(deviceSession);
-        if (declaredModel != null) {
+        if (declaredModel != null && !declaredModel.isEmpty()) {
             return declaredModel.toUpperCase(Locale.ROOT);
         }
         String versionPrefix;
@@ -961,10 +962,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (!model.startsWith("GL5") && !model.equals("GL320M")) {
             position.set(Position.KEY_HOURS, parseHours(v[index++]));
-            if (!v[index++].isEmpty()) {
+            if (!model.startsWith("GV50M") && !v[index++].isEmpty()) {
                 decodeAnalog(position, 1, v[index - 1]);
             }
-            if (!model.equals("GV350M") && !model.startsWith("GV600M")
+            if (!model.equals("GV350M") && !model.startsWith("GV600M") && !model.startsWith("GV50M")
                     && (!extended || model.startsWith("GV") && !model.startsWith("GV6"))) {
                 if (!v[index++].isEmpty()) {
                     decodeAnalog(position, 2, v[index - 1]);
@@ -1005,7 +1006,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
             if (extended) {
                 index += 1; // reserved / uart device type / external power 2
-            } else if (!model.equals("GV350M") && !model.startsWith("GV600M")) {
+            } else if (!model.equals("GV350M") && !model.startsWith("GV600M") && !model.startsWith("GV50M")) {
                 position.set(Position.KEY_RPM, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
                 index += 1; // fuel consumption
                 position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
