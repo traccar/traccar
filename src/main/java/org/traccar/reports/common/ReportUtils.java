@@ -481,9 +481,10 @@ public class ReportUtils {
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
-        if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC) && tripsConfig.getUseIgnition()) {
-            return ignitionTripsAndStops(device, from, to, reportClass, ignoreOdometer);
-        }
+        boolean useIgnition = tripsConfig.getUseIgnition();
+        String startEventType = useIgnition ? Event.TYPE_IGNITION_ON : Event.TYPE_DEVICE_MOVING;
+        String endEventType = useIgnition ? Event.TYPE_IGNITION_OFF : Event.TYPE_DEVICE_STOPPED;
+        String stateAttribute = useIgnition ? Position.KEY_IGNITION : Position.KEY_MOTION;
         boolean trips = reportClass.equals(TripReportItem.class);
         List<Event> fuelEvents = getFuelEvents(device, from, to);
 
@@ -493,17 +494,17 @@ public class ReportUtils {
                         new Condition.Equals("deviceId", device.getId()),
                         new Condition.Between("eventTime", from, to),
                         new Condition.Or(
-                                new Condition.Equals("type", Event.TYPE_DEVICE_MOVING),
-                                new Condition.Equals("type", Event.TYPE_DEVICE_STOPPED)))),
+                                new Condition.Equals("type", startEventType),
+                                new Condition.Equals("type", endEventType)))),
                 new Order("eventTime")));
 
         Position startPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
-        if (startPosition != null && startPosition.getBoolean(Position.KEY_MOTION) != trips) {
+        if (startPosition != null && startPosition.getBoolean(stateAttribute) != trips) {
             startPosition = null;
         }
 
         for (Event event : events) {
-            boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
+            boolean motion = event.getType().equals(startEventType);
             if (motion == trips) {
                 startPosition = storage.getObject(Position.class, new Request(
                         new Columns.All(),
