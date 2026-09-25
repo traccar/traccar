@@ -1668,8 +1668,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "NMR" -> position.set(Position.KEY_MOTION, reportType == 1);
                 case "DIS" -> position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
                 case "IGL" -> {
-                    boolean invertedIgnition = model.matches("GV50M.*|GV300N?|GV350M");
-                    position.set(Position.KEY_IGNITION, reportType % 0x10 == (invertedIgnition ? 0 : 1));
+                    int ignitionOnValue = model.matches("GV50M.*|GV300N?|GV350M|GV600MG|GV350CEU|GV355CEU") ? 0 : 1;
+                    position.set(Position.KEY_IGNITION, reportType % 0x10 == ignitionOnValue);
                 }
                 case "HBM" -> {
                     switch (reportType % 0x10) {
