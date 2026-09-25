@@ -598,6 +598,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                     }
+                } else if ((id == 1429 || id == 1432) && length == 8) {
+                    String prefix = id == 1429 ? "crashAvg" : "crashMax";
+                    position.set(prefix + "Magnitude", buf.readUnsignedShort());
+                    position.set(prefix, String.format(
+                            "[%d,%d,%d]", buf.readShort(), buf.readShort(), buf.readShort()));
+                    if (id == 1429) {
+                        position.addAlarm(Position.ALARM_ACCIDENT);
+                    }
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
