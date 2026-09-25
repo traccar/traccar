@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +42,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
     @Inject
@@ -79,6 +82,10 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     public Response add(T entity) throws Exception {
         permissionsService.checkEdit(getUserId(), entity, true, false);
 
+        if (entity instanceof Group group) {
+            checkGroupHierarchy(group, true);
+        }
+
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
         actionLogger.create(request, getUserId(), entity);
 
@@ -104,20 +111,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             permissionsService.checkUserUpdate(getUserId(), before, after);
             skipReadonly = permissionsService.getUser(getUserId())
                     .compare(after, "notificationTokens", "termsAccepted");
-        } else if (entity instanceof Group group) {
-            long parentId = group.getGroupId();
-            int depth = Storage.MAX_GROUP_DEPTH;
-            while (parentId > 0 && depth-- > 0) {
-                if (parentId == group.getId()) {
-                    throw new IllegalArgumentException("Cycle in group hierarchy");
-                }
-                Group parent = storage.getObject(Group.class, new Request(
-                        new Columns.Include("groupId"), new Condition.Equals("id", parentId)));
-                parentId = parent != null ? parent.getGroupId() : 0;
-            }
         }
 
         permissionsService.checkEdit(getUserId(), entity, false, skipReadonly);
+
+        if (entity instanceof Group group) {
+            checkGroupHierarchy(group, false);
+        }
 
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
@@ -133,6 +133,26 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         actionLogger.edit(request, getUserId(), entity);
 
         return Response.ok(entity).build();
+    }
+
+    void checkGroupHierarchy(Group group, boolean addition) throws StorageException {
+        if (group.getGroupId() > 0) {
+            Map<Long, Long> parents;
+            try (var groups = storage.getObjectsStream(
+                    Group.class, new Request(new Columns.Include("id", "groupId")))) {
+                parents = groups.collect(Collectors.toMap(Group::getId, Group::getGroupId));
+            }
+            parents.put(addition ? 0L : group.getId(), group.getGroupId());
+            for (long parentId : parents.values()) {
+                int depth = 1;
+                while (parentId > 0) {
+                    if (++depth > Storage.MAX_GROUP_DEPTH) {
+                        throw new IllegalArgumentException("Maximum group depth exceeded");
+                    }
+                    parentId = parents.getOrDefault(parentId, 0L);
+                }
+            }
+        }
     }
 
     @Path("{id}")
