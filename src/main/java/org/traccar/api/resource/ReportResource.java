@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.SimpleObjectResource;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.Parser;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.Report;
@@ -237,10 +238,11 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to,
-            @QueryParam("daily") boolean daily) throws StorageException {
+            @QueryParam("reportInterval") String reportInterval) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "summary", from, to, deviceIds, groupIds);
-        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
+        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to,
+            Parser.parseDateInterval(reportInterval));
     }
 
     @Path("summary")
@@ -251,12 +253,13 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to,
-            @QueryParam("daily") boolean daily,
+            @QueryParam("reportInterval") String reportInterval,
             @QueryParam("mail") boolean mail) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             actionLogger.report(request, getUserId(), false, "summary", from, to, deviceIds, groupIds);
-            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
+            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to,
+                Parser.parseDateInterval(reportInterval));
         });
     }
 
@@ -268,9 +271,9 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to,
-            @QueryParam("daily") boolean daily,
+            @QueryParam("reportInterval") String reportInterval,
             @PathParam("type") String type) throws StorageException {
-        return getSummaryExcel(deviceIds, groupIds, from, to, daily, type.equals("mail"));
+        return getSummaryExcel(deviceIds, groupIds, from, to, reportInterval, type.equals("mail"));
     }
 
     @Path("trips")
