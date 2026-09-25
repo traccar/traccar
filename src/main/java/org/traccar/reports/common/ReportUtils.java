@@ -317,6 +317,46 @@ public class ReportUtils {
         }
     }
 
+    private <T extends BaseReportItem> List<T> ignitionTripsAndStops(
+            Device device, Date from, Date to, Class<T> reportClass, boolean ignoreOdometer) throws StorageException {
+
+        List<T> result = new ArrayList<>();
+        List<Event> fuelEvents = getFuelEvents(device, from, to);
+        boolean trips = reportClass.equals(TripReportItem.class);
+        Position startPosition = null;
+        Position lastPosition = null;
+        double maxSpeed = 0;
+
+        try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+            for (var iterator = stream.iterator(); iterator.hasNext();) {
+                Position position = iterator.next();
+                if (position.hasAttribute(Position.KEY_IGNITION)) {
+                    if (position.getBoolean(Position.KEY_IGNITION) == trips) {
+                        if (startPosition == null) {
+                            startPosition = position;
+                            maxSpeed = position.getSpeed();
+                        }
+                    } else if (startPosition != null) {
+                        result.add(calculateTripOrStop(
+                                device, startPosition, position, Math.max(maxSpeed, position.getSpeed()),
+                                ignoreOdometer, reportClass, fuelEvents));
+                        startPosition = null;
+                    }
+                }
+                if (startPosition != null) {
+                    maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                }
+                lastPosition = position;
+            }
+        }
+
+        if (startPosition != null) {
+            result.add(calculateTripOrStop(
+                    device, startPosition, lastPosition, maxSpeed, ignoreOdometer, reportClass, fuelEvents));
+        }
+        return result;
+    }
+
     public <T extends BaseReportItem> List<T> slowTripsAndStops(
             Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
@@ -326,6 +366,9 @@ public class ReportUtils {
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
         boolean useNewLogic = config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC);
+        if (useNewLogic && tripsConfig.getUseIgnition()) {
+            return ignitionTripsAndStops(device, from, to, reportClass, ignoreOdometer);
+        }
         List<Event> fuelEvents = getFuelEvents(device, from, to);
 
         List<Event> events = new ArrayList<>();
@@ -438,6 +481,9 @@ public class ReportUtils {
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
+        if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC) && tripsConfig.getUseIgnition()) {
+            return ignitionTripsAndStops(device, from, to, reportClass, ignoreOdometer);
+        }
         boolean trips = reportClass.equals(TripReportItem.class);
         List<Event> fuelEvents = getFuelEvents(device, from, to);
 
