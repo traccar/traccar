@@ -114,6 +114,16 @@ public class ProtocolTest extends BaseTest {
         }
     }
 
+    protected void verifyEncode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        channel.writeOutbound(input);
+        assertEquals(expected.length, channel.outboundMessages().size(), "frames.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "frame[" + i + "]";
+            var actual = assertInstanceOf(ByteBuf.class, channel.readOutbound(), path);
+            assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
+        }
+    }
+
     protected void verifyEncode(EmbeddedChannel channel, Command command, Object... expected) {
         channel.writeOutbound(new NetworkMessage(command, null));
         assertEquals(expected.length, channel.outboundMessages().size(), "messages.count");
