@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.ReferenceCounted;
 import org.junit.jupiter.api.AfterEach;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
@@ -23,9 +24,12 @@ import org.traccar.model.WifiAccessPoint;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,6 +41,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ProtocolTest extends BaseTest {
 
     private final List<EmbeddedChannel> channels = new ArrayList<>();
+    private final Set<ReferenceCounted> resources = Collections.newSetFromMap(new IdentityHashMap<>());
+
+    private <T> T track(T object) {
+        if (object instanceof ReferenceCounted resource) {
+            resources.add(resource);
+        }
+        return object;
+    }
 
     protected EmbeddedChannel channel(ChannelHandler... handlers) {
         var channel = new EmbeddedChannel(handlers);
@@ -45,11 +57,17 @@ public class ProtocolTest extends BaseTest {
     }
 
     @AfterEach
-    public void closeChannels() {
+    public void closeResources() {
         for (var channel : channels) {
             channel.finishAndReleaseAll();
         }
         channels.clear();
+        for (var resource : resources) {
+            if (resource.refCnt() > 0) {
+                resource.release();
+            }
+        }
+        resources.clear();
     }
 
     protected enum Checks {
@@ -90,6 +108,7 @@ public class ProtocolTest extends BaseTest {
 
     protected void verifyDecode(
             BaseProtocolDecoder decoder, Object object, PositionExpectation... expected) throws Exception {
+        track(object);
         Object decoded = decoder.decode(null, null, object);
         List<?> positions = switch (decoded) {
             case null -> List.of();
@@ -105,21 +124,23 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyDecode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        resources.remove(input);
         channel.writeInbound(input);
         assertEquals(expected.length, channel.inboundMessages().size(), "frames.count");
         for (int i = 0; i < expected.length; i++) {
             String path = "frame[" + i + "]";
-            var actual = assertInstanceOf(ByteBuf.class, channel.readInbound(), path);
+            var actual = assertInstanceOf(ByteBuf.class, track(channel.readInbound()), path);
             assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
         }
     }
 
     protected void verifyEncode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        resources.remove(input);
         channel.writeOutbound(input);
         assertEquals(expected.length, channel.outboundMessages().size(), "frames.count");
         for (int i = 0; i < expected.length; i++) {
             String path = "frame[" + i + "]";
-            var actual = assertInstanceOf(ByteBuf.class, channel.readOutbound(), path);
+            var actual = assertInstanceOf(ByteBuf.class, track(channel.readOutbound()), path);
             assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
         }
     }
@@ -129,7 +150,7 @@ public class ProtocolTest extends BaseTest {
         assertEquals(expected.length, channel.outboundMessages().size(), "messages.count");
         for (int i = 0; i < expected.length; i++) {
             String path = "message[" + i + "]";
-            var message = assertInstanceOf(NetworkMessage.class, channel.readOutbound(), path);
+            var message = assertInstanceOf(NetworkMessage.class, track(channel.readOutbound()), path);
             if (expected[i] instanceof ByteBuf buffer) {
                 var actual = assertInstanceOf(ByteBuf.class, message.getMessage(), path);
                 assertEquals(ByteBufUtil.hexDump(buffer), ByteBufUtil.hexDump(actual), path);
@@ -148,7 +169,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf concatenateBuffers(ByteBuf... buffers) {
-        ByteBuf result = Unpooled.buffer();
+        ByteBuf result = track(Unpooled.buffer());
         for (ByteBuf buf : buffers) {
             result.writeBytes(buf);
         }
@@ -156,7 +177,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf binary(String... data) {
-        return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
+        return track(Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data))));
     }
 
     protected String text(String... data) {
@@ -164,7 +185,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf buffer(String... data) {
-        return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
+        return track(Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1));
     }
 
     protected DefaultFullHttpRequest request(String url) {
@@ -172,23 +193,26 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url));
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, ByteBuf data) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data);
+        resources.remove(data);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data));
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
+        return request(method, url, headers, Unpooled.buffer());
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers, ByteBuf data) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data, headers, new DefaultHttpHeaders());
+        resources.remove(data);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data, headers, new DefaultHttpHeaders()));
     }
 
     protected DefaultFullHttpResponse response(ByteBuf data) {
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
+        resources.remove(data);
+        return track(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data));
     }
 
     public static final class PositionExpectation {
