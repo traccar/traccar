@@ -16,7 +16,7 @@ public class CityeasyProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, "GMT+6");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("5353001100080001680000000B60820D0A"));
 
     }

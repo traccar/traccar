@@ -15,7 +15,7 @@ public class PortmanProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("&&123456789012345,XA5\r\n"));
 
     }
@@ -29,7 +29,7 @@ public class PortmanProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("&&123456789012345,XA6\r\n"));
 
     }

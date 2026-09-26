@@ -15,7 +15,7 @@ public class EasyTrackProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*ET,123456789012345,FD,Y1#"));
 
         command = new Command();
@@ -23,7 +23,7 @@ public class EasyTrackProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "SPEED120");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*ET,123456789012345,KS,SPEED120#"));
 
     }

@@ -24,7 +24,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_ARM);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*HQ,123456789012345,SCF,010203,0,0#"));
     }
 
@@ -37,7 +37,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_DISARM);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*HQ,123456789012345,SCF,010203,1,1#"));
     }
 
@@ -50,7 +50,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*HQ,123456789012345,S20,010203,1,1#"));
     }
 
@@ -63,7 +63,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*HQ,123456789012345,S20,010203,1,0#"));
     }
 
@@ -77,7 +77,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_FREQUENCY, 10);
         command.setType(Command.TYPE_POSITION_PERIODIC);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*HQ,123456789012345,S71,010203,22,10#"));
     }
 

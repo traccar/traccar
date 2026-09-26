@@ -10,7 +10,7 @@ public class AisProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new AisProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "!AIVDM,2,1,8,A,53UlSb01l>Ei=H4KF218PTpv222222222222221?8h=766gB0<Ck11DTp888,0*14s:MTb827ebc7686b,c:1481688227737*4d\\\r\n"
                     + "!AIVDM,2,2,8,A,88888888888,2*24\r\n"
                     + "!AIVDM,1,1,,A,13T=Qr0P001cmmLEf;A00?wN0PSU,0*29\r\n"
@@ -23,7 +23,7 @@ public class AisProtocolDecoderTest extends ProtocolTest {
                     + "!AIVDM,1,1,,A,13MKsr?0001dJC2Ee4W;jnal08Qj,0*00\r\n\r\n"),
                 positions(8));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "!AIVDM,1,1,,A,H3FUli4T000000000000001p0400,0*6E\\s:MTb827eba584a8,c:1481688176110*46\\\r\n"
                     + "!AIVDM,1,1,,B,13UhUh0P01QcoRTEdtB>4?v<2D=j,0*54\r\n\r\n"),
                 position());

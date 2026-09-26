@@ -16,7 +16,7 @@ public class UlbotechProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "UNO;13912345678");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 buffer("*TS01,UNO;13912345678#"));
 
     }

@@ -16,7 +16,7 @@ public class Gps103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 300);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("**,imei:123456789012345,C,05m"));
 
     }
@@ -31,7 +31,7 @@ public class Gps103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "H,080");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("**,imei:123456789012345,H,080"));
 
     }

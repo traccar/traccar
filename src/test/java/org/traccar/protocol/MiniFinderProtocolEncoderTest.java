@@ -16,7 +16,7 @@ public class MiniFinderProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, "GMT+1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("123456L+01"));
 
         command = new Command();
@@ -25,7 +25,7 @@ public class MiniFinderProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 2);
         command.set(Command.KEY_PHONE, "1111111111");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("123456C1,1111111111"));
 
     }

@@ -16,14 +16,14 @@ public class Xexun2ProtocolEncoderTest extends ProtocolTest {
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POWER_OFF);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("FAAF0007000112345678901234500004FEBC6F663D31FAAF"));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 150);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("FAAF0007000112345678901234500015F90E747261636B696E675F73656E643D3135302C313530FAAF"));
 
     }

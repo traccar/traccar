@@ -17,7 +17,7 @@ public class SuntechProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_REBOOT_DEVICE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("SA200CMD;123456789012345;02;Reboot\r"));
 
     }

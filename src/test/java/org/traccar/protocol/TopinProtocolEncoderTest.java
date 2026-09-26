@@ -17,7 +17,7 @@ public class TopinProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_PHONE, "13533333333");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("78780C4131333533333333333333330D0A"));
 
     }

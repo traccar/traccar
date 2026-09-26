@@ -19,7 +19,7 @@ public class Minifinder2ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_FIRMWARE_UPDATE);
         command.set(Command.KEY_DATA, "https://example.com");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("ab10160059d2010004143068747470733a2f2f6578616d706c652e636f6d"));
 
     }

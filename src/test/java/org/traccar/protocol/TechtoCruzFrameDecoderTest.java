@@ -10,10 +10,10 @@ public class TechtoCruzFrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new TechtoCruzFrameDecoder()));
 
-        verify(channel, buffer("$$A35,RESPO|G33|8612345678910|CRUZ,*E3"),
+        verifyDecode(channel, buffer("$$A35,RESPO|G33|8612345678910|CRUZ,*E3"),
                 buffer("$$A35,RESPO|G33|8612345678910|CRUZ,*E3"));
 
-        verify(channel, buffer("$$A120,8612345678910,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6"),
+        verifyDecode(channel, buffer("$$A120,8612345678910,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6"),
                 buffer("$$A120,8612345678910,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6"));
 
     }

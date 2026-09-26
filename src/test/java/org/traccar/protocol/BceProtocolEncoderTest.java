@@ -17,7 +17,7 @@ public class BceProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("79df0d86487000000600410aff00550048"));
 
     }

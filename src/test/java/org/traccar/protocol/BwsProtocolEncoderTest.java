@@ -15,7 +15,7 @@ public class BwsProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("001234567842000073"));
 
     }

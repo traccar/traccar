@@ -16,7 +16,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "#PTI300");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("#PTI300\r\n"));
 
     }
@@ -32,7 +32,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 2);
         command.set(Command.KEY_DATA, "1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("#OPC2,1\r\n"));
 
     }
@@ -47,7 +47,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, "GMT+8");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("#TMZ8\r\n"));
 
     }
@@ -63,7 +63,7 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_ALARM_SPEED);
         command.set(Command.KEY_DATA, 120);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("#SPD120\r\n"));
 
     }

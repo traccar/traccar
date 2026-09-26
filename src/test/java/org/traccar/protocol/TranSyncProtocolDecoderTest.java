@@ -10,11 +10,11 @@ public class TranSyncProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new TranSyncProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "3a3a2b583f086065705154043900801017050b11190f01623ef40887dff00000c25e9ff707000007152a2d0000000105004794916902050000100000050252ee060200822323"),
                 position());
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "3a3a2b583f086065705154043900801017050b11190f01623ef40887dff00000c25e9ff707000007152a2d0000000105004794916902050000000000050252ee060200822323"),
                 position(Checks.ATTRIBUTES));
 

@@ -16,7 +16,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_REBOOT_DEVICE);
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("$$0020CF000000,0061D"));
 
     }
@@ -31,7 +31,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_REBOOT_DEVICE);
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("*000000,006#"));
 
     }

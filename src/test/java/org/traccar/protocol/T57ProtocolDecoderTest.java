@@ -10,19 +10,19 @@ public class T57ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new T57ProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*T57#F1#T571117001#301117#000843#2234.1303#N#08826.1714#E#+0.242,+0.109,-0.789#0.000#6.20000#A2#4.2#"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*T57#F1#0123456789#041117#152900#1258.9653#N#07738.4169#E#00000000000000000000#0.000#926.300#A2#4.0#"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*T57#F2#0123456789#041117#152900#1258.9653#N#07738.4169#E#00000000000000000000#0.000#926.300#A2#4.0#"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*T57#F3#0123456789#041117#152900#1258.9653#N#07738.4169#E#I#9674432345#340#"));
 
     }

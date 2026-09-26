@@ -10,46 +10,46 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GpsGateProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRCMD,0097,_SendMessage,,7618.51990,S,4002.26182,E,350.0,1.08,0.0,250816,183522.000,0*7F"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRCMD,356406061385182,_SendMessage,,5223.88542,N,11440.45866,W,951.2,0.027,,220716,153507.00,1*5F"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRCMD,353067011068246,_SendMessage,,1918.1942,N,09906.3696,W,2246.5,000.0,295.9,150416,213147.00,1,Odometer=*70"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRCMD,862950025974620,_Ping,voltage=4*4F"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRCMD,862950025974620,_SendMessage, ,2721.5781,S,15259.145,E,61,0.00,61,080316,092612,1,SosButton=0,voltage=4*60"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRLIN,,user1,8IVHF*7A"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRLIN,,354503026292842,VGZTHKT*0C"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRLIN,IMEI,1234123412341234,*7B"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$GPRMC,154403.000,A,6311.64120,N,01438.02740,E,0.000,0.0,270707,,*0A"),
                 position().location("2007-07-27T15:44:03.000Z", true, 63.19402, 14.63379));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$GPRMC,074524,A,5553.73701,N,03728.90491,E,10.39,226.5,160614,0.0,E*75"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "$GPRMC,154403.000,A,6311.64120,N,01438.02740,E,0.000,0.0,270707,,*0A"),
                 position());
 

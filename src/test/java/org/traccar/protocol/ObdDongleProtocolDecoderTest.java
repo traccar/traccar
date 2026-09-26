@@ -10,10 +10,10 @@ public class ObdDongleProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new ObdDongleProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "55550003383634383637303232353131303135010009010011023402010201ABAAAA"));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "5555000338363438363730323235313130313503000100010355AABBCC184F1ABC614E21C1FA08712A84ABAAAA"),
                 position().location("2015-07-18T20:49:16.000Z", true, 22.12346, -123.45678));
 

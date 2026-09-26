@@ -88,7 +88,7 @@ public class ProtocolTest extends BaseTest {
         return new WifiAccessPointExpectation();
     }
 
-    protected void verify(
+    protected void verifyDecode(
             BaseProtocolDecoder decoder, Object object, PositionExpectation... expected) throws Exception {
         Object decoded = decoder.decode(null, null, object);
         List<?> positions = switch (decoded) {
@@ -104,7 +104,7 @@ public class ProtocolTest extends BaseTest {
         }
     }
 
-    protected void verify(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+    protected void verifyDecode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
         channel.writeInbound(input);
         assertEquals(expected.length, channel.inboundMessages().size(), "frames.count");
         for (int i = 0; i < expected.length; i++) {
@@ -114,7 +114,7 @@ public class ProtocolTest extends BaseTest {
         }
     }
 
-    protected void verify(EmbeddedChannel channel, Command command, Object... expected) {
+    protected void verifyEncode(EmbeddedChannel channel, Command command, Object... expected) {
         channel.writeOutbound(new NetworkMessage(command, null));
         assertEquals(expected.length, channel.outboundMessages().size(), "messages.count");
         for (int i = 0; i < expected.length; i++) {

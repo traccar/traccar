@@ -10,7 +10,7 @@ public class NdtpV6ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new NdtpV6ProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "7e7e3b000200334202000000000000000064000100000000000600020002034f0c0200000400000000000033353135313330353131393430353532353030323632373237343836363500"),
                 position(Checks.ATTRIBUTES));
 

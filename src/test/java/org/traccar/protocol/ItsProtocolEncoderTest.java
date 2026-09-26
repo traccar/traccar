@@ -15,7 +15,7 @@ public class ItsProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("@SET#RLP,OP1,"));
 
     }

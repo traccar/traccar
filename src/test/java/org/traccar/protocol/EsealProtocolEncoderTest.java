@@ -15,7 +15,7 @@ public class EsealProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_DISARM);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("##S,eSeal,123456789012345,256,3.0.8,RC-Unlock,E##"));
 
     }

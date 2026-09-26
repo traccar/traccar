@@ -15,7 +15,7 @@ public class FifotrackProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_REQUEST_PHOTO);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("##24,123456789012345,1,D05,3*9F\r\n"));
 
     }

@@ -15,7 +15,7 @@ public class GlobalSatProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_DISMISS);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("GSC,123456789012345,Na*48!"));
 
     }
@@ -31,7 +31,7 @@ public class GlobalSatProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("GSC,123456789012345,Lo(1,1)*69!"));
 
     }

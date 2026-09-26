@@ -10,18 +10,18 @@ public class ThinkPowerProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new ThinkPowerProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "0103002C01020F38363737333030353038323030343606544C3930344111522D312E302E31372E32303231303431300011C3"));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "05300012016099E995010D743CC943EB481500000000EED4"),
                 position());
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "05000007016099E768020162D8"),
                 position());
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "03040000C3DC"));
 
     }

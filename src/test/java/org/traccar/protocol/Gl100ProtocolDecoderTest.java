@@ -11,58 +11,58 @@ public class Gl100ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gl100ProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTRTL,359464032011616,1,0,0,0,0.1,0,1662.5,,36.822301,-1.309476,20230706032920,0639,0002,08DF,1F5E,00,095,0101050105,4470"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTLGL,359464030492644,1,2,1,0,0.4,0,299.7,1,5.455551,51.449776,20160311083229,0204,0016,03EC,BD94,00,0036,0102090501"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,359464030439249,1,0,61,1,0.0,346,-2.7,2,-80.392825,26.122424,20151214000354,0310,0260,72BC,35F5,00,04B6,0102070407"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,135790246811220,1,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102070202"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,135790246811220,2,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,1,-3.6,145,30.0,2,121.354442,31.221940,20090101000100,0460,0000,18d8,6141,00,11F0,0102070202"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "AT+GTHBD=HeartBeat,359231030000010,20090101000000,11F0,0102120204"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTSOS,359231030000010,0,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position().location("2009-01-01T00:00:00.000Z", false, 31.22207, 121.35434));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTRTL,359231030000010,0,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTEST,359231030000010,0,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTSZI,359231030000010,0,3,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTLBC,359231030000010,02132523415,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,359231030000010,1,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,359231030000010,2,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,0,0,1,-3.6,145,30.0,2,121.354442,31.221940,20090101000100,0460,0000,18d8,6141,00,11F0,0102120204"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "+RESP:GTTRI,359464030073766,1,0,0,0,1.7,254,-27.8,3,30.474475,50.488383,20131107155511,0255,0003,6995,4761,00,0071,0103090402"),
                 position());
 

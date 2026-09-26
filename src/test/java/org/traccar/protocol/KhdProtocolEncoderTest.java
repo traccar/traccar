@@ -15,11 +15,11 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
 
         command.setType(Command.TYPE_ENGINE_STOP);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("29293900065981972d5d0d"));
 
         command.setType(Command.TYPE_POSITION_SINGLE);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("29293000065981972d540d"));
 
     }

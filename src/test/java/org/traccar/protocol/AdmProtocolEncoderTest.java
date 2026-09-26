@@ -30,14 +30,14 @@ public class AdmProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_GET_DEVICE_STATUS);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("STATUS\r\n"));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "INPUT 0");
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("INPUT 0\r\n"));
     }
 

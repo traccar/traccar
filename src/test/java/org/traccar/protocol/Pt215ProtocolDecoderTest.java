@@ -10,10 +10,10 @@ public class Pt215ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Pt215ProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "58580d010359339075435451010d0a"));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "585801080d0a"));
 
     }

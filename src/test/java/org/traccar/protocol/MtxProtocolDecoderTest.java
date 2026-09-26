@@ -10,7 +10,7 @@ public class MtxProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new MtxProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "#MTX,353815011138124,20101226,195550,41.6296399,002.3611174,000,035,000000.00,X,X,1111,000,0,0"),
                 position());
 

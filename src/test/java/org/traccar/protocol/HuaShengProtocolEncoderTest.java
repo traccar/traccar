@@ -19,7 +19,7 @@ public class HuaShengProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("c00000000daa1600000000000101c0"));
 
         command = new Command();
@@ -27,7 +27,7 @@ public class HuaShengProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 60);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("c000000012aa0400000000000100020006003cc0"));
 
     }

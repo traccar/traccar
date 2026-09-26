@@ -37,7 +37,7 @@ public class JimiPhotoProtocolDecoderTest extends ProtocolTest {
                 --boundary--
                 """.replace("\n", "\r\n");
 
-        verify(decoder, request(
+        verifyDecode(decoder, request(
                 HttpMethod.POST, "/upload",
                 new ReadOnlyHttpHeaders(true, "Content-Type", "multipart/form-data; boundary=boundary"),
                 buffer(body)),

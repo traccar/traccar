@@ -10,10 +10,10 @@ public class DualcamFrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new DualcamFrameDecoder()));
 
-        verify(channel, binary("000000050001403a4abaa31444000400"),
+        verifyDecode(channel, binary("000000050001403a4abaa31444000400"),
                 binary("000000050001403a4abaa31444000400"));
 
-        verify(channel, binary("00010006000000110000"),
+        verifyDecode(channel, binary("00010006000000110000"),
                 binary("00010006000000110000"));
 
     }

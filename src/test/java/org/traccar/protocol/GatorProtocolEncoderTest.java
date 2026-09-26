@@ -19,7 +19,7 @@ public class GatorProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("24243000062008958C070D"));
     }
 }

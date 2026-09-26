@@ -15,7 +15,7 @@ public class WondexProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_SINGLE);
         command.set(Command.KEY_DEVICE_PASSWORD, "0000");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("$WP+GETLOCATION=0000"));
 
     }

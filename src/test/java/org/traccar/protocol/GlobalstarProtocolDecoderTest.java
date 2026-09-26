@@ -12,13 +12,13 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GlobalstarProtocolDecoder(null));
 
-        verify(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
+        verifyDecode(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
                 "{\"version\": 1,\"entity\": \"Mayacom\",\"resource\": \"GPS Device\",\"entry\": {\"devices\": [{\"gpsCoordinate\": {\"latitude\": \"\",\"longitude\": \"\"},\"deviceIdentify\": {\"esn\": \"0-99990\",\"unixTime\": 1034268516},\"deviceInfo\": {\"messageType\": 3,\"batteryStatus\": \"Good\",\"gpsDataValid\": \"Invalid\",\"missedEventInput1\": \"No\",\"missedEventInput2\": \"No\",\"gpsFailCounter\": 1,\"diagnosticMessage\": \"Replace Battery\",\"numberOfTransmissions\": 3,\"gpsSystemOk\": \"OK\",\"transmitterOk\": \"OK\",\"schedulerSubsystemOk\": \"OK\",\"minTransmissionInterval\": \"300 seconds\",\"maxTransmissionInterval\": \"600 seconds\",\"meanGpsSearchTime\": \"79 seconds\",\"failedGpsAttempts\": 0,\"transmissionsSinceLastDiagnostic\": 9,\"input1Triggered\": \"Yes\",\"input1State\": \"Closed\",\"input2Triggered\": \"No\",\"input2State\": \"Open\",\"messageSubType\": \"Location Message\",\"vibrationTriggered\": \"Yes\",\"unitInVibration\": \"No\",\"gps3DFix\": \"No\",\"deviceAtRest\": \"Yes\",\"highGpsFixAccuracy\": \"No\"}}]}}")),
                 position());
 
         decoder.setModelOverride("AtlasTrax");
 
-        verify(decoder, request(HttpMethod.POST, "/", buffer(
+        verifyDecode(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
                 "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"16/09/2020 01:33:07 GMT\" messageID=\"567207180ae9100687cef8c81978371a\">\n",
                 "<stuMessage>\n",
@@ -31,7 +31,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
 
         decoder.setModelOverride(null);
 
-        verify(decoder, request(HttpMethod.POST, "/", buffer(
+        verifyDecode(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
                 "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"25/03/2020 03:02:32 GMT\" messageID=\"300421a0fd2a100585bdde409d6f601a\">",
                 "<stuMessage>",
@@ -43,7 +43,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
                 "</stuMessages>")),
                 position());
 
-        verify(decoder, request(HttpMethod.POST, "/", buffer(
+        verifyDecode(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
                 "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"17/02/2019 21:56:15 GMT\" messageID=\"2a471778dda31005850dc52bb93ae81a\">",
                 "<stuMessage>",

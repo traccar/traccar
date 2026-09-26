@@ -10,7 +10,7 @@ public class NavisetFrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new NavisetFrameDecoder()));
 
-        verify(channel, binary("1310e4073836383230343030353935383436362a060716"),
+        verifyDecode(channel, binary("1310e4073836383230343030353935383436362a060716"),
                 binary("1310e4073836383230343030353935383436362a060716"));
 
     }

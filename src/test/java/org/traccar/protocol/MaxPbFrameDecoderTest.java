@@ -10,7 +10,7 @@ public class MaxPbFrameDecoderTest extends ProtocolTest {
 
         var channel = channel(new MaxPbFrameDecoder());
 
-        verify(channel, binary("55aa55aa1100b0f3020000000880d0a54c10f9b7cfaf02"),
+        verifyDecode(channel, binary("55aa55aa1100b0f3020000000880d0a54c10f9b7cfaf02"),
                 binary("55aa55aa1100b0f3020000000880d0a54c10f9b7cfaf02"));
 
     }

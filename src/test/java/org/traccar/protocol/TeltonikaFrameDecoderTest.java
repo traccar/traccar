@@ -10,11 +10,11 @@ public class TeltonikaFrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new TeltonikaFrameDecoder()));
 
-        verify(channel, binary("FF000F313233343536373839303132333435"),
+        verifyDecode(channel, binary("FF000F313233343536373839303132333435"),
                 binary("ff"),
                 binary("000F313233343536373839303132333435"));
 
-        verify(channel, binary("000F313233343536373839303132333435"),
+        verifyDecode(channel, binary("000F313233343536373839303132333435"),
                 binary("000F313233343536373839303132333435"));
 
     }

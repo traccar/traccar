@@ -10,10 +10,10 @@ public class VnetProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new VnetProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "24240000140029111909062986818303379282604c452e322e30302ea32b020f0000d3552323"));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "242433001200290615174213211489861061060690070B0001020304700005001E382323"),
                 position());
 

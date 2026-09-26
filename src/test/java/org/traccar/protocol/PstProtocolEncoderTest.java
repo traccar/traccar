@@ -15,7 +15,7 @@ public class PstProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("860ddf790600000001060002ffffffffe42b"));
 
     }
@@ -29,7 +29,7 @@ public class PstProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("860ddf790600000001060001ffffffff0af9"));
 
     }

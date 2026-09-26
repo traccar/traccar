@@ -15,13 +15,13 @@ public class MeitrackProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("@@A25,123456789012345,A10*58\r\n"));
 
         command.setDeviceId(1);
         command.setType(Command.TYPE_REQUEST_PHOTO);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("@@A46,123456789012345,D03,1,camera_picture.jpg*1C\r\n"));
 
         command.setDeviceId(1);
@@ -29,7 +29,7 @@ public class MeitrackProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_PHONE, "15360853789");
         command.set(Command.KEY_MESSAGE, "Meitrack");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("@@A48,123456789012345,C02,0,15360853789,Meitrack*8B\r\n"));
 
     }

@@ -10,7 +10,7 @@ public class NtoProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new NtoProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "^NB,880002023090601,N00,050923,233519,V,N,2236.1994,E,11315.4645,5,0,000000000000,460:00:0:75217090,-04:00,,1693971319,31,2DA5"),
                 position().location("2023-09-05T23:35:19.000Z", false, 22.60332, 113.25774));
 

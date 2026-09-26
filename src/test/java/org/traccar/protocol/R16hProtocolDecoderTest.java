@@ -10,14 +10,14 @@ public class R16hProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new R16hProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "@LINK,356823031235028"));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "@GPSD,356823031235028,R,20260520,000133,01.34587,N,103.71993,E,0,111,36,72,L,"),
                 position());
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "@LBSD,356823031235028,R,20260616,092110,302-490-75f8-61c3715:-111,,,21,L,"),
                 position(Checks.ATTRIBUTES));
 

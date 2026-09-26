@@ -14,7 +14,7 @@ public class Jt600ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(S07,0)"));
 
     }
@@ -27,7 +27,7 @@ public class Jt600ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(S07,1)"));
 
     }
@@ -41,7 +41,7 @@ public class Jt600ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, "GMT+4");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(S09,1,240)"));
 
     }
@@ -54,7 +54,7 @@ public class Jt600ProtocolEncoderTest extends ProtocolTest {
         Command command = new Command();
         command.setType(Command.TYPE_REBOOT_DEVICE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(S17)"));
 
     }

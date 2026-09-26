@@ -10,10 +10,10 @@ public class BlackKiteProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new BlackKiteProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "01150003313131313131313131313131313131209836055605BA"));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "0136000331313131313131313131313131313120523905563000010000000100000033000000003400004000004500004600005000005100009F76"),
                 position());
 

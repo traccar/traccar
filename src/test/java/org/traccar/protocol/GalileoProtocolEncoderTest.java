@@ -16,7 +16,7 @@ public class GalileoProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "status");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("01200003313233343536373839303132333435040000e000000000e1067374617475731f64"));
 
     }

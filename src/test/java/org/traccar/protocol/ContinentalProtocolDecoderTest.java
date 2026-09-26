@@ -10,19 +10,19 @@ public class ContinentalProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new ContinentalProtocolDecoder(null));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "5356003216001eb48505025b4001e90f7f18ce0f00522200400001015b4001e9000e820100000c24000100014e0400736a7a"),
                 position().location("2018-07-06T23:57:29.000Z", true, -23.46609, -46.54497));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "5356002A1100003039030243A68B5700FEB5AB00FD715F012700000143A68B57000E000000000C2F00000130"),
                 position().location("2005-12-19T10:28:39.000Z", true, -23.49027, -46.55138));
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "5356002a0d0010a12403025a9ea47f00feb48400fd6e63000c0000015a9ea480000e000100000c000000"),
                 position());
 
-        verify(decoder, binary(
+        verifyDecode(decoder, binary(
                 "5356002a0d0010a1240302581b944100febed800fd9fa30139001300581c73fa000e000000000d000001"),
                 position());
 

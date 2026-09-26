@@ -16,7 +16,7 @@ public class PretraceProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 300);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345D221300,300,,^69)"));
 
     }
@@ -31,7 +31,7 @@ public class PretraceProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "D21012");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345D21012^44)"));
 
     }

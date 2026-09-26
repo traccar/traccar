@@ -10,11 +10,11 @@ public class IdplProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new IdplProtocolDecoder(null));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*ID1,863071011086474,210314,153218,A,1831.4577,N,07351.1433,E,0.79,240.64,9,20,A,1,4.20,0,1,01,1,0,0,A01,R,935D#"),
                 position().location("2014-03-21T15:32:18.000Z", true, 18.524295, 73.852388333333));
 
-        verify(decoder, text(
+        verifyDecode(decoder, text(
                 "*ID1,863071011086474,210314,162752,A,1831.4412,N,07351.0983,E,0.04,213.84,9,25,A,1,4.20,0,1,01,1,0,0,A01,L,EA01#"),
                 position());
 

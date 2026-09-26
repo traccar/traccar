@@ -16,7 +16,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_OUTPUT_CONTROL);
         command.set(Command.KEY_DATA, "1");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AV001)"));
 
     }
@@ -30,7 +30,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AV010)"));
 
     }
@@ -44,7 +44,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AP00)"));
 
     }
@@ -59,7 +59,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 60);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AR00003C0000)"));
 
     }
@@ -73,7 +73,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AR0000000000)"));
 
     }
@@ -87,7 +87,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_GET_VERSION);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AP07)"));
 
     }
@@ -101,7 +101,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_REBOOT_DEVICE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AT00)"));
 
     }
@@ -115,7 +115,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_SET_ODOMETER);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AX01)"));
 
     }
@@ -129,7 +129,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*getposl*,[end]"));
 
     }
@@ -143,7 +143,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_PERIODIC);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*routetrack*99*,[end]"));
 
     }
@@ -157,7 +157,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_STOP);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*routetrackoff*,[end]"));
 
     }
@@ -171,7 +171,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_GET_VERSION);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*about*,[end]"));
 
     }
@@ -185,7 +185,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_REBOOT_DEVICE);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,88888888,[end]"));
 
     }
@@ -199,7 +199,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_IDENTIFICATION);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,999999,[end]"));
 
     }
@@ -214,7 +214,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_ALARM_SOS);
         command.set(Command.KEY_ENABLE, true);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*soson*,[end]"));
 
     }
@@ -229,7 +229,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_ALARM_SOS);
         command.set(Command.KEY_ENABLE, false);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*sosoff*,[end]"));
 
     }
@@ -244,7 +244,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "AA00");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("(123456789012345AA00)"));
 
     }
@@ -259,7 +259,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "any text is ok");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,any text is ok,[end]"));
 
     }
@@ -275,7 +275,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_SERVER, "1.2.3.4");
         command.set(Command.KEY_PORT, "5555");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*setip*1*2*3*4*5555*,[end]"));
 
     }
@@ -292,7 +292,7 @@ public class Tk103ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_PHONE, "+55555555555");
         command.set(Command.KEY_DEVICE_PASSWORD, "232323");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("[begin]sms2,*master*232323*+55555555555*,[end]"));
 
     }

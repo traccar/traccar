@@ -16,7 +16,7 @@ public class NavisProtocolEncoderTest extends ProtocolTest {
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "*!SETOUT 1Y");
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 binary("404e544300000000010000000b004f5c2a215345544f5554203159"));
 
     }

@@ -17,7 +17,7 @@ public class XirgoProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 0);
         command.set(Command.KEY_DATA, 1);
 
-        verify(channel, command,
+        verifyEncode(channel, command,
                 text("+XT:7005,2,1"));
 
     }
