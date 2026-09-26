@@ -87,15 +87,7 @@ public class ProtocolTest extends BaseTest {
         for (int i = 0; i < positions.size(); i++) {
             String path = "position[" + i + "]";
             var actual = assertInstanceOf(Position.class, positions.get(i), path);
-            var expectation = expected[i];
-            switch (expectation.mode) {
-                case ALL -> verifyDecodedPosition(actual, true, false);
-                case ATTRIBUTES -> verifyDecodedPosition(actual, false, true);
-                case NONE -> { }
-            }
-            for (var check : expectation.checks) {
-                check.accept(actual, path);
-            }
+            expected[i].verify(actual, path);
         }
     }
 
@@ -155,162 +147,6 @@ public class ProtocolTest extends BaseTest {
         assertNull(object);
     }
 
-    private static void verifyDecodedPosition(Position position, boolean checkLocation, boolean checkAttributes) {
-
-        if (checkLocation) {
-
-            assertNotNull(position.getServerTime());
-            assertNotNull(position.getFixTime());
-            assertTrue(position.getFixTime().after(new Date(915148800000L)), "year > 1999");
-            assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
-
-            assertTrue(position.getLatitude() >= -90, "latitude >= -90");
-            assertTrue(position.getLatitude() <= 90, "latitude <= 90");
-
-            assertTrue(position.getLongitude() >= -180, "longitude >= -180");
-            assertTrue(position.getLongitude() <= 180, "longitude <= 180");
-
-            assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
-            assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
-
-            assertTrue(position.getSpeed() >= 0, "speed >= 0");
-            assertTrue(position.getSpeed() <= 869, "speed <= 869");
-
-            assertTrue(position.getCourse() >= 0, "course >= 0");
-            assertTrue(position.getCourse() <= 360, "course <= 360");
-
-            assertNotNull(position.getProtocol(), "protocol is null");
-
-            assertTrue(position.getDeviceId() > 0, "deviceId > 0");
-
-        }
-
-        Map<String, Object> attributes = position.getAttributes();
-
-        if (checkAttributes) {
-            assertFalse(attributes.isEmpty(), "no attributes");
-        }
-
-        if (attributes.containsKey(Position.KEY_INDEX)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_INDEX));
-        }
-
-        if (attributes.containsKey(Position.KEY_HDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_HDOP));
-        }
-
-        if (attributes.containsKey(Position.KEY_VDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_VDOP));
-        }
-
-        if (attributes.containsKey(Position.KEY_PDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_PDOP));
-        }
-
-        if (attributes.containsKey(Position.KEY_SATELLITES)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES));
-        }
-
-        if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES_VISIBLE));
-        }
-
-        if (attributes.containsKey(Position.KEY_RSSI)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_RSSI));
-        }
-
-        if (attributes.containsKey(Position.KEY_ODOMETER)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_ODOMETER));
-        }
-
-        if (attributes.containsKey(Position.KEY_RPM)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_RPM));
-        }
-
-        if (attributes.containsKey(Position.KEY_FUEL)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL));
-        }
-
-        if (attributes.containsKey(Position.KEY_FUEL_USED)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL_USED));
-        }
-
-        if (attributes.containsKey(Position.KEY_POWER)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_POWER));
-        }
-
-        if (attributes.containsKey(Position.KEY_BATTERY)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_BATTERY));
-        }
-
-        if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
-            int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
-            assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
-        }
-
-        if (attributes.containsKey(Position.KEY_CHARGE)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_CHARGE));
-        }
-
-        if (attributes.containsKey(Position.KEY_IGNITION)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_IGNITION));
-        }
-
-        if (attributes.containsKey(Position.KEY_MOTION)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_MOTION));
-        }
-
-        if (attributes.containsKey(Position.KEY_ARCHIVE)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ARCHIVE));
-        }
-
-        if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
-            assertInstanceOf(String.class, attributes.get(Position.KEY_DRIVER_UNIQUE_ID));
-        }
-
-        if (attributes.containsKey(Position.KEY_STEPS)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_STEPS));
-        }
-
-        if (attributes.containsKey(Position.KEY_ROAMING)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ROAMING));
-        }
-
-        if (attributes.containsKey(Position.KEY_HOURS)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_HOURS));
-        }
-
-        if (attributes.containsKey(Position.KEY_RESULT)) {
-            assertInstanceOf(String.class, attributes.get(Position.KEY_RESULT));
-        }
-
-        if (position.getNetwork() != null) {
-            if (position.getNetwork().getCellTowers() != null) {
-                for (CellTower cellTower : position.getNetwork().getCellTowers()) {
-                    checkInteger(cellTower.getMobileCountryCode(), 0, 999);
-                    checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
-                    checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
-                    checkInteger(cellTower.getCellId(), 0, 268435455);
-                }
-            }
-
-            if (position.getNetwork().getWifiAccessPoints() != null) {
-                for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
-                    assertTrue(wifiAccessPoint.getMacAddress().matches("((\\p{XDigit}{2}):){5}(\\p{XDigit}{2})"));
-                }
-            }
-        }
-
-    }
-
-    private static void checkInteger(Object value, int min, int max) {
-        assertNotNull(value, "value is null");
-        assertTrue(value instanceof Integer || value instanceof Long, "not int or long");
-        long number = ((Number) value).longValue();
-        assertTrue(number >= min, "value too low");
-        assertTrue(number <= max, "value too high");
-    }
-
     protected void verifyCommand(
             BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
         verifyFrame(expected, encoder.encodeCommand(command));
@@ -332,14 +168,173 @@ public class ProtocolTest extends BaseTest {
         assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
     }
 
-    public static class PositionExpectation {
+    public static final class PositionExpectation {
 
         private final List<BiConsumer<Position, String>> checks = new ArrayList<>();
 
         private final Checks mode;
 
-        public PositionExpectation(Checks mode) {
+        private PositionExpectation(Checks mode) {
             this.mode = mode;
+        }
+
+        void verify(Position position, String path) {
+
+            if (mode == Checks.ALL) {
+
+                assertNotNull(position.getServerTime());
+                assertNotNull(position.getFixTime());
+                assertTrue(position.getFixTime().after(new Date(915148800000L)), "year > 1999");
+                assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
+
+                assertTrue(position.getLatitude() >= -90, "latitude >= -90");
+                assertTrue(position.getLatitude() <= 90, "latitude <= 90");
+
+                assertTrue(position.getLongitude() >= -180, "longitude >= -180");
+                assertTrue(position.getLongitude() <= 180, "longitude <= 180");
+
+                assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
+                assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
+
+                assertTrue(position.getSpeed() >= 0, "speed >= 0");
+                assertTrue(position.getSpeed() <= 869, "speed <= 869");
+
+                assertTrue(position.getCourse() >= 0, "course >= 0");
+                assertTrue(position.getCourse() <= 360, "course <= 360");
+
+                assertNotNull(position.getProtocol(), "protocol is null");
+
+                assertTrue(position.getDeviceId() > 0, "deviceId > 0");
+
+            }
+
+            if (mode != Checks.NONE) {
+                Map<String, Object> attributes = position.getAttributes();
+
+                if (mode == Checks.ATTRIBUTES) {
+                    assertFalse(attributes.isEmpty(), "no attributes");
+                }
+
+                if (attributes.containsKey(Position.KEY_INDEX)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_INDEX));
+                }
+
+                if (attributes.containsKey(Position.KEY_HDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_HDOP));
+                }
+
+                if (attributes.containsKey(Position.KEY_VDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_VDOP));
+                }
+
+                if (attributes.containsKey(Position.KEY_PDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_PDOP));
+                }
+
+                if (attributes.containsKey(Position.KEY_SATELLITES)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES));
+                }
+
+                if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES_VISIBLE));
+                }
+
+                if (attributes.containsKey(Position.KEY_RSSI)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_RSSI));
+                }
+
+                if (attributes.containsKey(Position.KEY_ODOMETER)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_ODOMETER));
+                }
+
+                if (attributes.containsKey(Position.KEY_RPM)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_RPM));
+                }
+
+                if (attributes.containsKey(Position.KEY_FUEL)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL));
+                }
+
+                if (attributes.containsKey(Position.KEY_FUEL_USED)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL_USED));
+                }
+
+                if (attributes.containsKey(Position.KEY_POWER)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_POWER));
+                }
+
+                if (attributes.containsKey(Position.KEY_BATTERY)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_BATTERY));
+                }
+
+                if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
+                    int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
+                    assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
+                }
+
+                if (attributes.containsKey(Position.KEY_CHARGE)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_CHARGE));
+                }
+
+                if (attributes.containsKey(Position.KEY_IGNITION)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_IGNITION));
+                }
+
+                if (attributes.containsKey(Position.KEY_MOTION)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_MOTION));
+                }
+
+                if (attributes.containsKey(Position.KEY_ARCHIVE)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ARCHIVE));
+                }
+
+                if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+                    assertInstanceOf(String.class, attributes.get(Position.KEY_DRIVER_UNIQUE_ID));
+                }
+
+                if (attributes.containsKey(Position.KEY_STEPS)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_STEPS));
+                }
+
+                if (attributes.containsKey(Position.KEY_ROAMING)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ROAMING));
+                }
+
+                if (attributes.containsKey(Position.KEY_HOURS)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_HOURS));
+                }
+
+                if (attributes.containsKey(Position.KEY_RESULT)) {
+                    assertInstanceOf(String.class, attributes.get(Position.KEY_RESULT));
+                }
+
+                if (position.getNetwork() != null) {
+                    if (position.getNetwork().getCellTowers() != null) {
+                        for (CellTower cellTower : position.getNetwork().getCellTowers()) {
+                            var mcc = cellTower.getMobileCountryCode();
+                            assertTrue(mcc != null && mcc >= 0 && mcc <= 999, "mcc: " + mcc);
+                            var mnc = cellTower.getMobileNetworkCode();
+                            assertTrue(mnc != null && mnc >= 0 && mnc <= 999, "mnc: " + mnc);
+                            var lac = cellTower.getLocationAreaCode();
+                            assertTrue(lac != null && lac >= 1 && lac <= 65535, "lac: " + lac);
+                            var cid = cellTower.getCellId();
+                            assertTrue(cid != null && cid >= 0 && cid <= 268435455, "cid: " + cid);
+                        }
+                    }
+
+                    if (position.getNetwork().getWifiAccessPoints() != null) {
+                        for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
+                            var mac = wifiAccessPoint.getMacAddress();
+                            assertTrue(mac != null && mac.matches("[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"), "mac: " + mac);
+                        }
+                    }
+                }
+            }
+
+            for (var check : checks) {
+                check.accept(position, path);
+            }
+
         }
 
         public PositionExpectation location(String fixTime, boolean valid, double latitude, double longitude) {
