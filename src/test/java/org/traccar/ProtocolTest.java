@@ -119,6 +119,21 @@ public class ProtocolTest extends BaseTest {
         }
     }
 
+    protected void verify(EmbeddedChannel channel, Command command, Object... expected) {
+        channel.writeOutbound(new NetworkMessage(command, null));
+        assertEquals(expected.length, channel.outboundMessages().size(), "messages.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "message[" + i + "]";
+            var message = assertInstanceOf(NetworkMessage.class, channel.readOutbound(), path);
+            if (expected[i] instanceof ByteBuf buffer) {
+                var actual = assertInstanceOf(ByteBuf.class, message.getMessage(), path);
+                assertEquals(ByteBufUtil.hexDump(buffer), ByteBufUtil.hexDump(actual), path);
+            } else {
+                assertEquals(expected[i], message.getMessage(), path);
+            }
+        }
+    }
+
     private String concatenateStrings(String... strings) {
         StringBuilder builder = new StringBuilder();
         for (String s : strings) {
@@ -171,23 +186,9 @@ public class ProtocolTest extends BaseTest {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
     }
 
-    protected void verifyNull(Object object) {
-        assertNull(object);
-    }
-
     protected void verifyCommand(
             BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
         verifyFrame(expected, encoder.encodeCommand(command));
-    }
-
-    protected Object encodeCommand(
-            BaseProtocolEncoder encoder, BaseProtocolDecoder decoder, Command command) {
-        var pipeline = mock(ChannelPipeline.class);
-        when(pipeline.iterator()).thenReturn(
-                List.<Map.Entry<String, ChannelHandler>>of(Map.entry("decoder", decoder)).iterator());
-        var channel = mock(Channel.class);
-        when(channel.pipeline()).thenReturn(pipeline);
-        return encoder.encodeCommand(channel, command);
     }
 
     protected void verifyFrame(ByteBuf expected, Object object) {
