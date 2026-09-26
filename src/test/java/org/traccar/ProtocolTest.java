@@ -21,16 +21,11 @@ import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,28 +89,14 @@ public class ProtocolTest extends BaseTest {
             var actual = assertInstanceOf(Position.class, positions.get(i), path);
             var expectation = expected[i];
             switch (expectation.mode) {
-                case ALL -> verifyDecodedPosition(actual, true, false, null);
-                case ATTRIBUTES -> verifyDecodedPosition(actual, false, true, null);
+                case ALL -> verifyDecodedPosition(actual, true, false);
+                case ATTRIBUTES -> verifyDecodedPosition(actual, false, true);
                 case NONE -> { }
             }
             for (var check : expectation.checks) {
                 check.accept(actual, path);
             }
         }
-    }
-
-    protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
-
-        Position position = new Position();
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        position.setTime(dateFormat.parse(time));
-        position.setValid(valid);
-        position.setLatitude(lat);
-        position.setLongitude(lon);
-
-        return position;
     }
 
     private String concatenateStrings(String... strings) {
@@ -170,106 +151,24 @@ public class ProtocolTest extends BaseTest {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
     }
 
-    protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        assertNotNull(decoder.decode(null, null, object));
-    }
-
     protected void verifyNull(Object object) {
         assertNull(object);
     }
 
-    protected void verifyNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        assertNull(decoder.decode(null, null, object));
-    }
-
-    protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
-        Object decodedObject = decoder.decode(null, null, object);
-        Position position;
-        if (decodedObject instanceof Collection) {
-            position = (Position) ((Collection<?>) decodedObject).iterator().next();
-        } else {
-            position = (Position) decodedObject;
-        }
-        switch (key) {
-            case "speed" -> assertEquals(expected, position.getSpeed());
-            case "course" -> assertEquals(expected, position.getCourse());
-            case "altitude" -> assertEquals(expected, position.getAltitude());
-            case "network" -> assertEquals(expected, position.getNetwork());
-
-            default -> assertEquals(expected, position.getAttributes().get(key));
-        }
-    }
-
-    protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, position);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, null);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), checkLocation, null);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, position);
-    }
-
-    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
-
-        assertNotNull(decodedObject, "list is null");
-        assertInstanceOf(List.class, decodedObject, "not a list");
-        assertFalse(((List<?>) decodedObject).isEmpty(), "list is empty");
-
-        for (Object item : (List<?>) decodedObject) {
-            verifyDecodedPosition(item, checkLocation, false, expected);
-        }
-
-    }
-
-    private static void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
-
-        assertNotNull(decodedObject, "position is null");
-        assertInstanceOf(Position.class, decodedObject, "not a position");
-
-        Position position = (Position) decodedObject;
+    private static void verifyDecodedPosition(Position position, boolean checkLocation, boolean checkAttributes) {
 
         if (checkLocation) {
 
-            if (expected != null) {
+            assertNotNull(position.getServerTime());
+            assertNotNull(position.getFixTime());
+            assertTrue(position.getFixTime().after(new Date(915148800000L)), "year > 1999");
+            assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
 
-                if (expected.getFixTime() != null) {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    assertEquals(dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()), "time");
-                }
-                assertEquals(expected.getValid(), position.getValid(), "valid");
-                assertEquals(expected.getLatitude(), position.getLatitude(), 0.00001, "latitude");
-                assertEquals(expected.getLongitude(), position.getLongitude(), 0.00001, "longitude");
+            assertTrue(position.getLatitude() >= -90, "latitude >= -90");
+            assertTrue(position.getLatitude() <= 90, "latitude <= 90");
 
-            } else {
-
-                assertNotNull(position.getServerTime());
-                assertNotNull(position.getFixTime());
-                assertTrue(position.getFixTime().after(new Date(915148800000L)), "year > 1999");
-                assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
-
-                assertTrue(position.getLatitude() >= -90, "latitude >= -90");
-                assertTrue(position.getLatitude() <= 90, "latitude <= 90");
-
-                assertTrue(position.getLongitude() >= -180, "longitude >= -180");
-                assertTrue(position.getLongitude() <= 180, "longitude <= 180");
-
-            }
+            assertTrue(position.getLongitude() >= -180, "longitude >= -180");
+            assertTrue(position.getLongitude() <= 180, "longitude <= 180");
 
             assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
             assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
