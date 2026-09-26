@@ -16,6 +16,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
@@ -23,11 +24,14 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -39,6 +43,48 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProtocolTest extends BaseTest {
+
+    protected PositionExpectation position() {
+        return position(true);
+    }
+
+    protected PositionExpectation position(boolean sanityChecks) {
+        return new PositionExpectation(sanityChecks);
+    }
+
+    protected NetworkExpectation network() {
+        return new NetworkExpectation();
+    }
+
+    protected CellTowerExpectation cell() {
+        return new CellTowerExpectation();
+    }
+
+    protected WifiAccessPointExpectation wifi() {
+        return new WifiAccessPointExpectation();
+    }
+
+    protected void verify(
+            BaseProtocolDecoder decoder, Object object, PositionExpectation... expected) throws Exception {
+        Object decoded = decoder.decode(null, null, object);
+        List<?> positions = switch (decoded) {
+            case null -> List.of();
+            case Position position -> List.of(position);
+            default -> assertInstanceOf(List.class, decoded, "positions");
+        };
+        assertEquals(expected.length, positions.size(), "positions.count");
+        for (int i = 0; i < positions.size(); i++) {
+            String path = "position[" + i + "]";
+            var actual = assertInstanceOf(Position.class, positions.get(i), path);
+            var expectation = expected[i];
+            if (expectation.sanityChecks) {
+                verifyDecodedPosition(actual, true, false, null);
+            }
+            for (var check : expectation.checks) {
+                check.accept(actual, path);
+            }
+        }
+    }
 
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
@@ -367,6 +413,161 @@ public class ProtocolTest extends BaseTest {
         assertNotNull(object, "buffer is null");
         assertInstanceOf(ByteBuf.class, object, "not a buffer");
         assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
+    }
+
+    public static class PositionExpectation {
+
+        private final List<BiConsumer<Position, String>> checks = new ArrayList<>();
+
+        private final boolean sanityChecks;
+
+        public PositionExpectation(boolean sanityChecks) {
+            this.sanityChecks = sanityChecks;
+        }
+
+        public PositionExpectation location(String fixTime, boolean valid, double latitude, double longitude) {
+            var time = Date.from(Instant.parse(fixTime));
+            checks.add((actual, path) -> assertEquals(time, actual.getFixTime(), path + ".fixTime"));
+            checks.add((actual, path) -> assertEquals(valid, actual.getValid(), path + ".valid"));
+            checks.add((actual, path) -> assertEquals(latitude, actual.getLatitude(), 0.00001, path + ".latitude"));
+            checks.add((actual, path) -> assertEquals(longitude, actual.getLongitude(), 0.00001, path + ".longitude"));
+            return this;
+        }
+
+        public PositionExpectation outdated(boolean expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getOutdated(), path + ".outdated"));
+            return this;
+        }
+
+        public PositionExpectation speed(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSpeed(), 0.00001, path + ".speed"));
+            return this;
+        }
+
+        public PositionExpectation course(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getCourse(), 0.00001, path + ".course"));
+            return this;
+        }
+
+        public PositionExpectation altitude(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getAltitude(), 0.00001, path + ".altitude"));
+            return this;
+        }
+
+        public PositionExpectation accuracy(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getAccuracy(), 0.00001, path + ".accuracy"));
+            return this;
+        }
+
+        public PositionExpectation deviceTime(String expected) {
+            var time = Date.from(Instant.parse(expected));
+            checks.add((actual, path) -> assertEquals(time, actual.getDeviceTime(), path + ".deviceTime"));
+            return this;
+        }
+
+        public PositionExpectation attribute(String key, Object expected) {
+            checks.add((actual, path) -> {
+                assertTrue(actual.getAttributes().containsKey(key), path + ".attributes." + key + " is missing");
+                assertEquals(expected, actual.getAttributes().get(key), path + ".attributes." + key);
+            });
+            return this;
+        }
+
+        public PositionExpectation network(NetworkExpectation expected) {
+            checks.add((actual, path) -> expected.verify(actual.getNetwork(), path + ".network"));
+            return this;
+        }
+
+    }
+
+    public static class NetworkExpectation {
+
+        private final List<CellTowerExpectation> towers = new ArrayList<>();
+        private final List<WifiAccessPointExpectation> accessPoints = new ArrayList<>();
+
+        public NetworkExpectation cell(CellTowerExpectation expected) {
+            towers.add(expected);
+            return this;
+        }
+
+        public NetworkExpectation wifi(WifiAccessPointExpectation expected) {
+            accessPoints.add(expected);
+            return this;
+        }
+
+        void verify(Network actual, String path) {
+            assertNotNull(actual, path);
+            if (!towers.isEmpty()) {
+                assertNotNull(actual.getCellTowers(), path + ".cellTowers");
+                assertEquals(towers.size(), actual.getCellTowers().size(), path + ".cellTowers.count");
+                var iterator = actual.getCellTowers().iterator();
+                for (int i = 0; i < towers.size(); i++) {
+                    var tower = iterator.next();
+                    for (var check : towers.get(i).checks) {
+                        check.accept(tower, path + ".cellTowers[" + i + "]");
+                    }
+                }
+            }
+            if (!accessPoints.isEmpty()) {
+                assertNotNull(actual.getWifiAccessPoints(), path + ".wifiAccessPoints");
+                assertEquals(accessPoints.size(), actual.getWifiAccessPoints().size(), path + ".wifiAccessPoints.count");
+                var iterator = actual.getWifiAccessPoints().iterator();
+                for (int i = 0; i < accessPoints.size(); i++) {
+                    var accessPoint = iterator.next();
+                    for (var check : accessPoints.get(i).checks) {
+                        check.accept(accessPoint, path + ".wifiAccessPoints[" + i + "]");
+                    }
+                }
+            }
+        }
+
+    }
+
+    public static class CellTowerExpectation {
+
+        private final List<BiConsumer<CellTower, String>> checks = new ArrayList<>();
+
+        public CellTowerExpectation mcc(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMobileCountryCode(), path + ".mobileCountryCode"));
+            return this;
+        }
+
+        public CellTowerExpectation mnc(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMobileNetworkCode(), path + ".mobileNetworkCode"));
+            return this;
+        }
+
+        public CellTowerExpectation lac(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getLocationAreaCode(), path + ".locationAreaCode"));
+            return this;
+        }
+
+        public CellTowerExpectation cid(long expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getCellId(), path + ".cellId"));
+            return this;
+        }
+
+        public CellTowerExpectation signal(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSignalStrength(), path + ".signalStrength"));
+            return this;
+        }
+
+    }
+
+    public static class WifiAccessPointExpectation {
+
+        private final List<BiConsumer<WifiAccessPoint, String>> checks = new ArrayList<>();
+
+        public WifiAccessPointExpectation mac(String expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMacAddress(), path + ".macAddress"));
+            return this;
+        }
+
+        public WifiAccessPointExpectation signal(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSignalStrength(), path + ".signalStrength"));
+            return this;
+        }
+
     }
 
 }

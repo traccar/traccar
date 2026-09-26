@@ -1,13 +1,13 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.traccar.ProtocolTest;
 import org.traccar.database.MediaManager;
 import org.traccar.model.Position;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class WatchProtocolDecoderTest extends ProtocolTest {
@@ -186,7 +186,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
                 buffer("[CS*1234567890*000e*TK,#!AMR"), binary("7d5b5d2c2aff"), buffer("]")),
                 Position.KEY_AUDIO, "mock.amr");
 
-        verify(mediaManager).writeFile(any(), any(), any());
+        Mockito.verify(mediaManager).writeFile(any(), any(), any());
 
     }
 
