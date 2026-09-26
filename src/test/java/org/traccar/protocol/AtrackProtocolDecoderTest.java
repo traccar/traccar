@@ -121,9 +121,9 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
         verify(decoder, binary(
                 "fe0200014104d8f196820001"));
 
-        verifyPositions(decoder, binary(
+        verify(decoder, binary(
                 "40503835003300070001441c3d8ed1c400000000000000c9000000c900000000000000000000020000000003de0100000000000007d007d000"),
-                position("1970-01-01 00:00:00.000", true, 0.00000, 0.00000));
+                position(Checks.ATTRIBUTES).location("1970-01-01T00:00:00.000Z", true, 0.00000, 0.00000));
 
         verify(decoder, binary(
                 "4050993f005c000200014104d8f19682525666c252568c3c52568c63ffc8338402698885000002000009cf03de0100000000000007d007d000525666c252568c5a52568c63ffc8338402698885000002000009cf03de0100000000000007d007d000"),
