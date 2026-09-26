@@ -10,7 +10,7 @@ public class SanulProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SanulProtocolDecoder(null));
 
-        verifyNull(decoder, binary(
+        verify(decoder, binary(
                 "aa007020000100000000000033353333353830313831353431313700000000000000000000"));
 
     }

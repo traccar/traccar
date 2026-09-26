@@ -37,7 +37,7 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
         verify(decoder, request(
                 "/?id=123456&timestamp=1377177267&cell=257,02,16,2224&cell=257,02,16,2223,-90&wifi=00-14-22-01-23-45,-80&wifi=00-1C-B3-09-85-15,-70"),
-                position(false)
+                position()
                         .network(network()
                                 .cell(cell().mcc(257).mnc(2).lac(16).cid(2224))
                                 .cell(cell().mcc(257).mnc(2).lac(16).cid(2223).signal(-90))

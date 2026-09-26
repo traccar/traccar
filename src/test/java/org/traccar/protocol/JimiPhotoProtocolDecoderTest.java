@@ -37,10 +37,11 @@ public class JimiPhotoProtocolDecoderTest extends ProtocolTest {
                 --boundary--
                 """.replace("\n", "\r\n");
 
-        verifyPosition(decoder, request(
+        verify(decoder, request(
                 HttpMethod.POST, "/upload",
                 new ReadOnlyHttpHeaders(true, "Content-Type", "multipart/form-data; boundary=boundary"),
-                buffer(body)));
+                buffer(body)),
+                position());
     }
 
 }

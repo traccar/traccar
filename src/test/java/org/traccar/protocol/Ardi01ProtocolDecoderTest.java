@@ -10,12 +10,13 @@ public class Ardi01ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Ardi01ProtocolDecoder(null));
 
-        verifyPosition(decoder, text(
+        verify(decoder, text(
                 "013227003054776,20141010052719,24.4736042,56.8445807,110,289,40,7,5,78,-1"),
-                position("2014-10-10 05:27:19.000", true, 56.84458, 24.47360));
+                position().location("2014-10-10T05:27:19.000Z", true, 56.84458, 24.47360));
 
-        verifyPosition(decoder, text(
-                "013227003054776,20141010052719,24.4736042,56.8445807,110,289,40,7,5,78,-1"));
+        verify(decoder, text(
+                "013227003054776,20141010052719,24.4736042,56.8445807,110,289,40,7,5,78,-1"),
+                position());
 
     }
 

@@ -11,7 +11,7 @@ public class SpotProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SpotProtocolDecoder(null));
 
-        verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
+        verify(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n",
                 "<messageList xmlns=\"http://v2.shared.globalstar.com\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://v2.shared.globalstar.com http://share.findmespot.com/shared/schema/spotXml-v2.xsd\">\n",
                 "<header>\n",
@@ -30,7 +30,8 @@ public class SpotProtocolDecoderTest extends ProtocolTest {
                 "<longitude>-47.93042</longitude>\n",
                 "<batteryState>GOOD</batteryState>\n",
                 "</message>\n",
-                "</messageList>")));
+                "</messageList>")),
+                position());
 
     }
 

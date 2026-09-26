@@ -11,8 +11,11 @@ public class ValtrackProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new ValtrackProtocolDecoder(null));
 
-        verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
-                "{\"resource\":[{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"},{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"},{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"}]}")));
+        verify(decoder, request(HttpMethod.POST, "/", buffer(
+                "{\"resource\":[{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"},{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"},{\"devid\":\"869731054075783\",\"etype\":\"G_PING\",\"lat\":\"0.000000\",\"lon\":\"0.000000\",\"vbat\":\"12.263848\",\"speed\":\"\",\"nlat\":\"4255.364258\",\"nlon\":\"176.867203\",\"ncsq\":\"16,99\"}]}")),
+                position(),
+                position(),
+                position());
 
     }
 

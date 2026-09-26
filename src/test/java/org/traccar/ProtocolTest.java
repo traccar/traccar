@@ -44,12 +44,16 @@ import static org.mockito.Mockito.when;
 
 public class ProtocolTest extends BaseTest {
 
-    protected PositionExpectation position() {
-        return position(true);
+    protected enum Checks {
+        ALL, ATTRIBUTES, NONE
     }
 
-    protected PositionExpectation position(boolean sanityChecks) {
-        return new PositionExpectation(sanityChecks);
+    protected PositionExpectation position() {
+        return position(Checks.ALL);
+    }
+
+    protected PositionExpectation position(Checks mode) {
+        return new PositionExpectation(mode);
     }
 
     protected NetworkExpectation network() {
@@ -77,8 +81,10 @@ public class ProtocolTest extends BaseTest {
             String path = "position[" + i + "]";
             var actual = assertInstanceOf(Position.class, positions.get(i), path);
             var expectation = expected[i];
-            if (expectation.sanityChecks) {
-                verifyDecodedPosition(actual, true, false, null);
+            switch (expectation.mode) {
+                case ALL -> verifyDecodedPosition(actual, true, false, null);
+                case ATTRIBUTES -> verifyDecodedPosition(actual, false, true, null);
+                case NONE -> { }
             }
             for (var check : expectation.checks) {
                 check.accept(actual, path);
@@ -218,7 +224,7 @@ public class ProtocolTest extends BaseTest {
 
     }
 
-    private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
+    private static void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
 
         assertNotNull(decodedObject, "position is null");
         assertInstanceOf(Position.class, decodedObject, "not a position");
@@ -386,7 +392,7 @@ public class ProtocolTest extends BaseTest {
 
     }
 
-    private void checkInteger(Object value, int min, int max) {
+    private static void checkInteger(Object value, int min, int max) {
         assertNotNull(value, "value is null");
         assertTrue(value instanceof Integer || value instanceof Long, "not int or long");
         long number = ((Number) value).longValue();
@@ -419,10 +425,10 @@ public class ProtocolTest extends BaseTest {
 
         private final List<BiConsumer<Position, String>> checks = new ArrayList<>();
 
-        private final boolean sanityChecks;
+        private final Checks mode;
 
-        public PositionExpectation(boolean sanityChecks) {
-            this.sanityChecks = sanityChecks;
+        public PositionExpectation(Checks mode) {
+            this.mode = mode;
         }
 
         public PositionExpectation location(String fixTime, boolean valid, double latitude, double longitude) {
@@ -466,10 +472,12 @@ public class ProtocolTest extends BaseTest {
         }
 
         public PositionExpectation attribute(String key, Object expected) {
-            checks.add((actual, path) -> {
-                assertTrue(actual.getAttributes().containsKey(key), path + ".attributes." + key + " is missing");
-                assertEquals(expected, actual.getAttributes().get(key), path + ".attributes." + key);
-            });
+            checks.add((actual, path) -> assertEquals(expected, actual.getAttributes().get(key), path + ".attributes." + key));
+            return this;
+        }
+
+        public PositionExpectation network(Network expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getNetwork(), path + ".network"));
             return this;
         }
 

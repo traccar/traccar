@@ -10,12 +10,13 @@ public class FreedomProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new FreedomProtocolDecoder(null));
 
-        verifyPosition(decoder, text(
+        verify(decoder, text(
                 "IMEI,353358011714362,2014/05/22, 20:49:32, N, Lat:4725.9624, E, Lon:01912.5483, Spd:5.05"),
-                position("2014-05-22 20:49:32.000", true, 47.43271, 19.20914));
+                position().location("2014-05-22T20:49:32.000Z", true, 47.43271, 19.20914));
 
-        verifyPosition(decoder, text(
-                "IMEI,353358011714362,2014/05/22, 20:49:32, N, Lat:4725.9624, E, Lon:01912.5483, Spd:5.05"));
+        verify(decoder, text(
+                "IMEI,353358011714362,2014/05/22, 20:49:32, N, Lat:4725.9624, E, Lon:01912.5483, Spd:5.05"),
+                position());
 
     }
 
