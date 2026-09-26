@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -13,6 +14,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.junit.jupiter.api.AfterEach;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
@@ -38,6 +40,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProtocolTest extends BaseTest {
+
+    private final List<EmbeddedChannel> channels = new ArrayList<>();
+
+    protected EmbeddedChannel channel(ChannelHandler... handlers) {
+        var channel = new EmbeddedChannel(handlers);
+        channels.add(channel);
+        return channel;
+    }
+
+    @AfterEach
+    public void closeChannels() {
+        for (var channel : channels) {
+            channel.finishAndReleaseAll();
+        }
+        channels.clear();
+    }
 
     protected enum Checks {
         ALL, ATTRIBUTES, NONE
@@ -88,6 +106,16 @@ public class ProtocolTest extends BaseTest {
             String path = "position[" + i + "]";
             var actual = assertInstanceOf(Position.class, positions.get(i), path);
             expected[i].verify(actual, path);
+        }
+    }
+
+    protected void verify(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        channel.writeInbound(input);
+        assertEquals(expected.length, channel.inboundMessages().size(), "frames.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "frame[" + i + "]";
+            var actual = assertInstanceOf(ByteBuf.class, channel.readInbound(), path);
+            assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
         }
     }
 

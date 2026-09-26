@@ -8,15 +8,14 @@ public class TeltonikaFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = inject(new TeltonikaFrameDecoder());
+        var channel = channel(inject(new TeltonikaFrameDecoder()));
 
-        verifyFrame(
+        verify(channel, binary("FF000F313233343536373839303132333435"),
                 binary("ff"),
-                decoder.decode(null, null, binary("FF000F313233343536373839303132333435")));
+                binary("000F313233343536373839303132333435"));
 
-        verifyFrame(
-                binary("000F313233343536373839303132333435"),
-                decoder.decode(null, null, binary("000F313233343536373839303132333435")));
+        verify(channel, binary("000F313233343536373839303132333435"),
+                binary("000F313233343536373839303132333435"));
 
     }
 
