@@ -191,12 +191,6 @@ public class ProtocolTest extends BaseTest {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
     }
 
-    protected void verifyFrame(ByteBuf expected, Object object) {
-        assertNotNull(object, "buffer is null");
-        assertInstanceOf(ByteBuf.class, object, "not a buffer");
-        assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
-    }
-
     public static final class PositionExpectation {
 
         private final List<BiConsumer<Position, String>> checks = new ArrayList<>();
