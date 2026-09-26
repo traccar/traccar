@@ -9,7 +9,7 @@ public class BceProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new BceProtocolEncoder(null));
+        var channel = channel(inject(new BceProtocolEncoder(null)));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -17,7 +17,8 @@ public class BceProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verifyCommand(encoder, command, binary("79df0d86487000000600410aff00550048"));
+        verify(channel, command,
+                binary("79df0d86487000000600410aff00550048"));
 
     }
 

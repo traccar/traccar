@@ -28,8 +28,15 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
 
     private static final String MARKER = "HQ";
 
+    private final Date time;
+
     public H02ProtocolEncoder(Protocol protocol) {
+        this(protocol, null);
+    }
+
+    public H02ProtocolEncoder(Protocol protocol, Date time) {
         super(protocol);
+        this.time = time;
     }
 
     private Object formatCommand(Date time, String uniqueId, String type, String... params) {
@@ -46,7 +53,9 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
         return result.toString();
     }
 
-    protected Object encodeCommand(Command command, Date time) {
+    @Override
+    protected Object encodeCommand(Command command) {
+        Date time = this.time != null ? this.time : new Date();
         String uniqueId = getUniqueId(command.getDeviceId());
 
         return switch (command.getType()) {
@@ -66,11 +75,6 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
             }
             default -> null;
         };
-    }
-
-    @Override
-    protected Object encodeCommand(Command command) {
-        return encodeCommand(command, new Date());
     }
 
 }

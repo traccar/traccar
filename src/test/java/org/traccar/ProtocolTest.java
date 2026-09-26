@@ -3,9 +3,7 @@ package org.traccar;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -34,10 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ProtocolTest extends BaseTest {
 
@@ -184,11 +179,6 @@ public class ProtocolTest extends BaseTest {
 
     protected DefaultFullHttpResponse response(ByteBuf data) {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
-    }
-
-    protected void verifyCommand(
-            BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
-        verifyFrame(expected, encoder.encodeCommand(command));
     }
 
     protected void verifyFrame(ByteBuf expected, Object object) {

@@ -9,13 +9,14 @@ public class BwsProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new BwsProtocolEncoder(null));
+        var channel = channel(inject(new BwsProtocolEncoder(null)));
 
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(encoder, command, binary("001234567842000073"));
+        verify(channel, command,
+                binary("001234567842000073"));
 
     }
 

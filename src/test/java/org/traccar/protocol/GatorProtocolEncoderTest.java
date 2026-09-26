@@ -12,12 +12,14 @@ public class GatorProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
         var encoder = inject(new GatorProtocolEncoder(null));
+        var channel = channel(encoder);
         var device = encoder.getCacheManager().getObject(Device.class, 1);
         when(device.getUniqueId()).thenReturn("13332082112");
 
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
-        verifyCommand(encoder, command, binary("24243000062008958C070D"));
+        verify(channel, command,
+                binary("24243000062008958C070D"));
     }
 }

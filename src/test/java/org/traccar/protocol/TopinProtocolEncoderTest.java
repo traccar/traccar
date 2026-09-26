@@ -9,7 +9,7 @@ public class TopinProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new TopinProtocolEncoder(null));
+        var channel = channel(inject(new TopinProtocolEncoder(null)));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -17,7 +17,8 @@ public class TopinProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_PHONE, "13533333333");
 
-        verifyCommand(encoder, command, binary("78780C4131333533333333333333330D0A"));
+        verify(channel, command,
+                binary("78780C4131333533333333333333330D0A"));
 
     }
 

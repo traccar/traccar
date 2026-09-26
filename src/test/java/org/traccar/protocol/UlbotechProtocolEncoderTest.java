@@ -9,14 +9,15 @@ public class UlbotechProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new UlbotechProtocolEncoder(null));
+        var channel = channel(inject(new UlbotechProtocolEncoder(null)));
 
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "UNO;13912345678");
 
-        verifyCommand(encoder, command, buffer("*TS01,UNO;13912345678#"));
+        verify(channel, command,
+                buffer("*TS01,UNO;13912345678#"));
 
     }
 

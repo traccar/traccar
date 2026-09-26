@@ -4,34 +4,59 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class Jt600ProtocolEncoderTest extends ProtocolTest {
-    private Jt600ProtocolEncoder encoder = new Jt600ProtocolEncoder(null);
-    private Command command = new Command();
 
     @Test
-    public void testEngineStop() {
+    public void testEngineStop() throws Exception {
+
+        var channel = channel(inject(new Jt600ProtocolEncoder(null)));
+
+        Command command = new Command();
         command.setType(Command.TYPE_ENGINE_STOP);
-        assertEquals("(S07,0)", encoder.encodeCommand(command));
+
+        verify(channel, command,
+                text("(S07,0)"));
+
     }
 
     @Test
-    public void testEngineResume() {
+    public void testEngineResume() throws Exception {
+
+        var channel = channel(inject(new Jt600ProtocolEncoder(null)));
+
+        Command command = new Command();
         command.setType(Command.TYPE_ENGINE_RESUME);
-        assertEquals("(S07,1)", encoder.encodeCommand(command));
+
+        verify(channel, command,
+                text("(S07,1)"));
+
     }
 
     @Test
-    public void testSetTimezone() {
+    public void testSetTimezone() throws Exception {
+
+        var channel = channel(inject(new Jt600ProtocolEncoder(null)));
+
+        Command command = new Command();
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, "GMT+4");
-        assertEquals("(S09,1,240)", encoder.encodeCommand(command));
+
+        verify(channel, command,
+                text("(S09,1,240)"));
+
     }
 
     @Test
-    public void testReboot() {
+    public void testReboot() throws Exception {
+
+        var channel = channel(inject(new Jt600ProtocolEncoder(null)));
+
+        Command command = new Command();
         command.setType(Command.TYPE_REBOOT_DEVICE);
-        assertEquals("(S17)", encoder.encodeCommand(command));
+
+        verify(channel, command,
+                text("(S17)"));
+
     }
+
 }

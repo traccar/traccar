@@ -9,7 +9,7 @@ public class HuaShengProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new HuaShengProtocolEncoder(null));
+        var channel = channel(inject(new HuaShengProtocolEncoder(null)));
 
         Command command;
 
@@ -19,14 +19,16 @@ public class HuaShengProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verifyCommand(encoder, command, binary("c00000000daa1600000000000101c0"));
+        verify(channel, command,
+                binary("c00000000daa1600000000000101c0"));
 
         command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 60);
 
-        verifyCommand(encoder, command, binary("c000000012aa0400000000000100020006003cc0"));
+        verify(channel, command,
+                binary("c000000012aa0400000000000100020006003cc0"));
 
     }
 
