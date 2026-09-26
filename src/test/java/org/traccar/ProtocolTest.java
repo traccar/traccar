@@ -56,6 +56,18 @@ public class ProtocolTest extends BaseTest {
         return new PositionExpectation(mode);
     }
 
+    protected PositionExpectation[] positions(int count) {
+        return positions(count, Checks.ALL);
+    }
+
+    protected PositionExpectation[] positions(int count, Checks mode) {
+        var expected = new PositionExpectation[count];
+        for (int i = 0; i < count; i++) {
+            expected[i] = position(mode);
+        }
+        return expected;
+    }
+
     protected NetworkExpectation network() {
         return new NetworkExpectation();
     }

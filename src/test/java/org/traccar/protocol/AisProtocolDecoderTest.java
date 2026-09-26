@@ -21,14 +21,7 @@ public class AisProtocolDecoderTest extends ProtocolTest {
                     + "!AIVDM,1,1,,A,35N7G;5OhQG?oJfE`G`cM9E`0001,0*6C\r\n"
                     + "!AIVDM,1,1,,B,13Ug;r0P011cqHJEevuEiOwf0L3h,0*6A\r\n"
                     + "!AIVDM,1,1,,A,13MKsr?0001dJC2Ee4W;jnal08Qj,0*00\r\n\r\n"),
-                position(),
-                position(),
-                position(),
-                position(),
-                position(),
-                position(),
-                position(),
-                position());
+                positions(8));
 
         verify(decoder, text(
                 "!AIVDM,1,1,,A,H3FUli4T000000000000001p0400,0*6E\\s:MTb827eba584a8,c:1481688176110*46\\\r\n"
