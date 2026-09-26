@@ -249,8 +249,9 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new TeltonikaProtocolDecoder(null, true));
 
-        verifyPositions(decoder, false, binary(
-                "0049cafe0122000f33353734353430373237313339373508010000015d3766f6a800003eef961ec6215e0063006d09003100070401000200f001c8000242381c18003201c7000000e10001"));
+        verify(decoder, binary(
+                "0049cafe0122000f33353734353430373237313339373508010000015d3766f6a800003eef961ec6215e0063006d09003100070401000200f001c8000242381c18003201c7000000e10001"),
+                position(Checks.ATTRIBUTES));
 
     }
 

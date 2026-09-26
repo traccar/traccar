@@ -77,8 +77,9 @@ public class GalileoProtocolDecoderTest extends ProtocolTest {
 
         /*decoder.setCompressed(true);
 
-        verifyPosition(decoder, binary(
-                "01003a01001c07553e40333030323334303639363034353930020021000063d1921c03000b0321ac2c4545b20000009f02000ac200000000db00000000"));*/
+        verify(decoder, binary(
+                "01003a01001c07553e40333030323334303639363034353930020021000063d1921c03000b0321ac2c4545b20000009f02000ac200000000db00000000"),
+                position());*/
 
     }
 
