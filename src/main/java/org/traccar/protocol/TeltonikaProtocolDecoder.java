@@ -686,6 +686,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        if (buf.readableBytes() == 1 && buf.getUnsignedByte(buf.readerIndex()) == 0xff) {
+            return null;
+        }
+
         if (connectionless) {
             return decodeUdp(channel, remoteAddress, buf);
         } else {
@@ -695,9 +699,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeTcp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        if (buf.readableBytes() == 1 && buf.readUnsignedByte() == 0xff) {
-            return null;
-        } else if (buf.getUnsignedShort(0) > 0) {
+        if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
             buf.skipBytes(4);
