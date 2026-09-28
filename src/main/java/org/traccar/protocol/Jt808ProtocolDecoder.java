@@ -256,6 +256,23 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         return BitUtil.check(value, 15) ? -BitUtil.to(value, 15) : BitUtil.to(value, 15);
     }
 
+    /**
+     * Reads an attitude angle, documented as a word in the range -180 to 180.
+     *
+     * <p>Devices in this family are inconsistent about how they sign a word: some use sign and
+     * magnitude in bit 15, as {@link #readSignedWord} does, and some use two's complement. The two
+     * agree for every positive angle, and for a negative one only the correct reading lands inside
+     * the documented range, so the encoding can be told apart rather than guessed.
+     */
+    private int readAngle(ByteBuf buf) {
+        int value = buf.readUnsignedShort();
+        if (!BitUtil.check(value, 15)) {
+            return value;
+        }
+        int magnitude = BitUtil.to(value, 15);
+        return magnitude <= 180 ? -magnitude : value - 0x10000;
+    }
+
     private Date readDate(ByteBuf buf, TimeZone timeZone) {
         DateBuilder dateBuilder = new DateBuilder(timeZone)
                 .setYear(BcdUtil.readInteger(buf, 2))
@@ -1024,7 +1041,13 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xE2:
-                    if (!"DT800".equals(model)) {
+                    if (length == 2) {
+                        // JT/T 808 V1.9-K devices report external supply voltage here in
+                        // units of 0.01 V. Reading it as the four byte fuel level below
+                        // both mislabels it and runs past the end of the item into
+                        // whatever follows, so the declared length tells the two apart.
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                    } else if (!"DT800".equals(model)) {
                         position.set(Position.KEY_FUEL, buf.readUnsignedInt() / 10.0);
                     }
                     break;
@@ -1034,10 +1057,17 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                     break;
                 case 0xE4:
-                    if (buf.readUnsignedByte() == 0) {
-                        position.set(Position.KEY_CHARGE, true);
+                    if (length == 6) {
+                        // JT/T 808 V1.9-K attitude: pitch, roll and yaw, one word each.
+                        position.set("pitch", readAngle(buf));
+                        position.set("roll", readAngle(buf));
+                        position.set("yaw", readAngle(buf));
+                    } else {
+                        if (buf.readUnsignedByte() == 0) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     }
-                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
                 case 0xE5:
                     if (length == 1) {

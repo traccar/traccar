@@ -31,6 +31,30 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
                 "7e02000048051160004464000d00000000000c00020159885e06cbf34400000000000020080718072201040000000130011c310109e4020063e50100e60100e7080000000000000000ee0a01cc01262c009a6743001e7e"),
                 position().attribute(Position.KEY_BATTERY_LEVEL, 99));
 
+        // JT/T 808 V1.9-K reports external supply voltage under 0xE2 in two bytes
+        // (0x04E2 is the document's own 12.50 V example) and attitude under 0xE4 in
+        // six. The item above keeps the two byte 0xE4 reading battery level, so the
+        // declared length is what tells the layouts apart.
+        //
+        // The angles cover both ways this family signs a word, because the document
+        // does not say which applies: 0x800F is sign and magnitude for -15, 0xFFEC is
+        // two's complement for -20, and only one reading of each falls inside the
+        // documented -180 to 180.
+        verifyDecode(decoder, binary(
+                "7e02000028000000000000022500000000000c00020000000000000000000000710000260615105725e20204e2e406000a800fffec577e"),
+                position()
+                        .attribute(Position.KEY_POWER, 12.5)
+                        .attribute("pitch", 10)
+                        .attribute("roll", -15)
+                        .attribute("yaw", -20));
+
+        // 0xE2 as the final item: the four byte read ran on into the checksum and
+        // trailing delimiter, which the frame decoder leaves in the buffer, so the
+        // value was silently wrong rather than absent.
+        verifyDecode(decoder, binary(
+                "7e02000023000000000000022600000000000c0002000000000000000000000071000026061510572530011fe20204e2057e"),
+                position().attribute(Position.KEY_POWER, 12.5));
+
         verifyDecode(decoder, binary(
                 "7e0100405c010000086649607758216452180000000000000000000000000000004d443330300000000000000000000000000000000000000000000000000038363634393630373735383231363400000000000000000000000000000004000000000000000000000000000000007a7e"));
 
