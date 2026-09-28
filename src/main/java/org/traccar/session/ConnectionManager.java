@@ -368,7 +368,7 @@ public class ConnectionManager implements BroadcastInterface {
                         .flatMap(Set::stream)
                         .forEach((listener) -> listener.onUpdateLog(record));
             }
-        } else {
+        } else if (sessions.size() == 1) {
             var firstEntry = sessions.entrySet().iterator().next();
             record.setUniqueId(firstEntry.getKey());
             record.setDeviceId(firstEntry.getValue().getDeviceId());
