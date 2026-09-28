@@ -185,10 +185,9 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                 return decodePosition(channel, remoteAddress, sentence, id);
             }
         } else {
-            LOGGER.warn("Malformed Freematics packet from {}: {}", remoteAddress, sentence.substring(1,Math.min(40, sentence.length())));
+            throw new IllegalArgumentException(
+                "Malformed Freematics packet from " + remoteAddress + ": " + sentence.substring(1, Math.min(40, sentence.length()))
+            );
         }
-
-        return null;
     }
-
 }
