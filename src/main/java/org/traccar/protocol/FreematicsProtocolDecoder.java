@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -30,7 +31,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreematicsProtocolDecoder.class);
 
     public FreematicsProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -178,6 +184,8 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 return decodePosition(channel, remoteAddress, sentence, id);
             }
+        } else {
+            LOGGER.warn("Malformed Freematics packet from {}: {}", remoteAddress, sentence.substring(1,Math.min(40, sentence.length())));
         }
 
         return null;
