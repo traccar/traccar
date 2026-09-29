@@ -18,6 +18,7 @@ package org.traccar.session.cache;
 import org.traccar.helper.ConcurrentWeakValueMap;
 import org.traccar.model.BaseModel;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +42,7 @@ public class CacheGraph {
         CacheNode node = nodes.remove(key);
         if (node != null) {
             node.getAllLinks(true).forEach(child -> child.removeLink(key.clazz(), false, node));
+            node.getAllLinks(false).forEach(parent -> parent.removeLink(key.clazz(), true, node));
         }
         roots.remove(key);
     }
@@ -57,7 +59,7 @@ public class CacheGraph {
 
         CacheNode rootNode = nodes.get(new CacheKey(fromClass, fromId));
         if (rootNode != null) {
-            return getObjectStream(rootNode, clazz, proxies, forward);
+            return getObjectStream(rootNode, clazz, proxies, forward, new HashSet<>());
         } else {
             return Stream.empty();
         }
@@ -65,9 +67,10 @@ public class CacheGraph {
 
     @SuppressWarnings("unchecked")
     private <T extends BaseModel> Stream<T> getObjectStream(
-            CacheNode rootNode, Class<T> clazz, Set<Class<? extends BaseModel>> proxies, boolean forward) {
+            CacheNode rootNode, Class<T> clazz, Set<Class<? extends BaseModel>> proxies, boolean forward,
+            Set<CacheNode> visited) {
 
-        if (proxies.contains(clazz)) {
+        if (proxies.contains(clazz) || !visited.add(rootNode)) {
             return Stream.empty();
         }
 
@@ -76,7 +79,7 @@ public class CacheGraph {
 
         var proxyStream = proxies.stream()
                 .flatMap(proxyClass -> rootNode.linkStream(proxyClass, forward)
-                        .flatMap(node -> getObjectStream(node, clazz, proxies, forward)));
+                        .flatMap(node -> getObjectStream(node, clazz, proxies, forward, visited)));
 
         return Stream.concat(directSteam, proxyStream);
     }
@@ -125,18 +128,21 @@ public class CacheGraph {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (CacheNode node : roots.values()) {
-            printNode(stringBuilder, node, "");
+            printNode(stringBuilder, node, "", new HashSet<>());
         }
         return stringBuilder.toString().trim();
     }
 
-    private void printNode(StringBuilder stringBuilder, CacheNode node, String indentation) {
+    private void printNode(StringBuilder stringBuilder, CacheNode node, String indentation, Set<CacheNode> visited) {
+        if (!visited.add(node)) {
+            return;
+        }
         stringBuilder
                 .append('\n')
                 .append(indentation)
                 .append(node.getValue().getClass().getSimpleName())
                 .append('(').append(node.getValue().getId()).append(')');
-        node.getAllLinks(true).forEach(child -> printNode(stringBuilder, child, indentation + "  "));
+        node.getAllLinks(true).forEach(child -> printNode(stringBuilder, child, indentation + "  ", visited));
     }
 
 }

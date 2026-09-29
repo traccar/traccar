@@ -260,7 +260,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // gsm
             .groupBegin()
             .number("(ddd),").optional()         // heart rate
-            .number("([01]{4})?,")               // input
+            .expression("(?:([01]{4})|static)?,") // input
             .number("([01]{4})?,")               // output
             .number("(d+)?,")                    // adc1
             .number("(d+)?,")                    // adc2

@@ -24,8 +24,15 @@ import java.util.Date;
 
 public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
+    private final Date time;
+
     public MobilogixProtocolEncoder(Protocol protocol) {
+        this(protocol, null);
+    }
+
+    public MobilogixProtocolEncoder(Protocol protocol, Date time) {
         super(protocol);
+        this.time = time;
     }
 
     private Object encodeCommand(Date time, String param) {
@@ -34,10 +41,7 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        return encodeCommand(command, new Date());
-    }
-
-    protected Object encodeCommand(Command command, Date time) {
+        Date time = this.time != null ? this.time : new Date();
         return switch (command.getType()) {
             case Command.TYPE_CUSTOM -> encodeCommand(time, command.getString(Command.KEY_DATA));
             case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "S6,RELAY=0");

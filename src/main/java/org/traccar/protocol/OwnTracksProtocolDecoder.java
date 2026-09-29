@@ -51,7 +51,17 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             return null;
         }
 
-        String uniqueId = root.getString("tid");
+        String uniqueId = null;
+        if (root.containsKey("topic")) {
+            uniqueId = root.getString("topic");
+        } else if (root.containsKey("tid")) {
+            uniqueId = root.getString("tid");
+        }
+
+        if (uniqueId != null) {
+            uniqueId = uniqueId.replace('/', '-');
+        }
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);

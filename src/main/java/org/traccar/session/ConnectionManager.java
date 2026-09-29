@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -68,6 +67,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<ConnectionKey, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
     private final Map<ConnectionKey, UnknownEntry> unknownByEndpoint = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lastSeenByDeviceId = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -99,9 +99,9 @@ public class ConnectionManager implements BroadcastInterface {
 
     public void sweepIdleSessions() {
         long cutoff = System.currentTimeMillis() - deviceTimeout * 1000;
-        for (DeviceSession session : sessionsByDeviceId.values()) {
-            if (session.getLastUpdate() < cutoff) {
-                deviceUnknown(session.getDeviceId());
+        for (var entry : lastSeenByDeviceId.entrySet()) {
+            if (entry.getValue() < cutoff) {
+                deviceUnknown(entry.getKey());
             }
         }
         unknownByEndpoint.values().removeIf(entry -> entry.timestamp() < cutoff);
@@ -212,10 +212,10 @@ public class ConnectionManager implements BroadcastInterface {
             Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(connectionKey);
             if (endpointSessions != null) {
                 for (DeviceSession deviceSession : endpointSessions.values()) {
-                    if (supportsOffline) {
+                    boolean removed = sessionsByDeviceId.remove(deviceSession.getDeviceId(), deviceSession);
+                    if (supportsOffline && removed) {
                         updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
                     }
-                    sessionsByDeviceId.remove(deviceSession.getDeviceId());
                     cacheManager.removeDevice(deviceSession.getDeviceId(), connectionKey);
                 }
             }
@@ -229,6 +229,7 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     private void removeDeviceSession(long deviceId) {
+        lastSeenByDeviceId.remove(deviceId);
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
         if (deviceSession != null) {
             ConnectionKey connectionKey = deviceSession.getConnectionKey();
@@ -256,6 +257,12 @@ public class ConnectionManager implements BroadcastInterface {
 
         String oldStatus = device.getStatus();
         device.setStatus(status);
+
+        if (Device.STATUS_ONLINE.equals(status)) {
+            lastSeenByDeviceId.put(deviceId, System.currentTimeMillis());
+        } else {
+            lastSeenByDeviceId.remove(deviceId);
+        }
 
         if (!status.equals(oldStatus) && statusEventsEnabled) {
             String eventType = switch (status) {
@@ -337,10 +344,16 @@ public class ConnectionManager implements BroadcastInterface {
     @Override
     public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
             boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
-        if (link && clazz1.equals(User.class) && clazz2.equals(Device.class)) {
-            if (listeners.containsKey(id1)) {
+        if (clazz1.equals(User.class) && clazz2.equals(Device.class) && listeners.containsKey(id1)) {
+            if (link) {
                 userDevices.get(id1).add(id2);
-                deviceUsers.put(id2, new HashSet<>(List.of(id1)));
+                deviceUsers.computeIfAbsent(id2, id -> new HashSet<>()).add(id1);
+            } else {
+                userDevices.get(id1).remove(id2);
+                deviceUsers.computeIfPresent(id2, (x, userIds) -> {
+                    userIds.remove(id1);
+                    return userIds.isEmpty() ? null : userIds;
+                });
             }
         }
     }
@@ -355,7 +368,7 @@ public class ConnectionManager implements BroadcastInterface {
                         .flatMap(Set::stream)
                         .forEach((listener) -> listener.onUpdateLog(record));
             }
-        } else {
+        } else if (sessions.size() == 1) {
             var firstEntry = sessions.entrySet().iterator().next();
             record.setUniqueId(firstEntry.getKey());
             record.setDeviceId(firstEntry.getValue().getDeviceId());

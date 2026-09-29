@@ -3,6 +3,8 @@ package org.traccar;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -10,43 +12,152 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.ReferenceCounted;
+import org.junit.jupiter.api.AfterEach;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProtocolTest extends BaseTest {
 
-    protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
+    private final List<EmbeddedChannel> channels = new ArrayList<>();
+    private final Set<ReferenceCounted> resources = Collections.newSetFromMap(new IdentityHashMap<>());
 
-        Position position = new Position();
+    private <T> T track(T object) {
+        if (object instanceof ReferenceCounted resource) {
+            resources.add(resource);
+        }
+        return object;
+    }
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        position.setTime(dateFormat.parse(time));
-        position.setValid(valid);
-        position.setLatitude(lat);
-        position.setLongitude(lon);
+    protected EmbeddedChannel channel(ChannelHandler... handlers) {
+        var channel = new EmbeddedChannel(handlers);
+        channels.add(channel);
+        return channel;
+    }
 
-        return position;
+    @AfterEach
+    public void closeResources() {
+        for (var channel : channels) {
+            channel.finishAndReleaseAll();
+        }
+        channels.clear();
+        for (var resource : resources) {
+            if (resource.refCnt() > 0) {
+                resource.release();
+            }
+        }
+        resources.clear();
+    }
+
+    protected enum Checks {
+        ALL, ATTRIBUTES, NONE
+    }
+
+    protected PositionExpectation position() {
+        return position(Checks.ALL);
+    }
+
+    protected PositionExpectation position(Checks mode) {
+        return new PositionExpectation(mode);
+    }
+
+    protected PositionExpectation[] positions(int count) {
+        return positions(count, Checks.ALL);
+    }
+
+    protected PositionExpectation[] positions(int count, Checks mode) {
+        var expected = new PositionExpectation[count];
+        for (int i = 0; i < count; i++) {
+            expected[i] = position(mode);
+        }
+        return expected;
+    }
+
+    protected NetworkExpectation network() {
+        return new NetworkExpectation();
+    }
+
+    protected CellTowerExpectation cell() {
+        return new CellTowerExpectation();
+    }
+
+    protected WifiAccessPointExpectation wifi() {
+        return new WifiAccessPointExpectation();
+    }
+
+    protected void verifyDecode(
+            BaseProtocolDecoder decoder, Object object, PositionExpectation... expected) throws Exception {
+        track(object);
+        Object decoded = decoder.decode(null, null, object);
+        List<?> positions = switch (decoded) {
+            case null -> List.of();
+            case Position position -> List.of(position);
+            default -> assertInstanceOf(List.class, decoded, "positions");
+        };
+        assertEquals(expected.length, positions.size(), "positions.count");
+        for (int i = 0; i < positions.size(); i++) {
+            String path = "position[" + i + "]";
+            var actual = assertInstanceOf(Position.class, positions.get(i), path);
+            expected[i].verify(actual, path);
+        }
+    }
+
+    protected void verifyDecode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        resources.remove(input);
+        channel.writeInbound(input);
+        assertEquals(expected.length, channel.inboundMessages().size(), "frames.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "frame[" + i + "]";
+            var actual = assertInstanceOf(ByteBuf.class, track(channel.readInbound()), path);
+            assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
+        }
+    }
+
+    protected void verifyEncode(EmbeddedChannel channel, ByteBuf input, ByteBuf... expected) {
+        resources.remove(input);
+        channel.writeOutbound(input);
+        assertEquals(expected.length, channel.outboundMessages().size(), "frames.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "frame[" + i + "]";
+            var actual = assertInstanceOf(ByteBuf.class, track(channel.readOutbound()), path);
+            assertEquals(ByteBufUtil.hexDump(expected[i]), ByteBufUtil.hexDump(actual), path);
+        }
+    }
+
+    protected void verifyEncode(EmbeddedChannel channel, Command command, Object... expected) {
+        channel.writeOutbound(new NetworkMessage(command, null));
+        assertEquals(expected.length, channel.outboundMessages().size(), "messages.count");
+        for (int i = 0; i < expected.length; i++) {
+            String path = "message[" + i + "]";
+            var message = assertInstanceOf(NetworkMessage.class, track(channel.readOutbound()), path);
+            if (expected[i] instanceof ByteBuf buffer) {
+                var actual = assertInstanceOf(ByteBuf.class, message.getMessage(), path);
+                assertEquals(ByteBufUtil.hexDump(buffer), ByteBufUtil.hexDump(actual), path);
+            } else {
+                assertEquals(expected[i], message.getMessage(), path);
+            }
+        }
     }
 
     private String concatenateStrings(String... strings) {
@@ -58,7 +169,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf concatenateBuffers(ByteBuf... buffers) {
-        ByteBuf result = Unpooled.buffer();
+        ByteBuf result = track(Unpooled.buffer());
         for (ByteBuf buf : buffers) {
             result.writeBytes(buf);
         }
@@ -66,7 +177,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf binary(String... data) {
-        return Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data)));
+        return track(Unpooled.wrappedBuffer(DataConverter.parseHex(concatenateStrings(data))));
     }
 
     protected String text(String... data) {
@@ -74,7 +185,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ByteBuf buffer(String... data) {
-        return Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
+        return track(Unpooled.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1));
     }
 
     protected DefaultFullHttpRequest request(String url) {
@@ -82,112 +193,41 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url));
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, ByteBuf data) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data);
+        resources.remove(data);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data));
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
+        return request(method, url, headers, Unpooled.buffer());
     }
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers, ByteBuf data) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data, headers, new DefaultHttpHeaders());
+        resources.remove(data);
+        return track(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data, headers, new DefaultHttpHeaders()));
     }
 
     protected DefaultFullHttpResponse response(ByteBuf data) {
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
+        resources.remove(data);
+        return track(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data));
     }
 
-    protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        assertNotNull(decoder.decode(null, null, object));
-    }
+    public static final class PositionExpectation {
 
-    protected void verifyNull(Object object) {
-        assertNull(object);
-    }
+        private final List<BiConsumer<Position, String>> checks = new ArrayList<>();
 
-    protected void verifyNull(BaseProtocolDecoder decoder, Object object) throws Exception {
-        assertNull(decoder.decode(null, null, object));
-    }
+        private final Checks mode;
 
-    protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
-        Object decodedObject = decoder.decode(null, null, object);
-        Position position;
-        if (decodedObject instanceof Collection) {
-            position = (Position) ((Collection<?>) decodedObject).iterator().next();
-        } else {
-            position = (Position) decodedObject;
-        }
-        switch (key) {
-            case "speed" -> assertEquals(expected, position.getSpeed());
-            case "course" -> assertEquals(expected, position.getCourse());
-            case "altitude" -> assertEquals(expected, position.getAltitude());
-            case "network" -> assertEquals(expected, position.getNetwork());
-
-            default -> assertEquals(expected, position.getAttributes().get(key));
-        }
-    }
-
-    protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, position);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, null);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), checkLocation, null);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), true, position);
-    }
-
-    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
-
-        assertNotNull(decodedObject, "list is null");
-        assertInstanceOf(List.class, decodedObject, "not a list");
-        assertFalse(((List<?>) decodedObject).isEmpty(), "list is empty");
-
-        for (Object item : (List<?>) decodedObject) {
-            verifyDecodedPosition(item, checkLocation, false, expected);
+        private PositionExpectation(Checks mode) {
+            this.mode = mode;
         }
 
-    }
+        void verify(Position position, String path) {
 
-    private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
-
-        assertNotNull(decodedObject, "position is null");
-        assertInstanceOf(Position.class, decodedObject, "not a position");
-
-        Position position = (Position) decodedObject;
-
-        if (checkLocation) {
-
-            if (expected != null) {
-
-                if (expected.getFixTime() != null) {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    assertEquals(dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()), "time");
-                }
-                assertEquals(expected.getValid(), position.getValid(), "valid");
-                assertEquals(expected.getLatitude(), position.getLatitude(), 0.00001, "latitude");
-                assertEquals(expected.getLongitude(), position.getLongitude(), 0.00001, "longitude");
-
-            } else {
+            if (mode == Checks.ALL) {
 
                 assertNotNull(position.getServerTime());
                 assertNotNull(position.getFixTime());
@@ -200,158 +240,295 @@ public class ProtocolTest extends BaseTest {
                 assertTrue(position.getLongitude() >= -180, "longitude >= -180");
                 assertTrue(position.getLongitude() <= 180, "longitude <= 180");
 
+                assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
+                assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
+
+                assertTrue(position.getSpeed() >= 0, "speed >= 0");
+                assertTrue(position.getSpeed() <= 869, "speed <= 869");
+
+                assertTrue(position.getCourse() >= 0, "course >= 0");
+                assertTrue(position.getCourse() <= 360, "course <= 360");
+
+                assertNotNull(position.getProtocol(), "protocol is null");
+
+                assertTrue(position.getDeviceId() > 0, "deviceId > 0");
+
             }
 
-            assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
-            assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
+            if (mode != Checks.NONE) {
+                Map<String, Object> attributes = position.getAttributes();
 
-            assertTrue(position.getSpeed() >= 0, "speed >= 0");
-            assertTrue(position.getSpeed() <= 869, "speed <= 869");
+                if (mode == Checks.ATTRIBUTES) {
+                    assertFalse(attributes.isEmpty(), "no attributes");
+                }
 
-            assertTrue(position.getCourse() >= 0, "course >= 0");
-            assertTrue(position.getCourse() <= 360, "course <= 360");
+                if (attributes.containsKey(Position.KEY_INDEX)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_INDEX));
+                }
 
-            assertNotNull(position.getProtocol(), "protocol is null");
+                if (attributes.containsKey(Position.KEY_HDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_HDOP));
+                }
 
-            assertTrue(position.getDeviceId() > 0, "deviceId > 0");
+                if (attributes.containsKey(Position.KEY_VDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_VDOP));
+                }
 
-        }
+                if (attributes.containsKey(Position.KEY_PDOP)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_PDOP));
+                }
 
-        Map<String, Object> attributes = position.getAttributes();
+                if (attributes.containsKey(Position.KEY_SATELLITES)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES));
+                }
 
-        if (checkAttributes) {
-            assertFalse(attributes.isEmpty(), "no attributes");
-        }
+                if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES_VISIBLE));
+                }
 
-        if (attributes.containsKey(Position.KEY_INDEX)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_INDEX));
-        }
+                if (attributes.containsKey(Position.KEY_RSSI)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_RSSI));
+                }
 
-        if (attributes.containsKey(Position.KEY_HDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_HDOP));
-        }
+                if (attributes.containsKey(Position.KEY_ODOMETER)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_ODOMETER));
+                }
 
-        if (attributes.containsKey(Position.KEY_VDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_VDOP));
-        }
+                if (attributes.containsKey(Position.KEY_RPM)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_RPM));
+                }
 
-        if (attributes.containsKey(Position.KEY_PDOP)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_PDOP));
-        }
+                if (attributes.containsKey(Position.KEY_FUEL)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL));
+                }
 
-        if (attributes.containsKey(Position.KEY_SATELLITES)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES));
-        }
+                if (attributes.containsKey(Position.KEY_FUEL_USED)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL_USED));
+                }
 
-        if (attributes.containsKey(Position.KEY_SATELLITES_VISIBLE)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_SATELLITES_VISIBLE));
-        }
+                if (attributes.containsKey(Position.KEY_POWER)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_POWER));
+                }
 
-        if (attributes.containsKey(Position.KEY_RSSI)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_RSSI));
-        }
+                if (attributes.containsKey(Position.KEY_BATTERY)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_BATTERY));
+                }
 
-        if (attributes.containsKey(Position.KEY_ODOMETER)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_ODOMETER));
-        }
+                if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
+                    int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
+                    assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
+                }
 
-        if (attributes.containsKey(Position.KEY_RPM)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_RPM));
-        }
+                if (attributes.containsKey(Position.KEY_CHARGE)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_CHARGE));
+                }
 
-        if (attributes.containsKey(Position.KEY_FUEL)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL));
-        }
+                if (attributes.containsKey(Position.KEY_IGNITION)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_IGNITION));
+                }
 
-        if (attributes.containsKey(Position.KEY_FUEL_USED)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL_USED));
-        }
+                if (attributes.containsKey(Position.KEY_MOTION)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_MOTION));
+                }
 
-        if (attributes.containsKey(Position.KEY_POWER)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_POWER));
-        }
+                if (attributes.containsKey(Position.KEY_ARCHIVE)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ARCHIVE));
+                }
 
-        if (attributes.containsKey(Position.KEY_BATTERY)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_BATTERY));
-        }
+                if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+                    assertInstanceOf(String.class, attributes.get(Position.KEY_DRIVER_UNIQUE_ID));
+                }
 
-        if (attributes.containsKey(Position.KEY_BATTERY_LEVEL)) {
-            int batteryLevel = ((Number) attributes.get(Position.KEY_BATTERY_LEVEL)).intValue();
-            assertTrue(batteryLevel <= 100 && batteryLevel >= 0);
-        }
+                if (attributes.containsKey(Position.KEY_STEPS)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_STEPS));
+                }
 
-        if (attributes.containsKey(Position.KEY_CHARGE)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_CHARGE));
-        }
+                if (attributes.containsKey(Position.KEY_ROAMING)) {
+                    assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ROAMING));
+                }
 
-        if (attributes.containsKey(Position.KEY_IGNITION)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_IGNITION));
-        }
+                if (attributes.containsKey(Position.KEY_HOURS)) {
+                    assertInstanceOf(Number.class, attributes.get(Position.KEY_HOURS));
+                }
 
-        if (attributes.containsKey(Position.KEY_MOTION)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_MOTION));
-        }
+                if (attributes.containsKey(Position.KEY_RESULT)) {
+                    assertInstanceOf(String.class, attributes.get(Position.KEY_RESULT));
+                }
 
-        if (attributes.containsKey(Position.KEY_ARCHIVE)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ARCHIVE));
-        }
+                if (position.getNetwork() != null) {
+                    if (position.getNetwork().getCellTowers() != null) {
+                        for (CellTower cellTower : position.getNetwork().getCellTowers()) {
+                            var mcc = cellTower.getMobileCountryCode();
+                            assertTrue(mcc != null && mcc >= 0 && mcc <= 999, "mcc: " + mcc);
+                            var mnc = cellTower.getMobileNetworkCode();
+                            assertTrue(mnc != null && mnc >= 0 && mnc <= 999, "mnc: " + mnc);
+                            var lac = cellTower.getLocationAreaCode();
+                            assertTrue(lac != null && lac >= 1 && lac <= 65535, "lac: " + lac);
+                            var cid = cellTower.getCellId();
+                            assertTrue(cid != null && cid >= 0 && cid <= 268435455, "cid: " + cid);
+                        }
+                    }
 
-        if (attributes.containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
-            assertInstanceOf(String.class, attributes.get(Position.KEY_DRIVER_UNIQUE_ID));
-        }
-
-        if (attributes.containsKey(Position.KEY_STEPS)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_STEPS));
-        }
-
-        if (attributes.containsKey(Position.KEY_ROAMING)) {
-            assertInstanceOf(Boolean.class, attributes.get(Position.KEY_ROAMING));
-        }
-
-        if (attributes.containsKey(Position.KEY_HOURS)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_HOURS));
-        }
-
-        if (attributes.containsKey(Position.KEY_RESULT)) {
-            assertInstanceOf(String.class, attributes.get(Position.KEY_RESULT));
-        }
-
-        if (position.getNetwork() != null) {
-            if (position.getNetwork().getCellTowers() != null) {
-                for (CellTower cellTower : position.getNetwork().getCellTowers()) {
-                    checkInteger(cellTower.getMobileCountryCode(), 0, 999);
-                    checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
-                    checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
-                    checkInteger(cellTower.getCellId(), 0, 268435455);
+                    if (position.getNetwork().getWifiAccessPoints() != null) {
+                        for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
+                            var mac = wifiAccessPoint.getMacAddress();
+                            assertTrue(mac != null && mac.matches("[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"), "mac: " + mac);
+                        }
+                    }
                 }
             }
 
-            if (position.getNetwork().getWifiAccessPoints() != null) {
-                for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
-                    assertTrue(wifiAccessPoint.getMacAddress().matches("((\\p{XDigit}{2}):){5}(\\p{XDigit}{2})"));
+            for (var check : checks) {
+                check.accept(position, path);
+            }
+
+        }
+
+        public PositionExpectation location(String fixTime, boolean valid, double latitude, double longitude) {
+            var time = Date.from(Instant.parse(fixTime));
+            checks.add((actual, path) -> assertEquals(time, actual.getFixTime(), path + ".fixTime"));
+            checks.add((actual, path) -> assertEquals(valid, actual.getValid(), path + ".valid"));
+            checks.add((actual, path) -> assertEquals(latitude, actual.getLatitude(), 0.00001, path + ".latitude"));
+            checks.add((actual, path) -> assertEquals(longitude, actual.getLongitude(), 0.00001, path + ".longitude"));
+            return this;
+        }
+
+        public PositionExpectation outdated(boolean expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getOutdated(), path + ".outdated"));
+            return this;
+        }
+
+        public PositionExpectation speed(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSpeed(), 0.00001, path + ".speed"));
+            return this;
+        }
+
+        public PositionExpectation course(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getCourse(), 0.00001, path + ".course"));
+            return this;
+        }
+
+        public PositionExpectation altitude(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getAltitude(), 0.00001, path + ".altitude"));
+            return this;
+        }
+
+        public PositionExpectation accuracy(double expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getAccuracy(), 0.00001, path + ".accuracy"));
+            return this;
+        }
+
+        public PositionExpectation deviceTime(String expected) {
+            var time = Date.from(Instant.parse(expected));
+            checks.add((actual, path) -> assertEquals(time, actual.getDeviceTime(), path + ".deviceTime"));
+            return this;
+        }
+
+        public PositionExpectation attribute(String key, Object expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getAttributes().get(key), path + ".attributes." + key));
+            return this;
+        }
+
+        public PositionExpectation network(Network expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getNetwork(), path + ".network"));
+            return this;
+        }
+
+        public PositionExpectation network(NetworkExpectation expected) {
+            checks.add((actual, path) -> expected.verify(actual.getNetwork(), path + ".network"));
+            return this;
+        }
+
+    }
+
+    public static class NetworkExpectation {
+
+        private final List<CellTowerExpectation> towers = new ArrayList<>();
+        private final List<WifiAccessPointExpectation> accessPoints = new ArrayList<>();
+
+        public NetworkExpectation cell(CellTowerExpectation expected) {
+            towers.add(expected);
+            return this;
+        }
+
+        public NetworkExpectation wifi(WifiAccessPointExpectation expected) {
+            accessPoints.add(expected);
+            return this;
+        }
+
+        void verify(Network actual, String path) {
+            assertNotNull(actual, path);
+            if (!towers.isEmpty()) {
+                assertNotNull(actual.getCellTowers(), path + ".cellTowers");
+                assertEquals(towers.size(), actual.getCellTowers().size(), path + ".cellTowers.count");
+                var iterator = actual.getCellTowers().iterator();
+                for (int i = 0; i < towers.size(); i++) {
+                    var tower = iterator.next();
+                    for (var check : towers.get(i).checks) {
+                        check.accept(tower, path + ".cellTowers[" + i + "]");
+                    }
+                }
+            }
+            if (!accessPoints.isEmpty()) {
+                assertNotNull(actual.getWifiAccessPoints(), path + ".wifiAccessPoints");
+                assertEquals(accessPoints.size(), actual.getWifiAccessPoints().size(), path + ".wifiAccessPoints.count");
+                var iterator = actual.getWifiAccessPoints().iterator();
+                for (int i = 0; i < accessPoints.size(); i++) {
+                    var accessPoint = iterator.next();
+                    for (var check : accessPoints.get(i).checks) {
+                        check.accept(accessPoint, path + ".wifiAccessPoints[" + i + "]");
+                    }
                 }
             }
         }
 
     }
 
-    private void checkInteger(Object value, int min, int max) {
-        assertNotNull(value, "value is null");
-        assertTrue(value instanceof Integer || value instanceof Long, "not int or long");
-        long number = ((Number) value).longValue();
-        assertTrue(number >= min, "value too low");
-        assertTrue(number <= max, "value too high");
+    public static class CellTowerExpectation {
+
+        private final List<BiConsumer<CellTower, String>> checks = new ArrayList<>();
+
+        public CellTowerExpectation mcc(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMobileCountryCode(), path + ".mobileCountryCode"));
+            return this;
+        }
+
+        public CellTowerExpectation mnc(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMobileNetworkCode(), path + ".mobileNetworkCode"));
+            return this;
+        }
+
+        public CellTowerExpectation lac(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getLocationAreaCode(), path + ".locationAreaCode"));
+            return this;
+        }
+
+        public CellTowerExpectation cid(long expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getCellId(), path + ".cellId"));
+            return this;
+        }
+
+        public CellTowerExpectation signal(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSignalStrength(), path + ".signalStrength"));
+            return this;
+        }
+
     }
 
-    protected void verifyCommand(
-            BaseProtocolEncoder encoder, Command command, ByteBuf expected) {
-        verifyFrame(expected, encoder.encodeCommand(command));
-    }
+    public static class WifiAccessPointExpectation {
 
-    protected void verifyFrame(ByteBuf expected, Object object) {
-        assertNotNull(object, "buffer is null");
-        assertInstanceOf(ByteBuf.class, object, "not a buffer");
-        assertEquals(ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump((ByteBuf) object));
+        private final List<BiConsumer<WifiAccessPoint, String>> checks = new ArrayList<>();
+
+        public WifiAccessPointExpectation mac(String expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getMacAddress(), path + ".macAddress"));
+            return this;
+        }
+
+        public WifiAccessPointExpectation signal(int expected) {
+            checks.add((actual, path) -> assertEquals(expected, actual.getSignalStrength(), path + ".signalStrength"));
+            return this;
+        }
+
     }
 
 }

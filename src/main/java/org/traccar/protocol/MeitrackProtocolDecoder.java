@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
@@ -42,8 +41,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
-
-    private ByteBuf photo;
 
     public MeitrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -540,8 +537,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 yield null;
             }
             case "D00" -> {
-                if (photo == null) {
-                    photo = Unpooled.buffer();
+                if (getMediaBuffer() == null) {
+                    newMediaBuffer();
                 }
 
                 index = index + 1 + type.length() + 1;
@@ -555,7 +552,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 int current = Integer.parseInt(buf.toString(index, endIndex - index, StandardCharsets.US_ASCII));
 
                 buf.readerIndex(endIndex + 1);
-                photo.writeBytes(buf.readSlice(buf.readableBytes() - 1 - 2 - 2));
+                getMediaBuffer().writeBytes(buf, buf.readableBytes() - 1 - 2 - 2);
 
                 if (current == total - 1) {
                     Position position = new Position(getProtocolName());
@@ -563,9 +560,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
 
                     yield position;
                 } else {
@@ -576,7 +571,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
             case "D03" -> {
-                photo = Unpooled.buffer();
+                newMediaBuffer();
                 requestPhotoPacket(channel, remoteAddress, imei, "camera_picture.jpg", 0);
                 yield null;
             }

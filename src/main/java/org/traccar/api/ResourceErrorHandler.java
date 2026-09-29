@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,52 @@
  */
 package org.traccar.api;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 public class ResourceErrorHandler implements ExceptionMapper<Exception> {
 
+    private final boolean showStackTraces;
+
+    @Inject
+    public ResourceErrorHandler(Config config) {
+        showStackTraces = config.getBoolean(Keys.WEB_SHOW_STACK_TRACES);
+    }
+
+    private static boolean isConcurrencyWrapper(Throwable throwable) {
+        return throwable instanceof CompletionException || throwable instanceof ExecutionException;
+    }
+
     @Override
     public Response toResponse(Exception exception) {
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        exception.printStackTrace(printWriter);
+        Throwable throwable = exception;
+        while (isConcurrencyWrapper(throwable) && throwable.getCause() != null) {
+            throwable = throwable.getCause();
+        }
 
-        if (exception instanceof WebApplicationException webException) {
-            return Response.fromResponse(webException.getResponse()).entity(stringWriter.toString()).build();
+        String message;
+        if (showStackTraces) {
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            throwable.printStackTrace(printWriter);
+            message = stringWriter.toString();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity(stringWriter.toString()).build();
+            message = throwable.getMessage();
+        }
+
+        if (throwable instanceof WebApplicationException webException) {
+            return Response.fromResponse(webException.getResponse()).entity(message).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
     }
 

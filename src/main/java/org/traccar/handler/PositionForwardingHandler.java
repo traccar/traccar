@@ -26,7 +26,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.forward.PositionData;
 import org.traccar.forward.PositionForwarder;
-import org.traccar.forward.ResultHandler;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
@@ -66,7 +65,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
         this.deliveryPending = new AtomicInteger();
     }
 
-    class AsyncRequestAndCallback implements ResultHandler, TimerTask {
+    class AsyncRequestAndCallback implements TimerTask {
 
         private final PositionData positionData;
 
@@ -78,7 +77,13 @@ public class PositionForwardingHandler extends BasePositionHandler {
         }
 
         private void send() {
-            positionForwarder.forward(positionData, this);
+            positionForwarder.forward(positionData).whenComplete((result, throwable) -> {
+                if (throwable == null) {
+                    deliveryPending.decrementAndGet();
+                } else {
+                    retry(throwable);
+                }
+            });
         }
 
         private void retry(Throwable throwable) {
@@ -96,15 +101,6 @@ public class PositionForwardingHandler extends BasePositionHandler {
 
         private void schedule() {
             timer.newTimeout(this, retryDelay * (1L << retries++), TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public void onResult(boolean success, Throwable throwable) {
-            if (success) {
-                deliveryPending.decrementAndGet();
-            } else {
-                retry(throwable);
-            }
         }
 
         @Override

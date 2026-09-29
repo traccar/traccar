@@ -28,7 +28,6 @@ import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -70,12 +69,16 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
-                    } else if ("BSJ".equals(model)) {
+                    } else if (model != null && Set.of("BSJ", "C5", "C5L").contains(model)) {
                         data.writeByte(1); // flag
-                        var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
-                        data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), Jt808ProtocolDecoder.CHARSET_GBK);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    } else if (model != null && model.startsWith("JC")) {
+                        data.writeByte(0xF0); // online command
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
+                        return decoder.formatMessage(
+                                Jt808ProtocolDecoder.MSG_TRANSPARENT_DOWNLINK, id, false, data);
                     } else {
                         return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
                     }
@@ -93,6 +96,14 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     data.writeInt(command.getInteger(Command.KEY_FREQUENCY));
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                case Command.TYPE_POSITION_SINGLE:
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_LOCATION_QUERY, id, false, data);
+                case Command.TYPE_POSITION_STOP:
+                    data.writeShort(0);
+                    data.writeInt(0);
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_TEMPORARY_TRACKING, id, false, data);
                 case Command.TYPE_ALARM_ARM:
                 case Command.TYPE_ALARM_DISARM:
                     data.writeByte(1); // number of parameters
@@ -103,6 +114,11 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     data.writeCharSequence(username, StandardCharsets.US_ASCII);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                case Command.TYPE_ALARM_DISMISS:
+                    data.writeShort(0);
+                    data.writeInt(0);
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_ALARM_ACK, id, false, data);
                 case Command.TYPE_ENGINE_STOP:
                 case Command.TYPE_ENGINE_RESUME:
                     if (alternative) {
@@ -122,6 +138,61 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }
+                case Command.TYPE_SET_CONNECTION:
+                    data.writeByte(2); // number of parameters
+                    String server = command.getString(Command.KEY_SERVER);
+                    data.writeInt(0x13); // server address
+                    data.writeByte(server.length());
+                    data.writeCharSequence(server, StandardCharsets.US_ASCII);
+                    data.writeInt(0x18); // server tcp port
+                    data.writeByte(4);
+                    data.writeInt(command.getInteger(Command.KEY_PORT));
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                case Command.TYPE_POWER_OFF:
+                    data.writeByte(0x02); // power off
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
+                case Command.TYPE_FACTORY_RESET:
+                    data.writeByte(0x03); // factory reset
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
+                case Command.TYPE_MESSAGE:
+                    data.writeByte(0x04); // display on terminal
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), Jt808ProtocolDecoder.CHARSET_GBK);
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                case Command.TYPE_VOICE_MESSAGE:
+                    data.writeByte(0x08); // tts voice broadcast
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), Jt808ProtocolDecoder.CHARSET_GBK);
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                case Command.TYPE_REQUEST_PHOTO:
+                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // channel
+                    data.writeShort(1); // take one photo
+                    data.writeZero(9); // photo interval and image parameters
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_TAKE_PHOTO, id, false, data);
+                case Command.TYPE_SET_SPEED_LIMIT:
+                    boolean hasDuration = command.hasAttribute(Command.KEY_DURATION);
+                    data.writeByte(hasDuration ? 2 : 1); // number of parameters
+                    data.writeInt(0x0055); // overspeed threshold
+                    data.writeByte(4);
+                    data.writeInt(command.getInteger(Command.KEY_DATA));
+                    if (hasDuration) {
+                        data.writeInt(0x0056); // overspeed duration
+                        data.writeByte(4);
+                        data.writeInt(command.getInteger(Command.KEY_DURATION));
+                    }
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                case Command.TYPE_OUTPUT_CONTROL:
+                    data.writeByte(command.getInteger(Command.KEY_INDEX, 0)); // control flag
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_VEHICLE_CONTROL, id, false, data);
+                case Command.TYPE_CONFIGURATION:
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_PARAMETER_QUERY_ALL, id, false, data);
                 case Command.TYPE_VIDEO_START:
                     var config = getCacheManager().getConfig();
                     String host = URI.create(config.getString(Keys.WEB_URL)).getHost();

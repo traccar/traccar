@@ -153,12 +153,7 @@ public class CacheManager implements BroadcastInterface {
                         var to = position.getFixTime();
                         try (var positionsStream =
                                 PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
-                            positionsStream.forEach(loaded -> {
-                                Position previous = positions.peekLast();
-                                if (previous == null || loaded.getFixTime().after(previous.getFixTime())) {
-                                    positions.add(loaded);
-                                }
-                            });
+                            positionsStream.forEach(loaded -> appendPosition(positions, loaded));
                         }
                     } else {
                         positions.add(position);
@@ -181,14 +176,29 @@ public class CacheManager implements BroadcastInterface {
         LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
     }
 
+    private static boolean appendPosition(Deque<Position> positions, Position position) {
+        Position previous = positions.peekLast();
+        if (previous != null) {
+            if (position.getFixTime().before(previous.getFixTime())) {
+                return false;
+            }
+            if (position.getFixTime().equals(previous.getFixTime())) {
+                if (position.getServerTime().before(previous.getServerTime())) {
+                    return false;
+                }
+                positions.pollLast();
+            }
+        }
+        positions.add(position);
+        return true;
+    }
+
     public void updatePosition(Position position) {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
             var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
-            Position previous = positions.peekLast();
-            if (previous != null && !position.getFixTime().after(previous.getFixTime())) {
+            if (!appendPosition(positions, position)) {
                 return oldValue;
             }
-            positions.add(position);
             if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
                 long minDuration = AttributeUtil.lookup(
                         this, Keys.REPORT_TRIP_MIN_DURATION, key) * 1000;
@@ -241,32 +251,29 @@ public class CacheManager implements BroadcastInterface {
                 return;
             }
 
-            switch (after) {
-                case GroupedModel afterGrouped -> {
-                    long beforeGroupId = ((GroupedModel) before).getGroupId();
-                    long afterGroupId = afterGrouped.getGroupId();
-                    if (beforeGroupId != afterGroupId) {
-                        if (beforeGroupId > 0) {
-                            invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
-                        }
-                        if (afterGroupId > 0) {
-                            invalidatePermission(clazz, id, Group.class, afterGroupId, true);
-                        }
+            if (after instanceof GroupedModel afterGrouped) {
+                long beforeGroupId = ((GroupedModel) before).getGroupId();
+                long afterGroupId = afterGrouped.getGroupId();
+                if (beforeGroupId != afterGroupId) {
+                    if (beforeGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                    }
+                    if (afterGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, afterGroupId, true);
                     }
                 }
-                case Schedulable afterSchedulable -> {
-                    long beforeCalendarId = ((Schedulable) before).getCalendarId();
-                    long afterCalendarId = afterSchedulable.getCalendarId();
-                    if (beforeCalendarId != afterCalendarId) {
-                        if (beforeCalendarId > 0) {
-                            invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
-                        }
-                        if (afterCalendarId > 0) {
-                            invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
-                        }
+            }
+            if (after instanceof Schedulable afterSchedulable) {
+                long beforeCalendarId = ((Schedulable) before).getCalendarId();
+                long afterCalendarId = afterSchedulable.getCalendarId();
+                if (beforeCalendarId != afterCalendarId) {
+                    if (beforeCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                    }
+                    if (afterCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
                     }
                 }
-                default -> {}
             }
 
             graph.updateObject(after);

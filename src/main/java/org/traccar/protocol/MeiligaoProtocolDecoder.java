@@ -31,15 +31,11 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
-
-    private final Map<Byte, ByteBuf> photos = new HashMap<>();
 
     public MeiligaoProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -421,7 +417,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if (command == MSG_UPLOAD_PHOTO) {
             byte imageIndex = buf.readByte();
-            photos.put(imageIndex, Unpooled.buffer());
+            newMediaBuffer();
             ByteBuf response = Unpooled.copiedBuffer(new byte[]{imageIndex});
             sendResponse(channel, remoteAddress, id, MSG_UPLOAD_PHOTO_RESPONSE, response);
             return null;
@@ -439,12 +435,12 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (command == MSG_DATA_PHOTO) {
 
-            byte imageIndex = buf.readByte();
+            buf.readByte(); // image index
             buf.readUnsignedShort(); // image footage
             buf.readUnsignedByte(); // total packets
             buf.readUnsignedByte(); // packet index
 
-            photos.get(imageIndex).writeBytes(buf, buf.readableBytes() - 2 - 2);
+            getMediaBuffer().writeBytes(buf, buf.readableBytes() - 2 - 2);
 
             return null;
 
@@ -479,14 +475,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             } else if (command == MSG_POSITION_IMAGE) {
-                byte imageIndex = buf.readByte();
+                buf.readByte(); // image index
                 buf.readUnsignedByte(); // image upload type
-                ByteBuf photo = photos.remove(imageIndex);
-                try {
-                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-                } finally {
-                    photo.release();
-                }
+                position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
             }
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);

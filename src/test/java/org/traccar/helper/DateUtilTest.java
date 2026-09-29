@@ -10,7 +10,7 @@ import java.util.Calendar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateUtilTest {
-    
+
     @Test
     public void testCorrectDate() throws ParseException {
 

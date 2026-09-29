@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,38 +203,42 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(flags, 4)) {
             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
             network.addWifiAccessPoint(WifiAccessPoint.from(
-                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                    mac.substring(0, mac.length() - 1), buf.readByte()));
         }
 
         if (BitUtil.check(flags, 5)) {
             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
             network.addWifiAccessPoint(WifiAccessPoint.from(
-                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                    mac.substring(0, mac.length() - 1), buf.readByte()));
         }
 
         if (BitUtil.check(flags, 6)) {
             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
             network.addWifiAccessPoint(WifiAccessPoint.from(
-                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                    mac.substring(0, mac.length() - 1), buf.readByte()));
         }
 
         if (BitUtil.check(flags, 7)) {
             buf.readUnsignedByte(); // radio access technology
             int count = buf.readUnsignedByte();
-            int lac = 0;
-            if (count > 0) {
+            int cellCount = BitUtil.to(count, 3);
+            if (cellCount > 0) {
                 mcc = buf.readUnsignedShort();
                 mnc = buf.readUnsignedShort();
-                lac = buf.readUnsignedShort(); // lac
+                int lac = buf.readUnsignedShort();
                 buf.readUnsignedShort(); // tac
-                buf.readUnsignedInt(); // cid
+                long cid = buf.readUnsignedInt();
                 buf.readUnsignedShort(); // ta
-            }
-            for (int i = 0; i < count; i++) {
-                int cid = buf.readUnsignedShort(); // physical cid
+                buf.readUnsignedShort(); // physical cid
                 buf.readUnsignedShort(); // e-arfcn
-                int rssi = buf.readUnsignedByte();
-                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, buf.readByte()));
+                buf.skipBytes((cellCount - 1) * 5);
+            }
+            int wifiCount = BitUtil.between(count, 3, 7);
+            for (int i = 0; i < wifiCount; i++) {
+                String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), buf.readByte()));
             }
         }
 

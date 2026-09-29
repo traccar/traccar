@@ -70,11 +70,14 @@ public final class DeviceUtil {
                 .collect(Collectors.toSet());
 
         var groupQueue = new LinkedList<>(groupIds);
-        while (!groupQueue.isEmpty()) {
-            long groupId = groupQueue.pop();
-            results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
-            groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
-                    .stream().map(Group::getId).toList());
+        for (int depth = 0; depth < Storage.MAX_GROUP_DEPTH && !groupQueue.isEmpty(); depth++) {
+            int levelSize = groupQueue.size();
+            for (int i = 0; i < levelSize; i++) {
+                long groupId = groupQueue.pop();
+                results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
+                groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
+                        .stream().map(Group::getId).toList());
+            }
         }
 
         return results;

@@ -141,9 +141,9 @@ def load_ports():
     dir = os.path.dirname(os.path.abspath(__file__))
     with open(dir + '/../src/main/java/org/traccar/config/PortConfigSuffix.java', 'r') as file:
         content = file.read()
-    pattern = re.compile(r'PORTS\.put\("([^"]+)",\s*(\d+)\);')
+    pattern = re.compile(r'put\((\w+)Protocol\.class,\s*(\d+)\);')
     matches = pattern.findall(content)
-    ports = {protocol: int(port) for protocol, port in matches}
+    ports = {protocol.lower(): int(port) for protocol, port in matches}
     if debug:
         print('\nports: {ports!r}\n')
     return ports

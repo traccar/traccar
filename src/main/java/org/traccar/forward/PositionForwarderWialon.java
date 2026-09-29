@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
@@ -78,7 +79,7 @@ public class PositionForwarderWialon implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
 
         Position position = positionData.getPosition();
         String uniqueId = positionData.getDevice().getUniqueId();
@@ -120,9 +121,9 @@ public class PositionForwarderWialon implements PositionForwarder {
 
         try {
             socket.send(packet);
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

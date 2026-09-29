@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,22 +37,20 @@ import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
 import org.eclipse.jetty.session.SessionCache;
 import org.eclipse.jetty.util.resource.ResourceFactory;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BaseProtocol;
 import org.traccar.LifecycleObject;
+import org.traccar.api.ApiResourceConfig;
 import org.traccar.api.CorsResponseFilter;
-import org.traccar.api.DateParameterConverterProvider;
-import org.traccar.api.ResourceErrorHandler;
-import org.traccar.api.StreamWriter;
+import org.traccar.protocol.OsmAndProtocol;
+import org.traccar.api.MediaFilter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.security.LoginService;
-import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.ObjectMapperContextResolver;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -113,7 +111,8 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initClientProxy(ServletContextHandler servletHandler) {
-        int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
+        int port = config.getInteger(
+                Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(OsmAndProtocol.class)));
         if (port > 0) {
             ServletHolder proxy = new ServletHolder(AsyncProxyServlet.Transparent.class);
             proxy.setInitParameter("proxyTo", "http://localhost:" + port);
@@ -161,6 +160,10 @@ public class WebServer implements LifecycleObject {
     private void initApi(ServletContextHandler servletHandler) {
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
+            servletHandler.addFilter(
+                    new FilterHolder(injector.getInstance(MediaFilter.class)),
+                    "/api/media/*", EnumSet.of(DispatcherType.REQUEST));
+
             ServletHolder servletHolder = new ServletHolder(ResourceServlet.class);
             servletHolder.setInitParameter("baseResource", Path.of(mediaPath).toUri().toString());
             servletHolder.setInitParameter("dirAllowed", "false");
@@ -178,17 +181,8 @@ public class WebServer implements LifecycleObject {
                     McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
         }
 
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
-        resourceConfig.registerClasses(
-                JacksonFeature.class,
-                ObjectMapperContextResolver.class,
-                DateParameterConverterProvider.class,
-                SecurityRequestFilter.class,
-                CorsResponseFilter.class,
-                ResourceErrorHandler.class,
-                StreamWriter.class);
-        resourceConfig.packages(ServerResource.class.getPackage().getName());
+        ResourceConfig resourceConfig = ApiResourceConfig.create();
+        resourceConfig.registerClasses(CorsResponseFilter.class);
         if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
             LOGGER.warn("Failed to load API resources");
         }

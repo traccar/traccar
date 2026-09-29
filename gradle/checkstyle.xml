@@ -7,6 +7,11 @@
 
     <module name="SuppressWarningsFilter"/>
 
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="LineLength"/>
+        <property name="files" value="[\\/]src[\\/]test[\\/]"/>
+    </module>
+
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value="^.*[\\/]protobuf[\\/].*$"/>
     </module>
@@ -71,6 +76,7 @@
         <module name="AvoidStarImport"/>
         <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
         <module name="RedundantImport"/>
+        <module name="UnnecessaryFullyQualifiedType"/>
         <module name="UnusedImports"/>
 
         <!-- Checks for Size Violations.                    -->
@@ -120,11 +126,21 @@
         <!-- See http://checkstyle.sf.net/config_coding.html -->
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
+        <module name="ExpressionOverBlockLambda"/>
         <module name="IllegalInstantiation"/>
         <!--<module name="InnerAssignment"/>-->
         <!--<module name="MissingSwitchDefault"/>-->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
+        <module name="UnnecessaryNullCheckWithInstanceOf"/>
+        <module name="UnusedLocalVariable">
+            <property name="jdkVersion" value="21"/>
+        </module>
+        <module name="UnusedPrivateField">
+            <!-- Jackson accesses annotated fields through reflection. -->
+            <property name="ignoreAnnotationCanonicalNames"
+                      value="java.io.Serial, com.fasterxml.jackson.annotation.JsonProperty"/>
+        </module>
 
         <!-- Checks for class design                         -->
         <!-- See http://checkstyle.sf.net/config_design.html -->

@@ -101,7 +101,11 @@ public class FirebaseCommandSender implements CommandSender {
 
         var result = firebaseMessaging.sendEachForMulticast(message);
         if (result.getFailureCount() > 0) {
-            throw result.getResponses().iterator().next().getException();
+            for (var response : result.getResponses()) {
+                if (response.getException() != null) {
+                    throw response.getException();
+                }
+            }
         }
     }
 

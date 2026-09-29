@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
     private int photoPackets = 0;
-    private ByteBuf photo;
 
     public Gps103ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -184,7 +183,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (alarm.startsWith("vt")) {
             photoPackets = Integer.parseInt(alarm.substring(2));
-            photo = Unpooled.buffer();
+            newMediaBuffer();
         } else if (alarm.equals("acc on")) {
             position.set(Position.KEY_IGNITION, true);
         } else if (alarm.equals("acc off")) {
@@ -345,7 +344,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(
                 sentence.substring(24, sentence.endsWith(";") ? sentence.length() - 1 : sentence.length())));
         int index = buf.readUnsignedShortLE();
-        photo.writeBytes(buf, buf.readerIndex() + 2, buf.readableBytes() - 4);
+        buf.skipBytes(2);
+        getMediaBuffer().writeBytes(buf, buf.readableBytes() - 2);
 
         if (index + 1 >= photoPackets) {
             Position position = new Position(getProtocolName());
@@ -354,11 +354,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             try {
-                position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
+                position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
             } finally {
                 photoPackets = 0;
-                photo.release();
-                photo = null;
             }
 
             return position;

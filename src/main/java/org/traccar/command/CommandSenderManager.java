@@ -44,7 +44,9 @@ public class CommandSenderManager {
     public CommandSender getSender(Device device) {
         String senderType = device.getString(Keys.COMMAND_SENDER.getKey());
         if (senderType != null) {
-            return injector.getInstance(SENDERS_ALL.get(senderType));
+            if (!"findHub".equals(senderType) || config.getBoolean(Keys.COMMAND_FIND_HUB_ENABLE)) {
+                return injector.getInstance(SENDERS_ALL.get(senderType));
+            }
         } else if (device.hasAttribute("notificationTokens")) {
             if (config.hasKey(Keys.COMMAND_CLIENT_SERVICE_ACCOUNT)) {
                 return injector.getInstance(FirebaseCommandSender.class);

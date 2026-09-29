@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
@@ -167,38 +169,73 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if ((type == MSG_DRIVER_BEHAVIOR_1 || type == MSG_DRIVER_BEHAVIOR_2) && header == 0x2626) {
+        } else if (type == MSG_DRIVER_BEHAVIOR_1 && header == 0x2626) {
+
+            String alarm = switch (buf.readUnsignedByte()) {
+                case 0, 2, 4 -> Position.ALARM_BRAKING;
+                case 1, 3, 5 -> Position.ALARM_ACCELERATION;
+                default -> null;
+            };
+
+            List<Position> positions = new LinkedList<>();
+            while (buf.readableBytes() >= 24) {
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                Date time = readDate(buf);
+
+                if (buf.getInt(buf.readerIndex()) != -1) {
+                    position.setValid(true);
+                    position.setTime(time);
+                    position.setAltitude(buf.readFloatLE());
+                    position.setLongitude(buf.readFloatLE());
+                    position.setLatitude(buf.readFloatLE());
+                } else {
+                    buf.skipBytes(12);
+                    getLastLocation(position, time);
+                }
+
+                position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
+
+                int course = buf.readUnsignedShort();
+                if (course != 0xffff) {
+                    position.setCourse(course / 10.0);
+                }
+
+                int rpm = buf.readUnsignedShort();
+                if (rpm != 0xffff) {
+                    position.set(Position.KEY_RPM, rpm);
+                }
+
+                positions.add(position);
+            }
+
+            positions.getLast().addAlarm(alarm);
+
+            return positions;
+
+        } else if (type == MSG_DRIVER_BEHAVIOR_2 && header == 0x2626) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             switch (buf.readUnsignedByte()) {
-                case 0, 4 -> position.addAlarm(Position.ALARM_BRAKING);
-                case 1, 3, 5 -> position.addAlarm(Position.ALARM_ACCELERATION);
-                case 2 -> {
-                    if (type == MSG_DRIVER_BEHAVIOR_1) {
-                        position.addAlarm(Position.ALARM_BRAKING);
-                    } else {
-                        position.addAlarm(Position.ALARM_CORNERING);
-                    }
-                }
+                case 0 -> position.addAlarm(Position.ALARM_BRAKING);
+                case 1 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> position.addAlarm(Position.ALARM_CORNERING);
             }
 
             position.setTime(readDate(buf));
 
-            if (type == MSG_DRIVER_BEHAVIOR_2) {
-                int status = buf.readUnsignedByte();
-                position.setValid(!BitUtil.check(status, 7));
-                buf.skipBytes(5); // acceleration
-            } else {
-                position.setValid(true);
-            }
+            int status = buf.readUnsignedByte();
+            position.setValid(!BitUtil.check(status, 7));
+            buf.skipBytes(5); // acceleration
 
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
             position.setLatitude(buf.readFloatLE());
             position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
-            position.setCourse(buf.readUnsignedShort());
+            position.setCourse(buf.readUnsignedShort() / 10.0);
 
             position.set(Position.KEY_RPM, buf.readUnsignedShort());
 
@@ -408,6 +445,8 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                             mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
                 }
                 position.setNetwork(network);
+            } else if (header == 0x2626) {
+                buf.skipBytes(12); // cell towers
             }
 
         }
@@ -453,7 +492,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             String model = getDeviceModel(deviceSession);
-            if ("TLW2-2BL".equals(model)) {
+            if ("TLW2-2BL".equals(model) || type == MSG_GPS_2 || type == MSG_ALARM_2) {
                 position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 4) / 100.0);
             }
             if (buf.readableBytes() >= 2) {
@@ -461,32 +500,49 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
             if (buf.readableBytes() >= 19) {
                 position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
-                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) / 100.0);
-                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_RPM, buf.readUnsignedShort());
-                int value;
+                long fuelUsed = buf.readUnsignedInt();
+                if (fuelUsed != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_USED, fuelUsed / 1000.0);
+                }
+                long fuelConsumption = buf.readUnsignedInt();
+                if (fuelConsumption != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_CONSUMPTION, fuelConsumption / 1000.0);
+                }
+                int value = buf.readUnsignedShort();
+                if (value != 0xffff) {
+                    position.set(Position.KEY_RPM, value);
+                }
                 value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airInput", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airPressure", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_COOLANT_TEMP, value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airTemp", value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_ENGINE_LOAD, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_THROTTLE, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
-                    position.set(Position.KEY_FUEL, value);
+                    if (BitUtil.check(value, 7)) {
+                        position.set(Position.KEY_FUEL, BitUtil.to(value, 7));
+                    } else {
+                        position.set(Position.KEY_FUEL_LEVEL, value);
+                    }
                 }
             }
         }

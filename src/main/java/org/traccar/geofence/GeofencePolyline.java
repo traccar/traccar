@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,6 +43,12 @@ public class GeofencePolyline extends GeofenceGeometry {
             }
         }
         return false;
+    }
+
+    @Override
+    protected boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        return intersectsEdges(coordinates, false, latitude1, longitude1, latitude2, longitude2);
     }
 
     @Override

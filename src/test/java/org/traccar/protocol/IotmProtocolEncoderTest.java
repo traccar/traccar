@@ -1,9 +1,12 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBufUtil;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IotmProtocolEncoderTest extends ProtocolTest {
 
@@ -19,7 +22,9 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_DATA, "1");
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
-        verifyFrame(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e"), encodedCommand.payload());
+        assertEquals(
+            ByteBufUtil.hexDump(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e")),
+            ByteBufUtil.hexDump(encodedCommand.payload()));
 
     }
 

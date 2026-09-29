@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -100,7 +100,7 @@ public class Network {
 
     public void addCellTower(CellTower cellTower) {
         if (cellTowers == null) {
-            cellTowers = new HashSet<>();
+            cellTowers = new LinkedHashSet<>();
         }
         cellTowers.add(cellTower);
     }
@@ -117,7 +117,7 @@ public class Network {
 
     public void addWifiAccessPoint(WifiAccessPoint wifiAccessPoint) {
         if (wifiAccessPoints == null) {
-            wifiAccessPoints = new HashSet<>();
+            wifiAccessPoints = new LinkedHashSet<>();
         }
         wifiAccessPoints.add(wifiAccessPoint);
     }

@@ -33,6 +33,7 @@ import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderUrl implements PositionForwarder {
 
@@ -50,7 +51,7 @@ public class PositionForwarderUrl implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
         try {
             String url = formatRequest(positionData);
             var requestBuilder = client.target(url).request();
@@ -64,24 +65,26 @@ public class PositionForwarderUrl implements PositionForwarder {
                 }
             }
 
+            var future = new CompletableFuture<Void>();
             requestBuilder.async().get(new InvocationCallback<Response>() {
                 @Override
                 public void completed(Response response) {
                     if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
-                        resultHandler.onResult(true, null);
+                        future.complete(null);
                     } else {
                         int code = response.getStatusInfo().getStatusCode();
-                        resultHandler.onResult(false, new RuntimeException("HTTP code " + code));
+                        future.completeExceptionally(new RuntimeException("HTTP code " + code));
                     }
                 }
 
                 @Override
                 public void failed(Throwable throwable) {
-                    resultHandler.onResult(false, throwable);
+                    future.completeExceptionally(throwable);
                 }
             });
+            return future;
         } catch (UnsupportedEncodingException | JsonProcessingException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

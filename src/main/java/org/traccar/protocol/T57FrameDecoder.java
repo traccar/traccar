@@ -35,7 +35,7 @@ public class T57FrameDecoder extends BaseFrameDecoder {
         String type = buf.toString(buf.readerIndex() + 5, 2, StandardCharsets.US_ASCII);
         int count = type.equals("F3") ? 12 : 14;
 
-        int index = 0;
+        int index = buf.readerIndex();
         while (index >= 0 && count > 0) {
             index = buf.indexOf(index + 1, buf.writerIndex(), (byte) '#');
             if (index > 0) {

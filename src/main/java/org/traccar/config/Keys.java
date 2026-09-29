@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -483,6 +483,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Check the straight line segment between consecutive positions for geofence boundary crossings, so a visit is
+     * detected even if no position was received inside the geofence (e.g. long reporting intervals).
+     */
+    public static final ConfigKey<Boolean> EVENT_GEOFENCE_SEGMENT_CROSSING = new BooleanConfigKey(
+            "event.geofence.segmentCrossing",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Driver behavior acceleration threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new DoubleConfigKey(
@@ -578,6 +587,15 @@ public final class Keys {
             "database.maxPoolSize",
             List.of(KeyType.CONFIG),
             20);
+
+    /**
+     * Number of rows fetched per round trip for streamed queries (position history and exports). On PostgreSQL this
+     * enables a server-side cursor so results are not fully buffered in memory.
+     */
+    public static final ConfigKey<Integer> DATABASE_STREAM_FETCH_SIZE = new IntegerConfigKey(
+            "database.streamFetchSize",
+            List.of(KeyType.CONFIG),
+            1000);
 
     /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
@@ -900,6 +918,15 @@ public final class Keys {
             "./media");
 
     /**
+     * Maximum size in bytes of a single media buffer (photo, audio or video) that a protocol decoder accumulates from
+     * a device. Transfers larger than this limit are dropped. Only one media buffer is kept per connection.
+     */
+    public static final ConfigKey<Integer> MEDIA_BUFFER_SIZE = new IntegerConfigKey(
+            "media.bufferSize",
+            List.of(KeyType.CONFIG),
+            32 * 1024 * 1024);
+
+    /**
      * Optional parameter to specify a network interface for the web interface to bind to. By default, the server will
      * bind to all available interfaces.
      */
@@ -955,6 +982,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Include stack traces in API error responses. Disable to return only error messages.
+     */
+    public static final ConfigKey<Boolean> WEB_SHOW_STACK_TRACES = new BooleanConfigKey(
+            "web.showStackTraces",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
      * A token to log in as a virtual admin account. Can be used to restore access in case of issues with regular
      * admin login. For example, if a password is lost and can't be restored.
      */
@@ -1007,6 +1042,40 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Raw data forwarding TCP connect timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "server.forward.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Raw data forwarding TCP write timeout in milliseconds. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> SERVER_FORWARD_WRITE_TIMEOUT = new IntegerConfigKey(
+            "server.forward.writeTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_CONNECT_TIMEOUT = new IntegerConfigKey(
+            "client.connectTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
+     * Read timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
+     * HTTP requests. Defaults to 5000.
+     */
+    public static final ConfigKey<Integer> CLIENT_READ_TIMEOUT = new IntegerConfigKey(
+            "client.readTimeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
      */
     public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(
@@ -1040,6 +1109,7 @@ public final class Keys {
 
     /**
      * Additional HTTP header that can be used for authorization.
+     * Global headers are only used when forwarding to the globally configured URL.
      */
     public static final ConfigKey<String> FORWARD_HEADER = new StringConfigKey(
             "forward.header",
@@ -1242,6 +1312,14 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
+     * SMTP connect, read and write timeout in milliseconds.
+     */
+    public static final ConfigKey<Integer> MAIL_SMTP_TIMEOUT = new IntegerConfigKey(
+            "mail.smtp.timeout",
+            List.of(KeyType.CONFIG),
+            5000);
+
+    /**
      * SMS API service full URL. Enables SMS commands and notifications.
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new StringConfigKey(
@@ -1321,6 +1399,14 @@ public final class Keys {
     public static final ConfigKey<String> COMMAND_CLIENT_SERVICE_ACCOUNT = new StringConfigKey(
             "command.client.serviceAccount",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Enable Google Find Hub command sender.
+     */
+    public static final ConfigKey<Boolean> COMMAND_FIND_HUB_ENABLE = new BooleanConfigKey(
+            "command.findHub.enable",
+            List.of(KeyType.CONFIG),
+            false);
 
     /**
      * Google Find Hub service URL.
@@ -1421,6 +1507,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Telegram notification base URL.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_BASE_URL = new StringConfigKey(
+            "notificator.telegram.base.url",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
@@ -1491,6 +1584,15 @@ public final class Keys {
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum number of positions returned by a single history or export request. Prevents unbounded queries from
+     * loading an entire result set into memory. Set to 0 to disable the limit.
+     */
+    public static final ConfigKey<Integer> REPORT_MAX_POSITIONS = new IntegerConfigKey(
+            "report.maxPositions",
+            List.of(KeyType.CONFIG),
+            50000);
 
     /**
      * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.
@@ -1708,16 +1810,8 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
-     */
-    public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new BooleanConfigKey(
-            "filter.skipAttributes.enable",
-            List.of(KeyType.CONFIG, KeyType.DEVICE));
-
-    /**
-     * Attribute skipping can be enabled in the config or device attributes.
-     * If position contains any attribute mentioned in "filter.skipAttributes" config key, position is not filtered out.
+     * List of attributes that prevent filtering. If any attribute mentioned in this config key changed value
+     * since the last position, the position is not filtered out.
      */
     public static final ConfigKey<String> FILTER_SKIP_ATTRIBUTES = new StringConfigKey(
             "filter.skipAttributes",
@@ -1729,7 +1823,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> TIME_OVERRIDE = new StringConfigKey(
             "time.override",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * List of protocols to enable. If not specified, Traccar enables all protocols that have port numbers listed.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,11 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 1) {
 
-            int frameEnd = buf.readerIndex() + buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+            if (length == 0) {
+                return null;
+            }
+            int frameEnd = buf.readerIndex() - 1 + length;
 
             int type = buf.readUnsignedByte();
             int index = buf.readUnsignedByte();

@@ -40,8 +40,6 @@ import java.util.regex.Pattern;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
-    private ByteBuf audio;
-
     public WatchProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -342,10 +340,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             int current = Integer.parseInt(values[2]);
             int total = Integer.parseInt(values[3]);
 
-            if (audio == null) {
-                audio = Unpooled.buffer();
+            if (getMediaBuffer() == null) {
+                newMediaBuffer();
             }
-            audio.writeBytes(buf);
+            getMediaBuffer().writeBytes(buf);
 
             sendResponse(channel, id, index, "JXTKR,1");
 
@@ -355,13 +353,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, null);
-                position.set(Position.KEY_AUDIO, writeMediaFile(id, audio, "amr"));
-                audio.release();
-                audio = null;
+                position.set(Position.KEY_AUDIO, writeMediaFile(id, "amr"));
                 return position;
             }
 
-        } else if (type.equals("TK")) {
+        } else if (type.equals("TK") || type.equals("TK2")) {
 
             if (buf.readableBytes() == 1) {
                 return null;

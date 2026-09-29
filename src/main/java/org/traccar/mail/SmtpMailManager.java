@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +36,9 @@ import jakarta.mail.internet.MimeMultipart;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
 
 public final class SmtpMailManager implements MailManager {
 
@@ -43,10 +46,12 @@ public final class SmtpMailManager implements MailManager {
 
     private final Config config;
     private final StatisticsManager statisticsManager;
+    private final ExecutorService executorService;
 
-    public SmtpMailManager(Config config, StatisticsManager statisticsManager) {
+    public SmtpMailManager(Config config, StatisticsManager statisticsManager, ExecutorService executorService) {
         this.config = config;
         this.statisticsManager = statisticsManager;
+        this.executorService = executorService;
     }
 
     private static void copyBooleanProperty(
@@ -84,6 +89,11 @@ public final class SmtpMailManager implements MailManager {
             copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM);
             copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM_NAME);
 
+            String timeout = String.valueOf(provider.getInteger(Keys.MAIL_SMTP_TIMEOUT));
+            properties.put("mail.smtp.connectiontimeout", timeout);
+            properties.put("mail.smtp.timeout", timeout);
+            properties.put("mail.smtp.writetimeout", timeout);
+
             return properties;
         }
         return null;
@@ -94,14 +104,25 @@ public final class SmtpMailManager implements MailManager {
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body) throws MessagingException {
-        sendMessage(user, system, subject, body, null);
+    public CompletableFuture<Void> sendMessage(User user, boolean system, String subject, String body) {
+        return sendMessage(user, system, subject, body, null);
     }
 
     @Override
-    public void sendMessage(
-            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+    public CompletableFuture<Void> sendMessage(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                sendMessageBlocking(user, system, subject, body, attachment);
+            } catch (MessagingException e) {
+                throw new CompletionException(e);
+            }
+        }, executorService);
+    }
+
+    private void sendMessageBlocking(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment)
+            throws MessagingException {
 
         Properties properties = null;
         if (!config.getBoolean(Keys.MAIL_SMTP_IGNORE_USER_CONFIG)) {

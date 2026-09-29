@@ -18,34 +18,27 @@ package org.traccar.handler.events;
 import jakarta.inject.Inject;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class FuelEventHandler extends BaseEventHandler {
-
-    private final CacheManager cacheManager;
+public class FuelEventHandler extends BasePositionEventHandler {
 
     @Inject
     public FuelEventHandler(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
 
         Device device = cacheManager.getObject(Device.class, position.getDeviceId());
         if (device == null) {
             return;
         }
-        if (!PositionUtil.isLatest(cacheManager, position)) {
-            return;
-        }
 
         if (position.hasAttribute(Position.KEY_FUEL)) {
-            Position lastPosition = cacheManager.getPosition(position.getDeviceId());
             if (lastPosition != null && lastPosition.hasAttribute(Position.KEY_FUEL)) {
                 double before = lastPosition.getDouble(Position.KEY_FUEL);
                 double after = position.getDouble(Position.KEY_FUEL);

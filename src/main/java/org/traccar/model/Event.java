@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class Event extends Message {
 
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
+    public static final String TYPE_GEOFENCE_CROSSED = "geofenceCrossed";
 
     public static final String TYPE_PROXIMITY_ENTER = "proximityEnter";
     public static final String TYPE_PROXIMITY_EXIT = "proximityExit";

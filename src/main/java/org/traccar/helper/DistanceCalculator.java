@@ -59,6 +59,37 @@ public final class DistanceCalculator {
         return 2 * area / d1;
     }
 
+    public static boolean segmentsIntersect(
+            double ax1, double ay1, double ax2, double ay2,
+            double bx1, double by1, double bx2, double by2) {
+        double d1 = direction(bx1, by1, bx2, by2, ax1, ay1);
+        double d2 = direction(bx1, by1, bx2, by2, ax2, ay2);
+        double d3 = direction(ax1, ay1, ax2, ay2, bx1, by1);
+        double d4 = direction(ax1, ay1, ax2, ay2, bx2, by2);
+        if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+            return true;
+        }
+        if (d1 == 0 && onSegment(bx1, by1, bx2, by2, ax1, ay1)) {
+            return true;
+        }
+        if (d2 == 0 && onSegment(bx1, by1, bx2, by2, ax2, ay2)) {
+            return true;
+        }
+        if (d3 == 0 && onSegment(ax1, ay1, ax2, ay2, bx1, by1)) {
+            return true;
+        }
+        return d4 == 0 && onSegment(ax1, ay1, ax2, ay2, bx2, by2);
+    }
+
+    private static double direction(double ax, double ay, double bx, double by, double cx, double cy) {
+        return (cx - ax) * (by - ay) - (cy - ay) * (bx - ax);
+    }
+
+    private static boolean onSegment(double ax, double ay, double bx, double by, double px, double py) {
+        return Math.min(ax, bx) <= px && px <= Math.max(ax, bx)
+                && Math.min(ay, by) <= py && py <= Math.max(ay, by);
+    }
+
     public static double getLatitudeDelta(double meters) {
         return meters / 111320;
     }

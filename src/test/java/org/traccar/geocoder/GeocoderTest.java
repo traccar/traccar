@@ -129,4 +129,28 @@ public class GeocoderTest {
         String address = geocoder.getAddress(40.7337807, -73.9974401, null);
         assertEquals("35 West 9th Street, New York, New York, US", address);
     }
+
+    @Disabled
+    @Test
+    public void testAutoNavi() {
+        Geocoder geocoder = new AutoNaviGeocoder(client, "", 0, new AddressFormat());
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("沙墟一村 云山大街, 番禺区, 广东省, 中国", address);
+    }
+
+    @Disabled
+    @Test
+    public void testBaidu() {
+        Geocoder geocoder = new BaiduGeocoder(client, "", null, 0, new AddressFormat());
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("东荟创新园 云山街, 广州市, 广东省, 中国", address);
+    }
+
+    @Disabled
+    @Test
+    public void testTencent() {
+        Geocoder geocoder = new TencentGeocoder(client, "", 0, new AddressFormat());
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("东荟创新园 云山大街, 广州市, 广东省, 中国", address);
+    }
 }
