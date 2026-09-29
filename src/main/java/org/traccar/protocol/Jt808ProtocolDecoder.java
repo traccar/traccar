@@ -713,6 +713,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
         }
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
+        
+        if ("MV710G".equals(model)) {
+            position.set(Position.KEY_ARMED, BitUtil.check(status, 6));
+        }
+        
         if ("MV810G".equals(model) || "MV710G".equals(model)) {
             position.set(Position.KEY_DOOR, BitUtil.check(status, 16));
         }
