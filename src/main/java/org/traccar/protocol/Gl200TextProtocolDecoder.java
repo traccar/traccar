@@ -898,6 +898,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         String vin = model.startsWith("GV500") ? v[index++] : null;
         index += 1; // device name
         long mask = extended ? Long.parseLong(v[index++], 16) : 0;
+        if (!v[index].isEmpty() && !v[index].chars().allMatch(Character::isDigit)) {
+            return null; // non-standard format, handled by basic decoder
+        }
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
         Integer reportType = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]);
 
