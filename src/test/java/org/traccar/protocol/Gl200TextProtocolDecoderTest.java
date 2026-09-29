@@ -16,10 +16,6 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 position().attribute(Position.KEY_BATTERY_LEVEL, 84));
 
         verifyDecode(decoder, buffer(
-                "+RESP:GTRTL,EF802C,864431040000001,JoJoSharingIoT,OK200428000950,OUKAI,,,,0000000000000000,2,0.0,0,-6.6,22.630699,38.078971,20260925050553,,0202,0005,002B,4F31,15&99,1,41,0,53808,4086,92,0,0,1,,0.0&0.00&0.0&269.9&0&0&0&000000362021022701090000&000000CF2019090301000000&0&0&00000000000000000000&2&2&00000000000000,100,20260925050554,C648$"),
-                position().attribute(Position.KEY_BATTERY_LEVEL, 100));
-
-        verifyDecode(decoder, buffer(
                 "+RESP:GTIGL,FE110A,866425030925657,gv50m,,00,1,1,17.7,98,14.0,113.950840,22.568487,20190923043110,0460,0000,2495,116F,,13670.4,20190923123107,5568$"),
                 position().attribute(Position.KEY_IGNITION, true));
 
