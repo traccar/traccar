@@ -59,7 +59,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (uniqueId != null) {
-            uniqueId = uniqueId.replaceAll("[/\\\\]", "-");
+            uniqueId = uniqueId.replace('/', '-');
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
