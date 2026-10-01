@@ -217,6 +217,10 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        if (position.getFixTime() == null) {
+            position.setFixTime(position.getDeviceTime());
+        }
+
         if (!hasLocation) {
             getLastLocation(position, position.getDeviceTime());
         }
