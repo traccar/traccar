@@ -107,7 +107,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         Network network = new Network();
-        boolean hasLocation = false;
 
         int bodyEnd = buf.readerIndex() + length - 11;
         while (buf.readerIndex() < bodyEnd) {
@@ -124,7 +123,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                         position.setValid(true);
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
-                        hasLocation = true;
                     }
                     position.setAltitude(buf.readFloat());
                     buf.readUnsignedByte(); // ephemeris
@@ -217,11 +215,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (position.getFixTime() == null) {
-            position.setFixTime(position.getDeviceTime());
-        }
-
-        if (!hasLocation) {
+        if (!position.getValid()) {
             getLastLocation(position, position.getDeviceTime());
         }
 
