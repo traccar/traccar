@@ -235,6 +235,7 @@ import org.traccar.protocol.TechtoCruzProtocol;
 import org.traccar.protocol.TekProtocol;
 import org.traccar.protocol.TelemaxProtocol;
 import org.traccar.protocol.TelicProtocol;
+import org.traccar.protocol.TeltonikaIridiumProtocol;
 import org.traccar.protocol.TeltonikaProtocol;
 import org.traccar.protocol.TeraTrackProtocol;
 import org.traccar.protocol.ThinkPowerProtocol;
@@ -562,6 +563,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(RadshidProtocol.class, 5265);
         put(R16hProtocol.class, 5266);
         put(JimiPhotoProtocol.class, 5267);
+        put(TeltonikaIridiumProtocol.class, 5268);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {
