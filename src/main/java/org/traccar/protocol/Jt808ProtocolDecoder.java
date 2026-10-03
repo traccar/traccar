@@ -1719,7 +1719,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x052A -> position.set(Position.KEY_FUEL, buf.readUnsignedShort() / 100.0);
                             case 0x0105, 0x052C -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 100.0);
                             case 0x014A, 0x0537, 0x0538, 0x0539 ->
-                                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
+                                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
                             case 0x052B -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                             case 0x052D -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
                             case 0x052E -> position.set("airTemp", buf.readUnsignedByte() - 40);

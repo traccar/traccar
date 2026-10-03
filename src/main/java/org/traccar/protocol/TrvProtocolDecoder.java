@@ -42,7 +42,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .ofPattern("yyyyMMddHHmmss").withZone(ZoneId.systemDefault());
 
     private static final Set<String> IGNORE_RESPONSE = Set.of(
-        "AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85", "AP86", "AP87");
+            "AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85", "AP86", "AP87");
 
     public TrvProtocolDecoder(Protocol protocol) {
         super(protocol);

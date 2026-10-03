@@ -55,7 +55,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             .any()                               // unknown 3 fields
             .compile();
 
-   private static final Pattern PATTERN_C = new PatternBuilder()
+    private static final Pattern PATTERN_C = new PatternBuilder()
             .text("!C,")
             .expression(PATTERN_FIX.pattern())
             .expression(PATTERN_STATE.pattern())

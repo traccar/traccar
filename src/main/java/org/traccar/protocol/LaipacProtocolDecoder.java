@@ -166,7 +166,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, parser.next());
+                getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -192,7 +192,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, parser.next());
+                getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -258,7 +258,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-        Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 

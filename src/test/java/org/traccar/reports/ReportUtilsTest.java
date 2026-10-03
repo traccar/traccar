@@ -358,18 +358,18 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsWithFluctuation() throws Exception {
         Stream<Position> data = Stream.of(
-            position(1, "2016-01-01 00:00:00.000", 0, 0),
-            position(2, "2016-01-01 00:01:00.000", 0, 0),
-            position(3, "2016-01-01 00:02:00.000", 10, 0),
-            position(4, "2016-01-01 00:03:00.000", 10, 1000),
-            position(5, "2016-01-01 00:04:00.000", 10, 2000),
-            position(6, "2016-01-01 00:05:00.000", 10, 3000),
-            position(7, "2016-01-01 00:06:00.000", 10, 4000),
-            position(8, "2016-01-01 00:07:00.000", 0, 5000),
-            position(9, "2016-01-01 00:08:00.000", 10, 6000),
-            position(10, "2016-01-01 00:09:00.000", 0, 7000),
-            position(11, "2016-01-01 00:19:00.000", 0, 7000),
-            position(12, "2016-01-01 00:29:00.000", 0, 7000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 10, 3000),
+                position(7, "2016-01-01 00:06:00.000", 10, 4000),
+                position(8, "2016-01-01 00:07:00.000", 0, 5000),
+                position(9, "2016-01-01 00:08:00.000", 10, 6000),
+                position(10, "2016-01-01 00:09:00.000", 0, 7000),
+                position(11, "2016-01-01 00:19:00.000", 0, 7000),
+                position(12, "2016-01-01 00:29:00.000", 0, 7000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
         Device device = mockDevice(500, 300, 180, 900, false);
         ReportUtils reportUtils = new ReportUtils(

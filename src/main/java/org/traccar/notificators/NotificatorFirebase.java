@@ -167,8 +167,8 @@ public class NotificatorFirebase extends Notificator {
                         }
                         try {
                             storage.updateObject(user, new Request(
-                                new Columns.Include("attributes"),
-                                new Condition.Equals("id", user.getId())));
+                                    new Columns.Include("attributes"),
+                                    new Condition.Equals("id", user.getId())));
                             cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                         } catch (Exception e) {
                             LOGGER.warn("Firebase token cleanup error", e);

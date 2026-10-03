@@ -138,7 +138,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
                 }
                 if (root.containsKey("temp_c-" + indexString)) {
                     position.set(Position.PREFIX_TEMP + (i + 1),
-                        root.getJsonNumber("temp_c-" + indexString).doubleValue());
+                            root.getJsonNumber("temp_c-" + indexString).doubleValue());
                 }
             }
         }

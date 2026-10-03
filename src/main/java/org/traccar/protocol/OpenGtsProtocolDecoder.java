@@ -76,7 +76,7 @@ public class OpenGtsProtocolDecoder extends BaseHttpProtocolDecoder {
                 case "gprmc":
                     Parser parser = new Parser(PATTERN, value);
                     if (!parser.matches()) {
-                            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+                        sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                         return null;
                     }
 

@@ -23,8 +23,8 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
 
         MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
         assertEquals(
-            ByteBufUtil.hexDump(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e")),
-            ByteBufUtil.hexDump(encodedCommand.payload()));
+                ByteBufUtil.hexDump(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e")),
+                ByteBufUtil.hexDump(encodedCommand.payload()));
 
     }
 

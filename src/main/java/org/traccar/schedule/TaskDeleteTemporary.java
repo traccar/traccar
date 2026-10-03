@@ -49,7 +49,7 @@ public class TaskDeleteTemporary extends SingleScheduleTask {
     @Override
     public void run() {
         try {
-           storage.removeObject(User.class, new Request(
+            storage.removeObject(User.class, new Request(
                     new Condition.And(
                             new Condition.Equals("temporary", true),
                             new Condition.Compare("expirationTime", "<", new Date()))));

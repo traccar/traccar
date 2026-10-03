@@ -408,9 +408,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (cellTower.getMobileCountryCode() != null
-            && cellTower.getMobileNetworkCode() != null
-            && cellTower.getCellId() != null && cellTower.getCellId() != 0
-            && cellTower.getLocationAreaCode() != null) {
+                && cellTower.getMobileNetworkCode() != null
+                && cellTower.getCellId() != null && cellTower.getCellId() != 0
+                && cellTower.getLocationAreaCode() != null) {
             position.setNetwork(new Network(cellTower));
         } else if (cellTower.getSignalStrength() != null) {
             position.set(Position.KEY_RSSI, cellTower.getSignalStrength());

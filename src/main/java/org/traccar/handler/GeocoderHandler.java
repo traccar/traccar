@@ -54,18 +54,18 @@ public class GeocoderHandler extends BasePositionHandler {
 
             geocoder.getAddress(position.getLatitude(), position.getLongitude(),
                     new Geocoder.ReverseGeocoderCallback() {
-                @Override
-                public void onSuccess(String address) {
-                    position.setAddress(address);
-                    callback.processed(false);
-                }
+                        @Override
+                        public void onSuccess(String address) {
+                            position.setAddress(address);
+                            callback.processed(false);
+                        }
 
-                @Override
-                public void onFailure(Throwable e) {
-                    LOGGER.warn("Geocoding failed", e);
-                    callback.processed(false);
-                }
-            });
+                        @Override
+                        public void onFailure(Throwable e) {
+                            LOGGER.warn("Geocoding failed", e);
+                            callback.processed(false);
+                        }
+                    });
         } else {
             callback.processed(false);
         }
