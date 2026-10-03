@@ -15,10 +15,11 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
+
+import jakarta.inject.Inject;
 
 public class HemisphereHandler extends BasePositionHandler {
 

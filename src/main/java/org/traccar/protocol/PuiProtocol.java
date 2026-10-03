@@ -17,11 +17,12 @@ package org.traccar.protocol;
 
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
-import jakarta.inject.Inject;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+
+import jakarta.inject.Inject;
 
 public class PuiProtocol extends BaseProtocol {
 

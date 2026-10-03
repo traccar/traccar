@@ -22,7 +22,6 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.core.Response;
-
 import java.util.concurrent.CompletableFuture;
 
 public class EventForwarderJson implements EventForwarder {

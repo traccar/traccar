@@ -15,7 +15,6 @@
  */
 package org.traccar.web;
 
-import jakarta.ws.rs.core.Configuration;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.inject.hk2.Hk2InjectionManagerFactory;
 import org.glassfish.jersey.internal.inject.InjectionManager;
@@ -25,6 +24,7 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.traccar.Main;
 
 import jakarta.annotation.Priority;
+import jakarta.ws.rs.core.Configuration;
 
 @Priority(20)
 public class WebInjectionManagerFactory implements InjectionManagerFactory {

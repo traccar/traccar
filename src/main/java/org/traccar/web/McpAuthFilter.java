@@ -15,6 +15,8 @@
  */
 package org.traccar.web;
 
+import org.traccar.api.security.LoginService;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,8 +24,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.traccar.api.security.LoginService;
-
 import java.io.IOException;
 import java.util.Locale;
 

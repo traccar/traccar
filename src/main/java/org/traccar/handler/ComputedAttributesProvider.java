@@ -15,8 +15,6 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
@@ -33,6 +31,8 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.lang.invoke.MethodHandle;
 import java.util.Date;
 import java.util.HashMap;

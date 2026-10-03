@@ -16,10 +16,9 @@
 package org.traccar.protocol;
 
 import com.google.inject.Injector;
-import org.traccar.BaseProtocolDecoder;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 
 import jakarta.inject.Inject;

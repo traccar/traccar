@@ -16,11 +16,12 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+
+import jakarta.inject.Inject;
 
 public class MaintenanceEventHandler extends BasePositionEventHandler {
 

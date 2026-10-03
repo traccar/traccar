@@ -22,9 +22,8 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
-import java.nio.charset.StandardCharsets;
-
 import jakarta.inject.Inject;
+import java.nio.charset.StandardCharsets;
 
 public class FlexApiProtocol extends BaseProtocol {
 

@@ -22,9 +22,9 @@ import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import jakarta.inject.Inject;
-import org.traccar.config.Keys;
 
 public class TaipProtocol extends BaseProtocol {
 

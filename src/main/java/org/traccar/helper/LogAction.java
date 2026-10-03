@@ -16,14 +16,6 @@
  */
 package org.traccar.helper;
 
-import java.beans.Introspector;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +27,14 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import java.beans.Introspector;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 
 public final class LogAction {
 

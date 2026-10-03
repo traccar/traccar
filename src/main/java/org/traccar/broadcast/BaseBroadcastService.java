@@ -15,15 +15,15 @@
  */
 package org.traccar.broadcast;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class BaseBroadcastService implements BroadcastService {
 

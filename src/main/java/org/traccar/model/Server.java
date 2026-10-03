@@ -16,7 +16,6 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 

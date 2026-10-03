@@ -21,8 +21,8 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
-import java.nio.ByteOrder;
 import jakarta.inject.Inject;
+import java.nio.ByteOrder;
 
 public class ProgressProtocol extends BaseProtocol {
 

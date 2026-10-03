@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
@@ -33,6 +32,7 @@ import org.traccar.model.LogRecord;
 import org.traccar.protocol.Jt1078Protocol;
 import org.traccar.session.ConnectionManager;
 
+import jakarta.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 

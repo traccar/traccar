@@ -15,11 +15,10 @@
  */
 package org.traccar.forward;
 
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import java.util.concurrent.CompletableFuture;
 

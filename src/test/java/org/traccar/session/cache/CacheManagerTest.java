@@ -1,17 +1,17 @@
 package org.traccar.session.cache;
 
 import org.junit.jupiter.api.Test;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
-import org.traccar.model.User;
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.model.Server;
+import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.query.Request;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;

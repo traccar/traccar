@@ -15,12 +15,12 @@
  */
 package org.traccar.model;
 
-import java.util.Date;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
+
+import java.util.Date;
+import java.util.List;
 
 @StorageName("tc_positions")
 public class Position extends Message {

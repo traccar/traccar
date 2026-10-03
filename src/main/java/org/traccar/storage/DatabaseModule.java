@@ -31,12 +31,12 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import jakarta.inject.Singleton;
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Path;
+import javax.sql.DataSource;
 
 public class DatabaseModule extends AbstractModule {
 

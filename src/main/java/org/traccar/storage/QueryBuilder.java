@@ -23,7 +23,6 @@ import org.traccar.config.Keys;
 import org.traccar.helper.ReflectionCache;
 import org.traccar.model.Permission;
 
-import javax.sql.DataSource;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
@@ -46,6 +45,7 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 
 public final class QueryBuilder implements AutoCloseable {
 

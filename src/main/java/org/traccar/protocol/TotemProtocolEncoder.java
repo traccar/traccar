@@ -16,10 +16,10 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.StringProtocolEncoder;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Checksum;
+import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 

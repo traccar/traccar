@@ -27,6 +27,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
+
 import java.net.SocketAddress;
 import java.util.Date;
 

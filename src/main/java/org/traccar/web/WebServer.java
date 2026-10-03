@@ -17,9 +17,6 @@ package org.traccar.web;
 
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.SessionCookieConfig;
-import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
@@ -45,14 +42,16 @@ import org.traccar.BaseProtocol;
 import org.traccar.LifecycleObject;
 import org.traccar.api.ApiResourceConfig;
 import org.traccar.api.CorsResponseFilter;
-import org.traccar.protocol.OsmAndProtocol;
 import org.traccar.api.MediaFilter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.protocol.OsmAndProtocol;
 
-import javax.sql.DataSource;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
@@ -61,6 +60,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Locale;
+import javax.sql.DataSource;
 
 public class WebServer implements LifecycleObject {
 

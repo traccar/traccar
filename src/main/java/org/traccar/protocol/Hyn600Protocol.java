@@ -16,11 +16,12 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import jakarta.inject.Inject;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+
+import jakarta.inject.Inject;
 
 public class Hyn600Protocol extends BaseProtocol {
 

@@ -17,9 +17,9 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BasePipelineFactory;
+import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 public class SuntechProtocolEncoder extends StringProtocolEncoder {
 

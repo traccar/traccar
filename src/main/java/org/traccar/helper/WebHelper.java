@@ -15,21 +15,20 @@
  */
 package org.traccar.helper;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import org.eclipse.jetty.util.URIUtil;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.core.Response;
-
-import org.eclipse.jetty.util.URIUtil;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public final class WebHelper {
 

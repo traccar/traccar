@@ -17,12 +17,12 @@ package org.traccar.helper;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.traccar.model.User;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Date;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Date;
 
 public final class SessionHelper {
 

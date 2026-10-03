@@ -16,11 +16,12 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+
+import jakarta.inject.Inject;
 
 public class MotionHandler extends BasePositionHandler {
 

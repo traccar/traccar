@@ -19,6 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.session.cache.CacheManager;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
@@ -26,9 +28,6 @@ import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.traccar.helper.model.AttributeUtil;
-import org.traccar.session.cache.CacheManager;
-
 import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderJson implements PositionForwarder {

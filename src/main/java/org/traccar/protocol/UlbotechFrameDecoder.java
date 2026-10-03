@@ -15,12 +15,11 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.BaseFrameDecoder;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseFrameDecoder;
 
 public class UlbotechFrameDecoder extends BaseFrameDecoder {
 

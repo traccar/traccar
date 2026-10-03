@@ -26,7 +26,6 @@ import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;

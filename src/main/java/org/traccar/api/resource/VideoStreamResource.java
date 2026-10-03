@@ -16,16 +16,17 @@
 package org.traccar.api.resource;
 
 import io.netty.buffer.ByteBuf;
+import org.traccar.api.BaseResource;
+import org.traccar.media.VideoStreamManager;
+import org.traccar.model.Device;
+import org.traccar.storage.StorageException;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
-import org.traccar.api.BaseResource;
-import org.traccar.media.VideoStreamManager;
-import org.traccar.model.Device;
-import org.traccar.storage.StorageException;
 
 @Path("stream")
 public class VideoStreamResource extends BaseResource {

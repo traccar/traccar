@@ -24,12 +24,11 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-
-import jakarta.inject.Inject;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;

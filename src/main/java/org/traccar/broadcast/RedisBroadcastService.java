@@ -20,16 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-
-import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
+
+import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 public class RedisBroadcastService extends BaseBroadcastService {
 

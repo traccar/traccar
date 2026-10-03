@@ -16,6 +16,12 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.helper.ClassScanner;
+import org.traccar.storage.QueryIgnore;
+
 import java.beans.Introspector;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -23,12 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.traccar.helper.ClassScanner;
-import org.traccar.storage.QueryIgnore;
 
 public class Permission {
 
