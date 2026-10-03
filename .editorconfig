@@ -9,5 +9,8 @@ trim_trailing_whitespace = true
 [*.java]
 indent_style = space
 indent_size = 4
+ij_continuation_indent_size = 8
+ij_java_line_comment_at_first_column = false
+ij_java_block_comment_at_first_column = false
 ij_java_imports_layout = *, |, jakarta.**, java.**, javax.**, |, $*
 ij_java_layout_static_imports_separately = true

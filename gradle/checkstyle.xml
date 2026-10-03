@@ -96,6 +96,11 @@
         <!-- Checks for whitespace                               -->
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
         <module name="EmptyForIteratorPad"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
+        </module>
+        <module name="CommentsIndentation"/>
         <module name="GenericWhitespace"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
