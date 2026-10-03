@@ -199,6 +199,10 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     if (fuel != 0xFF) {
                         position.set(Position.KEY_FUEL_LEVEL, fuel);
                     }
+                    long deviceTime = buf.readUnsignedInt();
+                    if (deviceTime != 0xFFFFFFFFL) {
+                        position.setDeviceTime(new Date(deviceTime * 1000));
+                    }
                 }
                 default -> {}
             }
