@@ -116,6 +116,7 @@
         <module name="ParenPad"/>
         <module name="TypecastParenPad"/>
         <module name="WhitespaceAfter"/>
+        <module name="SingleSpaceSeparator"/>
         <module name="WhitespaceAround">
             <property name="allowEmptyConstructors" value="true"/>
             <property name="allowEmptyMethods" value="true"/>

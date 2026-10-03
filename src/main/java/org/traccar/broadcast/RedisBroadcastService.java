@@ -68,7 +68,7 @@ public class RedisBroadcastService extends BaseBroadcastService {
     @Override
     protected void sendMessage(BroadcastMessage message) {
         try (Jedis publisher = publisherPool.getResource()) {
-            String payload = id  + ":" + objectMapper.writeValueAsString(message);
+            String payload = id + ":" + objectMapper.writeValueAsString(message);
             publisher.publish(channel, payload);
         } catch (IOException | JedisException e) {
             LOGGER.warn("Broadcast failed", e);

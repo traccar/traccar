@@ -92,7 +92,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
             String id;
             if (type == MSG_LOGIN_REQUEST) {
-                id =  data.toString(StandardCharsets.US_ASCII);
+                id = data.toString(StandardCharsets.US_ASCII);
             } else {
                 id = data.copy(1, 15).toString(StandardCharsets.US_ASCII);
             }
