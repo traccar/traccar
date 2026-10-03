@@ -272,28 +272,27 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
-        register(80, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set("dataMode", b.readUnsignedByte()));
-        register(81, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
-        register(82, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
-        register(83, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
+        register(80, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set("dataMode", b.readUnsignedByte()));
+        register(81, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
+        register(82, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
+        register(83, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
         register(84, fmaXXX.or(fm1XXX), (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort()));
         register(84, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort() / 10.0));
-
-        register(85, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
-        register(87, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
-        register(89, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
+        register(85, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_RPM, b.readUnsignedShort()));
+        register(87, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
+        register(89, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) ->
+                p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
         register(90, any, TeltonikaProtocolDecoder::decodeDoorStatus);
         register(100, any, (p, b) -> p.set("lvcanProgramNumber", b.readUnsignedInt()));
         register(101, any, (p, b) -> p.set("lvcanModuleId", Long.toUnsignedString(b.readLong())));
-        register(107, fmbXXX.or(fmaXXX).or(fm1XXX),
-        (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
+        register(107, fmbXXX.or(fmaXXX).or(fm1XXX), (p, b) ->
+                p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
         register(110, fmaXXX.or(fm1XXX), (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort()));
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() / 10.0));
         register(111, fmbXXX.or(fmaXXX).or(fm1XXX), (p, b) -> p.set("adBlueLevel", b.readUnsignedByte()));
@@ -313,8 +312,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(193, fmaXXX.or(fm1XXX), (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
         register(199, any, (p, b) -> p.set(Position.KEY_ODOMETER_TRIP, b.readUnsignedInt()));
         register(200, any, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
-        register(205, fmbXXX.or(fmaXXX).or(fm1XXX).or(tatXXX),
-        (p, b) -> p.set("cid2g", b.readUnsignedShort()));
+        register(205, fmbXXX.or(fmaXXX).or(fm1XXX).or(tatXXX), (p, b) ->
+                p.set("cid2g", b.readUnsignedShort()));
         register(205, ftXXX, (p, b) -> p.set("cid2g", b.readUnsignedInt()));
         register(206, any, (p, b) -> p.set("lac", b.readUnsignedShort()));
         register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0));
@@ -385,7 +384,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
-        register(13201, fmbXXX, (p, b) -> p.set("pcbTemperature", b.readShort() / 10.0));
+        register(13201, fmbXXX, (p, b) -> p.set(Position.KEY_DEVICE_TEMP, b.readShort() / 10.0));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
