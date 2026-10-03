@@ -155,12 +155,14 @@
         <module name="EmptyStatement"/>
         <module name="OneStatementPerLine"/>
         <module name="EqualsHashCode"/>
+        <module name="FallThrough"/>
         <module name="ExpressionOverBlockLambda"/>
         <module name="IllegalInstantiation"/>
         <!--<module name="InnerAssignment"/>-->
         <!--<module name="MissingSwitchDefault"/>-->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
         <module name="UnnecessaryNullCheckWithInstanceOf"/>
         <module name="UnusedLocalVariable">
             <property name="jdkVersion" value="21"/>
