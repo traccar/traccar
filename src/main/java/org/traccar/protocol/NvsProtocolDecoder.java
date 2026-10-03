@@ -50,7 +50,6 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
 
             buf.readUnsignedShort(); // length

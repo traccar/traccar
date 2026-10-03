@@ -293,7 +293,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-
     private Position decodeAlternative(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN_ALT, sentence);

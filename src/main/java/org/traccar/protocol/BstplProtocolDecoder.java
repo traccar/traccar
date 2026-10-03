@@ -91,6 +91,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
             default -> null;
         };
     }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {

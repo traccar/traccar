@@ -3,7 +3,6 @@ package org.traccar.protocol;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-
 public class Avl301ProtocolDecoderTest extends ProtocolTest {
 
     @Test

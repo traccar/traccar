@@ -237,7 +237,6 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-
     private void sendResponse(
             Channel channel, SocketAddress remoteAddress, Long deviceId, Integer type, Integer index) {
         if (channel != null) {
