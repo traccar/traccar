@@ -313,7 +313,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(193, fmaXXX.or(fm1XXX), (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
         register(199, any, (p, b) -> p.set(Position.KEY_ODOMETER_TRIP, b.readUnsignedInt()));
         register(200, any, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
-        register(205, any, (p, b) -> p.set("cid2g", b.readUnsignedShort()));
+        register(205, fmbXXX.or(fmaXXX).or(fm1XXX).or(tatXXX),
+        (p, b) -> p.set("cid2g", b.readUnsignedShort()));
+        register(205, ftXXX, (p, b) -> p.set("cid2g", b.readUnsignedInt()));
         register(206, any, (p, b) -> p.set("lac", b.readUnsignedShort()));
         register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0));
         register(233, fmbXXX, (p, b) -> p.set("cngUsed", b.readUnsignedInt()));
@@ -450,7 +452,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Integer cid2g = position.removeInteger("cid2g");
             Long cid4g = position.removeLong("cid4g");
             Integer lac = position.removeInteger("lac");
-            if (lac != null && (cid2g != null || cid4g != null)) {
+            if (lac != null
+                    && lac >= 1
+                    && (cid2g != null || cid4g != null)) {
                 Network network = new Network();
                 CellTower cellTower;
                 if (cid2g != null) {
