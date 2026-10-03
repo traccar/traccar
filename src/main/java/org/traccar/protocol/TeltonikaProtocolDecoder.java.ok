@@ -272,28 +272,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
-        register(80, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set("dataMode", b.readUnsignedByte()));
-        register(81, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
-        register(82, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
-        register(83, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
+        register(80, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set("dataMode", b.readUnsignedByte()));
+        register(81, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
+        register(82, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
+        register(83, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
         register(84, fmaXXX.or(fm1XXX), (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort()));
         register(84, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort() / 10.0));
-
-        register(85, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
-        register(87, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
-        register(89, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()),
-        (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
+        register(85, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
+        register(87, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
+        register(89, (fmbXXX.or(fmaXXX).or(fm1XXX)).and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
         register(90, any, TeltonikaProtocolDecoder::decodeDoorStatus);
         register(100, any, (p, b) -> p.set("lvcanProgramNumber", b.readUnsignedInt()));
         register(101, any, (p, b) -> p.set("lvcanModuleId", Long.toUnsignedString(b.readLong())));
-        register(107, fmbXXX.or(fmaXXX).or(fm1XXX),
-        (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
+        register(107, fmbXXX.or(fmaXXX).or(fm1XXX), (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
         register(110, fmaXXX.or(fm1XXX), (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort()));
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() / 10.0));
         register(111, fmbXXX.or(fmaXXX).or(fm1XXX), (p, b) -> p.set("adBlueLevel", b.readUnsignedByte()));
