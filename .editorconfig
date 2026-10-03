@@ -9,3 +9,5 @@ trim_trailing_whitespace = true
 [*.java]
 indent_style = space
 indent_size = 4
+ij_java_imports_layout = *, |, jakarta.**, java.**, javax.**, |, $*
+ij_java_layout_static_imports_separately = true

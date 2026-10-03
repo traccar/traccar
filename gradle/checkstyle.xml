@@ -74,6 +74,11 @@
         <!-- Checks for imports                              -->
         <!-- See http://checkstyle.sf.net/config_import.html -->
         <module name="AvoidStarImport"/>
+        <module name="CustomImportOrder">
+            <property name="customImportOrderRules" value="THIRD_PARTY_PACKAGE, STANDARD_JAVA_PACKAGE, STATIC"/>
+            <property name="standardPackageRegExp" value="^(java|javax|jakarta)\."/>
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+        </module>
         <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
         <module name="RedundantImport"/>
         <module name="UnnecessaryFullyQualifiedType"/>
