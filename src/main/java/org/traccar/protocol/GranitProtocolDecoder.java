@@ -45,7 +45,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         int checksum = Checksum.xor(buffer.nioBuffer(0, length)) & 0xFF;
         String checksumString = String.format("%02X", checksum);
         buffer.writeBytes(checksumString.getBytes(StandardCharsets.US_ASCII));
-        buffer.writeByte('\r'); buffer.writeByte('\n');
+        buffer.writeByte('\r');
+        buffer.writeByte('\n');
     }
 
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {

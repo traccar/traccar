@@ -55,7 +55,8 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, int type, ByteBuf content) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeByte(0x02); response.writeByte(0x55); // header
+            response.writeByte(0x02); // header
+            response.writeByte(0x55); // header
             response.writeByte(type);
             response.writeShortLE(content != null ? content.readableBytes() : 0);
             if (content != null) {

@@ -65,7 +65,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         data.writeShortLE(0); // OK
 
         ByteBuf header = Unpooled.buffer(20);
-        header.writeByte(1); header.writeByte(0);
+        header.writeByte(1);
+        header.writeByte(0);
         header.writeShortLE(senderSequenceNumber++);
         header.writeShortLE(MSG_ACKNOWLEDGEMENT);
         header.writeShortLE(header.capacity() + data.capacity());

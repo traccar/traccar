@@ -71,7 +71,8 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null && channel != null) {
                     ByteBuf response = Unpooled.buffer();
-                    response.writeByte(0x48); response.writeByte(0x52); // header
+                    response.writeByte(0x48); // header
+                    response.writeByte(0x52); // header
                     response.writeBytes(id);
                     response.writeByte(0x2c); // separator
                     response.writeByte(type);

@@ -57,7 +57,8 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte('$');
             response.writeByte(type);
             response.writeByte('#');
-            response.writeByte('\r'); response.writeByte('\n');
+            response.writeByte('\r');
+            response.writeByte('\n');
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }

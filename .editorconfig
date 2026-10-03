@@ -25,3 +25,4 @@ ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
 ij_java_align_subsequent_simple_methods = false
+ij_java_keep_multiple_expressions_in_one_line = false
