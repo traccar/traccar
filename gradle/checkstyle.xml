@@ -58,6 +58,7 @@
     <module name="TreeWalker">
 
         <module name="SuppressWarningsHolder"/>
+        <module name="AnnotationLocation"/>
 
         <!-- Checks for Naming Conventions.                  -->
         <!-- See http://checkstyle.sf.net/config_naming.html -->
@@ -111,6 +112,7 @@
         <module name="GenericWhitespace"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
+        <module name="NoLineWrap"/>
         <module name="NoWhitespaceBefore"/>
         <module name="OperatorWrap"/>
         <module name="SeparatorWrap">

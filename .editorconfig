@@ -26,3 +26,7 @@ ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
 ij_java_align_subsequent_simple_methods = false
 ij_java_keep_multiple_expressions_in_one_line = false
+ij_java_class_annotation_wrap = split_into_lines
+ij_java_method_annotation_wrap = split_into_lines
+ij_java_field_annotation_wrap = split_into_lines
+ij_java_parameter_annotation_wrap = off
