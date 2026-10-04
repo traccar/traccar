@@ -347,7 +347,9 @@ public class ReportUtils {
                 for (var iterator = stream.iterator(); iterator.hasNext();) {
                     Position position = iterator.next();
                     if (lastPosition == null) {
-                        boolean initialValue = position.getBoolean(Position.KEY_MOTION);
+                        boolean initialValue = position.getBoolean(
+                                tripsConfig.getUseIgnition() && position.hasAttribute(Position.KEY_IGNITION)
+                                        ? Position.KEY_IGNITION : Position.KEY_MOTION);
                         if (initialValue == trips) {
                             startPosition = position;
                             maxSpeed = position.getSpeed();
@@ -357,7 +359,8 @@ public class ReportUtils {
                     }
                     maxSpeed = Math.max(maxSpeed, position.getSpeed());
                     positionMap.put(position.getId(), position);
-                    NewMotionProcessor.updateState(motionState, position, minDistance, minDuration, stopGap);
+                    NewMotionProcessor.updateState(
+                            motionState, position, minDistance, minDuration, stopGap, tripsConfig.getUseIgnition());
                     if (!motionState.getEvents().isEmpty()) {
                         for (Event event : motionState.getEvents()) {
                             event.set("maxSpeed", maxSpeed);

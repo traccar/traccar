@@ -566,4 +566,35 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(1260000, itemStop.getDuration());
     }
 
+    @Test
+    public void testDetectTripsWithNewLogicIgnition() throws Exception {
+
+        List<Position> data = Arrays.asList(
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 0, 0));
+        when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data.stream());
+
+        data.get(0).set(Position.KEY_IGNITION, true);
+        data.get(1).set(Position.KEY_IGNITION, true);
+        data.get(2).set(Position.KEY_IGNITION, false);
+
+        Config config = mock(Config.class);
+        when(config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)).thenReturn(true);
+        Device device = mockDevice(500, 300, 180, 900, true);
+        ReportUtils reportUtils = new ReportUtils(
+                config, storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+
+        var trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+
+        assertNotNull(trips);
+        assertFalse(trips.isEmpty());
+
+        TripReportItem itemTrip = trips.iterator().next();
+
+        assertEquals(date("2016-01-01 00:00:00.000"), itemTrip.getStartTime());
+        assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getEndTime());
+        assertEquals(120000, itemTrip.getDuration());
+    }
+
 }
