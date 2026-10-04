@@ -153,4 +153,12 @@ public class GeocoderTest {
         String address = geocoder.getAddress(22.944354, 113.375930, null);
         assertEquals("东荟创新园 云山大街, 广州市, 广东省, 中国", address);
     }
+
+    @Disabled
+    @Test
+    public void testMyGeocode() {
+        Geocoder geocoder = new MyGeocodeGeocoder(client, null, null, null, 0, new AddressFormat());
+        String address = geocoder.getAddress(40.733, -73.989, null);
+        assertEquals("118 E 13th St, New York, New York, US", address);
+    }
 }

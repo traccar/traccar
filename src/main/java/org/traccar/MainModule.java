@@ -71,6 +71,7 @@ import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapTilerGeocoder;
 import org.traccar.geocoder.MapboxGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
+import org.traccar.geocoder.MyGeocodeGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
@@ -258,6 +259,8 @@ public class MainModule extends AbstractModule {
                 case "autonavi" -> new AutoNaviGeocoder(client, key, cacheSize, addressFormat);
                 case "baidu" -> new BaiduGeocoder(client, key, language, cacheSize, addressFormat);
                 case "tencent" -> new TencentGeocoder(client, key, cacheSize, addressFormat);
+                case "mygeocode" -> new MyGeocodeGeocoder(
+                        client, url, config.hasKey(Keys.GEOCODER_KEY) ? key : null, language, cacheSize, addressFormat);
                 default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);
