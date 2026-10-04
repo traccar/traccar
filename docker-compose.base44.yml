@@ -1,0 +1,14 @@
+services:
+  traccar:
+    image: eclipse-temurin:21-jdk
+    working_dir: /app
+    volumes:
+      - .:/app
+      - gradle-cache:/root/.gradle
+    command: ["sh", "-c", "./gradlew test --tests org.traccar.protocol.Xexun3ProtocolDecoderTest --console=plain"]
+    environment:
+      - DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME:-}
+      - DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN:-}
+
+volumes:
+  gradle-cache:

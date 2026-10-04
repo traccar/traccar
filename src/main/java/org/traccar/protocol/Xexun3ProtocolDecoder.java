@@ -121,9 +121,10 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        int bodyStart = buf.readerIndex();
+        int bodyEnd = bodyStart + length - 11;
+
         if (type != MSG_COMMAND) {
-            int bodyStart = buf.readerIndex();
-            int bodyEnd = bodyStart + length - 11;
             sendResponse(channel, type, index, imei,
                     shouldIncludeTimestamp(buf, bodyStart, bodyEnd));
         }
@@ -138,7 +139,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         Network network = new Network();
         boolean hasLocation = false;
 
-        int bodyEnd = buf.readerIndex() + length - 11;
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
             int subLength = buf.readUnsignedByte();
