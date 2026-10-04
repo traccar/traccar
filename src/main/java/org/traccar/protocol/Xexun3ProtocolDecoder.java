@@ -47,14 +47,14 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             int bodyLength = includeTimestamp ? 5 : 1;
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xFC);
-            response.writeShort(11 + bodyLength); // length = 11 (header) + body
+            response.writeShort(11 + bodyLength); // length
             response.writeByte(0x03); // version
             response.writeByte(type);
             response.writeByte(index);
             response.writeBytes(imei, imei.readerIndex(), 8);
-            response.writeByte(0); // result (0x00 = success)
+            response.writeByte(0); // result
             if (includeTimestamp) {
-                response.writeInt((int) (System.currentTimeMillis() / 1000)); // UTC timestamp
+                response.writeInt((int) (System.currentTimeMillis() / 1000));
             }
             response.writeShort(Checksum.crc16(
                     Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 11 + bodyLength)));
