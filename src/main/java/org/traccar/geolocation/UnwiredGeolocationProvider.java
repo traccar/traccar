@@ -40,16 +40,22 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
     private abstract static class NetworkMixIn {
         @JsonProperty("mcc")
         abstract Integer getHomeMobileCountryCode();
+
         @JsonProperty("mnc")
         abstract Integer getHomeMobileNetworkCode();
+
         @JsonProperty("radio")
         abstract String getRadioType();
+
         @JsonIgnore
         abstract String getCarrier();
+
         @JsonIgnore
         abstract Boolean getConsiderIp();
+
         @JsonProperty("cells")
         abstract Collection<CellTower> getCellTowers();
+
         @JsonProperty("wifi")
         abstract Collection<WifiAccessPoint> getWifiAccessPoints();
     }
@@ -57,12 +63,16 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
     private abstract static class CellTowerMixIn {
         @JsonProperty("radio")
         abstract String getRadioType();
+
         @JsonProperty("mcc")
         abstract Integer getMobileCountryCode();
+
         @JsonProperty("mnc")
         abstract Integer getMobileNetworkCode();
+
         @JsonProperty("lac")
         abstract Integer getLocationAreaCode();
+
         @JsonProperty("cid")
         abstract Long getCellId();
     }
@@ -70,6 +80,7 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
     private abstract static class WifiAccessPointMixIn {
         @JsonProperty("bssid")
         abstract String getMacAddress();
+
         @JsonProperty("signal")
         abstract Integer getSignalStrength();
     }

@@ -169,7 +169,6 @@ public class Pt60ProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setNetwork(network);
 
-
             } else {
 
                 position.setValid(true);

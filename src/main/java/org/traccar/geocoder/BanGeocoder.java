@@ -16,7 +16,6 @@
  */
 package org.traccar.geocoder;
 
-
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 

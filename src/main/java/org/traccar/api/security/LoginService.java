@@ -189,6 +189,7 @@ public class LoginService {
         checkUserEnabled(user);
         return new LoginResult(user);
     }
+
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");

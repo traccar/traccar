@@ -34,6 +34,7 @@ public final class Hashing {
 
     private static final SecretKeyFactory LEGACY_FACTORY;
     private static final SecretKeyFactory FACTORY;
+
     static {
         try {
             LEGACY_FACTORY = SecretKeyFactory.getInstance(LEGACY_ALGORITHM);

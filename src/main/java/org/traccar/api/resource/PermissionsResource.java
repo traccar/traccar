@@ -45,7 +45,7 @@ import java.util.Set;
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class PermissionsResource  extends BaseResource {
+public class PermissionsResource extends BaseResource {
 
     @Inject
     private CacheManager cacheManager;

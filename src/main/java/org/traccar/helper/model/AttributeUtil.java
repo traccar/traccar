@@ -36,8 +36,11 @@ public final class AttributeUtil {
 
     public interface Provider {
         Device getDevice();
+
         Group getGroup(long groupId);
+
         Server getServer();
+
         Config getConfig();
     }
 

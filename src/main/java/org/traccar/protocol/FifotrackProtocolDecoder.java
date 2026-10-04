@@ -183,7 +183,6 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-
     private Object decodeLocationNew(
             Channel channel, SocketAddress remoteAddress, String sentence) {
 

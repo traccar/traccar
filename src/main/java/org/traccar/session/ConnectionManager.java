@@ -382,9 +382,13 @@ public class ConnectionManager implements BroadcastInterface {
 
     public interface UpdateListener {
         void onKeepalive();
+
         void onUpdateDevice(Device device);
+
         void onUpdatePosition(Position position);
+
         void onUpdateEvent(Event event);
+
         void onUpdateLog(LogRecord record);
     }
 

@@ -531,7 +531,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-
     private Position decodeTextLine(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);

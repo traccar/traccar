@@ -271,9 +271,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
         if (pattern == PATTERN2) {
-            day   = parser.nextInt(0);
+            day = parser.nextInt(0);
             month = parser.nextInt(0);
-            year  = parser.nextInt(0);
+            year = parser.nextInt(0);
         }
         dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
@@ -284,9 +284,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         if (pattern == PATTERN1) {
-            day   = parser.nextInt(0);
+            day = parser.nextInt(0);
             month = parser.nextInt(0);
-            year  = parser.nextInt(0);
+            year = parser.nextInt(0);
         }
         if (year == 0) {
             return null; // ignore invalid data

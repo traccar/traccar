@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 

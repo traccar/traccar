@@ -158,7 +158,6 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-
     private Object decodeCustom(
             Channel channel, SocketAddress remoteAddress, String sentence) {
 

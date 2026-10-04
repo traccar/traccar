@@ -88,7 +88,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             position.addAlarm(Position.ALARM_TEMPERATURE);
         } else if (BitUtil.check(status[2], 4)) {
             position.addAlarm(Position.ALARM_TAMPERING);
-        }  else if (BitUtil.check(status[2], 6)) {
+        } else if (BitUtil.check(status[2], 6)) {
             position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
         } else if (BitUtil.check(status[2], 7)) {
             position.addAlarm(Position.ALARM_IDLE);
@@ -234,7 +234,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
                 }
 
-            }  else {
+            } else {
 
                 buf.readUnsignedByte(); // overloaded state
                 buf.readUnsignedByte(); // logging status

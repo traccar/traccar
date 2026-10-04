@@ -127,7 +127,6 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 100.0);
             position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
 
-
         } else if (type == MSG_ALARM) {
 
             buf.readUnsignedShortLE(); // random number

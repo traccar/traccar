@@ -55,6 +55,7 @@ class StringConfigKey extends ConfigKey<String> {
     StringConfigKey(String key, List<KeyType> types) {
         super(key, types, String.class, null);
     }
+
     StringConfigKey(String key, List<KeyType> types, String defaultValue) {
         super(key, types, String.class, defaultValue);
     }
@@ -64,6 +65,7 @@ class BooleanConfigKey extends ConfigKey<Boolean> {
     BooleanConfigKey(String key, List<KeyType> types) {
         super(key, types, Boolean.class, null);
     }
+
     BooleanConfigKey(String key, List<KeyType> types, Boolean defaultValue) {
         super(key, types, Boolean.class, defaultValue);
     }
@@ -73,6 +75,7 @@ class IntegerConfigKey extends ConfigKey<Integer> {
     IntegerConfigKey(String key, List<KeyType> types) {
         super(key, types, Integer.class, null);
     }
+
     IntegerConfigKey(String key, List<KeyType> types, Integer defaultValue) {
         super(key, types, Integer.class, defaultValue);
     }
@@ -82,6 +85,7 @@ class LongConfigKey extends ConfigKey<Long> {
     LongConfigKey(String key, List<KeyType> types) {
         super(key, types, Long.class, null);
     }
+
     LongConfigKey(String key, List<KeyType> types, Long defaultValue) {
         super(key, types, Long.class, defaultValue);
     }
@@ -91,6 +95,7 @@ class DoubleConfigKey extends ConfigKey<Double> {
     DoubleConfigKey(String key, List<KeyType> types) {
         super(key, types, Double.class, null);
     }
+
     DoubleConfigKey(String key, List<KeyType> types, Double defaultValue) {
         super(key, types, Double.class, defaultValue);
     }
