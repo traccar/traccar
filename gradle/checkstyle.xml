@@ -59,6 +59,7 @@
 
         <module name="SuppressWarningsHolder"/>
         <module name="AnnotationLocation"/>
+        <module name="MissingOverride"/>
 
         <!-- Checks for Naming Conventions.                  -->
         <!-- See http://checkstyle.sf.net/config_naming.html -->
@@ -153,6 +154,7 @@
         <!-- Checks for common coding problems               -->
         <!-- See http://checkstyle.sf.net/config_coding.html -->
         <module name="EmptyStatement"/>
+        <module name="AvoidDoubleBraceInitialization"/>
         <module name="OneStatementPerLine"/>
         <module name="EqualsHashCode"/>
         <module name="FallThrough"/>
