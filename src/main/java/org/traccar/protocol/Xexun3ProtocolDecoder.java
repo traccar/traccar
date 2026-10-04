@@ -46,14 +46,15 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xFC);
-            response.writeShort(12); // length
+            response.writeShort(16); // length = 11 (header) + 5 (body: result + UTC timestamp)
             response.writeByte(0x03); // version
             response.writeByte(type);
             response.writeByte(index);
             response.writeBytes(imei, imei.readerIndex(), 8);
-            response.writeByte(0); // result
+            response.writeByte(0); // result (0x00 = success)
+            response.writeInt((int) (System.currentTimeMillis() / 1000)); // UTC timestamp
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 12)));
+                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 16)));
             response.writeByte(0xCF);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
