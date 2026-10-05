@@ -259,8 +259,7 @@ public class MainModule extends AbstractModule {
                 case "autonavi" -> new AutoNaviGeocoder(client, key, cacheSize, addressFormat);
                 case "baidu" -> new BaiduGeocoder(client, key, language, cacheSize, addressFormat);
                 case "tencent" -> new TencentGeocoder(client, key, cacheSize, addressFormat);
-                case "mygeocode" -> new MyGeocodeGeocoder(
-                        client, url, config.hasKey(Keys.GEOCODER_KEY) ? key : null, language, cacheSize, addressFormat);
+                case "mygeocode" -> new MyGeocodeGeocoder(client, url, key, language, cacheSize, addressFormat);
                 default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);
