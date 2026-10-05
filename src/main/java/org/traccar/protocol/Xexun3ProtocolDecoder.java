@@ -72,9 +72,21 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                 return true;
             }
             switch (subType) {
-                case 0x6B -> { if (subLength != 0x05) return true; }
-                case 0x64 -> { if (subLength != 0x21) return true; }
-                case 0x6A -> { if (subLength != 0x10) return true; }
+                case 0x6B -> {
+                    if (subLength != 0x05) {
+                        return true;
+                    }
+                }
+                case 0x64 -> {
+                    if (subLength != 0x21) {
+                        return true;
+                    }
+                }
+                case 0x6A -> {
+                    if (subLength != 0x10) {
+                        return true;
+                    }
+                }
             }
             pos += 2 + subLength;
         }
