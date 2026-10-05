@@ -63,36 +63,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private boolean shouldIncludeTimestamp(ByteBuf buf, int bodyEnd) {
-        int pos = buf.readerIndex();
-        while (pos + 2 <= bodyEnd) {
-            int subType = buf.getUnsignedByte(pos);
-            int subLength = buf.getUnsignedByte(pos + 1);
-            if (subType == 0x6E) {
-                return true;
-            }
-            switch (subType) {
-                case 0x6B -> {
-                    if (subLength != 0x05) {
-                        return true;
-                    }
-                }
-                case 0x64 -> {
-                    if (subLength != 0x21) {
-                        return true;
-                    }
-                }
-                case 0x6A -> {
-                    if (subLength != 0x10) {
-                        return true;
-                    }
-                }
-            }
-            pos += 2 + subLength;
-        }
-        return false;
-    }
-
     private String decodeAlarm(int value) {
         return switch (value) {
             case 1 -> Position.ALARM_SOS;
@@ -131,12 +101,10 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         int bodyEnd = buf.readerIndex() + length - 11;
 
-        if (type != MSG_COMMAND) {
-            sendResponse(channel, type, index, imei,
-                    shouldIncludeTimestamp(buf, bodyEnd));
-        }
-
         if (type != MSG_DATA) {
+            if (type != MSG_COMMAND) {
+                sendResponse(channel, type, index, imei, false);
+            }
             return null;
         }
 
@@ -145,11 +113,19 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
         boolean hasLocation = false;
+        boolean newSpec = false;
 
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
             int subLength = buf.readUnsignedByte();
             int subEnd = buf.readerIndex() + subLength;
+
+            if (subType == 0x6E
+                    || subType == 0x6B && subLength != 0x05
+                    || subType == 0x64 && subLength != 0x21
+                    || subType == 0x6A && subLength != 0x10) {
+                newSpec = true;
+            }
 
             switch (subType) {
                 case 0x64 -> {
@@ -245,6 +221,8 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readerIndex(subEnd);
         }
+
+        sendResponse(channel, type, index, imei, newSpec);
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
