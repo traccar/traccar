@@ -97,7 +97,7 @@ public class ShareResource extends BaseResource {
 
             storage.addPermission(new Permission(User.class, share.getId(), clazz, id));
         } else {
-            throw new WebApplicationException("Already shared", Response.Status.CONFLICT);
+            throw new WebApplicationException(Response.Status.CONFLICT);
         }
 
         return tokenManager.generateToken(share.getId(), expiration);
