@@ -113,7 +113,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
         boolean hasLocation = false;
-        boolean newFormat = false;
+        boolean newFormat = Boolean.TRUE.equals(deviceSession.get("newFormat"));
 
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
@@ -125,6 +125,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     || subType == 0x64 && subLength != 0x21
                     || subType == 0x6A && subLength != 0x10) {
                 newFormat = true;
+                deviceSession.set("newFormat", true);
             }
 
             switch (subType) {
