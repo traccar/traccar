@@ -113,7 +113,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
         boolean hasLocation = false;
-        boolean newSpec = false;
+        boolean newFormat = false;
 
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
@@ -124,7 +124,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     || subType == 0x6B && subLength != 0x05
                     || subType == 0x64 && subLength != 0x21
                     || subType == 0x6A && subLength != 0x10) {
-                newSpec = true;
+                newFormat = true;
             }
 
             switch (subType) {
@@ -222,7 +222,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             buf.readerIndex(subEnd);
         }
 
-        sendResponse(channel, type, index, imei, newSpec);
+        sendResponse(channel, type, index, imei, newFormat);
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
