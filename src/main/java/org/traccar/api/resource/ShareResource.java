@@ -35,7 +35,9 @@ import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
@@ -94,6 +96,8 @@ public class ShareResource extends BaseResource {
             share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
 
             storage.addPermission(new Permission(User.class, share.getId(), clazz, id));
+        } else {
+            throw new WebApplicationException(Response.Status.CONFLICT);
         }
 
         return tokenManager.generateToken(share.getId(), expiration);
