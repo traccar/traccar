@@ -42,6 +42,8 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATA = 0x20;
     public static final int MSG_COMMAND = 0x21;
 
+    private boolean newFormat;
+
     private void sendResponse(Channel channel, int type, int index, ByteBuf imei, boolean includeTimestamp) {
         if (channel != null) {
             int bodyLength = includeTimestamp ? 5 : 1;
@@ -113,7 +115,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
         boolean hasLocation = false;
-        boolean newFormat = Boolean.TRUE.equals(deviceSession.get("newFormat"));
 
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
