@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -23,7 +22,6 @@ import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 import jakarta.inject.Inject;
-import java.nio.ByteOrder;
 
 public class Minifinder2Protocol extends BaseProtocol {
 
@@ -35,8 +33,7 @@ public class Minifinder2Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(
-                        ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH_LARGE, 2, 2, 4, 0, true));
+                pipeline.addLast(new Minifinder2FrameDecoder());
                 pipeline.addLast(new Minifinder2ProtocolEncoder(Minifinder2Protocol.this));
                 pipeline.addLast(new Minifinder2ProtocolDecoder(Minifinder2Protocol.this));
             }
