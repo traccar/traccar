@@ -64,7 +64,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
         while (buf.isReadable()) {
 
             buf.readUnsignedShort(); // block type
-            int blockEnd = buf.readInt() + buf.readerIndex();
+            int blockEnd = Math.toIntExact(buf.readUnsignedInt() + buf.readerIndex());
             buf.readUnsignedByte(); // security attribute
             int dataType = buf.readUnsignedByte();
 

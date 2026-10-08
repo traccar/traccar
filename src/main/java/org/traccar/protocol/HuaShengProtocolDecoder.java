@@ -218,7 +218,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 4) {
             int subtype = buf.readUnsignedShort();
-            int length = buf.readUnsignedShort() - 4;
+            int length = Math.max(buf.readUnsignedShort() - 4, 0);
             int endIndex = buf.readerIndex() + length;
             switch (subtype) {
                 case 0x0001:

@@ -63,7 +63,7 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
         while (buf.isReadable()) {
 
             int segmentId = readBitExt(buf);
-            int segmentEnd = readBitExt(buf) + buf.readerIndex();
+            int segmentEnd = Math.max(readBitExt(buf), 0) + buf.readerIndex();
 
             switch (segmentId) {
                 case 0x01:

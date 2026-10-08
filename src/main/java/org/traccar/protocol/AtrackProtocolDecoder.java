@@ -129,6 +129,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private void decodeBeaconData(Position position, int mode, int mask, ByteBuf data) {
         int i = 1;
         while (data.isReadable()) {
+            int startIndex = data.readerIndex();
             if (BitUtil.check(mask, 7)) {
                 position.set("tag" + i + "Id", ByteBufUtil.hexDump(data.readSlice(6)));
             }
@@ -191,6 +192,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                         data.skipBytes(9); // name
                     }
                 }
+            }
+            if (data.readerIndex() == startIndex) {
+                break;
             }
             i += 1;
         }
