@@ -409,7 +409,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readerIndex() < recordsEnd) {
 
             int recordStart = buf.readerIndex();
-            int recordEnd = recordStart + readVariableLength(buf);
+            int recordEnd = recordStart + Math.max(readVariableLength(buf), 9);
 
             buf.readUnsignedInt(); // generated time
             buf.readUnsignedShort(); // record count number
