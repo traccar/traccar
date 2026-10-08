@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.traccar.BaseProtocol;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -286,7 +287,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
 
     private ByteBuf decompress(ByteBuf in) {
 
-        ByteBuf out = Unpooled.buffer();
+        ByteBuf out = Unpooled.buffer(256, BaseProtocol.MAX_FRAME_LENGTH_LARGE);
 
         if (in.readableBytes() < 1) {
             return out;
