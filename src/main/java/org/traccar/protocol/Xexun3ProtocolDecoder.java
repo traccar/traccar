@@ -122,8 +122,8 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             int subEnd = buf.readerIndex() + subLength;
 
             if (subType == 0x6E
-                    || subType == 0x6B && subLength != 0x05
-                    || subType == 0x64 && subLength != 0x21
+                    || subType == 0x6B && subLength == 0x01
+                    || subType == 0x64 && subLength == 0x22
                     || subType == 0x6A && subLength == 0x18) {
                 newFormat = true;
             }
