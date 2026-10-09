@@ -46,14 +46,15 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xFC);
-            response.writeShort(12); // length
+            response.writeShort(16); // length
             response.writeByte(0x03); // version
             response.writeByte(type);
             response.writeByte(index);
             response.writeBytes(imei, imei.readerIndex(), 8);
             response.writeByte(0); // result
+            response.writeInt((int) (System.currentTimeMillis() / 1000));
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 12)));
+                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 16)));
             response.writeByte(0xCF);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -199,9 +200,11 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
                     if (fuel != 0xFF) {
                         position.set(Position.KEY_FUEL_LEVEL, fuel);
                     }
-                    long deviceTime = buf.readUnsignedInt();
-                    if (deviceTime != 0xFFFFFFFFL) {
-                        position.setDeviceTime(new Date(deviceTime * 1000));
+                    if (subEnd - buf.readerIndex() >= 4) {
+                        long deviceTime = buf.readUnsignedInt();
+                        if (deviceTime != 0xFFFFFFFFL) {
+                            position.setDeviceTime(new Date(deviceTime * 1000));
+                        }
                     }
                 }
                 default -> {}
