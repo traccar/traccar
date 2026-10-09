@@ -27,11 +27,6 @@ import java.nio.charset.StandardCharsets;
 
 public class Xexun3ProtocolEncoder extends BaseProtocolEncoder {
 
-    public static final String KEY_PRIORITY = "priority";
-    public static final String KEY_DELAY = "delay";
-    public static final String KEY_STATIC_INTERVAL = "staticInterval";
-    public static final String KEY_KEEPALIVE = "keepalive";
-
     public Xexun3ProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
@@ -68,12 +63,7 @@ public class Xexun3ProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM -> encodeContent(uniqueId, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_PERIODIC -> {
                 int frequency = command.getInteger(Command.KEY_FREQUENCY);
-                yield encodeContent(uniqueId, String.format("tk=%d,%d,%d,%d,%d",
-                        command.getInteger(KEY_PRIORITY, 2),
-                        frequency,
-                        command.getInteger(KEY_DELAY, 0),
-                        command.getInteger(KEY_STATIC_INTERVAL, frequency),
-                        command.getInteger(KEY_KEEPALIVE, 1)));
+                yield encodeContent(uniqueId, String.format("tk=2,%d,0,%d,1", frequency, frequency));
             }
             case Command.TYPE_POWER_OFF -> encodeContent(uniqueId, "of=1");
             case Command.TYPE_REBOOT_DEVICE -> encodeContent(uniqueId, "rt=1");
