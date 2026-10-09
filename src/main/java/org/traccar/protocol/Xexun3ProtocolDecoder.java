@@ -42,24 +42,19 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATA = 0x20;
     public static final int MSG_COMMAND = 0x21;
 
-    private boolean newFormat;
-
-    private void sendResponse(Channel channel, int type, int index, ByteBuf imei, boolean includeTimestamp) {
+    private void sendResponse(Channel channel, int type, int index, ByteBuf imei) {
         if (channel != null) {
-            int bodyLength = includeTimestamp ? 5 : 1;
             ByteBuf response = Unpooled.buffer();
             response.writeByte(0xFC);
-            response.writeShort(11 + bodyLength); // length
+            response.writeShort(15); // length
             response.writeByte(0x03); // version
             response.writeByte(type);
             response.writeByte(index);
             response.writeBytes(imei, imei.readerIndex(), 8);
             response.writeByte(0); // result
-            if (includeTimestamp) {
-                response.writeInt((int) (System.currentTimeMillis() / 1000));
-            }
+            response.writeInt((int) (System.currentTimeMillis() / 1000));
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 11 + bodyLength)));
+                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(3, 15)));
             response.writeByte(0xCF);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -101,12 +96,11 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        int bodyEnd = buf.readerIndex() + length - 11;
+        if (type != MSG_COMMAND) {
+            sendResponse(channel, type, index, imei);
+        }
 
         if (type != MSG_DATA) {
-            if (type != MSG_COMMAND) {
-                sendResponse(channel, type, index, imei, false);
-            }
             return null;
         }
 
@@ -116,17 +110,11 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         Network network = new Network();
         boolean hasLocation = false;
 
+        int bodyEnd = buf.readerIndex() + length - 11;
         while (buf.readerIndex() < bodyEnd) {
             int subType = buf.readUnsignedByte();
             int subLength = buf.readUnsignedByte();
             int subEnd = buf.readerIndex() + subLength;
-
-            if (subType == 0x6E
-                    || subType == 0x6B && subLength == 0x01
-                    || subType == 0x64 && subLength == 0x22
-                    || subType == 0x6A && subLength == 0x18) {
-                newFormat = true;
-            }
 
             switch (subType) {
                 case 0x64 -> {
@@ -224,8 +212,6 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readerIndex(subEnd);
         }
-
-        sendResponse(channel, type, index, imei, newFormat);
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
