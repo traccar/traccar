@@ -12,6 +12,15 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new T800xProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
+                "272702004907050867284063890232000026101005364580cc00100022256f013201920192019200080081008615ff39000002c2b403a002580000a8c00000000030f480000000ffd5"),
+                position(Checks.ATTRIBUTES)
+                        .network(network().cell(cell().mcc(204).mnc(16).lac(306).cid(2237807))));
+
+        verifyDecode(decoder, binary(
+                "272704004901e608672840638902328016261007160350ffffffffffffffffffffffffffffffff00480080908717ff39000002c2b4000402580000a8c00000000030f480000000ff80"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_BATTERY_LEVEL, 87));
+
+        verifyDecode(decoder, binary(
                 "262604005330c40863257069370825001902581e0000003f80c0200505000000041600001b5b2800260908230233ffffffffffffffffffffffffffffffff1212000000000000ffffffffffffffffffffffffff"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_POWER, 12.12));
 
