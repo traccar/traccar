@@ -95,6 +95,11 @@ public class EventsReportProvider {
                 })
                 .filter(event -> all || filterType(types, alarms, event))
                 .filter(event -> {
+                    long orderId = event.getOrderId();
+                    if (orderId > 0
+                            && reportUtils.getObject(userId, org.traccar.model.Order.class, orderId) == null) {
+                        return false;
+                    }
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId > 0 && reportUtils.getObject(userId, Geofence.class, geofenceId) == null) {
                         return false;
@@ -127,8 +132,12 @@ public class EventsReportProvider {
                     Event event = iterator.next();
                     if (all || filterType(types, alarms, event)) {
                         long geofenceId = event.getGeofenceId();
+                        long orderId = event.getOrderId();
                         long maintenanceId = event.getMaintenanceId();
-                        if (geofenceId != 0) {
+                        if (orderId > 0
+                                && reportUtils.getObject(userId, org.traccar.model.Order.class, orderId) == null) {
+                            continue;
+                        } else if (geofenceId != 0) {
                             Geofence geofence = reportUtils.getObject(userId, Geofence.class, geofenceId);
                             if (geofence != null) {
                                 geofenceNames.put(geofenceId, geofence.getName());

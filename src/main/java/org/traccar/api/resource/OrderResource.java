@@ -16,12 +16,14 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.SimpleObjectResource;
+import org.traccar.model.Geofence;
 import org.traccar.model.Order;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 @Path("orders")
@@ -31,6 +33,24 @@ public class OrderResource extends SimpleObjectResource<Order> {
 
     public OrderResource() {
         super(Order.class, "description", List.of("description"));
+    }
+
+    private void checkGeofencePermission(Order order) throws Exception {
+        if (order.getGeofenceId() > 0) {
+            permissionsService.checkPermission(Geofence.class, getUserId(), order.getGeofenceId());
+        }
+    }
+
+    @Override
+    public Response add(Order entity) throws Exception {
+        checkGeofencePermission(entity);
+        return super.add(entity);
+    }
+
+    @Override
+    public Response update(Order entity) throws Exception {
+        checkGeofencePermission(entity);
+        return super.update(entity);
     }
 
 }
