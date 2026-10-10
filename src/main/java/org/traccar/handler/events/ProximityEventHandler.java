@@ -15,7 +15,6 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.model.AttributeUtil;
@@ -24,6 +23,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
 import java.util.Set;
 
 public class ProximityEventHandler extends BasePositionEventHandler {

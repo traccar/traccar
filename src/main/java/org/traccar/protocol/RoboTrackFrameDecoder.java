@@ -27,7 +27,7 @@ public class RoboTrackFrameDecoder extends BaseFrameDecoder {
             case RoboTrackProtocolDecoder.MSG_ID -> 69;
             case RoboTrackProtocolDecoder.MSG_ACK -> 3;
             case RoboTrackProtocolDecoder.MSG_GPS, RoboTrackProtocolDecoder.MSG_GSM,
-                 RoboTrackProtocolDecoder.MSG_IMAGE_START -> 24;
+                    RoboTrackProtocolDecoder.MSG_IMAGE_START -> 24;
             case RoboTrackProtocolDecoder.MSG_IMAGE_DATA -> 8 + buf.getUnsignedShortLE(buf.readerIndex() + 1);
             case RoboTrackProtocolDecoder.MSG_IMAGE_END -> 6;
             default -> Integer.MAX_VALUE;

@@ -19,11 +19,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +64,7 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
         while (buf.isReadable()) {
 
             buf.readUnsignedShort(); // block type
-            int blockEnd = buf.readInt() + buf.readerIndex();
+            int blockEnd = Math.toIntExact(buf.readUnsignedInt() + buf.readerIndex());
             buf.readUnsignedByte(); // security attribute
             int dataType = buf.readUnsignedByte();
 

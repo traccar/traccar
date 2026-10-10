@@ -15,9 +15,8 @@
  */
 package org.traccar.model;
 
-import org.traccar.storage.QueryIgnore;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")

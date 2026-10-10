@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
@@ -28,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -409,7 +409,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readerIndex() < recordsEnd) {
 
             int recordStart = buf.readerIndex();
-            int recordEnd = recordStart + readVariableLength(buf);
+            int recordEnd = recordStart + Math.max(readVariableLength(buf), 9);
 
             buf.readUnsignedInt(); // generated time
             buf.readUnsignedShort(); // record count number

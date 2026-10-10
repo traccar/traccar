@@ -74,7 +74,7 @@ public class MediaManager {
             String name = DATE_FORMAT.format(Instant.now()) + "." + extension;
             try (FileOutputStream output = new FileOutputStream(createFile(uniqueId, name));
                     FileChannel fileChannel = output.getChannel()) {
-                    ByteBuffer byteBuffer = buf.nioBuffer();
+                ByteBuffer byteBuffer = buf.nioBuffer();
                 int written = 0;
                 while (written < size) {
                     written += fileChannel.write(byteBuffer);

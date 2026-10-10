@@ -15,13 +15,12 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.traccar.storage.QueryIgnore;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.traccar.storage.StorageName;
 
 @StorageName("tc_notifications")
 public class Notification extends ExtendedModel implements Schedulable {

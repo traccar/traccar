@@ -15,11 +15,11 @@
  */
 package org.traccar.protocol;
 
-import java.util.TimeZone;
-
+import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
+
+import java.util.TimeZone;
 
 public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
 

@@ -24,12 +24,11 @@ import org.traccar.config.Keys;
 import org.traccar.helper.SessionHelper;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpSession;
-import org.traccar.storage.StorageException;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;

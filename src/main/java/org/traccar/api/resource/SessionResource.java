@@ -15,6 +15,7 @@
  */
 package org.traccar.api.resource;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.CodeRequiredException;
 import org.traccar.api.security.LoginResult;
@@ -30,7 +31,6 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;

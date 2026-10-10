@@ -16,15 +16,14 @@
  */
 package org.traccar.api.resource;
 
+import org.traccar.api.SimpleObjectResource;
+import org.traccar.model.Calendar;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
 import java.util.List;
-
-import org.traccar.api.SimpleObjectResource;
-import org.traccar.model.Calendar;
 
 @Path("calendars")
 @Produces(MediaType.APPLICATION_JSON)

@@ -20,18 +20,18 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BufferUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 
@@ -88,7 +88,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             position.addAlarm(Position.ALARM_TEMPERATURE);
         } else if (BitUtil.check(status[2], 4)) {
             position.addAlarm(Position.ALARM_TAMPERING);
-        }  else if (BitUtil.check(status[2], 6)) {
+        } else if (BitUtil.check(status[2], 6)) {
             position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
         } else if (BitUtil.check(status[2], 7)) {
             position.addAlarm(Position.ALARM_IDLE);
@@ -234,7 +234,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
                 }
 
-            }  else {
+            } else {
 
                 buf.readUnsignedByte(); // overloaded state
                 buf.readUnsignedByte(); // logging status

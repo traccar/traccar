@@ -17,8 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.model.Command;
 
 public class Xrb28ProtocolEncoder extends BaseProtocolEncoder {
 

@@ -15,12 +15,11 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
-
-import io.netty.handler.codec.string.StringDecoder;
 
 import jakarta.inject.Inject;
 

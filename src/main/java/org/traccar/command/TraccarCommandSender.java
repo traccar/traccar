@@ -16,10 +16,6 @@
 package org.traccar.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -27,10 +23,14 @@ import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Singleton

@@ -15,11 +15,11 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
 import java.util.List;
 
 public class GeofenceHandler extends BasePositionHandler {

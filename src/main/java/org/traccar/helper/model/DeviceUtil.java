@@ -38,7 +38,6 @@ public final class DeviceUtil {
         storage.updateObject(new Device(), new Request(new Columns.Include("status")));
     }
 
-
     public static Collection<Device> getAccessibleDevices(
             Storage storage, long userId,
             Collection<Long> deviceIds, Collection<Long> groupIds) throws StorageException {

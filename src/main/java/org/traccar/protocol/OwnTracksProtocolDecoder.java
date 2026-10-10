@@ -20,10 +20,10 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -138,7 +138,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
                 }
                 if (root.containsKey("temp_c-" + indexString)) {
                     position.set(Position.PREFIX_TEMP + (i + 1),
-                        root.getJsonNumber("temp_c-" + indexString).doubleValue());
+                            root.getJsonNumber("temp_c-" + indexString).doubleValue());
                 }
             }
         }

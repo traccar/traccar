@@ -15,10 +15,10 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import jakarta.inject.Inject;
 import java.util.stream.Stream;
 
 public class MediaEventHandler extends BaseEventHandler {

@@ -15,10 +15,7 @@
  */
 package org.traccar.api.resource;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.OpenIdProvider;
@@ -27,6 +24,7 @@ import org.traccar.helper.Log;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.mail.MailManager;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
@@ -39,6 +37,7 @@ import org.traccar.storage.query.Request;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -47,6 +46,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.File;

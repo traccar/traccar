@@ -25,7 +25,6 @@ import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.InvocationCallback;
-
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;

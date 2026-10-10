@@ -32,8 +32,6 @@ import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -50,6 +48,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,8 +167,8 @@ public class NotificatorFirebase extends Notificator {
                         }
                         try {
                             storage.updateObject(user, new Request(
-                                new Columns.Include("attributes"),
-                                new Condition.Equals("id", user.getId())));
+                                    new Columns.Include("attributes"),
+                                    new Condition.Equals("id", user.getId())));
                             cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                         } catch (Exception e) {
                             LOGGER.warn("Firebase token cleanup error", e);

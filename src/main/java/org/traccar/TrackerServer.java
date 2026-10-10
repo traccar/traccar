@@ -28,9 +28,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import java.net.InetSocketAddress;
 
 public abstract class TrackerServer implements TrackerConnector {
 

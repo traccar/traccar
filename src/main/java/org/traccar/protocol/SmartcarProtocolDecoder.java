@@ -32,12 +32,12 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class SmartcarProtocolDecoder extends BaseHttpProtocolDecoder {
 

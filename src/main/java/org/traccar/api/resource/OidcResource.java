@@ -15,6 +15,7 @@
  */
 package org.traccar.api.resource;
 
+import com.nimbusds.jose.JOSEException;
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.OidcSessionManager;
 import org.traccar.api.security.OidcSessionManager.AuthorizationCode;
@@ -23,7 +24,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
-import com.nimbusds.jose.JOSEException;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -44,8 +44,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;

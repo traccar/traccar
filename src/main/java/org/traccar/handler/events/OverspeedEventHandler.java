@@ -16,7 +16,6 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -33,6 +32,8 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
+
+import jakarta.inject.Inject;
 
 public class OverspeedEventHandler extends BasePositionEventHandler {
 

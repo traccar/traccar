@@ -52,7 +52,6 @@ public class Pt502ProtocolEncoderTest extends ProtocolTest {
 
     }
 
-
     @Test
     public void testEncodeAlarmSpeed() throws Exception {
 

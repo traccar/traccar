@@ -26,9 +26,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import java.util.concurrent.TimeUnit;
 
 public abstract class TrackerClient implements TrackerConnector {
 

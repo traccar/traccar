@@ -6,12 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.traccar.config.Config;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,7 +107,7 @@ public class QueryBuilderTest {
         objectMapper = new ObjectMapper();
 
         try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
+                Statement statement = connection.createStatement()) {
             statement.execute("DROP TABLE IF EXISTS test_entity");
             statement.execute(
                     "CREATE TABLE test_entity ("
@@ -143,7 +143,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
+                Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
             TestEntity entity = results.get(0);
@@ -179,7 +179,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
+                Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
             TestEntity loaded = results.get(0);
@@ -208,7 +208,7 @@ public class QueryBuilderTest {
 
         try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
                 "SELECT * FROM test_entity ORDER BY count");
-             Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
+                Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(3, results.size());
             assertEquals("row0", results.get(0).getName());

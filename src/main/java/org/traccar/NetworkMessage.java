@@ -15,8 +15,8 @@
  */
 package org.traccar;
 
-import io.netty.util.ReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCounted;
 
 import java.net.SocketAddress;
 

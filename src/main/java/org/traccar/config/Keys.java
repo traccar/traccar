@@ -879,8 +879,8 @@ public final class Keys {
      * This option will only work if your OpenID provider supports the groups scope.
      */
     public static final ConfigKey<String> OPENID_ALLOW_GROUP = new StringConfigKey(
-        "openid.allowGroup",
-        List.of(KeyType.CONFIG));
+            "openid.allowGroup",
+            List.of(KeyType.CONFIG));
 
     /**
      * OpenID Connect group to grant admin access.
@@ -1959,8 +1959,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> GEOCODER_KEY = new StringConfigKey(
             "geocoder.key",
-            List.of(KeyType.CONFIG),
-            "pk.689d849289c8c63708068b2ff1f63b2d");
+            List.of(KeyType.CONFIG));
 
     /**
      * Language parameter for providers that support localization (e.g. Google and Nominatim).

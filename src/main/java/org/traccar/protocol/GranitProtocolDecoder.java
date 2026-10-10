@@ -19,12 +19,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +45,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         int checksum = Checksum.xor(buffer.nioBuffer(0, length)) & 0xFF;
         String checksumString = String.format("%02X", checksum);
         buffer.writeBytes(checksumString.getBytes(StandardCharsets.US_ASCII));
-        buffer.writeByte('\r'); buffer.writeByte('\n');
+        buffer.writeByte('\r');
+        buffer.writeByte('\n');
     }
 
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {

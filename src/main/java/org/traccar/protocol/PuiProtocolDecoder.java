@@ -16,8 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import org.apache.kafka.common.utils.ByteBufferInputStream;
 import org.traccar.BaseMqttProtocolDecoder;
 import org.traccar.Protocol;
@@ -26,6 +24,8 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 

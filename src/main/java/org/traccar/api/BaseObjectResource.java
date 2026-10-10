@@ -16,13 +16,11 @@
  */
 package org.traccar.api;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 import org.traccar.api.security.ServiceAccountUser;
-import org.traccar.model.ObjectOperation;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
@@ -34,14 +32,15 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 

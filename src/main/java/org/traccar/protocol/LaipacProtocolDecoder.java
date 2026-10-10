@@ -17,18 +17,18 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.model.AttributeUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.helper.BitUtil;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Locale;
@@ -166,7 +166,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, parser.next());
+                getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -192,7 +192,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, parser.next());
+                getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -258,7 +258,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-        Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
