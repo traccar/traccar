@@ -43,17 +43,15 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMMAND = 0x21;
 
     static ByteBuf encodeContent(int type, int index, ByteBuf imei, ByteBuf content) {
+        int length = 11 + content.readableBytes();
         ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0xFC);
-        int lengthIndex = buf.writerIndex();
-        buf.writeShort(0); // length placeholder, back-patched below
+        buf.writeByte(0xFC); // start
+        buf.writeShort(length);
         buf.writeByte(0x03); // version
         buf.writeByte(type);
         buf.writeByte(index);
         buf.writeBytes(imei, imei.readerIndex(), 8);
         buf.writeBytes(content);
-        int length = buf.writerIndex() - lengthIndex - 2;
-        buf.setShort(lengthIndex, length);
         buf.writeShort(Checksum.crc16(
                 Checksum.CRC16_CCITT_FALSE, buf.nioBuffer(3, length)));
         buf.writeByte(0xCF); // end
