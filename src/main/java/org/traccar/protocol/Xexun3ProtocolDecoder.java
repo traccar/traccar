@@ -44,14 +44,14 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
 
     static ByteBuf encodeContent(int type, int index, ByteBuf imei, ByteBuf content) {
         ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0xFC); // start
+        buf.writeByte(0xFC);
         int lengthIndex = buf.writerIndex();
-        buf.writeShort(0); // length placeholder
-        buf.writeByte(0x03); // version
+        buf.writeShort(0); // length placeholder, back-patched below
+        buf.writeByte(0x03);
         buf.writeByte(type);
         buf.writeByte(index);
-        buf.writeBytes(imei, imei.readerIndex(), 8); // imei
-        buf.writeBytes(content); // body
+        buf.writeBytes(imei, imei.readerIndex(), 8);
+        buf.writeBytes(content);
         int length = buf.writerIndex() - lengthIndex - 2;
         buf.setShort(lengthIndex, length);
         buf.writeShort(Checksum.crc16(
