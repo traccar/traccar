@@ -446,15 +446,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(6); // physical cell ids
                     network.setRadioType("lte");
                     network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, tac, cid));
-                } else if (header == 0x2727) {
-                    for (int i = 0; i < 3; i++) {
-                        network.addCellTower(CellTower.from(
-                                mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort()));
-                    }
                 } else {
                     for (int i = 0; i < 3; i++) {
-                        network.addCellTower(CellTower.from(
-                                mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
+                        int lac = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        int cid = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
                     }
                 }
                 position.setNetwork(network);

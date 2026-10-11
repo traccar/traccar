@@ -13,8 +13,7 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, binary(
                 "272702004907050867284063890232000026101005364580cc00100022256f013201920192019200080081008615ff39000002c2b403a002580000a8c00000000030f480000000ffd5"),
-                position(Checks.ATTRIBUTES)
-                        .network(network().cell(cell().mcc(204).mnc(16).lac(306).cid(2237807))));
+                position(Checks.ATTRIBUTES).network(network().cell(cell().mcc(204).mnc(16).lac(306).cid(2237807))));
 
         verifyDecode(decoder, binary(
                 "272704004901e608672840638902328016261007160350ffffffffffffffffffffffffffffffff00480080908717ff39000002c2b4000402580000a8c00000000030f480000000ff80"),
