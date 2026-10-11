@@ -435,35 +435,31 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, readDate(buf));
 
-            int lbsType = buf.getUnsignedShort(buf.readerIndex());
-            if (header == 0x2727 && lbsType != 0xffff && BitUtil.check(lbsType, 15)) {
+            int mcc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+            int mnc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
 
-                int mcc = BitUtil.to(buf.readUnsignedShort(), 15);
-                int mnc = buf.readUnsignedShort();
-                long cid = buf.readUnsignedInt();
-                int tac = buf.readUnsignedShort();
-                buf.skipBytes(6); // physical cell ids
-
-                Network network = new Network(CellTower.from(mcc, mnc, tac, cid));
-                network.setRadioType("lte");
-                position.setNetwork(network);
-
-            } else {
-
-                int mcc = buf.readUnsignedShortLE();
-                int mnc = buf.readUnsignedShortLE();
-
-                if (mcc != 0xffff && mnc != 0xffff) {
-                    Network network = new Network();
+            if (mcc != 0xffff && mnc != 0xffff) {
+                Network network = new Network();
+                if (header == 0x2727 && BitUtil.check(mcc, 15)) {
+                    long cid = buf.readUnsignedInt();
+                    int tac = buf.readUnsignedShort();
+                    buf.skipBytes(6); // physical cell ids
+                    network.setRadioType("lte");
+                    network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, tac, cid));
+                } else if (header == 0x2727) {
+                    for (int i = 0; i < 3; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort()));
+                    }
+                } else {
                     for (int i = 0; i < 3; i++) {
                         network.addCellTower(CellTower.from(
                                 mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
                     }
-                    position.setNetwork(network);
-                } else if (header == 0x2626 || header == 0x2727) {
-                    buf.skipBytes(12); // cell towers
                 }
-
+                position.setNetwork(network);
+            } else if (header == 0x2626 || header == 0x2727) {
+                buf.skipBytes(12); // cell towers
             }
 
         }
