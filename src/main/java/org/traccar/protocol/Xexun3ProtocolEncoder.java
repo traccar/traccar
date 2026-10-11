@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
-import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 
@@ -32,27 +31,10 @@ public class Xexun3ProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private ByteBuf encodeContent(String uniqueId, String content) {
-        ByteBuf buf = Unpooled.buffer();
-
+        ByteBuf imei = Unpooled.wrappedBuffer(DataConverter.parseHex("0" + uniqueId));
         ByteBuf message = Unpooled.copiedBuffer(content.getBytes(StandardCharsets.US_ASCII));
-
-        buf.writeByte(0xFC); // start
-        int lengthIndex = buf.writerIndex();
-        buf.writeShort(0); // length placeholder, back-patched after body is written
-        buf.writeByte(0x03); // version
-        buf.writeByte(Xexun3ProtocolDecoder.MSG_COMMAND); // type
-        buf.writeByte(1); // index
-        buf.writeBytes(DataConverter.parseHex("0" + uniqueId)); // imei
-        buf.writeBytes(message); // body
-
-        int length = buf.writerIndex() - lengthIndex - 2;
-        buf.setShort(lengthIndex, length);
-
-        buf.writeShort(Checksum.crc16(
-                Checksum.CRC16_CCITT_FALSE, buf.nioBuffer(3, length)));
-        buf.writeByte(0xCF); // end
-
-        return buf;
+        return Xexun3ProtocolDecoder.encodeContent(
+                Xexun3ProtocolDecoder.MSG_COMMAND, 1, imei, message);
     }
 
     @Override
