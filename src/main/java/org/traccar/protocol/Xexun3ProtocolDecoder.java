@@ -98,17 +98,17 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_COMMAND) {
-            Position result = new Position(getProtocolName());
-            result.setDeviceId(deviceSession.getDeviceId());
-            getLastLocation(result, null);
-            result.set(Position.KEY_RESULT, buf.readCharSequence(
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, buf.readCharSequence(
                     length - 11, StandardCharsets.UTF_8).toString().replace("\0", "").trim());
-            return result;
+            return position;
+        } else if (type == MSG_DATA) {
+            sendResponse(channel, type, index, imei);
         } else {
             sendResponse(channel, type, index, imei);
-            if (type != MSG_DATA) {
-                return null;
-            }
+            return null;
         }
 
         Position position = new Position(getProtocolName());
