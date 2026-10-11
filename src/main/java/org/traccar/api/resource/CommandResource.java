@@ -38,6 +38,7 @@ import org.traccar.model.UserRestrictions;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -104,7 +105,8 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                 Condition.merge(List.of(
                         new Condition.Permission(User.class, getUserId(), baseClass),
                         new Condition.Permission(Device.class, deviceId, baseClass)
-                ))));
+                )),
+                new Order("description")));
 
         return commands.stream().filter(command -> {
             String type = command.getType();
