@@ -47,7 +47,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
         buf.writeByte(0xFC);
         int lengthIndex = buf.writerIndex();
         buf.writeShort(0); // length placeholder, back-patched below
-        buf.writeByte(0x03);
+        buf.writeByte(0x03); // version
         buf.writeByte(type);
         buf.writeByte(index);
         buf.writeBytes(imei, imei.readerIndex(), 8);
