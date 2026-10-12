@@ -1416,6 +1416,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xF7:
                     if (length == 2) {
                         position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() / 10.0);
+                    } else if (length >= 9) {
+                        buf.skipBytes(length); // APN information (MCC, MNC, APN, account, password)
                     } else {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedInt() / 1000.0);
                         if (length >= 5) {
@@ -1424,7 +1426,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                 position.set(Position.KEY_CHARGE, true);
                             }
                         }
-                        if (length >= 6) {
+                        if (length >= 6 && !position.hasAttribute(Position.KEY_BATTERY_LEVEL)) {
                             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         }
                     }
