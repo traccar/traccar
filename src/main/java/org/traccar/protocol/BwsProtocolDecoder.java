@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,18 @@ public class BwsProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(int value) {
+        return switch (value) {
+            case 0x09 -> Position.ALARM_MOVEMENT;
+            case 0x28 -> Position.ALARM_ACCELERATION;
+            case 0x29 -> Position.ALARM_BRAKING;
+            case 0x30 -> Position.ALARM_CORNERING;
+            case 0x34 -> Position.ALARM_REMOVING;
+            case 0x36 -> Position.ALARM_IDLE;
+            default -> null;
+        };
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -78,6 +90,7 @@ public class BwsProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_EVENT, messageType);
+        position.addAlarm(decodeAlarm(messageType));
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 360000.0);

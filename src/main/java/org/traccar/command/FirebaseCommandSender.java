@@ -82,7 +82,7 @@ public class FirebaseCommandSender implements CommandSender {
         ApnsConfig apnsConfig = ApnsConfig.builder()
                 .setAps(Aps.builder().setContentAvailable(true).build())
                 .putHeader("apns-push-type", "background")
-                .putHeader("apns-priority", "10")
+                .putHeader("apns-priority", "5")
                 .build();
 
         var messageBuilder = MulticastMessage.builder()

@@ -435,17 +435,26 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, readDate(buf));
 
-            int mcc = buf.readUnsignedShortLE();
-            int mnc = buf.readUnsignedShortLE();
+            int mcc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+            int mnc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
 
             if (mcc != 0xffff && mnc != 0xffff) {
                 Network network = new Network();
-                for (int i = 0; i < 3; i++) {
-                    network.addCellTower(CellTower.from(
-                            mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
+                if (header == 0x2727 && BitUtil.check(mcc, 15)) {
+                    long cid = buf.readUnsignedInt();
+                    int tac = buf.readUnsignedShort();
+                    buf.skipBytes(6); // physical cell ids
+                    network.setRadioType("lte");
+                    network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, tac, cid));
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                        int lac = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        int cid = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                    }
                 }
                 position.setNetwork(network);
-            } else if (header == 0x2626) {
+            } else if (header == 0x2626 || header == 0x2727) {
                 buf.skipBytes(12); // cell towers
             }
 

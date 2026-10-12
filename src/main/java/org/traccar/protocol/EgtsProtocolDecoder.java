@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         short headerLength = buf.getUnsignedByte(buf.readerIndex() + 3);
-        int index = buf.getUnsignedShort(buf.readerIndex() + 5 + 2);
+        int index = buf.getUnsignedShortLE(buf.readerIndex() + 5 + 2);
         short packetType = buf.getUnsignedByte(buf.readerIndex() + 5 + 2 + 2);
         buf.skipBytes(headerLength);
 
@@ -158,11 +158,10 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
             int recordEnd = buf.readerIndex() + length;
 
+            List<Position> recordPositions = new LinkedList<>();
             Position position = new Position(getProtocolName());
+            int adcOffset = 0;
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession != null) {
-                position.setDeviceId(deviceSession.getDeviceId());
-            }
 
             ByteBuf response = Unpooled.buffer();
             response.writeShortLE(recordIndex);
@@ -210,6 +209,11 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
                 } else if (type == MSG_POS_DATA) {
 
+                    if (position.getFixTime() != null) {
+                        position = new Position(getProtocolName());
+                        adcOffset = 0;
+                    }
+
                     position.setTime(new Date((buf.readUnsignedIntLE() + 1262304000) * 1000)); // since 2010-01-01
                     position.setLatitude(buf.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
                     position.setLongitude(buf.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
@@ -232,7 +236,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
                     if (BitUtil.check(flags, 7)) {
-                        position.setAltitude(buf.readMediumLE());
+                        int altitude = buf.readUnsignedMediumLE();
+                        position.setAltitude(BitUtil.check(speed, 14) ? -altitude : altitude);
+                    }
+
+                    if (serviceType == SERVICE_TELEDATA) {
+                        recordPositions.add(position);
                     }
 
                 } else if (type == MSG_EXT_POS_DATA) {
@@ -240,13 +249,13 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                     int flags = buf.readUnsignedByte();
 
                     if (BitUtil.check(flags, 0)) {
-                        position.set(Position.KEY_VDOP, buf.readUnsignedShortLE());
+                        position.set(Position.KEY_VDOP, buf.readUnsignedShortLE() / 100.0);
                     }
                     if (BitUtil.check(flags, 1)) {
-                        position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
+                        position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() / 100.0);
                     }
                     if (BitUtil.check(flags, 2)) {
-                        position.set(Position.KEY_PDOP, buf.readUnsignedShortLE());
+                        position.set(Position.KEY_PDOP, buf.readUnsignedShortLE() / 100.0);
                     }
                     if (BitUtil.check(flags, 3)) {
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
@@ -268,20 +277,27 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
                     for (int i = 0; i < 8; i++) {
                         if (BitUtil.check(adcMask, i)) {
-                            position.set(Position.PREFIX_ADC + (i + 1), buf.readUnsignedMediumLE());
+                            position.set(Position.PREFIX_ADC + (adcOffset + i + 1), buf.readUnsignedMediumLE());
                         }
                     }
+                    adcOffset += 8;
 
                 } else if (type == MSG_LIQUID_LEVEL_SENSOR) {
 
                     int flags = buf.readUnsignedByte();
+                    int sensorIndex = BitUtil.to(flags, 3);
 
                     buf.readUnsignedShortLE(); // address
 
                     if (BitUtil.check(flags, 3)) {
-                        position.set("liquidRaw", ByteBufUtil.hexDump(buf.readSlice(end - buf.readerIndex())));
+                        String value = ByteBufUtil.hexDump(buf.readSlice(end - buf.readerIndex()));
+                        position.set("liquid" + sensorIndex + "Raw", value);
                     } else {
-                        position.set("liquid", buf.readUnsignedIntLE());
+                        if (BitUtil.between(flags, 4, 6) == 2) {
+                            position.set("liquid" + sensorIndex, buf.readUnsignedIntLE() / 10.0);
+                        } else {
+                            position.set("liquid" + sensorIndex, buf.readUnsignedIntLE());
+                        }
                     }
 
                 }
@@ -289,15 +305,15 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(end);
             }
 
-            if (serviceType == SERVICE_TELEDATA && position.getValid()) {
+            if (!recordPositions.isEmpty()) {
                 if (useObjectIdAsDeviceId && objectId != 0L) {
                     deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(objectId));
-                    if (deviceSession != null) {
-                        position.setDeviceId(deviceSession.getDeviceId());
-                    }
                 }
                 if (deviceSession != null) {
-                    positions.add(position);
+                    for (Position recordPosition : recordPositions) {
+                        recordPosition.setDeviceId(deviceSession.getDeviceId());
+                    }
+                    positions.addAll(recordPositions);
                 }
             }
         }
