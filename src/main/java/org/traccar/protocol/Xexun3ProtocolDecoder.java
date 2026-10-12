@@ -110,7 +110,7 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
             position.set(Position.KEY_RESULT, buf.readCharSequence(
-                    length - 11, StandardCharsets.UTF_8).toString().replace("\0", "").trim());
+                    length - 11, StandardCharsets.UTF_8).toString());
             return position;
         } else if (type == MSG_DATA) {
             sendResponse(channel, type, index, imei);
