@@ -114,11 +114,14 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return position;
         } else if (type == MSG_DATA) {
             sendResponse(channel, type, index, imei);
+            return decodeData(deviceSession, buf, length);
         } else {
             sendResponse(channel, type, index, imei);
             return null;
         }
+    }
 
+    private Position decodeData(DeviceSession deviceSession, ByteBuf buf, int length) {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
