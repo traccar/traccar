@@ -31,6 +31,7 @@ import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
@@ -104,14 +105,23 @@ public class Xexun3ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type != MSG_COMMAND) {
+        if (type == MSG_COMMAND) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, buf.readCharSequence(
+                    length - 11, StandardCharsets.UTF_8).toString());
+            return position;
+        } else if (type == MSG_DATA) {
             sendResponse(channel, type, index, imei);
-        }
-
-        if (type != MSG_DATA) {
+            return decodeData(deviceSession, buf, length);
+        } else {
+            sendResponse(channel, type, index, imei);
             return null;
         }
+    }
 
+    private Position decodeData(DeviceSession deviceSession, ByteBuf buf, int length) {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
