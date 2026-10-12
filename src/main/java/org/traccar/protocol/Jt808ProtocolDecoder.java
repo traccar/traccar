@@ -1426,7 +1426,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                 position.set(Position.KEY_CHARGE, true);
                             }
                         }
-                        if (length >= 6 && !position.hasAttribute(Position.KEY_BATTERY_LEVEL)) {
+                        if (length >= 6) {
                             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         }
                     }
