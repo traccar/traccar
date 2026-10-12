@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Xexun3ProtocolDecoderTest extends ProtocolTest {
 
@@ -27,7 +28,7 @@ public class Xexun3ProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, binary(
                 "fc001b0321010862596080911005746b3d332c36302c302c333630302c319e50cf"),
-                position(Checks.ATTRIBUTES).attribute("result", "tk=3,60,0,3600,1"));
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_RESULT, "tk=3,60,0,3600,1"));
 
     }
 
