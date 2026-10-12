@@ -1417,7 +1417,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     if (length == 2) {
                         position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() / 10.0);
                     } else if (length >= 9) {
-                        buf.skipBytes(length); // APN information (MCC, MNC, APN, account, password)
+                        buf.skipBytes(length); // apn information
                     } else {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedInt() / 1000.0);
                         if (length >= 5) {
