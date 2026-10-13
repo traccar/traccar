@@ -12,6 +12,18 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTIGN,5E0100,135790246811220,1G1JC5444R7252367,,1200,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18D8,6141,00,00003:27:00,2000.0,20090214093254,11F0$"),
+                position().attribute(Position.KEY_IGNITION, true));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTVGF,5E0100,135790246811220,,,00,2,444,0,0.0,0,24.3,117.201856,31.833027,20171207092337,0460,0000,5678,2D7E,00,00003:20:00,0.0,20171207092340,011C$"),
+                position().attribute(Position.KEY_IGNITION, false));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTVGN,FE110A,868446032529642,gv50m,2,923,1,0.0,0,272.6,114.016065,22.537606,20190927060647,0460,0001,253D,AEC3,,,,20190927060649,1066$"),
+                position().attribute(Position.KEY_IGNITION, true));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTFRI,EF802C,864431040000001,JoJoSharingIoT,OK200428000950,OUKAI,,,0,0000000000000000,2,0.0,0,7.7,22.630466,38.078765,20260929061303,,0202,0005,002B,4F31,14&99,1,41,0,51848,4076,91,0,0,1,,0.0&0.00&0.0&269.9&0&0&0&000000362021022701090000&000000CF2019090301000000&0&0&00000000000000000000&2&2&00000000000000,84,20260929061305,CFE1$"),
                 position().attribute(Position.KEY_BATTERY_LEVEL, 84));
 

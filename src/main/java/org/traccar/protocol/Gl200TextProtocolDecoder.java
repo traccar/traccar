@@ -1154,10 +1154,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String model = getDeviceModel(deviceSession, protocolVersion);
+        if (model.startsWith("GV500")) {
+            index += 1; // vin
+        }
         index += 1; // device name
-        if (model.equals("CV200")) {
+        if (model.equals("CV200")
+                || type.startsWith("V") && model.matches("GV500MAP|GV55W|GV350CEU|GV355CEU")) {
             index += 1; // reserved
             index += 1; // report type
+        } else if (type.startsWith("V") && model.equals("GV50M")) {
+            index += 1; // virtual ignition mode
         }
         index += 1; // duration of ignition on/off
 
