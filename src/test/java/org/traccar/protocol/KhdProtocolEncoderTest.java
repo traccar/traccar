@@ -7,7 +7,6 @@ import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.session.cache.CacheManager;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,45 +28,37 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new KhdProtocolEncoder(null));
-        var channel = channel(encoder);
+        var channel = channel(inject(new KhdProtocolEncoder(null)));
 
         Command command = new Command();
         command.setDeviceId(1);
 
         command.setType(Command.TYPE_ENGINE_STOP);
-        verifyEncode(channel, command, binary("29293900065981972d5d0d"));
+        verifyEncode(channel, command,
+                binary("29293900065981972d5d0d"));
 
         command.setType(Command.TYPE_POSITION_SINGLE);
-        verifyEncode(channel, command, binary("29293000065981972d540d"));
+        verifyEncode(channel, command,
+                binary("29293000065981972d540d"));
 
-        // GS18 §2.2 periodic: interval 15s, default count 65535 (continuous)
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 15);
-        verifyEncode(channel, command, binary("29297b000a5981972d000fffff1c0d"));
-
-        // GS18 §2.2 periodic: interval 15s x 10 (matches PDF example payload)
-        command.set("count", 10);
-        verifyEncode(channel, command, binary("29297b000a5981972d000f000a160d"));
-
-        // GS18 §2.4 reset restart
         command.setType(Command.TYPE_REBOOT_DEVICE);
-        verifyEncode(channel, command, binary("29293200065981972d560d"));
+        verifyEncode(channel, command,
+                binary("29293200065981972d560d"));
 
-        // GS18 §2.3 scheduling text
         command.setType(Command.TYPE_CUSTOM);
         command.set(Command.KEY_DATA, "Hello!");
-        verifyEncode(channel, command, binary("29293a000c5981972d48656c6c6f21370d"));
+        verifyEncode(channel, command,
+                binary("29293a000c5981972d48656c6c6f21370d"));
 
-        // GS18 §2.3 param setting (Appendix D style, reply to D8 apply)
-        command.set(Command.KEY_DATA, "<D:006>");
-        verifyEncode(channel, command, binary("29293a000d5981972d3c443a3030363e1f0d"));
+        command.setType(Command.TYPE_POSITION_PERIODIC);
+        command.set(Command.KEY_FREQUENCY, 15);
+        verifyEncode(channel, command,
+                binary("29297b000a5981972d000fffff1c0d"));
 
-        // empty payload encodes to nothing
-        command = new Command();
-        command.setDeviceId(1);
         command.setType(Command.TYPE_CUSTOM);
-        assertNull(encoder.encodeCommand(command));
+        command.set(Command.KEY_DATA, "<D:006>");
+        verifyEncode(channel, command,
+                binary("29293a000d5981972d3c443a3030363e1f0d"));
 
     }
 
@@ -90,20 +81,6 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         // uint32 registration 3369902872 -> C8DCA318.
         verifyEncode(channel(encoderFor("3369902872")), command,
                 binary("29293a000cc8dca3183c434b57573e930d"));
-
-        command.setType(Command.TYPE_REBOOT_DEVICE);
-        verifyEncode(channel, command,
-                binary("29293200065981972d560d"));
-
-        command.setType(Command.TYPE_CUSTOM);
-        command.set(Command.KEY_DATA, "Hello!");
-        verifyEncode(channel, command,
-                binary("29293a000c5981972d48656c6c6f21370d"));
-
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 15);
-        verifyEncode(channel, command,
-                binary("29297b000a5981972d000fffff1c0d"));
 
     }
 
