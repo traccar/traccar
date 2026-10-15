@@ -68,10 +68,30 @@ def get_html():
     )
 
 
+def js_string(value):
+    encoded = json.dumps(value, ensure_ascii=False)
+    if value.count("'") <= value.count('"'):
+        encoded = "'" + encoded[1:-1].replace('\\"', '"').replace("'", "\\'") + "'"
+    return encoded
+
+
 def get_js():
-    keys = get_config_keys()
-    payload = json.dumps(keys, indent=2, sort_keys=True)
-    return f"const configKeys = {payload};\n\nexport default configKeys;\n"
+    lines = ["const configKeys = ["]
+    for key in get_config_keys():
+        lines.append("  {")
+        for name, value in sorted(key.items()):
+            if name == "types":
+                value = "[" + ", ".join(js_string(item) for item in value) + "]"
+            else:
+                value = "null" if value is None else js_string(value)
+            line = f"    {name}: {value},"
+            if len(line) > 100:
+                lines.extend([f"    {name}:", f"      {value},"])
+            else:
+                lines.append(line)
+        lines.append("  },")
+    lines.extend(["];", "", "export default configKeys;"])
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
