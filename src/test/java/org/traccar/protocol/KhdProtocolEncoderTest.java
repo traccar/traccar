@@ -22,6 +22,11 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         verifyEncode(channel, command,
                 binary("29293000065981972d540d"));
 
+        command.setType(Command.TYPE_CUSTOM);
+        command.set(Command.KEY_DATA, "Hello!");
+        verifyEncode(channel, command,
+                binary("29293a000c5981972d48656c6c6f21370d"));
+
     }
 
 }

@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
@@ -26,6 +27,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
     public static final int MSG_ON_DEMAND_TRACK = 0x30;
     public static final int MSG_CUT_OIL = 0x39;
+    public static final int MSG_SEND_TEXT = 0x3A;
     public static final int MSG_RESUME_OIL = 0x38;
     public static final int MSG_CHECK_VERSION = 0x3D;
     public static final int MSG_FACTORY_RESET = 0xC3;
@@ -74,6 +76,11 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         String uniqueId = getUniqueId(command.getDeviceId());
 
         return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> {
+                ByteBuf content = Unpooled.copiedBuffer(
+                        command.getString(Command.KEY_DATA), CharsetUtil.GB2312);
+                yield encodeCommand(MSG_SEND_TEXT, uniqueId, content);
+            }
             case Command.TYPE_ENGINE_STOP -> encodeCommand(MSG_CUT_OIL, uniqueId, null);
             case Command.TYPE_ENGINE_RESUME -> encodeCommand(MSG_RESUME_OIL, uniqueId, null);
             case Command.TYPE_GET_VERSION -> encodeCommand(MSG_CHECK_VERSION, uniqueId, null);
