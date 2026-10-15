@@ -141,6 +141,40 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeExtendedData(Position position, ByteBuf buf) {
+        int endIndex = buf.writerIndex() - 2; // checksum and ending
+        Network network = new Network();
+        while (buf.readerIndex() < endIndex) {
+            int length = buf.readUnsignedShort();
+            int type = buf.readUnsignedShort();
+            int dataEnd = buf.readerIndex() + length - 2;
+            switch (type) {
+                case 0x0024 -> {
+                    String[] values = BufferUtil.readString(buf, length - 2).split(";");
+                    network.addCellTower(CellTower.from(
+                            Integer.parseInt(values[0]), Integer.parseInt(values[1]),
+                            Integer.parseInt(values[2]), Long.parseLong(values[3])));
+                }
+                case 0x00A9 -> {
+                    int mcc = buf.readUnsignedShort();
+                    int mnc = buf.readUnsignedByte();
+                    int count = buf.readUnsignedByte();
+                    for (int i = 0; i < count; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, buf.readUnsignedShort(),
+                                buf.readUnsignedShort(), buf.readUnsignedByte()));
+                    }
+                }
+                default -> {
+                }
+            }
+            buf.readerIndex(dataEnd);
+        }
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -271,6 +305,10 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
                 decodeAlarmStatus(position, alarmStatus);
 
+            }
+
+            if (type == MSG_POSITION_UPLOAD || type == MSG_REPLY || type == MSG_TIME_APPLY) {
+                decodeExtendedData(position, buf);
             }
 
             return position;

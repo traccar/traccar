@@ -12,6 +12,18 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new KhdProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
+                "29298000a6c8dca3182610021401168061704410658602000000007f000000fff75cffffffffffffffff00001300243436303b30313b333331323b3237333035000500042952150004000801e5001600a35757413543382053433238585556312e38203b00000600a50000000c00060089ffffffff002400a901fe15060cf06aa9350cefb3e5300cf06aaa170cf06aa8110cef27a7110cef49800e000600c5ffffffff000400fa14117a0d"),
+                position()
+                        .network(network()
+                                .cell(cell().mcc(460).mnc(1).lac(3312).cid(27305))
+                                .cell(cell().mcc(510).mnc(21).lac(3312).cid(27305).signal(-53))
+                                .cell(cell().mcc(510).mnc(21).lac(3311).cid(46053).signal(-48))
+                                .cell(cell().mcc(510).mnc(21).lac(3312).cid(27306).signal(-23))
+                                .cell(cell().mcc(510).mnc(21).lac(3312).cid(27304).signal(-17))
+                                .cell(cell().mcc(510).mnc(21).lac(3311).cid(10151).signal(-17))
+                                .cell(cell().mcc(510).mnc(21).lac(3311).cid(18816).signal(-14))));
+
+        verifyDecode(decoder, binary(
                 "2929A300403099934C2004030943310000000000000000000000007B0000007FFF0E0000E70014000000000018050B01303030314330334437312102007B2203140DDA610D"),
                 position().attribute(Position.KEY_DRIVER_UNIQUE_ID, "0001C03D71"));
 
