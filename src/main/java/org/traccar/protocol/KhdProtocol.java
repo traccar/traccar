@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,13 @@ public class KhdProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 3, 2));
+                pipeline.addLast(new KhdProtocolEncoder(KhdProtocol.this));
+                pipeline.addLast(new KhdProtocolDecoder(KhdProtocol.this));
+            }
+        });
+        addServer(new TrackerServer(config, getName(), true) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new KhdProtocolEncoder(KhdProtocol.this));
                 pipeline.addLast(new KhdProtocolDecoder(KhdProtocol.this));
             }

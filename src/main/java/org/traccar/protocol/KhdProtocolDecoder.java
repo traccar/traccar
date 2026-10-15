@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -66,6 +67,24 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_REPLY = 0x85;
     public static final int MSG_SMS_ALARM_SWITCH = 0x86;
     public static final int MSG_PERIPHERAL = 0xA3;
+    public static final int MSG_PARAM_APPLY = 0xD8;
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, ByteBuf buf, int type) {
+        ByteBuf response = Unpooled.buffer();
+        response.writeByte(0x29);
+        response.writeByte(0x29); // header
+        response.writeByte(MSG_CONFIRMATION);
+        response.writeShort(5); // size
+        response.writeByte(buf.getByte(buf.writerIndex() - 2));
+        response.writeByte(type);
+        response.writeByte(buf.writerIndex() > 9 ? buf.getByte(9) : 0); // 10th byte
+        response.writeByte(Checksum.xor(response.nioBuffer()));
+        response.writeByte(0x0D); // ending
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
 
     private void decodeAlarmStatus(Position position, byte[] status) {
         if (BitUtil.check(status[0], 4)) {
@@ -116,23 +135,14 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // size
 
         if (type == MSG_LOGIN || type == MSG_ADMIN_NUMBER || type == MSG_SEND_TEXT
-                || type == MSG_SMS_ALARM_SWITCH || type == MSG_POSITION_REUPLOAD) {
+                || type == MSG_SMS_ALARM_SWITCH || type == MSG_POSITION_REUPLOAD
+                || channel instanceof DatagramChannel && (type == MSG_POSITION_UPLOAD || type == MSG_REPLY)) {
+            sendResponse(channel, remoteAddress, buf, type);
+        }
 
-            ByteBuf response = Unpooled.buffer();
-            response.writeByte(0x29);
-            response.writeByte(0x29); // header
-            response.writeByte(MSG_CONFIRMATION);
-            response.writeShort(5); // size
-            response.writeByte(buf.getByte(buf.writerIndex() - 2));
-            response.writeByte(type);
-            response.writeByte(buf.writerIndex() > 9 ? buf.getByte(9) : 0); // 10th byte
-            response.writeByte(Checksum.xor(response.nioBuffer()));
-            response.writeByte(0x0D); // ending
-
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
-
+        if (type == MSG_PARAM_APPLY) {
+            getDeviceSession(channel, remoteAddress, readIdentifiers(buf));
+            return null;
         }
 
         if (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD || type == MSG_POSITION_REUPLOAD
