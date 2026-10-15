@@ -177,6 +177,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         boolean isAkroz = sentence.startsWith("RUV");
+        boolean isRinho = sentence.startsWith("RCQ") || sentence.startsWith("RCV") || sentence.startsWith("RBR");
 
         Position position = new Position(getProtocolName());
 
@@ -210,7 +211,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             located = true;
         }
 
-        position.setSpeed(convertSpeed(parser.nextDouble(0), isAkroz ? "kmh" : "mph"));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), isAkroz || isRinho ? "kmh" : "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {

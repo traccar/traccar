@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 public class TaipProtocolDecoderTest extends ProtocolTest {
@@ -27,7 +28,11 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, text(
                 ">RCQ00151123235718-2782354-06407582055121FF0013501CDCC6313011100001514;#0805;ID=SIA056;*15<"),
-                position());
+                position().speed(UnitsConverter.knotsFromKph(55)));
+
+        verifyDecode(decoder, text(
+                ">RBR00291224153045-2778467-0642565804518081011270003A98013041200011015420+235005;ID=974862;*5E<"),
+                position().speed(UnitsConverter.knotsFromKph(45)));
 
         verifyDecode(decoder, text(
                 ">RTT151123153149-4330468-06503640000009300DF2101 04101203 000 00000000130000040414;ID=8803;#1ABD;*2B<"));
