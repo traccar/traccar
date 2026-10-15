@@ -282,7 +282,10 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte();
                 buf.readUnsignedByte();
 
-                position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
+                int command = buf.readUnsignedByte();
+                if (command != 0 && command != MSG_CONFIRMATION) {
+                    position.set(Position.KEY_RESULT, String.valueOf(command));
+                }
 
                 if (type == MSG_PERIPHERAL) {
 

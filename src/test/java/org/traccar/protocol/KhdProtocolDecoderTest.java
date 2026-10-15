@@ -78,7 +78,7 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, binary(
                 "29298500081DD08C22120312174026026545710312541700000000F819C839FFFF1D00001E00500000003AF90D"),
-                position());
+                position().attribute(Position.KEY_RESULT, "58"));
 
         verifyDecode(decoder, binary(
                 "292980002822836665140825142037045343770193879200000050ffff000082fc000004b0780b170000002a0d"),
