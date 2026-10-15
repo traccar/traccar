@@ -159,6 +159,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                 case 0x0088 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 case 0x00A3 -> position.set("debug", BufferUtil.readString(buf, length - 2).trim());
                 case 0x00A5 -> position.set("model", String.format("%08X", buf.readUnsignedInt()));
+                case 0x00A8 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                 case 0x00A9 -> {
                     int mcc = buf.readUnsignedShort();
                     int mnc = buf.readUnsignedByte();
