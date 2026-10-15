@@ -170,6 +170,20 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                                 buf.readUnsignedShort(), buf.readUnsignedByte()));
                     }
                 }
+                case 0x00AA -> {
+                    position.set(Position.KEY_IGNITION, buf.readUnsignedByte() == 1);
+                    position.set(Position.KEY_G_SENSOR, buf.readUnsignedByte() == 1);
+                    buf.skipBytes(12); // reporting intervals and mode durations
+                    String[] values = BufferUtil.readString(buf, length - 16).split(";");
+                    int mcc = Integer.parseInt(values[0]);
+                    int mnc = Integer.parseInt(values[1]);
+                    int count = Integer.parseInt(values[2]);
+                    for (int i = 0; i < count; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, Integer.parseInt(values[3 + i * 2]),
+                                Long.parseLong(values[4 + i * 2])));
+                    }
+                }
                 case 0x00B9 -> {
                     int count = buf.readUnsignedByte();
                     String[] values = BufferUtil.readString(buf, length - 3).split(",");
