@@ -14,6 +14,8 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
         verifyDecode(decoder, binary(
                 "29298000a6c8dca3182610021401168061704410658602000000007f000000fff75cffffffffffffffff00001300243436303b30313b333331323b3237333035000500042952150004000801e5001600a35757413543382053433238585556312e38203b00000600a50000000c00060089ffffffff002400a901fe15060cf06aa9350cefb3e5300cf06aaa170cf06aa8110cef27a7110cef49800e000600c5ffffffff000400fa14117a0d"),
                 position()
+                        .attribute("model", "0000000C")
+                        .attribute("debug", "WWA5C8 SC28XUV1.8 ;")
                         .network(network()
                                 .cell(cell().mcc(460).mnc(1).lac(3312).cid(27305))
                                 .cell(cell().mcc(510).mnc(21).lac(3312).cid(27305).signal(-53))

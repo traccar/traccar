@@ -33,6 +33,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
@@ -155,6 +156,9 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(values[0]), Integer.parseInt(values[1]),
                             Integer.parseInt(values[2]), Long.parseLong(values[3])));
                 }
+                case 0x0088 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                case 0x00A3 -> position.set("debug", BufferUtil.readString(buf, length - 2).trim());
+                case 0x00A5 -> position.set("model", String.format("%08X", buf.readUnsignedInt()));
                 case 0x00A9 -> {
                     int mcc = buf.readUnsignedShort();
                     int mnc = buf.readUnsignedByte();
@@ -163,6 +167,14 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                         network.addCellTower(CellTower.from(
                                 mcc, mnc, buf.readUnsignedShort(),
                                 buf.readUnsignedShort(), buf.readUnsignedByte()));
+                    }
+                }
+                case 0x00B9 -> {
+                    int count = buf.readUnsignedByte();
+                    String[] values = BufferUtil.readString(buf, length - 3).split(",");
+                    for (int i = 0; i < count; i++) {
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                values[i * 2].trim(), Integer.parseInt(values[i * 2 + 1].trim())));
                     }
                 }
                 default -> {
