@@ -27,6 +27,7 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.BufferUtil;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -35,8 +36,14 @@ import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class KhdProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyMMddHHmmss").withZone(ZoneOffset.UTC);
 
     public KhdProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -67,17 +74,27 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_REPLY = 0x85;
     public static final int MSG_SMS_ALARM_SWITCH = 0x86;
     public static final int MSG_PERIPHERAL = 0xA3;
+    public static final int MSG_TIME_APPLY = 0xD6;
+    public static final int MSG_TIME_RESPONSE = 0xD7;
     public static final int MSG_PARAM_APPLY = 0xD8;
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, ByteBuf buf, int type) {
         ByteBuf response = Unpooled.buffer();
         response.writeByte(0x29);
         response.writeByte(0x29); // header
-        response.writeByte(MSG_CONFIRMATION);
-        response.writeShort(5); // size
-        response.writeByte(buf.getByte(buf.writerIndex() - 2));
-        response.writeByte(type);
-        response.writeByte(buf.writerIndex() > 9 ? buf.getByte(9) : 0); // 10th byte
+        if (type == MSG_TIME_APPLY) {
+            response.writeByte(MSG_TIME_RESPONSE);
+            response.writeShort(13); // size
+            response.writeBytes(buf, buf.readerIndex(), 4); // device address
+            response.writeBytes(DataConverter.parseHex(DATE_FORMAT.format(Instant.now())));
+            response.writeByte(0); // reserved
+        } else {
+            response.writeByte(MSG_CONFIRMATION);
+            response.writeShort(5); // size
+            response.writeByte(buf.getByte(buf.writerIndex() - 2));
+            response.writeByte(type);
+            response.writeByte(buf.writerIndex() > 9 ? buf.getByte(9) : 0); // 10th byte
+        }
         response.writeByte(Checksum.xor(response.nioBuffer()));
         response.writeByte(0x0D); // ending
 
@@ -135,7 +152,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // size
 
         if (type == MSG_LOGIN || type == MSG_ADMIN_NUMBER || type == MSG_SEND_TEXT
-                || type == MSG_SMS_ALARM_SWITCH || type == MSG_POSITION_REUPLOAD
+                || type == MSG_SMS_ALARM_SWITCH || type == MSG_POSITION_REUPLOAD || type == MSG_TIME_APPLY
                 || channel instanceof DatagramChannel && (type == MSG_POSITION_UPLOAD || type == MSG_REPLY)) {
             sendResponse(channel, remoteAddress, buf, type);
         }
@@ -146,7 +163,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD || type == MSG_POSITION_REUPLOAD
-                || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL) {
+                || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL || type == MSG_TIME_APPLY) {
 
             Position position = new Position(getProtocolName());
 
