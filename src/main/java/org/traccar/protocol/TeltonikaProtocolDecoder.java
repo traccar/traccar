@@ -190,7 +190,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
         Predicate<String> tatXXX = (m) -> m != null && m.matches("T.T...");
-        Predicate<String> ftXXX = (m) -> m != null && m.matches("FT[A-Z]\\d{3}");
+        Predicate<String> ftXXX = (m) -> m != null && m.matches("(FT[A-Z]|AT[CM])\\d{3}");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, any, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -220,6 +220,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(66, any, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedShort() / 1000.0));
         register(67, any, (p, b) -> p.set(Position.KEY_BATTERY, b.readUnsignedShort() / 1000.0));
         register(68, fmbXXX.or(ftXXX), (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() / 1000.0));
+        register(70, ftXXX, (p, b) -> p.set(Position.KEY_DEVICE_TEMP, b.readShort() / 10.0));
         register(72, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 1, b.readInt() / 10.0));
         register(73, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 2, b.readInt() / 10.0));
         register(74, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 3, b.readInt() / 10.0));
@@ -230,7 +231,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
-        register(80, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set("dataMode", b.readUnsignedByte()));
+        register(80, fmbXXX.and(fmb6XX.negate()).or(ftXXX), (p, b) -> p.set("dataMode", b.readUnsignedByte()));
         register(81, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
         register(82, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
         register(83, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() / 10.0));
