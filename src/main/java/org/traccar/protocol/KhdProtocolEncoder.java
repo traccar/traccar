@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.traccar.model.Command;
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
     public static final int MSG_ON_DEMAND_TRACK = 0x30;
+    public static final int MSG_REBOOT = 0x32;
     public static final int MSG_CUT_OIL = 0x39;
     public static final int MSG_SEND_TEXT = 0x3A;
     public static final int MSG_RESUME_OIL = 0x38;
@@ -33,6 +34,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
     public static final int MSG_FACTORY_RESET = 0xC3;
     public static final int MSG_SET_OVERSPEED = 0x3F;
     public static final int MSG_DELETE_MILEAGE = 0x66;
+    public static final int MSG_PERIODIC_TRACK = 0x7B;
 
     public KhdProtocolEncoder(Protocol protocol) {
         super(protocol);
@@ -92,6 +94,13 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
             }
             case Command.TYPE_SET_ODOMETER -> encodeCommand(MSG_DELETE_MILEAGE, uniqueId, null);
             case Command.TYPE_POSITION_SINGLE -> encodeCommand(MSG_ON_DEMAND_TRACK, uniqueId, null);
+            case Command.TYPE_POSITION_PERIODIC -> {
+                ByteBuf content = Unpooled.buffer();
+                content.writeShort(command.getInteger(Command.KEY_FREQUENCY));
+                content.writeShort(0xFFFF); // report count
+                yield encodeCommand(MSG_PERIODIC_TRACK, uniqueId, content);
+            }
+            case Command.TYPE_REBOOT_DEVICE -> encodeCommand(MSG_REBOOT, uniqueId, null);
             default -> null;
         };
     }

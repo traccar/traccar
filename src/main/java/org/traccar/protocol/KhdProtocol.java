@@ -36,7 +36,9 @@ public class KhdProtocol extends BaseProtocol {
                 Command.TYPE_FACTORY_RESET,
                 Command.TYPE_SET_SPEED_LIMIT,
                 Command.TYPE_SET_ODOMETER,
-                Command.TYPE_POSITION_SINGLE);
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_REBOOT_DEVICE);
 
         addServer(new TrackerServer(config, getName(), false) {
             @Override
