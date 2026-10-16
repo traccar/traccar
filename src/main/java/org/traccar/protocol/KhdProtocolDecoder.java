@@ -233,7 +233,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN || type == MSG_ADMIN_NUMBER || type == MSG_SEND_TEXT
                 || type == MSG_SMS_ALARM_SWITCH || type == MSG_POSITION_REUPLOAD || type == MSG_TIME_APPLY
-                || channel instanceof DatagramChannel && (type == MSG_POSITION_UPLOAD || type == MSG_REPLY)) {
+                || channel instanceof DatagramChannel && (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD
+                || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL)) {
             sendResponse(channel, remoteAddress, buf, type);
         }
 
