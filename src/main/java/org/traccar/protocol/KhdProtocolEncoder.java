@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
@@ -40,6 +41,22 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
+    byte[] encodeIdentifier(String uniqueId) {
+        int mask = 0b0110;
+        if (uniqueId.length() == 11 && uniqueId.startsWith("1")) {
+            int prefix = Integer.parseInt(uniqueId.substring(0, 3));
+            mask = prefix - 130 - (prefix >= 156 && prefix <= 159 ? 16 : 0);
+        }
+        uniqueId = "00000000".concat(uniqueId);
+        uniqueId = uniqueId.substring(uniqueId.length() - 8);
+        byte[] identifier = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            int value = Integer.parseInt(uniqueId.substring(i * 2, i * 2 + 2));
+            identifier[i] = (byte) (value + (BitUtil.check(mask, 3 - i) ? 0x80 : 0));
+        }
+        return identifier;
+    }
+
     private ByteBuf encodeCommand(int command, String uniqueId, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
@@ -55,12 +72,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         }
         buf.writeShort(length);
 
-        uniqueId = "00000000".concat(uniqueId);
-        uniqueId = uniqueId.substring(uniqueId.length() - 8);
-        buf.writeByte(Integer.parseInt(uniqueId.substring(0, 2)));
-        buf.writeByte(Integer.parseInt(uniqueId.substring(2, 4)) + 0x80);
-        buf.writeByte(Integer.parseInt(uniqueId.substring(4, 6)) + 0x80);
-        buf.writeByte(Integer.parseInt(uniqueId.substring(6, 8)));
+        buf.writeBytes(encodeIdentifier(uniqueId));
 
         if (content != null) {
             buf.writeBytes(content);

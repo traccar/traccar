@@ -1,8 +1,11 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBufUtil;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class KhdProtocolEncoderTest extends ProtocolTest {
 
@@ -36,6 +39,14 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         verifyEncode(channel, command,
                 binary("29297b000a5981972d000fffff1c0d"));
 
+    }
+
+    @Test
+    public void testEncodeIdentifier() {
+        var encoder = new KhdProtocolEncoder(null);
+
+        assertEquals("c8dca318", ByteBufUtil.hexDump(encoder.encodeIdentifier("14472923524")));
+        assertEquals("1dd08262", ByteBufUtil.hexDump(encoder.encodeIdentifier("29800298")));
     }
 
 }
