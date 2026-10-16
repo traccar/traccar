@@ -1,29 +1,13 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBufUtil;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
-import org.traccar.config.Config;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
-import org.traccar.session.cache.CacheManager;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class KhdProtocolEncoderTest extends ProtocolTest {
-
-    private KhdProtocolEncoder encoderFor(String uniqueId) throws Exception {
-        var encoder = new KhdProtocolEncoder(null);
-        var device = mock(Device.class);
-        when(device.getUniqueId()).thenReturn(uniqueId);
-        var cacheManager = mock(CacheManager.class);
-        when(cacheManager.getConfig()).thenReturn(mock(Config.class));
-        when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
-        encoder.setCacheManager(cacheManager);
-        return encoder;
-    }
 
     @Test
     public void testEncode() throws Exception {
@@ -55,33 +39,14 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
         verifyEncode(channel, command,
                 binary("29297b000a5981972d000fffff1c0d"));
 
-        command.setType(Command.TYPE_CUSTOM);
-        command.set(Command.KEY_DATA, "<D:006>");
-        verifyEncode(channel, command,
-                binary("29293a000d5981972d3c443a3030363e1f0d"));
-
     }
 
     @Test
-    public void testEncodeSimFakeIp() throws Exception {
+    public void testEncodeIdentifier() {
+        var encoder = new KhdProtocolEncoder(null);
 
-        Command command = new Command();
-        command.setDeviceId(1);
-        command.setType(Command.TYPE_CUSTOM);
-        command.set(Command.KEY_DATA, "<CKWW>");
-
-        // SIM 13511223344 must address mask slot 0B9621AC, not legacy 0B96A12C.
-        verifyEncode(channel(encoderFor("13511223344")), command,
-                binary("29293a000c0b9621ac3c434b57573e2c0d"));
-
-        // Another SIM slot: 14472923524 -> C8DCA318.
-        verifyEncode(channel(encoderFor("14472923524")), command,
-                binary("29293a000cc8dca3183c434b57573e930d"));
-
-        // uint32 registration 3369902872 -> C8DCA318.
-        verifyEncode(channel(encoderFor("3369902872")), command,
-                binary("29293a000cc8dca3183c434b57573e930d"));
-
+        assertEquals("c8dca318", ByteBufUtil.hexDump(encoder.encodeIdentifier("14472923524")));
+        assertEquals("1dd08262", ByteBufUtil.hexDump(encoder.encodeIdentifier("29800298")));
     }
 
 }

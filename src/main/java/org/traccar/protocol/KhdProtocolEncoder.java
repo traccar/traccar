@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
@@ -40,6 +41,22 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
+    byte[] encodeIdentifier(String uniqueId) {
+        int mask = 0b0110;
+        if (uniqueId.length() == 11 && uniqueId.startsWith("1")) {
+            int prefix = Integer.parseInt(uniqueId.substring(0, 3));
+            mask = prefix - 130 - (prefix >= 156 && prefix <= 159 ? 16 : 0);
+        }
+        uniqueId = "00000000".concat(uniqueId);
+        uniqueId = uniqueId.substring(uniqueId.length() - 8);
+        byte[] identifier = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            int value = Integer.parseInt(uniqueId.substring(i * 2, i * 2 + 2));
+            identifier[i] = (byte) (value + (BitUtil.check(mask, 3 - i) ? 0x80 : 0));
+        }
+        return identifier;
+    }
+
     private ByteBuf encodeCommand(int command, String uniqueId, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
@@ -55,7 +72,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         }
         buf.writeShort(length);
 
-        buf.writeBytes(decodeUniqueId(uniqueId));
+        buf.writeBytes(encodeIdentifier(uniqueId));
 
         if (content != null) {
             buf.writeBytes(content);
@@ -65,76 +82,6 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(0x0D); // ending
 
         return buf;
-    }
-
-    /**
-     * Forward S18 mask encoding: 11-digit SIM phone -> 4-byte Fake IP.
-     * Inverse of KhdProtocolDecoder.decodeFakeIp. Returns null when the
-     * string is not an encodable SIM (wrong length/prefix), so the caller
-     * falls through to the legacy or hex paths.
-     */
-    static byte[] encodeSimAsFakeIp(String uniqueId) {
-        if (uniqueId == null || uniqueId.length() != 11 || uniqueId.charAt(0) != '1') {
-            return null;
-        }
-        for (int i = 0; i < 11; i++) {
-            if (!Character.isDigit(uniqueId.charAt(i))) {
-                return null;
-            }
-        }
-        int n = Integer.parseInt(uniqueId.substring(1, 3));
-        int mask = n - 30 < 10 ? n - 30 : n - 30 - 16;
-        if (mask < 0 || mask > 15) {
-            int extended = n - 30; // non-standard 144/145 prefixes, masks 14/15
-            if (extended < 14 || extended > 15) {
-                return null;
-            }
-            mask = extended;
-        }
-        byte[] result = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            int pair = Integer.parseInt(uniqueId.substring(3 + 2 * i, 5 + 2 * i));
-            if ((mask & (0x08 >> i)) != 0) {
-                pair += 0x80;
-            }
-            result[i] = (byte) pair;
-        }
-        return result;
-    }
-
-    private byte[] decodeUniqueId(String uniqueId) {
-        byte[] simFakeIp = encodeSimAsFakeIp(uniqueId);
-        if (simFakeIp != null) {
-            return simFakeIp;
-        }
-        if (uniqueId != null && uniqueId.matches("\\d{9,10}")) {
-            // S18 Fake IP registered as unsigned 32-bit decimal, e.g. 3369902872.
-            long value = Long.parseLong(uniqueId);
-            if (value <= 0xFFFFFFFFL) {
-                return new byte[] {
-                    (byte) (value >> 24), (byte) (value >> 16),
-                    (byte) (value >> 8), (byte) value};
-            }
-        }
-        try {
-            String padded = "00000000".concat(uniqueId);
-            padded = padded.substring(padded.length() - 8);
-            return new byte[] {
-                (byte) Integer.parseInt(padded.substring(0, 2)),
-                (byte) (Integer.parseInt(padded.substring(2, 4)) + 0x80),
-                (byte) (Integer.parseInt(padded.substring(4, 6)) + 0x80),
-                (byte) Integer.parseInt(padded.substring(6, 8))};
-        } catch (NumberFormatException e) {
-            // S18 Fake-IP hex identifier, e.g. 0A9B6584: raw bytes, no KHD bias.
-            String hex = uniqueId.replaceAll("[^0-9A-Fa-f]", "");
-            hex = "00000000".concat(hex);
-            hex = hex.substring(hex.length() - 8);
-            byte[] result = new byte[4];
-            for (int i = 0; i < 4; i++) {
-                result[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
-            }
-            return result;
-        }
     }
 
     @Override
