@@ -27,6 +27,8 @@ import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -70,7 +72,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     static {
         addTagLength(1,
-                0x01, 0x02, 0x35, 0x43, 0xc4, 0xc5, 0xc6, 0xc7,
+                0x01, 0x02, 0x35, 0x36, 0x43, 0xc4, 0xc5, 0xc6, 0xc7,
                 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf,
                 0xd0, 0xd1, 0xd2, 0xd5, 0x88, 0x89, 0x8a, 0x8b, 0x8c,
                 0xa0, 0xaf, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6,
@@ -90,8 +92,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 0xd4, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xf0, 0xf9,
                 0x5a, 0x47, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6,
                 0xf7, 0xf8, 0xe2, 0xe9);
-        TAG_LENGTH_MAP.put(0x5b, 7); // variable length
-        TAG_LENGTH_MAP.put(0x5c, 68);
         TAG_LENGTH_MAP.put(0xfd, 8);
     }
 
@@ -101,6 +101,36 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             throw new IllegalArgumentException(String.format("Unknown tag: 0x%02x", tag));
         }
         return length;
+    }
+
+    private static final Map<Integer, Integer> EXTENDED_TAG_LENGTH_MAP = new HashMap<>();
+
+    private static void addExtendedTagLength(int length, int... tags) {
+        for (int tag : tags) {
+            EXTENDED_TAG_LENGTH_MAP.put(tag, length);
+        }
+    }
+
+    private static void addExtendedTagRange(int length, int from, int to) {
+        for (int tag = from; tag <= to; tag++) {
+            EXTENDED_TAG_LENGTH_MAP.put(tag, length);
+        }
+    }
+
+    static {
+        addExtendedTagRange(4, 0x0001, 0x0080);
+        addExtendedTagRange(4, 0x0086, 0x0091);
+        addExtendedTagLength(1,
+                0x0085, 0x0093, 0x00a4, 0x00a5, 0x00a6, 0x00a7, 0x00a8,
+                0x00b0, 0x00b1, 0x00b2, 0x00fc);
+        addExtendedTagLength(2, 0x0081, 0x0082, 0x0083, 0x0084);
+        addExtendedTagLength(4, 0x0095, 0x00a9, 0x00ac);
+        addExtendedTagLength(6, 0x00ad, 0x00ae, 0x00b4, 0x00b5, 0x00b6);
+        addExtendedTagLength(8, 0x00fd, 0x00fe);
+        addExtendedTagLength(12, 0x00ab, 0x00b3);
+        EXTENDED_TAG_LENGTH_MAP.put(0x0092, 15);
+        EXTENDED_TAG_LENGTH_MAP.put(0x0094, 20);
+        EXTENDED_TAG_LENGTH_MAP.put(0x00af, 14);
     }
 
     private void sendResponse(Channel channel, int header, int checksum) {
@@ -136,6 +166,70 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static final int[] REFRIGERATOR_FIELD_LENGTHS = {
+            0, 10, 10, 10, 2, 2, 2, 2, 2, 2, 32, 20, 12, 2, 2 };
+
+    private String readRefrigeratorData(ByteBuf buf) {
+        int status = buf.getUnsignedShortLE(buf.readerIndex() + 1);
+        int length = 7;
+        for (int i = 0; i < REFRIGERATOR_FIELD_LENGTHS.length; i++) {
+            if (BitUtil.check(status, i)) {
+                length += REFRIGERATOR_FIELD_LENGTHS[i];
+            }
+        }
+        return ByteBufUtil.hexDump(buf.readSlice(length));
+    }
+
+    private void decodeTirePressureData(Position position, ByteBuf buf) {
+        int b0 = buf.getUnsignedByte(buf.readerIndex());
+        int b1 = buf.getUnsignedByte(buf.readerIndex() + 1);
+        if ((b0 == 0x00 && b1 == 0xFF) || (b0 == 0xFF && b1 == 0x00)) {
+            buf.skipBytes(2);
+            return;
+        }
+        for (int i = 0; i < 34; i++) {
+            String prefix = "tire" + (i + 1);
+            position.set(prefix + "Pressure", buf.readUnsignedByte());
+            int flags = buf.readUnsignedByte();
+            if (BitUtil.check(flags, 3)) {
+                position.set(prefix + "NoLink", true);
+            }
+            if (BitUtil.check(flags, 4)) {
+                position.set(prefix + "LowBattery", true);
+            }
+        }
+    }
+
+    private void decodeExtendedTags(Position position, ByteBuf buf) {
+        int endIndex = buf.readUnsignedShortLE() + buf.readerIndex();
+        CellTower cellTower = new CellTower();
+        cellTower.setRadioType("gsm");
+        while (buf.readerIndex() < endIndex) {
+            int tag = buf.readUnsignedShortLE();
+            switch (tag) {
+                case 0x0081 -> cellTower.setCellId((long) buf.readUnsignedShortLE());
+                case 0x0082 -> cellTower.setLocationAreaCode(buf.readUnsignedShortLE());
+                case 0x0083 -> cellTower.setMobileCountryCode(buf.readUnsignedShortLE());
+                case 0x0084 -> cellTower.setMobileNetworkCode(buf.readUnsignedShortLE());
+                case 0x0085 -> cellTower.setSignalStrength((int) buf.readUnsignedByte());
+                case 0x008e -> {
+                    position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.set("snrAvg", buf.readUnsignedByte());
+                    position.set("snrMax", buf.readUnsignedByte());
+                }
+                default -> {
+                    Integer length = EXTENDED_TAG_LENGTH_MAP.get(tag);
+                    buf.skipBytes(length != null ? length : endIndex - buf.readerIndex());
+                }
+            }
+        }
+        buf.readerIndex(endIndex);
+        if (cellTower.getCellId() != null) {
+            position.setNetwork(new Network(cellTower));
+        }
+    }
+
     private void decodeTagOther(Position position, ByteBuf buf, int tag) {
         switch (tag) {
             case 0x01 -> position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
@@ -149,6 +243,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
             case 0x34 -> position.setAltitude(buf.readShortLE());
             case 0x35 -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+            case 0x36 -> position.set(Position.KEY_PDOP, buf.readUnsignedByte() / 10.0);
             case 0x40 -> position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
             case 0x41 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
             case 0x42 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
@@ -159,6 +254,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x48 -> position.set("statusExtended", buf.readUnsignedShortLE());
             case 0x58 -> position.set("rs2320", buf.readUnsignedShortLE());
             case 0x59 -> position.set("rs2321", buf.readUnsignedShortLE());
+            case 0x5b -> position.set("refrigeratorData", readRefrigeratorData(buf));
+            case 0x5c -> decodeTirePressureData(position, buf);
             case 0x90 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
             case 0xc0 -> position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
             case 0xc1 -> {
@@ -173,7 +270,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0xe1 -> position.set(Position.KEY_RESULT,
                     buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
             case 0xea -> position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
-            case 0xfe -> buf.skipBytes(buf.readUnsignedShortLE());
+            case 0xfe -> decodeExtendedTags(position, buf);
             default -> buf.skipBytes(getTagLength(tag));
         }
     }
@@ -269,7 +366,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             while (data.isReadable()) {
                 int tag = data.readUnsignedByte();
                 if (tag == 0x30) {
-                    position.setValid((data.readUnsignedByte() & 0xf0) == 0x00);
+                    position.setValid(BitUtil.from(data.readUnsignedByte(), 4) == 0);
                     position.setLatitude(data.readIntLE() / 1000000.0);
                     position.setLongitude(data.readIntLE() / 1000000.0);
                 } else {
@@ -311,7 +408,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                         channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
             } else if (tag == 0x30) {
                 hasLocation = true;
-                position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
+                int flags = buf.readUnsignedByte();
+                position.setValid(BitUtil.from(flags, 4) == 0);
+                position.set(Position.KEY_SATELLITES, BitUtil.to(flags, 4));
                 position.setLatitude(buf.readIntLE() / 1000000.0);
                 position.setLongitude(buf.readIntLE() / 1000000.0);
             } else {
