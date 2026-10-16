@@ -50,16 +50,20 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private String[] readIdentifiers(ByteBuf buf) {
-        String[] identifiers = new String[2];
+    String[] readIdentifiers(ByteBuf buf) {
+        String[] identifiers = new String[3];
 
         identifiers[0] = ByteBufUtil.hexDump(buf, buf.readerIndex(), 4);
 
         int b1 = buf.readUnsignedByte();
-        int b2 = buf.readUnsignedByte() - 0x80;
-        int b3 = buf.readUnsignedByte() - 0x80;
+        int b2 = buf.readUnsignedByte();
+        int b3 = buf.readUnsignedByte();
         int b4 = buf.readUnsignedByte();
-        identifiers[1] = String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
+        identifiers[1] = String.format("%02d%02d%02d%02d", b1, b2 - 0x80, b3 - 0x80, b4);
+
+        int mask = ((b1 & 0x80) >> 4) | ((b2 & 0x80) >> 5) | ((b3 & 0x80) >> 6) | (b4 >> 7);
+        int prefix = 130 + mask + (mask >= 10 && mask <= 13 ? 16 : 0);
+        identifiers[2] = String.format("%03d%02d%02d%02d%02d", prefix, b1 & 0x7F, b2 & 0x7F, b3 & 0x7F, b4 & 0x7F);
 
         return identifiers;
     }

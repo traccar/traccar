@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 public class KhdProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -90,6 +92,14 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
                 "292980002802425349120811032137022373011140211100000334FFFF000082FC0000001E780913000034DF0D"),
                 position());
 
+    }
+
+    @Test
+    public void testReadIdentifiers() {
+        var decoder = new KhdProtocolDecoder(null);
+
+        assertArrayEquals(new String[] {"c8dca318", "200923524", "14472923524"},
+                decoder.readIdentifiers(binary("C8DCA318")));
     }
 
 }
