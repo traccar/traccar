@@ -151,6 +151,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             int dataEnd = buf.readerIndex() + length - 2;
             switch (type) {
                 case 0x0004 -> position.set(Position.PREFIX_ADC + 1, BcdUtil.readInteger(buf, 6) / 100000.0);
+                case 0x0008 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedShort() * 100 / 1500);
                 case 0x0024 -> {
                     String[] values = BufferUtil.readString(buf, length - 2).split(";");
                     network.addCellTower(CellTower.from(
