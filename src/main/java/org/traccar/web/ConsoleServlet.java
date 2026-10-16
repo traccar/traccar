@@ -17,6 +17,7 @@ package org.traccar.web;
 
 import org.h2.server.web.ConnectionInfo;
 import org.h2.server.web.JakartaWebServlet;
+import org.h2.server.web.WebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -43,7 +44,7 @@ public class ConsoleServlet extends JakartaWebServlet {
         try {
             Field field = JakartaWebServlet.class.getDeclaredField("server");
             field.setAccessible(true);
-            org.h2.server.web.WebServer server = (org.h2.server.web.WebServer) field.get(this);
+            WebServer server = (WebServer) field.get(this);
 
             ConnectionInfo connectionInfo = new ConnectionInfo("Traccar|"
                     + config.getString(Keys.DATABASE_DRIVER) + "|"
@@ -52,11 +53,11 @@ public class ConsoleServlet extends JakartaWebServlet {
 
             Method method;
 
-            method = org.h2.server.web.WebServer.class.getDeclaredMethod("updateSetting", ConnectionInfo.class);
+            method = WebServer.class.getDeclaredMethod("updateSetting", ConnectionInfo.class);
             method.setAccessible(true);
             method.invoke(server, connectionInfo);
 
-            method = org.h2.server.web.WebServer.class.getDeclaredMethod("setAllowOthers", boolean.class);
+            method = WebServer.class.getDeclaredMethod("setAllowOthers", boolean.class);
             method.setAccessible(true);
             method.invoke(server, true);
 

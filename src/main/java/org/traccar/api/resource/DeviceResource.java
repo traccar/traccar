@@ -15,8 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
@@ -34,6 +32,7 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -43,12 +42,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -160,6 +161,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             if (entity.getHours() != null) {
                 position.getAttributes().put(Position.KEY_HOURS, entity.getHours());
             }
+            position.setServerTime(new Date());
             position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
 
             Device device = new Device();

@@ -19,13 +19,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +71,8 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null && channel != null) {
                     ByteBuf response = Unpooled.buffer();
-                    response.writeByte(0x48); response.writeByte(0x52); // header
+                    response.writeByte(0x48); // header
+                    response.writeByte(0x52); // header
                     response.writeBytes(id);
                     response.writeByte(0x2c); // separator
                     response.writeByte(type);

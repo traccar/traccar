@@ -20,18 +20,18 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.config.Keys;
-import org.traccar.helper.model.AttributeUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.math.BigInteger;
 import java.net.SocketAddress;
@@ -435,16 +435,27 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, readDate(buf));
 
-            int mcc = buf.readUnsignedShortLE();
-            int mnc = buf.readUnsignedShortLE();
+            int mcc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+            int mnc = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
 
             if (mcc != 0xffff && mnc != 0xffff) {
                 Network network = new Network();
-                for (int i = 0; i < 3; i++) {
-                    network.addCellTower(CellTower.from(
-                            mcc, mnc, buf.readUnsignedShortLE(), buf.readUnsignedShortLE()));
+                if (header == 0x2727 && BitUtil.check(mcc, 15)) {
+                    long cid = buf.readUnsignedInt();
+                    int tac = buf.readUnsignedShort();
+                    buf.skipBytes(6); // physical cell ids
+                    network.setRadioType("lte");
+                    network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, tac, cid));
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                        int lac = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        int cid = header == 0x2727 ? buf.readUnsignedShort() : buf.readUnsignedShortLE();
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                    }
                 }
                 position.setNetwork(network);
+            } else if (header == 0x2626 || header == 0x2727) {
+                buf.skipBytes(12); // cell towers
             }
 
         }
@@ -498,32 +509,49 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
             if (buf.readableBytes() >= 19) {
                 position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
-                position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) / 100.0);
-                position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 1000.0);
-                position.set(Position.KEY_RPM, buf.readUnsignedShort());
-                int value;
+                long fuelUsed = buf.readUnsignedInt();
+                if (fuelUsed != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_USED, fuelUsed / 1000.0);
+                }
+                long fuelConsumption = buf.readUnsignedInt();
+                if (fuelConsumption != 0xffffffffL) {
+                    position.set(Position.KEY_FUEL_CONSUMPTION, fuelConsumption / 1000.0);
+                }
+                int value = buf.readUnsignedShort();
+                if (value != 0xffff) {
+                    position.set(Position.KEY_RPM, value);
+                }
                 value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airInput", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airPressure", value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_COOLANT_TEMP, value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set("airTemp", value - 40);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_ENGINE_LOAD, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
                     position.set(Position.KEY_THROTTLE, value);
                 }
+                value = buf.readUnsignedByte();
                 if (value != 0xff) {
-                    position.set(Position.KEY_FUEL, value);
+                    if (BitUtil.check(value, 7)) {
+                        position.set(Position.KEY_FUEL, BitUtil.to(value, 7));
+                    } else {
+                        position.set(Position.KEY_FUEL_LEVEL, value);
+                    }
                 }
             }
         }

@@ -20,14 +20,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Date;
@@ -40,7 +40,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int HEADER_VERSION_1 = 0x22;
     private static final int HEADER_VERSION_2 = 0x23;
-    private static final int HEADER_VERSION_3 = 0x24;
+    private static final int HEADER_VERSION_2_WIFI = 0x25;
 
     private static final int RECORD_PING = 0x00;
     private static final int RECORD_DATA = 0x01;
@@ -60,7 +60,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             if (version == HEADER_VERSION_1) {
                 response.writeByte(0x00);
                 response.writeByte((byte) index);
-            } else if (version == HEADER_VERSION_2) {
+            } else if (version == HEADER_VERSION_2 || version == HEADER_VERSION_2_WIFI) {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
                 ByteBuf timeBytes = Unpooled.buffer(4);

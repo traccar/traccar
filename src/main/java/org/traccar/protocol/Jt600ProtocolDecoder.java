@@ -19,20 +19,21 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BufferUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.StringUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -122,7 +123,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // header
 
-        String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
+        String id = StringUtil.stripLeading('0', ByteBufUtil.hexDump(buf.readSlice(5)));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;

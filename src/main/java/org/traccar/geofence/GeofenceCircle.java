@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 package org.traccar.geofence;
 
+import org.traccar.helper.DistanceCalculator;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
-
-import org.traccar.helper.DistanceCalculator;
 
 public class GeofenceCircle extends GeofenceGeometry {
 
@@ -38,6 +38,13 @@ public class GeofenceCircle extends GeofenceGeometry {
     @Override
     protected boolean containsPointInternal(double latitude, double longitude) {
         return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude) <= radius;
+    }
+
+    @Override
+    protected boolean intersectsSegmentInternal(
+            double latitude1, double longitude1, double latitude2, double longitude2) {
+        return DistanceCalculator.distanceToLine(
+                centerLatitude, centerLongitude, latitude1, longitude1, latitude2, longitude2) <= radius;
     }
 
     @Override

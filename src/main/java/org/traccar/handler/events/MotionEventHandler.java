@@ -16,13 +16,11 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
@@ -36,29 +34,30 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
+
+import jakarta.inject.Inject;
 import java.util.Date;
 
-public class MotionEventHandler extends BaseEventHandler {
+public class MotionEventHandler extends BasePositionEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MotionEventHandler.class);
 
     private final Config config;
-    private final CacheManager cacheManager;
     private final Storage storage;
 
     @Inject
     public MotionEventHandler(Config config, CacheManager cacheManager, Storage storage) {
+        super(cacheManager);
         this.config = config;
-        this.cacheManager = cacheManager;
         this.storage = storage;
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
 
         long deviceId = position.getDeviceId();
         Device device = cacheManager.getObject(Device.class, deviceId);
-        if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
+        if (device == null) {
             return;
         }
 
@@ -67,15 +66,17 @@ public class MotionEventHandler extends BaseEventHandler {
             double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
             long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
             long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
-            handleNewLogic(device, position, minDistance, minDuration, stopGap, callback);
+            boolean useIgnition = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_USE_IGNITION);
+            handleNewLogic(device, position, minDistance, minDuration, stopGap, useIgnition, callback);
         } else {
             TripsConfig tripsConfig = new TripsConfig(attributeProvider);
-            handleOldLogic(device, position, tripsConfig, callback);
+            handleOldLogic(device, position, lastPosition, tripsConfig, callback);
         }
     }
 
     private void handleNewLogic(
-            Device device, Position position, double minDistance, long minDuration, long stopGap, Callback callback) {
+            Device device, Position position,
+            double minDistance, long minDuration, long stopGap, boolean useIgnition, Callback callback) {
         NewMotionState state = new NewMotionState();
         state.setMotionStreak(device.getMotionStreak());
         state.setPositions(cacheManager.getPositions(device.getId()));
@@ -94,7 +95,7 @@ public class MotionEventHandler extends BaseEventHandler {
         } else {
             state.setEventPosition(position);
         }
-        NewMotionProcessor.updateState(state, position, minDistance, minDuration, stopGap);
+        NewMotionProcessor.updateState(state, position, minDistance, minDuration, stopGap, useIgnition);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());
             device.setMotionTime(state.getEventTime());
@@ -115,10 +116,11 @@ public class MotionEventHandler extends BaseEventHandler {
         }
     }
 
-    private void handleOldLogic(Device device, Position position, TripsConfig tripsConfig, Callback callback) {
+    private void handleOldLogic(
+            Device device, Position position, Position lastPosition, TripsConfig tripsConfig, Callback callback) {
         MotionState state = MotionState.fromDevice(device);
-        Position last = cacheManager.getPosition(device.getId());
-        MotionProcessor.updateState(state, last, position, position.getBoolean(Position.KEY_MOTION), tripsConfig);
+        MotionProcessor.updateState(
+                state, lastPosition, position, position.getBoolean(Position.KEY_MOTION), tripsConfig);
         if (state.isChanged()) {
             state.toDevice(device);
             try {

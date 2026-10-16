@@ -20,13 +20,13 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -35,8 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
-
-    private ByteBuf photo;
 
     public RuptelaProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -327,10 +325,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf filename = buf.readSlice(8);
                 int total = buf.readUnsignedShort();
                 int current = buf.readUnsignedShort();
-                if (photo == null) {
-                    photo = Unpooled.buffer();
+                if (getMediaBuffer() == null) {
+                    newMediaBuffer();
                 }
-                photo.writeBytes(buf.readSlice(buf.readableBytes() - 2));
+                getMediaBuffer().writeBytes(buf, buf.readableBytes() - 2);
                 if (current < total - 1) {
                     ByteBuf content = Unpooled.buffer();
                     content.writeByte(subtype);
@@ -346,9 +344,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
                     getLastLocation(position, null);
-                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
                     return position;
                 }
             }

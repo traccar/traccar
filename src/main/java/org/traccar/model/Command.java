@@ -15,9 +15,8 @@
  */
 package org.traccar.model;
 
-import org.traccar.storage.QueryIgnore;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
@@ -81,6 +80,7 @@ public class Command extends BaseCommand {
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_ENABLE = "enable";
     public static final String KEY_DATA = "data";
+    public static final String KEY_DURATION = "duration";
     public static final String KEY_INDEX = "index";
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SERVER = "server";

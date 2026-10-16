@@ -15,15 +15,20 @@
  */
 package org.traccar.helper;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.InvocationCallback;
+import jakarta.ws.rs.core.Response;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public final class WebHelper {
 
@@ -58,6 +63,28 @@ public final class WebHelper {
             }
             return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT));
         }
+    }
+
+    public static CompletableFuture<Void> post(
+            Invocation.Builder request, Entity<?> entity, Consumer<Response> handler) {
+        var future = new CompletableFuture<Void>();
+        request.async().post(entity, new InvocationCallback<Response>() {
+            @Override
+            public void completed(Response response) {
+                try (response) {
+                    handler.accept(response);
+                    future.complete(null);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                }
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        });
+        return future;
     }
 
 }

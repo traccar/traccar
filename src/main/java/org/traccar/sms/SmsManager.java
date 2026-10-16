@@ -16,10 +16,10 @@
  */
 package org.traccar.sms;
 
-import org.traccar.notification.MessageException;
+import java.util.concurrent.CompletableFuture;
 
 public interface SmsManager {
 
-    void sendMessage(String phone, String message, boolean command) throws MessageException;
+    CompletableFuture<Void> sendMessage(String phone, String message, boolean command);
 
 }

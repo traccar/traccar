@@ -22,6 +22,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.core.Response;
+import java.util.concurrent.CompletableFuture;
 
 public class EventForwarderJson implements EventForwarder {
 
@@ -37,7 +38,7 @@ public class EventForwarderJson implements EventForwarder {
     }
 
     @Override
-    public void forward(EventData eventData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(EventData eventData) {
         var requestBuilder = client.target(url).request();
 
         if (header != null && !header.isEmpty()) {
@@ -47,22 +48,24 @@ public class EventForwarderJson implements EventForwarder {
             }
         }
 
+        var future = new CompletableFuture<Void>();
         requestBuilder.async().post(Entity.json(eventData), new InvocationCallback<Response>() {
             @Override
             public void completed(Response response) {
                 if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
-                    resultHandler.onResult(true, null);
+                    future.complete(null);
                 } else {
                     int code = response.getStatusInfo().getStatusCode();
-                    resultHandler.onResult(false, new RuntimeException("HTTP code " + code));
+                    future.completeExceptionally(new RuntimeException("HTTP code " + code));
                 }
             }
 
             @Override
             public void failed(Throwable throwable) {
-                resultHandler.onResult(false, throwable);
+                future.completeExceptionally(throwable);
             }
         });
+        return future;
     }
 
 }

@@ -50,7 +50,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private ByteBuf photo;
     private boolean compressed;
 
     public void setCompressed(boolean compressed) {
@@ -451,15 +450,15 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = null;
 
-        if (photo == null) {
-            photo = Unpooled.buffer();
+        if (getMediaBuffer() == null) {
+            newMediaBuffer();
         }
 
         buf.readUnsignedByte(); // part number
 
         if (length > 1) {
 
-            photo.writeBytes(buf, length - 1);
+            getMediaBuffer().writeBytes(buf, length - 1);
 
         } else {
 
@@ -470,9 +469,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
-            photo.release();
-            photo = null;
+            position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
 
         }
 

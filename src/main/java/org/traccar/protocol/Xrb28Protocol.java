@@ -24,9 +24,8 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
-
 import jakarta.inject.Inject;
+import java.nio.charset.StandardCharsets;
 
 public class Xrb28Protocol extends BaseProtocol {
 

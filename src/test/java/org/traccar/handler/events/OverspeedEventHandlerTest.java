@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class OverspeedEventHandlerTest  extends BaseTest {
+public class OverspeedEventHandlerTest extends BaseTest {
 
     private Position position(String time, double speed) throws ParseException {
         Position position = new Position();

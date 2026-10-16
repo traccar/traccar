@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.forward;
+package org.traccar.helper;
 
-public interface ResultHandler {
-    void onResult(boolean success, Throwable throwable);
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+public final class CharsetUtil {
+
+    public static final Charset GB2312 = getCharset("GB2312");
+    public static final Charset GBK = getCharset("GBK");
+
+    private CharsetUtil() {}
+
+    private static Charset getCharset(String name) {
+        return Charset.isSupported(name) ? Charset.forName(name) : StandardCharsets.US_ASCII;
+    }
+
 }

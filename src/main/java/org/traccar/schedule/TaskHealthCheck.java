@@ -24,7 +24,6 @@ import org.traccar.config.Keys;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
-
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 

@@ -48,7 +48,6 @@ public class FilterHandlerTest extends BaseTest {
         when(config.getString(Keys.FILTER_DISTANCE.getKey())).thenReturn("10");
         when(config.getString(Keys.FILTER_MAX_SPEED.getKey())).thenReturn("500");
         when(config.getString(Keys.FILTER_SKIP_LIMIT.getKey())).thenReturn("10");
-        when(config.getString(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE.getKey())).thenReturn("true");
         when(config.getString(Keys.FILTER_SKIP_ATTRIBUTES.getKey())).thenReturn("alarm,result");
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);

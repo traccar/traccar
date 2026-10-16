@@ -16,10 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -31,6 +29,7 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -43,8 +42,6 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyMMddHHmmss").withZone(ZoneOffset.UTC);
-
-    private ByteBuf photo;
 
     public FifotrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -153,6 +150,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void requestPhoto(Channel channel, SocketAddress remoteAddress, String imei, String file) {
+        ByteBuf photo = getMediaBuffer();
         String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
         sendResponse(channel, remoteAddress, imei, content);
     }
@@ -184,7 +182,6 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
         return null;
     }
-
 
     private Object decodeLocationNew(
             Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -356,12 +353,13 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 String imei = parser.next();
                 int length = parser.nextInt();
                 String photoId = parser.next();
-                photo = Unpooled.buffer(length);
+                newMediaBuffer(length);
                 requestPhoto(channel, remoteAddress, imei, photoId);
             }
 
         } else if (type.equals("D06")) {
 
+            ByteBuf photo = getMediaBuffer();
             if (photo == null) {
                 return null;
             }
@@ -383,9 +381,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
                     getLastLocation(position, null);
-                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
-                    photo.release();
-                    photo = null;
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, "jpg"));
                     return position;
                 }
             }

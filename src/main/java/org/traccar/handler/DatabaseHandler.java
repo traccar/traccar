@@ -15,12 +15,13 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.PositionBatchWriter;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Position;
+
+import jakarta.inject.Inject;
 
 public class DatabaseHandler extends BasePositionHandler {
 

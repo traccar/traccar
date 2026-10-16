@@ -24,6 +24,7 @@ public final class ConcurrentWeakValueMap<K, V> {
 
     private static final class WeakValue<K, V> extends WeakReference<V> {
         private final K key;
+
         WeakValue(K key, V value, ReferenceQueue<? super V> q) {
             super(value, q);
             this.key = key;

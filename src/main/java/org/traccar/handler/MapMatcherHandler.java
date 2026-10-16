@@ -34,19 +34,19 @@ public class MapMatcherHandler extends BasePositionHandler {
     public void onPosition(Position position, Callback callback) {
         mapMatcher.getPoint(position.getLatitude(), position.getLongitude(),
                 new MapMatcher.MapMatcherCallback() {
-            @Override
-            public void onSuccess(double latitude, double longitude) {
-                position.setLatitude(latitude);
-                position.setLongitude(longitude);
-                callback.processed(false);
-            }
+                    @Override
+                    public void onSuccess(double latitude, double longitude) {
+                        position.setLatitude(latitude);
+                        position.setLongitude(longitude);
+                        callback.processed(false);
+                    }
 
-            @Override
-            public void onFailure(Throwable e) {
-                LOGGER.warn("Map matcher failed", e);
-                callback.processed(false);
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable e) {
+                        LOGGER.warn("Map matcher failed", e);
+                        callback.processed(false);
+                    }
+                });
     }
 
 }

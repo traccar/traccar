@@ -23,6 +23,8 @@ public interface TrackerConnector extends LifecycleObject {
 
     boolean isSecure();
 
+    int getPort();
+
     ChannelGroup getChannelGroup();
 
 }

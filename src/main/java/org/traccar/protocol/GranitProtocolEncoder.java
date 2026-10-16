@@ -15,13 +15,13 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.StandardCharsets;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.model.Command;
+
+import java.nio.charset.StandardCharsets;
 
 public class GranitProtocolEncoder extends BaseProtocolEncoder {
 

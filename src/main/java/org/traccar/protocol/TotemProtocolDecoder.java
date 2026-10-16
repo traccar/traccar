@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -29,6 +28,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Locale;
@@ -271,9 +271,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
         if (pattern == PATTERN2) {
-            day   = parser.nextInt(0);
+            day = parser.nextInt(0);
             month = parser.nextInt(0);
-            year  = parser.nextInt(0);
+            year = parser.nextInt(0);
         }
         dateBuilder.setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
@@ -284,9 +284,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
 
         if (pattern == PATTERN1) {
-            day   = parser.nextInt(0);
+            day = parser.nextInt(0);
             month = parser.nextInt(0);
-            year  = parser.nextInt(0);
+            year = parser.nextInt(0);
         }
         if (year == 0) {
             return null; // ignore invalid data

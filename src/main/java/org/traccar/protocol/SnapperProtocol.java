@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import jakarta.inject.Inject;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+
+import jakarta.inject.Inject;
 
 public class SnapperProtocol extends BaseProtocol {
 

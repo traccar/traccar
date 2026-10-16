@@ -23,7 +23,6 @@ import org.traccar.config.Keys;
 import org.traccar.helper.ReflectionCache;
 import org.traccar.model.Permission;
 
-import javax.sql.DataSource;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
@@ -46,6 +45,7 @@ import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 
 public final class QueryBuilder implements AutoCloseable {
 
@@ -58,6 +58,8 @@ public final class QueryBuilder implements AutoCloseable {
     private final PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
+
+    private boolean streamingTransaction;
 
     private QueryBuilder(
             Config config, DataSource dataSource, ObjectMapper objectMapper,
@@ -234,10 +236,17 @@ public final class QueryBuilder implements AutoCloseable {
         }
     }
 
-    public <T> Stream<T> executeQueryStreamed(Class<T> clazz) throws SQLException {
+    public <T> Stream<T> executeQueryStreamed(Class<T> clazz, String databaseType) throws SQLException {
         ResultSet resultSet = null;
         try {
             logQuery();
+
+            connection.setAutoCommit(false);
+            streamingTransaction = true;
+            statement.setFetchSize(switch (databaseType) {
+                case "MySQL" -> Integer.MIN_VALUE;
+                default -> config.getInteger(Keys.DATABASE_STREAM_FETCH_SIZE);
+            });
 
             resultSet = statement.executeQuery();
             ResultSetMetaData resultMetaData = resultSet.getMetaData();
@@ -311,7 +320,15 @@ public final class QueryBuilder implements AutoCloseable {
         try {
             statement.close();
         } finally {
-            connection.close();
+            try {
+                if (streamingTransaction) {
+                    streamingTransaction = false;
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+            } finally {
+                connection.close();
+            }
         }
     }
 

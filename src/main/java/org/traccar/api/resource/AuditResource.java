@@ -15,12 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Action;
 import org.traccar.model.User;
@@ -30,8 +24,14 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import java.util.Map;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Date;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

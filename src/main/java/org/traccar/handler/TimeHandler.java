@@ -15,13 +15,13 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;

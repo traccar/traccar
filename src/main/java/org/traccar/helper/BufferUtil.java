@@ -16,11 +16,11 @@
  */
 package org.traccar.helper;
 
-import java.nio.charset.StandardCharsets;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+
+import java.nio.charset.StandardCharsets;
 
 public final class BufferUtil {
 

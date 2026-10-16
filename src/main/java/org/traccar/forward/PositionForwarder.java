@@ -15,6 +15,8 @@
  */
 package org.traccar.forward;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface PositionForwarder {
-    void forward(PositionData positionData, ResultHandler resultHandler);
+    CompletableFuture<Void> forward(PositionData positionData);
 }

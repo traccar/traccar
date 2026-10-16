@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.time.Duration;
@@ -51,7 +52,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +73,7 @@ public class OidcSessionManager {
 
     private final Config config;
     private final CryptoManager cryptoManager;
+    private final SecureRandom secureRandom = new SecureRandom();
     private volatile ECKey signingKey;
 
     private final ConcurrentMap<String, AuthorizationCode> codes = new ConcurrentHashMap<>();
@@ -92,7 +93,7 @@ public class OidcSessionManager {
             String codeChallenge,
             String codeChallengeMethod) {
         byte[] random = new byte[32];
-        ThreadLocalRandom.current().nextBytes(random);
+        secureRandom.nextBytes(random);
         String code = Base64.encodeBase64URLSafeString(random);
         codes.put(code, new AuthorizationCode(
                 userId, Objects.requireNonNull(clientId), redirectUri,

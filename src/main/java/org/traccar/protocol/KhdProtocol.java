@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,28 @@ public class KhdProtocol extends BaseProtocol {
     @Inject
     public KhdProtocol(Config config) {
         setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_FACTORY_RESET,
                 Command.TYPE_SET_SPEED_LIMIT,
                 Command.TYPE_SET_ODOMETER,
-                Command.TYPE_POSITION_SINGLE);
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_REBOOT_DEVICE);
 
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 3, 2));
+                pipeline.addLast(new KhdProtocolEncoder(KhdProtocol.this));
+                pipeline.addLast(new KhdProtocolDecoder(KhdProtocol.this));
+            }
+        });
+        addServer(new TrackerServer(config, getName(), true) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new KhdProtocolEncoder(KhdProtocol.this));
                 pipeline.addLast(new KhdProtocolDecoder(KhdProtocol.this));
             }

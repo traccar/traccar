@@ -21,6 +21,8 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import redis.clients.jedis.Jedis;
 
+import java.util.concurrent.CompletableFuture;
+
 public class PositionForwarderRedis implements PositionForwarder {
 
     private final String url;
@@ -33,7 +35,7 @@ public class PositionForwarderRedis implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
 
         try {
             String key = "positions." + positionData.getDevice().getUniqueId();
@@ -41,9 +43,9 @@ public class PositionForwarderRedis implements PositionForwarder {
             try (Jedis jedis = new Jedis(url)) {
                 jedis.lpush(key, value);
             }
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (JsonProcessingException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

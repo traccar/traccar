@@ -15,14 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.traccar.api.BaseResource;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -32,6 +24,15 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
+
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("health")
 @Produces(MediaType.TEXT_PLAIN)
@@ -66,15 +67,16 @@ public class HealthResource extends BaseResource {
         synchronized (HealthResource.class) {
             long messageCurrentTotal = statisticsManager.messageStoredCount();
             long messageCurrentCheck = messageCurrentTotal - messageLastTotal;
+            long messagePreviousCheck = messageLastCheck;
+            messageLastTotal = messageCurrentTotal;
+            messageLastCheck = messageCurrentCheck;
             double dropThreshold = config.getDouble(Keys.WEB_HEALTH_CHECK_DROP_THRESHOLD);
-            if (dropThreshold > 0 && messageLastCheck > 0 && messageCurrentCheck > 0) {
-                double ratio = messageCurrentCheck / (double) messageLastCheck;
+            if (dropThreshold > 0 && messagePreviousCheck > 0 && messageCurrentCheck > 0) {
+                double ratio = messageCurrentCheck / (double) messagePreviousCheck;
                 if (ratio < dropThreshold) {
                     throw new IllegalStateException("Message health check failed with ratio " + ratio);
                 }
             }
-            messageLastTotal = messageCurrentTotal;
-            messageLastCheck = messageCurrentCheck;
         }
     }
 

@@ -23,13 +23,13 @@ import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,7 +82,7 @@ public class FirebaseCommandSender implements CommandSender {
         ApnsConfig apnsConfig = ApnsConfig.builder()
                 .setAps(Aps.builder().setContentAvailable(true).build())
                 .putHeader("apns-push-type", "background")
-                .putHeader("apns-priority", "10")
+                .putHeader("apns-priority", "5")
                 .build();
 
         var messageBuilder = MulticastMessage.builder()
@@ -101,7 +101,11 @@ public class FirebaseCommandSender implements CommandSender {
 
         var result = firebaseMessaging.sendEachForMulticast(message);
         if (result.getFailureCount() > 0) {
-            throw result.getResponses().iterator().next().getException();
+            for (var response : result.getResponses()) {
+                if (response.getException() != null) {
+                    throw response.getException();
+                }
+            }
         }
     }
 

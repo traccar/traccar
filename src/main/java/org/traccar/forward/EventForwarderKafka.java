@@ -24,6 +24,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 public class EventForwarderKafka implements EventForwarder {
 
@@ -44,14 +45,14 @@ public class EventForwarderKafka implements EventForwarder {
     }
 
     @Override
-    public void forward(EventData eventData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(EventData eventData) {
         try {
             String key = Long.toString(eventData.getDevice().getId());
             String value = objectMapper.writeValueAsString(eventData);
             producer.send(new ProducerRecord<>(topic, key, value));
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (JsonProcessingException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

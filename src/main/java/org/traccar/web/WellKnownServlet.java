@@ -16,15 +16,15 @@
 package org.traccar.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.api.security.OidcSessionManager;
+import org.traccar.config.Config;
+import org.traccar.helper.WebHelper;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.traccar.api.security.OidcSessionManager;
-import org.traccar.config.Config;
-import org.traccar.helper.WebHelper;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,9 +46,11 @@ public class WellKnownServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
         Map<String, Object> payload = switch (path) {
-            case "/openid-configuration" -> openIdConfiguration();
-            case "/oauth-authorization-server" -> authorizationServerConfiguration();
-            case "/oauth-protected-resource" -> protectedResourceConfiguration();
+            case "/openid-configuration", "/openid-configuration/api/oidc" -> openIdConfiguration();
+            case "/oauth-authorization-server", "/oauth-authorization-server/api/oidc" ->
+                    authorizationServerConfiguration();
+            case "/oauth-protected-resource", "/oauth-protected-resource/api/mcp" ->
+                    protectedResourceConfiguration();
             default -> null;
         };
         if (payload != null) {

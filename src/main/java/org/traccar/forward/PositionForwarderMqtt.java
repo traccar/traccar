@@ -15,11 +15,12 @@
  */
 package org.traccar.forward;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderMqtt implements PositionForwarder {
 
@@ -35,12 +36,20 @@ public class PositionForwarderMqtt implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
         try {
             String payload = objectMapper.writeValueAsString(positionData);
-            mqttClient.publish(topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+            var future = new CompletableFuture<Void>();
+            mqttClient.publish(topic, payload, (message, e) -> {
+                if (e == null) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(e);
+                }
+            });
+            return future;
         } catch (JsonProcessingException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

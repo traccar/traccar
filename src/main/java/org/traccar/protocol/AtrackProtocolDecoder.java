@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -34,6 +33,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -59,8 +59,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean custom;
     private int frameMask;
     private String form;
-
-    private ByteBuf photo;
 
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
@@ -131,6 +129,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private void decodeBeaconData(Position position, int mode, int mask, ByteBuf data) {
         int i = 1;
         while (data.isReadable()) {
+            int startIndex = data.readerIndex();
             if (BitUtil.check(mask, 7)) {
                 position.set("tag" + i + "Id", ByteBufUtil.hexDump(data.readSlice(6)));
             }
@@ -193,6 +192,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                         data.skipBytes(9); // name
                     }
                 }
+            }
+            if (data.readerIndex() == startIndex) {
+                break;
             }
             i += 1;
         }
@@ -410,9 +412,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (cellTower.getMobileCountryCode() != null
-            && cellTower.getMobileNetworkCode() != null
-            && cellTower.getCellId() != null && cellTower.getCellId() != 0
-            && cellTower.getLocationAreaCode() != null) {
+                && cellTower.getMobileNetworkCode() != null
+                && cellTower.getCellId() != null && cellTower.getCellId() != 0
+                && cellTower.getLocationAreaCode() != null) {
             position.setNetwork(new Network(cellTower));
         } else if (cellTower.getSignalStrength() != null) {
             position.set(Position.KEY_RSSI, cellTower.getSignalStrength());
@@ -533,7 +535,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-
     private Position decodeTextLine(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -593,10 +594,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
-        if (photo == null) {
-            photo = Unpooled.buffer();
+        if (getMediaBuffer() == null) {
+            newMediaBuffer();
         }
-        photo.writeBytes(buf.readSlice(buf.readUnsignedShort()));
+        getMediaBuffer().writeBytes(buf, buf.readUnsignedShort());
 
         if (index == count - 1) {
             Position position = new Position(getProtocolName());
@@ -604,9 +605,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
-            photo.release();
-            photo = null;
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), "jpg"));
 
             return position;
         }

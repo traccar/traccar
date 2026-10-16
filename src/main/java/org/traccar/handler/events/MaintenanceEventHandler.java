@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,25 +16,23 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class MaintenanceEventHandler extends BaseEventHandler {
+import jakarta.inject.Inject;
 
-    private final CacheManager cacheManager;
+public class MaintenanceEventHandler extends BasePositionEventHandler {
 
     @Inject
     public MaintenanceEventHandler(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+        super(cacheManager);
     }
 
     @Override
-    public void onPosition(Position position, Callback callback) {
-        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) < 0) {
+    protected void onPosition(Position position, Position lastPosition, Callback callback) {
+        if (lastPosition == null) {
             return;
         }
 
@@ -44,8 +42,8 @@ public class MaintenanceEventHandler extends BaseEventHandler {
                 double newValue = getValue(position, maintenance.getType());
                 if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
                     if (oldValue < maintenance.getStart()
-                        || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
-                        < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
+                            || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
+                            < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
                         Event event = new Event(Event.TYPE_MAINTENANCE, position);
                         event.setMaintenanceId(maintenance.getId());
                         event.set(maintenance.getType(), newValue);

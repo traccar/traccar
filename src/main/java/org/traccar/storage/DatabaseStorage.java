@@ -29,17 +29,17 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.sql.DataSource;
 
 public class DatabaseStorage extends Storage {
 
@@ -86,7 +86,7 @@ public class DatabaseStorage extends Storage {
             for (int index = 0; index < values.size(); index++) {
                 builder.setValue(index, values.get(index));
             }
-            Stream<T> stream = builder.executeQueryStreamed(clazz);
+            Stream<T> stream = builder.executeQueryStreamed(clazz, databaseType);
             builder = null;
             return stream;
         } catch (SQLException e) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -28,9 +27,11 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -160,7 +161,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
-        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        if (AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId())) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 
@@ -186,14 +188,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d*)(dd.d+),([NS]),")       // latitude
+            .number("(d*?)(d?d.d+),([NS]),")     // latitude
             .or()
             .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d*)(dd.d+),([EW]),")       // longitude
+            .number("(d*?)(d?d.d+),([EW]),")     // longitude
             .or()
             .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
@@ -348,7 +350,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
-        } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        } else if (AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId())) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 

@@ -28,9 +28,9 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import java.net.InetSocketAddress;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import java.net.InetSocketAddress;
 
 public abstract class TrackerServer implements TrackerConnector {
 
@@ -66,6 +66,7 @@ public abstract class TrackerServer implements TrackerConnector {
                 try {
                     if (isSecure()) {
                         SSLEngine engine = SSLContext.getDefault().createSSLEngine();
+                        engine.setUseClientMode(false);
                         pipeline.addLast(new SslHandler(engine));
                     }
                 } catch (Exception e) {
@@ -96,6 +97,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
+    @Override
     public int getPort() {
         return port;
     }

@@ -25,6 +25,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 public class PositionForwarderKafka implements PositionForwarder {
 
@@ -45,14 +46,14 @@ public class PositionForwarderKafka implements PositionForwarder {
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public CompletableFuture<Void> forward(PositionData positionData) {
         try {
             String key = Long.toString(positionData.getDevice().getId());
             String value = objectMapper.writeValueAsString(positionData);
             producer.send(new ProducerRecord<>(topic, key, value));
-            resultHandler.onResult(true, null);
+            return CompletableFuture.completedFuture(null);
         } catch (JsonProcessingException e) {
-            resultHandler.onResult(false, e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 

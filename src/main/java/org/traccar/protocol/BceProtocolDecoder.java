@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -27,6 +26,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -52,9 +52,14 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
     private void decodeMask1(ByteBuf buf, int mask, Position position) {
 
         if (BitUtil.check(mask, 0)) {
-            position.setValid(true);
-            position.setLongitude(buf.readFloatLE());
-            position.setLatitude(buf.readFloatLE());
+            int startIndex = buf.readerIndex();
+            try {
+                position.setLongitude(buf.readFloatLE());
+                position.setLatitude(buf.readFloatLE());
+                position.setValid(true);
+            } catch (IllegalArgumentException e) {
+                buf.readerIndex(startIndex + 8);
+            }
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
             int status = buf.readUnsignedByte();
