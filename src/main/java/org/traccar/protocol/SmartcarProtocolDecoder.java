@@ -101,7 +101,7 @@ public class SmartcarProtocolDecoder extends BaseHttpProtocolDecoder {
                 }
                 case "tractionbattery-stateofcharge" -> {
                     if (value instanceof JsonNumber number) {
-                        position.set(Position.KEY_BATTERY_LEVEL, number.doubleValue());
+                        position.set(Position.KEY_ENERGY_LEVEL, number.doubleValue());
                     }
                 }
                 case "charge-ischarging" -> {

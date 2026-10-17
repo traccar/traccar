@@ -243,7 +243,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() / 10.0));
         register(113, fmbXXX.or(ftXXX), (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
         register(115, fmbXXX, (p, b) -> p.set(Position.KEY_ENGINE_TEMP, b.readShort() / 10.0));
+        register(152, fmbXXX.and(fmb6XX.negate()).or(ftXXX), (p, b) ->
+                p.set(Position.KEY_ENERGY_LEVEL, b.readUnsignedByte()));
         register(389, "FMB003"::equals, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt() * 1000));
+        register(411, fmbXXX, (p, b) -> p.set(Position.KEY_ENERGY_LEVEL, b.readUnsignedByte()));
+        register(1383, fmbXXX, (p, b) -> p.set(Position.KEY_ENERGY, b.readUnsignedShort() / 100.0));
         register(701, fmb6XX, (p, b) -> p.set("bleTemp1", b.readShort() / 10.0));
         register(702, fmb6XX, (p, b) -> p.set("bleTemp2", b.readShort() / 10.0));
         register(703, fmb6XX, (p, b) -> p.set("bleTemp3", b.readShort() / 10.0));

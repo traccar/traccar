@@ -444,7 +444,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
             position.set("current", buf.readUnsignedShortLE() / 10.0);
             position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
-            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set(Position.KEY_ENERGY_LEVEL, buf.readUnsignedByte());
             position.set("batteryOverheat", buf.readUnsignedByte() > 0);
             position.set("chargeProtection", buf.readUnsignedByte() > 0);
             position.set("dischargeProtection", buf.readUnsignedByte() > 0);
@@ -480,7 +480,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("cumulativeVoltage", buf.readUnsignedShortLE() / 10.0);
                         position.set("gatherVoltage", buf.readUnsignedShortLE() / 10.0);
                         position.set("current", (buf.readUnsignedShortLE() - 30000) / 10.0);
-                        position.set("soc", buf.readUnsignedShortLE() / 10.0);
+                        position.set(Position.KEY_ENERGY_LEVEL, buf.readUnsignedShortLE() / 10.0);
                     }
                     case 0x91 -> {
                         position.set("maxCellVoltage", buf.readUnsignedShortLE() / 1000.0);
