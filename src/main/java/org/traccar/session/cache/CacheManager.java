@@ -48,8 +48,10 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -75,6 +77,9 @@ public class CacheManager implements BroadcastInterface {
     private volatile Server server;
     private final Map<Long, ConcurrentLinkedDeque<Position>> devicePositions = new ConcurrentHashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
+
+    private record LinkedReference(long deviceId) {
+    }
 
     @Inject
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
@@ -133,10 +138,20 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public synchronized void addDevice(long deviceId, Object key) throws Exception {
-        var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
-        if (references.isEmpty()) {
+        var references = deviceReferences.get(deviceId);
+        if (references != null) {
+            references.add(key);
+            return;
+        }
+        references = new HashSet<>();
+        references.add(key);
+        deviceReferences.put(deviceId, references);
+        try {
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.All(), new Condition.Equals("id", deviceId)));
+            if (device == null) {
+                throw new StorageException("Device not found: " + deviceId);
+            }
             graph.addObject(device);
             initializeCache(device);
             if (device.getPositionId() > 0) {
@@ -160,27 +175,58 @@ public class CacheManager implements BroadcastInterface {
                     }
                 }
             }
+        } catch (Exception e) {
+            references.remove(key);
+            removeUnreferencedDevices();
+            throw e;
         }
-        references.add(key);
         LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
     }
 
     public synchronized void removeDevice(long deviceId, Object key) {
-        var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
-        references.remove(key);
-        if (references.isEmpty()) {
-            removeLinkedDevices(deviceId);
-            graph.removeObject(Device.class, deviceId);
-            devicePositions.remove(deviceId);
-            deviceReferences.remove(deviceId);
+        var references = deviceReferences.get(deviceId);
+        if (references != null) {
+            references.remove(key);
+            removeUnreferencedDevices();
+            LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
         }
-        LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
     }
 
-    private void removeLinkedDevices(long deviceId) {
-        for (Device linkedDevice : getDeviceObjects(deviceId, Device.class)) {
-            removeDevice(linkedDevice.getId(), deviceId);
+    private void removeUnreferencedDevices() {
+        // Only external references keep a linked component alive, including components with cycles.
+        Set<Long> reachable = new HashSet<>();
+        Map<Long, Set<Long>> dependents = new HashMap<>();
+        deviceReferences.forEach((id, references) -> {
+            for (Object reference : references) {
+                if (reference instanceof LinkedReference linked) {
+                    dependents.computeIfAbsent(linked.deviceId(), key -> new HashSet<>()).add(id);
+                } else {
+                    reachable.add(id);
+                }
+            }
+        });
+        Deque<Long> pending = new ArrayDeque<>(reachable);
+        while (!pending.isEmpty()) {
+            for (long id : dependents.getOrDefault(pending.removeFirst(), Set.of())) {
+                if (reachable.add(id)) {
+                    pending.addLast(id);
+                }
+            }
         }
+        for (long id : Set.copyOf(deviceReferences.keySet())) {
+            if (!reachable.contains(id)) {
+                removeCachedDevice(id);
+            }
+        }
+        deviceReferences.values().forEach(references -> references.removeIf(
+                reference -> reference instanceof LinkedReference linked
+                        && !deviceReferences.containsKey(linked.deviceId())));
+    }
+
+    private void removeCachedDevice(long deviceId) {
+        deviceReferences.remove(deviceId);
+        devicePositions.remove(deviceId);
+        graph.removeObject(Device.class, deviceId);
     }
 
     private static boolean appendPosition(Deque<Position> positions, Position position) {
@@ -238,9 +284,11 @@ public class CacheManager implements BroadcastInterface {
         synchronized (this) {
             if (operation == ObjectOperation.DELETE) {
                 if (clazz.equals(Device.class)) {
-                    removeLinkedDevices(id);
+                    removeCachedDevice(id);
+                    removeUnreferencedDevices();
+                } else {
+                    graph.removeObject(clazz, id);
                 }
-                graph.removeObject(clazz, id);
             }
             if (operation != ObjectOperation.UPDATE) {
                 return;
@@ -326,10 +374,10 @@ public class CacheManager implements BroadcastInterface {
         }
 
         boolean cachedDeviceLink = fromClass.equals(Device.class) && toClass.equals(Device.class)
-                && graph.getObject(fromClass, fromId) != null;
+                && deviceReferences.containsKey(fromId);
         if (link) {
             if (cachedDeviceLink) {
-                addDevice(toId, fromId);
+                addDevice(toId, new LinkedReference(fromId));
             }
             if (!graph.addLink(fromClass, fromId, toClass, toId, createObjectSupplier(toClass, toId))) {
                 initializeCache(graph.getObject(toClass, toId));
@@ -337,7 +385,7 @@ public class CacheManager implements BroadcastInterface {
         } else {
             graph.removeLink(fromClass, fromId, toClass, toId);
             if (cachedDeviceLink) {
-                removeDevice(toId, fromId);
+                removeDevice(toId, new LinkedReference(fromId));
             }
         }
     }
