@@ -32,7 +32,12 @@ public class CacheGraph {
 
     void addObject(BaseModel value) {
         CacheKey key = new CacheKey(value);
-        CacheNode node = new CacheNode(value);
+        CacheNode node = nodes.get(key);
+        if (node == null) {
+            node = new CacheNode(value);
+        } else {
+            node.setValue(value);
+        }
         roots.put(key, node);
         nodes.put(key, node);
     }
