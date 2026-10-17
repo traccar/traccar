@@ -60,4 +60,14 @@ public class Order extends ExtendedModel {
         this.toAddress = toAddress;
     }
 
+    private long geofenceId;
+
+    public long getGeofenceId() {
+        return geofenceId;
+    }
+
+    public void setGeofenceId(long geofenceId) {
+        this.geofenceId = geofenceId;
+    }
+
 }
