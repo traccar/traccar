@@ -15,6 +15,7 @@
  */
 package org.traccar.reports;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -59,11 +60,11 @@ public class CsvExportProvider {
             String trimmed = stringValue.trim();
             if (!trimmed.isEmpty()) {
                 char c = trimmed.charAt(0);
-                return c == '=' || c == '+' || c == '-' || c == '@' ? "" : trimmed;
+                return c == '=' || c == '+' || c == '-' || c == '@' ? "" : StringEscapeUtils.escapeCsv(trimmed);
             }
             return trimmed;
         }
-        return Objects.toString(value, "");
+        return StringEscapeUtils.escapeCsv(Objects.toString(value, ""));
     }
 
     public void generate(
@@ -108,7 +109,9 @@ public class CsvExportProvider {
         attributes.forEach(key -> properties.put(key, position -> position.getAttributes().get(key)));
 
         try (PrintWriter writer = new PrintWriter(outputStream)) {
-            writer.println(String.join(",", properties.keySet()));
+            writer.println(properties.keySet().stream()
+                    .map(CsvExportProvider::formatCell)
+                    .collect(Collectors.joining(",")));
             positions.forEach(position -> writer.println(properties.values().stream()
                     .map(f -> formatCell(f.apply(position)))
                     .collect(Collectors.joining(","))));
