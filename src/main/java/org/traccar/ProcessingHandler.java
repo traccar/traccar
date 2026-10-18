@@ -23,6 +23,7 @@ import org.traccar.config.Config;
 import org.traccar.database.BufferingManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.handler.BasePositionHandler;
+import org.traccar.handler.BusinessHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DatabaseHandler;
@@ -111,6 +112,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
                 MotionHandler.class,
+                BusinessHandler.class,
                 ComputedAttributesHandler.Late.class,
                 DriverHandler.class,
                 CopyAttributesHandler.class,
