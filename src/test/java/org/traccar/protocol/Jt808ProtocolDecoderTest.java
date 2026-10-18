@@ -12,6 +12,10 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Jt808ProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
+                "7e0704003e0184380000500084000101003900000000000c000f01d792b7034f72e600c90000009b26101319020901040000000030011f31010ad00400000000d40164d7030100beda0105e17e"),
+                position().attribute(Position.KEY_ARCHIVE, true));
+
+        verifyDecode(decoder, binary(
                 "7e0200004c045410006147000800000000004000020335401c0083150a000f0000000026100620320301040000017030011931010be4020153e50101e60100e7080000000400000000f50101f70b00012700000502656d0000a07e"),
                 position().attribute(Position.KEY_BATTERY_LEVEL, 83));
 

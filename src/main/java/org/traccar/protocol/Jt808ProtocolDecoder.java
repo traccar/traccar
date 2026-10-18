@@ -1015,11 +1015,13 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xDA:
-                    buf.readUnsignedShort(); // string cut count
-                    int deviceStatus = buf.readUnsignedByte();
-                    position.set("string", BitUtil.check(deviceStatus, 0));
-                    position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
-                    position.set("cover", BitUtil.check(deviceStatus, 3));
+                    if (length >= 3) {
+                        buf.readUnsignedShort(); // string cut count
+                        int deviceStatus = buf.readUnsignedByte();
+                        position.set("string", BitUtil.check(deviceStatus, 0));
+                        position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
+                        position.set("cover", BitUtil.check(deviceStatus, 3));
+                    }
                     break;
                 case 0xE2:
                     if (!"DT800".equals(model)) {
