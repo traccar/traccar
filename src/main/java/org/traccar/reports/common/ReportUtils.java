@@ -207,6 +207,8 @@ public class ReportUtils {
         trip.setDeviceId(deviceId);
         trip.setDeviceName(device.getName());
 
+        trip.setBusiness(startTrip.getBoolean(Position.KEY_BUSINESS));
+
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
         trip.setStartLon(startTrip.getLongitude());

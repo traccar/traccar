@@ -4377,6 +4377,9 @@ components:
         deviceName:
           type: string
           description: Human readable device name
+        business:
+          type: boolean
+          description: Business attribute from the trip's starting position. False if absent.
         maxSpeed:
           type: number
           description: in knots

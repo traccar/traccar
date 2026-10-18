@@ -18,6 +18,16 @@ package org.traccar.reports.model;
 
 public class TripReportItem extends BaseReportItem {
 
+    private boolean business;
+
+    public boolean getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(boolean business) {
+        this.business = business;
+    }
+
     private long startPositionId;
 
     public long getStartPositionId() {
