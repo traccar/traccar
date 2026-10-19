@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -100,6 +101,7 @@ public class NotificatorFirebase extends Notificator {
 
         List<String> registrationTokens = new ArrayList<>(
                 Arrays.asList(user.getString("notificationTokens").split("[, ]")));
+        registrationTokens.sort(Comparator.comparing(token -> token.length() == 22));
 
         var androidConfig = AndroidConfig.builder()
                 .setNotification(AndroidNotification.builder().setSound("default").build());
@@ -114,8 +116,14 @@ public class NotificatorFirebase extends Notificator {
 
         var messageBuilder = MulticastMessage.builder()
                 .setAndroidConfig(androidConfig.build())
-                .setApnsConfig(apnsConfig.build())
-                .addAllTokens(registrationTokens);
+                .setApnsConfig(apnsConfig.build());
+        for (String token : registrationTokens) {
+            if (token.length() == 22) {
+                messageBuilder.addFid(token);
+            } else {
+                messageBuilder.addToken(token);
+            }
+        }
 
         if (!"data".equals(mode)) {
             messageBuilder.setNotification(com.google.firebase.messaging.Notification.builder()
