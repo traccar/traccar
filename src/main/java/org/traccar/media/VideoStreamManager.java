@@ -59,20 +59,28 @@ public class VideoStreamManager {
 
     static class DeviceStream {
 
+        private record Segment(ByteBuf data, long duration) { }
+
         private final VideoStreamWriter writer = new VideoStreamWriter();
-        private final LinkedHashMap<Integer, ByteBuf> segments = new LinkedHashMap<>();
+        private final LinkedHashMap<Integer, Segment> segments = new LinkedHashMap<>();
         private ByteBuf currentSegment;
         private int segmentIndex;
         private long firstTimestamp;
+        private long segmentTimestamp;
+        private boolean released;
 
         synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
-            if (isKeyFrame && currentSegment != null) {
-                finalizeSegment();
+            if (released || (currentSegment == null && !isKeyFrame)) {
+                return;
+            }
+            if (isKeyFrame && currentSegment != null && timestamp > segmentTimestamp) {
+                finalizeSegment(timestamp);
             }
 
             if (currentSegment == null) {
                 currentSegment = Unpooled.buffer();
-                if (firstTimestamp == 0) {
+                segmentTimestamp = timestamp;
+                if (segmentIndex == 0) {
                     firstTimestamp = timestamp;
                 }
             }
@@ -80,32 +88,32 @@ public class VideoStreamManager {
             writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame, payloadType);
         }
 
-        private void finalizeSegment() {
-            segments.put(segmentIndex++, currentSegment);
+        private void finalizeSegment(long timestamp) {
+            segments.put(segmentIndex++, new Segment(currentSegment, timestamp - segmentTimestamp));
             currentSegment = null;
 
             while (segments.size() > MAX_SEGMENTS) {
                 Integer oldest = segments.keySet().iterator().next();
-                segments.remove(oldest).release();
+                segments.remove(oldest).data().release();
             }
         }
 
         synchronized void release() {
+            released = true;
             if (currentSegment != null) {
                 currentSegment.release();
+                currentSegment = null;
             }
-            for (ByteBuf segment : segments.values()) {
-                segment.release();
+            for (Segment segment : segments.values()) {
+                segment.data().release();
             }
+            segments.clear();
         }
 
         static final String EMPTY_PLAYLIST =
                 "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:5\n#EXT-X-MEDIA-SEQUENCE:0\n";
 
         synchronized String getPlaylist() {
-            if (currentSegment != null) {
-                finalizeSegment();
-            }
             if (segments.isEmpty()) {
                 return EMPTY_PLAYLIST;
             }
@@ -118,16 +126,17 @@ public class VideoStreamManager {
             sb.append("#EXT-X-TARGETDURATION:5\n");
             sb.append("#EXT-X-MEDIA-SEQUENCE:").append(firstIndex).append("\n");
 
-            for (int key : segments.keySet()) {
-                sb.append("#EXTINF:3.0,\n");
-                sb.append(key).append(".ts\n");
+            for (Map.Entry<Integer, Segment> entry : segments.entrySet()) {
+                sb.append("#EXTINF:").append(entry.getValue().duration() / 1000.0).append(",\n");
+                sb.append(entry.getKey()).append(".ts\n");
             }
 
             return sb.toString();
         }
 
         synchronized ByteBuf getSegment(int index) {
-            return segments.get(index);
+            Segment segment = segments.get(index);
+            return segment != null ? segment.data().retainedDuplicate() : null;
         }
     }
 
