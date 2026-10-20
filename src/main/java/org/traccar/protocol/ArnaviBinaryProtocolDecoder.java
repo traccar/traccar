@@ -220,7 +220,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 62:
                 case 63:
                 case 64:
-                    position.set("axleLoad" + (tag - 59), buf.readUnsignedIntLE());
+                    position.set("axleLoad" + (tag - 59), buf.readUnsignedIntLE() / 10.0);
                     break;
 
                 case 67:
@@ -237,6 +237,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
 
+                case 70:
                 case 71:
                 case 72:
                 case 73:
@@ -247,9 +248,15 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 78:
                 case 79:
                     int level = buf.readUnsignedShortLE();
+                    int temp = buf.readByte();
+                    int lls_battery = buf.readUnsignedByte();
                     if (level != 0x0000 && level != 0xffff) {
-                        position.set("llsLevel" + (tag - 70), level);
-                        position.set("llsTemp" + (tag - 70), (buf.readUnsignedShortLE() - 100.0) / 10.0);
+                        int n = tag - 70;
+                        position.set("llsLevel" + n, level);
+                        position.set("llsTemp" + n, temp);
+                        if (lls_battery != 0) {
+                            position.set("llsBattery" + n, lls_battery / 10);
+                        }
                     }
                     break;
 
