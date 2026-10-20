@@ -1695,6 +1695,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            String model = getDeviceModel(deviceSession);
+            if (model != null && model.startsWith("JC")) {
+                getLastLocation(position, null);
+                position.set(Position.KEY_RESULT, // online command response
+                        buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString());
+                return position;
+            }
+
             Date time = readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE));
 
             if (buf.readUnsignedByte() > 0) {
