@@ -182,21 +182,18 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeTirePressureData(Position position, ByteBuf buf) {
-        int b0 = buf.getUnsignedByte(buf.readerIndex());
-        int b1 = buf.getUnsignedByte(buf.readerIndex() + 1);
-        if ((b0 == 0x00 && b1 == 0xFF) || (b0 == 0xFF && b1 == 0x00)) {
+        if (buf.getUnsignedShortLE(buf.readerIndex()) == 0x00ff) {
             buf.skipBytes(2);
             return;
         }
-        for (int i = 0; i < 34; i++) {
-            String prefix = "tire" + (i + 1);
-            position.set(prefix + "Pressure", buf.readUnsignedByte());
+        for (int i = 1; i <= 34; i++) {
+            position.set("tire" + i + "Pressure", buf.readUnsignedByte());
             int flags = buf.readUnsignedByte();
             if (BitUtil.check(flags, 3)) {
-                position.set(prefix + "NoLink", true);
+                position.set("tire" + i + "NoLink", true);
             }
             if (BitUtil.check(flags, 4)) {
-                position.set(prefix + "LowBattery", true);
+                position.set("tire" + i + "LowBattery", true);
             }
         }
     }
@@ -204,7 +201,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private void decodeExtendedTags(Position position, ByteBuf buf) {
         int endIndex = buf.readUnsignedShortLE() + buf.readerIndex();
         CellTower cellTower = new CellTower();
-        cellTower.setRadioType("gsm");
         while (buf.readerIndex() < endIndex) {
             int tag = buf.readUnsignedShortLE();
             switch (tag) {
