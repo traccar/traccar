@@ -1698,7 +1698,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             String model = getDeviceModel(deviceSession);
             if (model != null && model.startsWith("JC")) {
                 getLastLocation(position, null);
-                position.set(Position.KEY_RESULT, // online command response
+                position.set(Position.KEY_RESULT,
                         buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString());
                 return position;
             }
