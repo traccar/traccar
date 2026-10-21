@@ -12,6 +12,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new H02ProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "*HQ,0000000000,V19,220606,V,4915.0978,N,01634.6187,E,000.00,000,220426,,,8942001180368594259F,BFFFFBFF#"),
+                position().attribute(Position.KEY_ICCID, "8942001180368594259"));
+
+        verifyDecode(decoder, buffer(
                 "*HQ,1234567890,V8,112806,A,3832.7803,N,9.9068,W,64.14,67,310826,FFFFF9FF,214,3,18106,9261854,20,21,126,0#"),
                 position().location("2026-08-31T11:28:06.000Z", true, 38.54634, -0.16511));
 
