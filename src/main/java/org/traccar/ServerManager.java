@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ClassScanner;
+import org.traccar.model.ProtocolSettings;
+import org.traccar.model.ProtocolSettings.Transport;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -30,6 +32,7 @@ import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +43,8 @@ public class ServerManager implements LifecycleObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
     private final Config config;
-    private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
+    private final Map<String, BaseProtocol> protocols = new ConcurrentHashMap<>();
+    private final Map<TrackerConnector, Integer> runningConnectors = new IdentityHashMap<>();
 
     @Inject
     public ServerManager(
@@ -55,25 +59,41 @@ public class ServerManager implements LifecycleObject {
             if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
                 if (config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocolName)) > 0) {
                     BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
-                    protocolList.put(protocol.getName(), protocol);
+                    protocols.put(protocol.getName(), protocol);
                 }
             }
         }
     }
 
     public BaseProtocol getProtocol(String name) {
-        return protocolList.get(name);
+        return protocols.get(name);
     }
 
     @Override
-    public void start() throws Exception {
-        for (BaseProtocol protocol : protocolList.values()) {
+    public synchronized void start() throws Exception {
+        for (BaseProtocol protocol : protocols.values()) {
             int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol.getName()));
-            for (TrackerConnector connector : protocol.getConnectorList()) {
+            Transport transport = port > 0 ? Transport.ALL : Transport.DISABLED;
+            apply(new ProtocolSettings(protocol.getName(), port, transport));
+        }
+    }
+
+    public synchronized void apply(ProtocolSettings settings) throws Exception {
+        BaseProtocol protocol = protocols.get(settings.protocol());
+        for (TrackerConnector connector : protocol.getConnectorList()) {
+            boolean enabled = settings.transport() == Transport.ALL
+                    || settings.transport() == (connector.isDatagram() ? Transport.UDP : Transport.TCP);
+            Integer runningPort = runningConnectors.get(connector);
+            if (runningPort != null && (!enabled || runningPort != settings.port())) {
+                connector.stop();
+                runningConnectors.remove(connector);
+            }
+            if (enabled && !runningConnectors.containsKey(connector)) {
                 try {
-                    connector.start(port);
+                    connector.start(settings.port());
+                    runningConnectors.put(connector, settings.port());
                 } catch (BindException e) {
-                    LOGGER.warn("Port {} disabled due to conflict", port, e);
+                    LOGGER.warn("Port {} disabled due to conflict", settings.port(), e);
                 } catch (ConnectException e) {
                     LOGGER.warn("Connection failed", e);
                 }
@@ -82,10 +102,11 @@ public class ServerManager implements LifecycleObject {
     }
 
     @Override
-    public void stop() throws Exception {
-        for (BaseProtocol protocol : protocolList.values()) {
+    public synchronized void stop() throws Exception {
+        for (BaseProtocol protocol : protocols.values()) {
             for (TrackerConnector connector : protocol.getConnectorList()) {
                 connector.stop();
+                runningConnectors.remove(connector);
             }
         }
     }
