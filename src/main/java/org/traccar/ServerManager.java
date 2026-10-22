@@ -31,6 +31,7 @@ import java.net.BindException;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -42,26 +43,20 @@ public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
+    private final Injector injector;
     private final Config config;
+    private final Map<String, Class<? extends BaseProtocol>> protocolClasses = new HashMap<>();
     private final Map<String, BaseProtocol> protocols = new ConcurrentHashMap<>();
     private final Map<TrackerConnector, Integer> runningConnectors = new IdentityHashMap<>();
 
     @Inject
     public ServerManager(
             Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+        this.injector = injector;
         this.config = config;
-        Set<String> enabledProtocols = null;
-        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
-            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
-        }
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
-            String protocolName = BaseProtocol.nameFromClass(protocolClass);
-            if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
-                if (config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocolName)) > 0) {
-                    BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
-                    protocols.put(protocol.getName(), protocol);
-                }
-            }
+            protocolClasses.put(
+                    BaseProtocol.nameFromClass(protocolClass), protocolClass.asSubclass(BaseProtocol.class));
         }
     }
 
@@ -71,15 +66,21 @@ public class ServerManager implements LifecycleObject {
 
     @Override
     public synchronized void start() throws Exception {
-        for (BaseProtocol protocol : protocols.values()) {
-            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol.getName()));
-            Transport transport = port > 0 ? Transport.ALL : Transport.DISABLED;
-            apply(new ProtocolSettings(protocol.getName(), port, transport));
+        Set<String> enabledProtocols = null;
+        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
+            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
+        }
+        for (String protocol : protocolClasses.keySet()) {
+            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+            if (port > 0 && (enabledProtocols == null || enabledProtocols.contains(protocol))) {
+                apply(new ProtocolSettings(protocol, port, Transport.ALL));
+            }
         }
     }
 
     public synchronized void apply(ProtocolSettings settings) throws Exception {
-        BaseProtocol protocol = protocols.get(settings.protocol());
+        BaseProtocol protocol = protocols.computeIfAbsent(
+                settings.protocol(), name -> injector.getInstance(protocolClasses.get(name)));
         for (TrackerConnector connector : protocol.getConnectorList()) {
             boolean enabled = settings.transport() == Transport.ALL
                     || settings.transport() == (connector.isDatagram() ? Transport.UDP : Transport.TCP);
