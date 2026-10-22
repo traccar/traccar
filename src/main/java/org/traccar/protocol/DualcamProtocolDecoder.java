@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
+import org.traccar.BaseMediaProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -28,7 +28,7 @@ import org.traccar.session.DeviceSession;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
-public class DualcamProtocolDecoder extends BaseProtocolDecoder {
+public class DualcamProtocolDecoder extends BaseMediaProtocolDecoder {
 
     public DualcamProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -80,14 +80,20 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedShort();
 
-        DeviceSession deviceSession;
+        if (type != MSG_INIT && getDeviceSession(channel, remoteAddress) == null) {
+            return null;
+        }
+
         switch (type) {
             case MSG_INIT:
                 buf.readUnsignedShort(); // protocol id
                 uniqueId = String.valueOf(buf.readLong());
-                deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+                if (deviceSession == null) {
+                    return null;
+                }
                 long settings = buf.readUnsignedInt();
-                if (channel != null && deviceSession != null) {
+                if (channel != null) {
                     ByteBuf response = Unpooled.buffer();
                     if (BitUtil.check(settings, 25)) {
                         response.writeShort(MSG_PATH_REQUEST);
