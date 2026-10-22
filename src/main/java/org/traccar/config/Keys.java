@@ -1694,6 +1694,13 @@ public final class Keys {
             true);
 
     /**
+     * Filter positions outside the device calendar. Disable to retain private positions.
+     */
+    public static final ConfigKey<Boolean> FILTER_CALENDAR = new BooleanConfigKey(
+            "filter.calendar",
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
+
+    /**
      * Filter invalid (valid field is set to false) positions.
      */
     public static final ConfigKey<Boolean> FILTER_INVALID = new BooleanConfigKey(

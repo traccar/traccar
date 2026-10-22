@@ -216,7 +216,8 @@ public class FilterHandler extends BasePositionHandler {
         }
 
         Device device = cacheManager.getObject(Device.class, deviceId);
-        if (device.getCalendarId() > 0) {
+        if (device.getCalendarId() > 0
+                && Boolean.TRUE.equals(AttributeUtil.lookup(cacheManager, Keys.FILTER_CALENDAR, deviceId))) {
             Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
             if (!calendar.checkMoment(position.getFixTime())) {
                 filterTypes.add("Calendar");
