@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,7 @@ import java.net.SocketAddress;
 
 public class NetworkForwarderHandler extends ChannelInboundHandlerAdapter {
 
-    private final int port;
-
     private NetworkForwarder networkForwarder;
-
-    public NetworkForwarderHandler(int port) {
-        this.port = port;
-    }
 
     @Inject
     public void setNetworkForwarder(NetworkForwarder networkForwarder) {
@@ -57,6 +51,7 @@ public class NetworkForwarderHandler extends ChannelInboundHandlerAdapter {
 
         byte[] data = new byte[buffer.readableBytes()];
         buffer.getBytes(buffer.readerIndex(), data);
+        int port = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
         networkForwarder.forward((InetSocketAddress) remoteAddress, port, datagram, data);
         super.channelRead(ctx, msg);
     }

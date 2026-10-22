@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,12 +39,13 @@ public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
-    private final List<TrackerConnector> connectorList = new LinkedList<>();
+    private final Config config;
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
     @Inject
     public ServerManager(
             Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+        this.config = config;
         Set<String> enabledProtocols = null;
         if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
             enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
@@ -56,7 +55,6 @@ public class ServerManager implements LifecycleObject {
             if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
                 if (config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocolName)) > 0) {
                     BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
-                    connectorList.addAll(protocol.getConnectorList());
                     protocolList.put(protocol.getName(), protocol);
                 }
             }
@@ -69,21 +67,26 @@ public class ServerManager implements LifecycleObject {
 
     @Override
     public void start() throws Exception {
-        for (TrackerConnector connector: connectorList) {
-            try {
-                connector.start();
-            } catch (BindException e) {
-                LOGGER.warn("Port {} disabled due to conflict", connector.getPort(), e);
-            } catch (ConnectException e) {
-                LOGGER.warn("Connection failed", e);
+        for (BaseProtocol protocol : protocolList.values()) {
+            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol.getName()));
+            for (TrackerConnector connector : protocol.getConnectorList()) {
+                try {
+                    connector.start(port);
+                } catch (BindException e) {
+                    LOGGER.warn("Port {} disabled due to conflict", port, e);
+                } catch (ConnectException e) {
+                    LOGGER.warn("Connection failed", e);
+                }
             }
         }
     }
 
     @Override
     public void stop() throws Exception {
-        for (TrackerConnector connector : connectorList) {
-            connector.stop();
+        for (BaseProtocol protocol : protocolList.values()) {
+            for (TrackerConnector connector : protocol.getConnectorList()) {
+                connector.stop();
+            }
         }
     }
 

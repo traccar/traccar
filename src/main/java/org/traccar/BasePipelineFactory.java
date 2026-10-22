@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         }
         pipeline.addLast(new OpenChannelHandler(connector));
         if (config.hasKey(Keys.SERVER_FORWARD)) {
-            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
-            pipeline.addLast(injectMembers(new NetworkForwarderHandler(port)));
+            pipeline.addLast(injectMembers(new NetworkForwarderHandler()));
         }
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(injectMembers(new StandardLoggingHandler(protocol)));
