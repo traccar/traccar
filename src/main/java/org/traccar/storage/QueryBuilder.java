@@ -169,6 +169,8 @@ public final class QueryBuilder implements AutoCloseable {
                     setDouble(index, (Double) value);
                 } else if (returnType.equals(String.class)) {
                     setString(index, (String) value);
+                } else if (returnType.isEnum()) {
+                    setString(index, value != null ? ((Enum<?>) value).name() : null);
                 } else if (returnType.equals(Date.class)) {
                     setDate(index, (Date) value);
                 } else if (returnType.equals(byte[].class)) {
@@ -208,6 +210,10 @@ public final class QueryBuilder implements AutoCloseable {
         } else if (parameterType.equals(String.class)) {
             processors.add((object, resultSet) -> {
                 handle.invokeExact(object, (Object) resultSet.getString(columnIndex));
+            });
+        } else if (parameterType.isEnum()) {
+            processors.add((object, resultSet) -> {
+                handle.invokeExact(object, objectMapper.convertValue(resultSet.getString(columnIndex), parameterType));
             });
         } else if (parameterType.equals(Date.class)) {
             processors.add((object, resultSet) -> {

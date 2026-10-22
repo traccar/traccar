@@ -80,21 +80,21 @@ public class ServerManager implements LifecycleObject {
 
     public synchronized void apply(ProtocolSettings settings) throws Exception {
         BaseProtocol protocol = protocols.computeIfAbsent(
-                settings.protocol(), name -> injector.getInstance(protocolClasses.get(name)));
+                settings.getProtocol(), name -> injector.getInstance(protocolClasses.get(name)));
         for (TrackerConnector connector : protocol.getConnectorList()) {
-            boolean enabled = settings.transport() == Transport.ALL
-                    || settings.transport() == (connector.isDatagram() ? Transport.UDP : Transport.TCP);
+            boolean enabled = settings.getTransport() == Transport.ALL
+                    || settings.getTransport() == (connector.isDatagram() ? Transport.UDP : Transport.TCP);
             Integer runningPort = runningConnectors.get(connector);
-            if (runningPort != null && (!enabled || runningPort != settings.port())) {
+            if (runningPort != null && (!enabled || runningPort != settings.getPort())) {
                 connector.stop();
                 runningConnectors.remove(connector);
             }
             if (enabled && !runningConnectors.containsKey(connector)) {
                 try {
-                    connector.start(settings.port());
-                    runningConnectors.put(connector, settings.port());
+                    connector.start(settings.getPort());
+                    runningConnectors.put(connector, settings.getPort());
                 } catch (BindException e) {
-                    LOGGER.warn("Port {} disabled due to conflict", settings.port(), e);
+                    LOGGER.warn("Port {} disabled due to conflict", settings.getPort(), e);
                 } catch (ConnectException e) {
                     LOGGER.warn("Connection failed", e);
                 }

@@ -15,7 +15,49 @@
  */
 package org.traccar.model;
 
-public record ProtocolSettings(String protocol, int port, Transport transport) {
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_protocols")
+public class ProtocolSettings extends BaseModel {
+
+    public ProtocolSettings() {
+    }
+
+    public ProtocolSettings(String protocol, int port, Transport transport) {
+        this.protocol = protocol;
+        this.port = port;
+        this.transport = transport;
+    }
+
+    private String protocol;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    private int port;
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    private Transport transport;
+
+    public Transport getTransport() {
+        return transport;
+    }
+
+    public void setTransport(Transport transport) {
+        this.transport = transport;
+    }
 
     public enum Transport {
         DISABLED,
