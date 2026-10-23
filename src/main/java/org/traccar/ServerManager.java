@@ -73,12 +73,15 @@ public class ServerManager implements LifecycleObject {
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
             String protocol = BaseProtocol.nameFromClass(protocolClass);
             protocolClasses.put(protocol, protocolClass.asSubclass(BaseProtocol.class));
-            if (!configuredProtocols.contains(protocol)) {
+            if (!configuredProtocols.remove(protocol)) {
                 int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
                 boolean enabled = port > 0 && (enabledProtocols == null || enabledProtocols.contains(protocol));
                 var setting = new ProtocolSettings(protocol, port, enabled ? defaultTransport : Transport.DISABLED);
                 storage.addObject(setting, new Request(new Columns.Exclude("id")));
             }
+        }
+        for (String protocol : configuredProtocols) {
+            storage.removeObject(ProtocolSettings.class, new Request(new Condition.Equals("protocol", protocol)));
         }
     }
 
@@ -89,7 +92,7 @@ public class ServerManager implements LifecycleObject {
     @Override
     public synchronized void start() throws Exception {
         for (ProtocolSettings setting : storage.getObjects(ProtocolSettings.class, new Request(new Columns.All()))) {
-            if (protocolClasses.containsKey(setting.getProtocol()) && setting.getTransport() != Transport.DISABLED) {
+            if (setting.getTransport() != Transport.DISABLED) {
                 updateConnectors(setting);
             }
         }
