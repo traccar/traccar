@@ -33,7 +33,7 @@ public final class Keys {
      * Port number for the protocol. Most protocols use TCP on the transport layer. Some protocols use UDP. Some
      * support both TCP and UDP.
      */
-    public static final ConfigSuffix<Integer> PROTOCOL_PORT = new PortConfigSuffix(
+    public static final ConfigSuffix<Integer> PROTOCOL_PORT = new ProtocolConfig.PortSuffix(
             ".port",
             List.of(KeyType.CONFIG));
 

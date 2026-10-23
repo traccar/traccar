@@ -168,6 +168,7 @@ import org.traccar.protocol.OigoProtocol;
 import org.traccar.protocol.OkoProtocol;
 import org.traccar.protocol.OmnicommProtocol;
 import org.traccar.protocol.OpenGtsProtocol;
+import org.traccar.protocol.OrbcommProtocol;
 import org.traccar.protocol.OrionProtocol;
 import org.traccar.protocol.OsmAndProtocol;
 import org.traccar.protocol.OutsafeProtocol;
@@ -288,15 +289,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PortConfigSuffix extends ConfigSuffix<Integer> {
+public final class ProtocolConfig {
+
+    private ProtocolConfig() {}
 
     private static final Map<String, Integer> PORTS = new HashMap<>();
+    private static final Map<String, Class<? extends BaseProtocol>> PROTOCOLS = new HashMap<>();
 
     private static void put(Class<? extends BaseProtocol> protocolClass, int port) {
-        PORTS.put(BaseProtocol.nameFromClass(protocolClass), port);
+        String name = BaseProtocol.nameFromClass(protocolClass);
+        PORTS.put(name, port);
+        PROTOCOLS.put(name, protocolClass);
     }
 
     static {
+        put(OrbcommProtocol.class, 0);
         put(Gps103Protocol.class, 5001);
         put(Tk103Protocol.class, 5002);
         put(Gl100Protocol.class, 5003);
@@ -566,12 +573,21 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(TeltonikaIridiumProtocol.class, 5268);
     }
 
-    PortConfigSuffix(String key, List<KeyType> types) {
-        super(key, types, null);
+    public static Map<String, Class<? extends BaseProtocol>> getProtocolClasses() {
+        return Map.copyOf(PROTOCOLS);
     }
 
-    @Override
-    public ConfigKey<Integer> withPrefix(String protocol) {
-        return new IntegerConfigKey(protocol + keySuffix, types, PORTS.get(protocol));
+    static class PortSuffix extends ConfigSuffix<Integer> {
+
+        PortSuffix(String key, List<KeyType> types) {
+            super(key, types, null);
+        }
+
+        @Override
+        public ConfigKey<Integer> withPrefix(String protocol) {
+            return new IntegerConfigKey(protocol + keySuffix, types, PORTS.get(protocol));
+        }
+
     }
+
 }

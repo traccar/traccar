@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.ClassScanner;
+import org.traccar.config.ProtocolConfig;
 import org.traccar.model.ProtocolSettings;
 import org.traccar.model.ProtocolSettings.Transport;
 import org.traccar.storage.Storage;
@@ -31,12 +31,9 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -50,14 +47,11 @@ public class ServerManager implements LifecycleObject {
 
     private final Injector injector;
     private final Storage storage;
-    private final Map<String, Class<? extends BaseProtocol>> protocolClasses = new HashMap<>();
     private final Map<String, BaseProtocol> protocols = new ConcurrentHashMap<>();
     private final Map<TrackerConnector, Integer> runningConnectors = new IdentityHashMap<>();
 
     @Inject
-    public ServerManager(
-            Injector injector, Config config, Storage storage)
-            throws IOException, URISyntaxException, ReflectiveOperationException, StorageException {
+    public ServerManager(Injector injector, Config config, Storage storage) throws StorageException {
         this.injector = injector;
         this.storage = storage;
         Set<String> configuredProtocols = new HashSet<>();
@@ -70,9 +64,7 @@ public class ServerManager implements LifecycleObject {
         if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
             enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
         }
-        for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
-            String protocol = BaseProtocol.nameFromClass(protocolClass);
-            protocolClasses.put(protocol, protocolClass.asSubclass(BaseProtocol.class));
+        for (String protocol : ProtocolConfig.getProtocolClasses().keySet()) {
             if (!configuredProtocols.remove(protocol)) {
                 int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
                 boolean enabled = port > 0 && (enabledProtocols == null || enabledProtocols.contains(protocol));
@@ -106,7 +98,7 @@ public class ServerManager implements LifecycleObject {
 
     private void updateConnectors(ProtocolSettings settings) throws Exception {
         BaseProtocol protocol = protocols.computeIfAbsent(
-                settings.getProtocol(), name -> injector.getInstance(protocolClasses.get(name)));
+                settings.getProtocol(), name -> injector.getInstance(ProtocolConfig.getProtocolClasses().get(name)));
         for (TrackerConnector connector : protocol.getConnectorList()) {
             boolean enabled = settings.getTransport() == Transport.ALL
                     || settings.getTransport() == (connector.isDatagram() ? Transport.UDP : Transport.TCP);
