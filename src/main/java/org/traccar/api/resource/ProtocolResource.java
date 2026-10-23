@@ -22,6 +22,7 @@ import org.traccar.model.ProtocolSettings;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -53,7 +54,7 @@ public class ProtocolResource extends BaseResource {
 
     @GET
     public List<ProtocolSettings> get() throws StorageException {
-        return storage.getObjects(ProtocolSettings.class, new Request(new Columns.All()));
+        return storage.getObjects(ProtocolSettings.class, new Request(new Columns.All(), new Order("protocol")));
     }
 
     @Path("{id}")
