@@ -1842,6 +1842,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Default transport when initializing protocol settings in the database: TCP, UDP, ALL, or DISABLED.
+     */
+    public static final ConfigKey<String> PROTOCOLS_DEFAULT_TRANSPORT = new StringConfigKey(
+            "protocols.defaultTransport",
+            List.of(KeyType.CONFIG),
+            "ALL");
+
+    /**
      * List of protocols for overriding time. If not specified, override is applied globally. The list consists of
      * protocol names that can be separated by a comma or a single space character.
      */

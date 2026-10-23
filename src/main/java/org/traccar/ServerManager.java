@@ -23,6 +23,11 @@ import org.traccar.config.Keys;
 import org.traccar.helper.ClassScanner;
 import org.traccar.model.ProtocolSettings;
 import org.traccar.model.ProtocolSettings.Transport;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -44,19 +49,36 @@ public class ServerManager implements LifecycleObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
     private final Injector injector;
-    private final Config config;
+    private final Storage storage;
     private final Map<String, Class<? extends BaseProtocol>> protocolClasses = new HashMap<>();
     private final Map<String, BaseProtocol> protocols = new ConcurrentHashMap<>();
     private final Map<TrackerConnector, Integer> runningConnectors = new IdentityHashMap<>();
 
     @Inject
     public ServerManager(
-            Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+            Injector injector, Config config, Storage storage)
+            throws IOException, URISyntaxException, ReflectiveOperationException, StorageException {
         this.injector = injector;
-        this.config = config;
+        this.storage = storage;
+        Set<String> configuredProtocols = new HashSet<>();
+        for (ProtocolSettings setting : storage.getObjects(
+                ProtocolSettings.class, new Request(new Columns.Include("protocol")))) {
+            configuredProtocols.add(setting.getProtocol());
+        }
+        Transport defaultTransport = Transport.valueOf(config.getString(Keys.PROTOCOLS_DEFAULT_TRANSPORT));
+        Set<String> enabledProtocols = null;
+        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
+            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
+        }
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
-            protocolClasses.put(
-                    BaseProtocol.nameFromClass(protocolClass), protocolClass.asSubclass(BaseProtocol.class));
+            String protocol = BaseProtocol.nameFromClass(protocolClass);
+            protocolClasses.put(protocol, protocolClass.asSubclass(BaseProtocol.class));
+            if (!configuredProtocols.contains(protocol)) {
+                int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+                boolean enabled = port > 0 && (enabledProtocols == null || enabledProtocols.contains(protocol));
+                var setting = new ProtocolSettings(protocol, port, enabled ? defaultTransport : Transport.DISABLED);
+                storage.addObject(setting, new Request(new Columns.Exclude("id")));
+            }
         }
     }
 
@@ -66,19 +88,20 @@ public class ServerManager implements LifecycleObject {
 
     @Override
     public synchronized void start() throws Exception {
-        Set<String> enabledProtocols = null;
-        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
-            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
-        }
-        for (String protocol : protocolClasses.keySet()) {
-            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
-            if (port > 0 && (enabledProtocols == null || enabledProtocols.contains(protocol))) {
-                apply(new ProtocolSettings(protocol, port, Transport.ALL));
+        for (ProtocolSettings setting : storage.getObjects(ProtocolSettings.class, new Request(new Columns.All()))) {
+            if (protocolClasses.containsKey(setting.getProtocol()) && setting.getTransport() != Transport.DISABLED) {
+                updateConnectors(setting);
             }
         }
     }
 
-    public synchronized void apply(ProtocolSettings settings) throws Exception {
+    public synchronized void updateSettings(ProtocolSettings settings) throws Exception {
+        storage.updateObject(settings, new Request(
+                new Columns.Include("port", "transport"), new Condition.Equals("protocol", settings.getProtocol())));
+        updateConnectors(settings);
+    }
+
+    private void updateConnectors(ProtocolSettings settings) throws Exception {
         BaseProtocol protocol = protocols.computeIfAbsent(
                 settings.getProtocol(), name -> injector.getInstance(protocolClasses.get(name)));
         for (TrackerConnector connector : protocol.getConnectorList()) {

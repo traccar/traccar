@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.17.0">
+
+  <changeSet author="author" id="changelog-6.17.0">
+
+    <createTable tableName="tc_protocols">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="protocol" type="VARCHAR(128)">
+        <constraints unique="true" nullable="false" />
+      </column>
+      <column name="port" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="transport" type="VARCHAR(16)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+  </changeSet>
+
+</databaseChangeLog>
