@@ -3,6 +3,7 @@ package org.traccar;
 import io.netty.channel.Channel;
 import org.traccar.config.Config;
 import org.traccar.database.CommandsManager;
+import org.traccar.database.DeviceLookupService;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Device;
@@ -46,6 +47,11 @@ public class BaseTest {
             }
         });
         decoder.setConnectionManager(connectionManager);
+        if (decoder instanceof BaseMediaProtocolDecoder mediaDecoder) {
+            var deviceLookupService = mock(DeviceLookupService.class);
+            when(deviceLookupService.lookup(any(String[].class))).thenReturn(device);
+            mediaDecoder.setDeviceLookupService(deviceLookupService);
+        }
         decoder.setStatisticsManager(mock(StatisticsManager.class));
         decoder.setMediaManager(mock(MediaManager.class));
         decoder.setCommandsManager(mock(CommandsManager.class));

@@ -20,19 +20,17 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import org.traccar.BaseProtocolDecoder;
+import org.traccar.BaseMediaProtocolDecoder;
 import org.traccar.Protocol;
-import org.traccar.database.DeviceLookupService;
 import org.traccar.helper.BitUtil;
 import org.traccar.media.VideoStreamManager;
-import org.traccar.model.Device;
+import org.traccar.session.DeviceSession;
 
 import jakarta.inject.Inject;
 import java.net.SocketAddress;
 
-public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
+public class Jt1078ProtocolDecoder extends BaseMediaProtocolDecoder {
 
-    private DeviceLookupService deviceLookupService;
     private VideoStreamManager streamManager;
 
     private CompositeByteBuf frameBuffer;
@@ -45,11 +43,6 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
 
     public Jt1078ProtocolDecoder(Protocol protocol) {
         super(protocol);
-    }
-
-    @Inject
-    public void setDeviceLookupService(DeviceLookupService deviceLookupService) {
-        this.deviceLookupService = deviceLookupService;
     }
 
     @Inject
@@ -86,12 +79,12 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Device device = deviceLookupService.lookup(new String[]{uniqueId});
-        if (device == null) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+        if (deviceSession == null) {
             return null;
         }
 
-        streamDeviceId = device.getId();
+        streamDeviceId = deviceSession.getDeviceId();
         streamChannel = videoChannel;
 
         ByteBuf body = buf.readRetainedSlice(bodyLength);

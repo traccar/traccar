@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ public abstract class TrackerServer implements TrackerConnector {
     @SuppressWarnings("rawtypes")
     private final AbstractBootstrap bootstrap;
 
-    private final int port;
     private final String address;
 
     private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -58,7 +57,6 @@ public abstract class TrackerServer implements TrackerConnector {
     public TrackerServer(Config config, String protocol, boolean datagram) {
         secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
         address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
 
         BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, config, protocol) {
             @Override
@@ -97,11 +95,6 @@ public abstract class TrackerServer implements TrackerConnector {
 
     protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
-    @Override
-    public int getPort() {
-        return port;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -112,7 +105,7 @@ public abstract class TrackerServer implements TrackerConnector {
     }
 
     @Override
-    public void start() throws Exception {
+    public void start(int port) throws Exception {
         if (address == null) {
             bind(new InetSocketAddress(port));
         } else {

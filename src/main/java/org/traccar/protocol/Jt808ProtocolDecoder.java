@@ -1278,7 +1278,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF0:
-                    while (buf.readerIndex() < endIndex) {
+                    while (endIndex - buf.readerIndex() >= 13) {
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedShort();
                         long cid = buf.readUnsignedInt();
