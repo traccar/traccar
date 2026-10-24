@@ -26,6 +26,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.media.VideoRecordingFilter;
 import org.traccar.model.Command;
 
 import java.net.URI;
@@ -34,6 +35,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
 
@@ -58,6 +60,30 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                 getUniqueId(command.getDeviceId()), protocolVersion != null ? 10 : 6);
         String model = getDeviceModel(command.getDeviceId());
         try {
+            if (command.getType().equals(Command.TYPE_VIDEO_RECORDING_LIST)) {
+                var filter = new VideoRecordingFilter(command.getString("from"), command.getString("to"),
+                        command.getInteger(Command.KEY_INDEX, 0), command.getInteger("resourceType", 0),
+                        command.getInteger("streamType", 0), command.getInteger("storageType", 0),
+                        command.getString("alarmMask"));
+                filter.validate();
+                int sequence = command.getInteger("sequence", 0);
+                if (sequence < 0 || sequence > 0xffff) {
+                    throw new IllegalArgumentException("Invalid recording query sequence");
+                }
+                String timeZone = AttributeUtil.lookup(getCacheManager(), Keys.DECODER_TIMEZONE, command.getDeviceId());
+                var zone = TimeZone.getTimeZone(timeZone != null ? timeZone : "GMT+8").toZoneId();
+                byte[] from = DataConverter.parseHex(filter.encodeTime(filter.from(), zone));
+                byte[] to = DataConverter.parseHex(filter.encodeTime(filter.to(), zone));
+                ByteBuf body = Unpooled.buffer(24);
+                body.writeByte(filter.channel());
+                body.writeBytes(from);
+                body.writeBytes(to);
+                body.writeBytes(DataConverter.parseHex(filter.mask()));
+                body.writeByte(filter.resourceType());
+                body.writeByte(filter.streamType());
+                body.writeByte(filter.storageType());
+                return decoder.formatMessage(Jt808ProtocolDecoder.MSG_VIDEO_RECORDING_QUERY, id, false, body, sequence);
+            }
             ByteBuf data = Unpooled.buffer();
 
             switch (command.getType()) {

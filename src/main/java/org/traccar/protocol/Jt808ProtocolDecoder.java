@@ -33,15 +33,18 @@ import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.StringUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.media.VideoRecordingManager;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 
+import jakarta.inject.Inject;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -102,6 +105,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM_ACK = 0x8203;
     public static final int MSG_VEHICLE_CONTROL = 0x8500;
     public static final int MSG_TAKE_PHOTO = 0x8801;
+    public static final int MSG_VIDEO_RECORDING_QUERY = 0x9205;
+    public static final int MSG_VIDEO_RECORDING_RESPONSE = 0x1205;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -111,6 +116,12 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
     private int delimiter = 0x7e;
     private Integer protocolVersion;
+    private VideoRecordingManager recordingManager;
+
+    @Inject
+    public void setRecordingManager(VideoRecordingManager recordingManager) {
+        this.recordingManager = recordingManager;
+    }
 
     public Integer getProtocolVersion() {
         return protocolVersion;
@@ -121,6 +132,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
+        return formatMessage(type, id, shortIndex, data, 0);
+    }
+
+    public ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data, int index) {
         ByteBuf buf = Unpooled.buffer();
         buf.writeByte(delimiter);
         buf.writeShort(type);
@@ -136,7 +151,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         if (shortIndex) {
             buf.writeByte(1);
         } else {
-            buf.writeShort(0);
+            buf.writeShort(index);
         }
         buf.writeBytes(data);
         data.release();
@@ -353,6 +368,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        int messageStart = buf.readerIndex();
         delimiter = buf.readUnsignedByte();
         int type = buf.readUnsignedShort();
         int attribute = buf.readUnsignedShort();
@@ -380,6 +396,59 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
         if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
             deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId(), "GMT+8"));
+        }
+
+        if (type == MSG_TERMINAL_GENERAL_RESPONSE && !BitUtil.check(attribute, 13)
+                && bodyLength == 5 && buf.readableBytes() == 7) {
+            int sequence = buf.readUnsignedShort();
+            int commandType = buf.readUnsignedShort();
+            int result = buf.readUnsignedByte();
+            if (commandType == MSG_VIDEO_RECORDING_QUERY && result != 0
+                    && (Checksum.xor(buf.nioBuffer(messageStart + 1, buf.writerIndex() - messageStart - 3)) & 0xff)
+                    == buf.getUnsignedByte(buf.writerIndex() - 2)) {
+                recordingManager.fail(
+                        deviceSession.getDeviceId(), sequence, "Device rejected recording query: " + result);
+            }
+            return null;
+        }
+
+        if (type == MSG_VIDEO_RECORDING_RESPONSE) {
+            if (buf.getUnsignedByte(buf.writerIndex() - 1) != delimiter
+                    || (Checksum.xor(buf.nioBuffer(messageStart + 1, buf.writerIndex() - messageStart - 3)) & 0xff)
+                    != buf.getUnsignedByte(buf.writerIndex() - 2)) {
+                throw new IllegalArgumentException("Invalid recording response checksum");
+            }
+            int packetCount = 1;
+            int packetIndex = 1;
+            if (BitUtil.check(attribute, 13)) {
+                if (buf.readableBytes() < 6) {
+                    throw new IllegalArgumentException("Truncated recording response header");
+                }
+                packetCount = buf.readUnsignedShort();
+                packetIndex = buf.readUnsignedShort();
+            }
+            if (buf.readableBytes() != bodyLength + 2) {
+                throw new IllegalArgumentException("Invalid recording response body length");
+            }
+            byte[] data = new byte[bodyLength];
+            buf.readBytes(data);
+            byte[] body = recordingManager.receive(deviceSession.getDeviceId(), index, packetCount, packetIndex, data);
+            if (body != null) {
+                int sequence = (body[0] & 0xff) << 8 | body[1] & 0xff;
+                ByteBuf resources = Unpooled.wrappedBuffer(body);
+                try {
+                    TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
+                    recordingManager.complete(deviceSession.getDeviceId(), sequence,
+                            Jt808RecordingResources.decode(resources, timeZone.toZoneId()));
+                } catch (IllegalArgumentException | DateTimeException error) {
+                    recordingManager.fail(deviceSession.getDeviceId(), sequence, "Invalid device recording response");
+                    throw error;
+                } finally {
+                    resources.release();
+                }
+            }
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+            return null;
         }
 
         if (type == MSG_TERMINAL_REGISTER) {
