@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,10 @@ public class OverrideTextFilter implements Filter {
                         .replace("${title}", title)
                         .replace("${description}", description)
                         .replace("${colorPrimary}", colorPrimary);
+
+                if (isHtml) {
+                    alteredContent = alteredContent.replace("<!--${customHead}-->", server.getString("customHead", ""));
+                }
 
                 byte[] data = alteredContent.getBytes(StandardCharsets.UTF_8);
                 response.setContentLength(data.length);
