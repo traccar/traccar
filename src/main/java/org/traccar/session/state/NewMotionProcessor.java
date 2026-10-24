@@ -79,7 +79,21 @@ public final class NewMotionProcessor {
             long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
             if (duration >= minDuration) {
                 state.setMotionStreak(false);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+                Position stopPosition = position;
+                Position next = position;
+                for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+                    Position candidate = iterator.next();
+                    boolean beforeStart = !candidate.getFixTime().after(state.getEventTime());
+                    double legDistance = DistanceCalculator.distance(candidate, next);
+                    long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
+                    boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
+                    if (beforeStart || legMoving) {
+                        break;
+                    }
+                    stopPosition = candidate;
+                    next = candidate;
+                }
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, stopPosition);
             }
         } else {
             double distance = DistanceCalculator.distance(
