@@ -35,15 +35,14 @@ import java.util.List;
 
 public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
-    // CRC16_CCITT in components/crc/src/crc.c. The name is not generic CCITT:
-    // init is 0, each byte is XORed into the high byte, bits shift left, and
-    // 0xA001 is applied when the bit shifted into position 16 is set.
+    // Radshid packet CRC: initial value 0, high-byte input, left shifts, and
+    // the protocol polynomial 0xA001.
     private static final int CRC_POLYNOMIAL = 0xA001;
 
-    // Fixed Event_t prefix, including the extra-length byte (AVLCore.h).
+    // Fixed event prefix, including the extra-length byte.
     private static final int EVENT_PREFIX_LENGTH = 44;
 
-    // Packed DebugParam_t sizes. v11 and v13 share one layout; v13 only changes the version constant.
+    // Packed debug-extra sizes. Versions 11 and 13 share one layout.
     private static final int EXTRA_V7_TEMPERATURE = 27;
     private static final int EXTRA_V8_STATIC_LOCATION = 36;
     private static final int EXTRA_V10_CCID = 37;
@@ -74,17 +73,15 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             response.writeIntLE(0x07);
             response.writeByte(0x82);
             response.writeByte(packetTag);
-            // PacketParser reads this uint32 big-endian (GSMPackGenerator.c:192-198) and requires
-            // value + 4 == SendDataLen. GSMTask.c passes bigpack->len, so the echoed value is the
-            // request length field. The ACK length prefix stays little-endian (native uint32).
+            // The acknowledgement carries the request payload length in big-endian order.
+            // Its own length prefix remains little-endian.
             response.writeInt(requestLength);
             response.writeByte(0x01);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
-    // Current Event_ID values from AVLCore.h. Commented-out historical codes are not alarms.
-    // 0xF1 is the first valid GPS fix. 0xF7 is the distance event. Jamming is 0xD6 and 0xD7.
+    // Event codes observed in the Radshid packet format. Non-alarm events return null.
     private String decodeAlarm(int event) {
         return switch (event) {
             case 0xD6, 0xD7 -> Position.ALARM_JAMMING;
@@ -103,7 +100,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeGpsStatus(Position position, int gpsStatus) {
-        // GPS_FIX[FixPoint] in AVLCore.c: 0x00 3D, 0x01 no fix, 0x02 2D, 0x03 LBS (GPSTask.h).
+        // 0x00 and 0x02 are GPS fixes; 0x03 is a valid approximate location.
         position.set(Position.KEY_GPS, gpsStatus);
         switch (gpsStatus) {
             case 0x00, 0x02 -> position.setValid(true);
@@ -124,8 +121,8 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
         int version = buf.getUnsignedByte(extraStart);
-        // The first extra byte is DebugParam_t.version (AVLCore.h), not a type code.
-        // Unsupported versions, including any future layout, are skipped by extraLength.
+        // The first extra byte is the debug-extra version, not a type code.
+        // Unsupported versions, including future layouts, are skipped.
         if (version == 7 || version == 8 || version == 10 || version == 11 || version == 13) {
             decodeDebugExtra(buf, position, extraStart, extraLength, version);
         }
@@ -167,7 +164,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         if (fits(length, 23, 1)) {
-            // External_Power is GetExPower()/100, with GetExPower in millivolts (IOTask.c).
             position.set(Position.KEY_POWER, buf.getUnsignedByte(start + 23) / 10.0);
         }
         if (fits(length, 24, 1)) {
@@ -186,7 +182,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HUMIDITY, (double) buf.getFloatLE(start + 31));
         }
         if (fits(length, 35, 1)) {
-            // bootloaderVersion stores the event CRC8 (AVLCore.c, Version.h).
             position.set("crc8", (int) buf.getUnsignedByte(start + 35));
         }
         if (version >= 8 && fits(length, EXTRA_V8_STATIC_LOCATION, 1)) {
@@ -221,7 +216,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
         long rawLength = buf.readUnsignedIntLE();
-        // Length covers the bytes after the prefix, including the CRC trailer (GsmHeader_t).
+        // Length covers the bytes after the prefix, including the CRC trailer.
         if (rawLength < 8 || rawLength > buf.readableBytes()) {
             return null;
         }
@@ -229,8 +224,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         int payloadStart = buf.readerIndex();
         int eventLimit = payloadStart + payloadLength - 2;
 
-        // CRC16_CCITT over data[4 .. len-1], excluding the length prefix and the two CRC bytes
-        // (GSMPackGenerator.c). memcpy stores that uint16 little-endian.
+        // CRC covers the payload excluding the length prefix and the two CRC bytes.
         int actualCrc = buf.getUnsignedShortLE(eventLimit);
         if (crc16(buf, payloadStart, payloadLength - 2) != actualCrc) {
             return null;
@@ -270,13 +264,13 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // max gps speed
             buf.readUnsignedByte(); // max sensor speed
 
-            // Engine_RPM is the geofence id, byte-swapped with UINT16_L2B (AVLCore.c).
+            // This field is the geofence id in the Radshid event layout.
             position.set("geofenceId", buf.readUnsignedShort());
-            // GPS_TraveledDistance is meters since the previous point. Bit 31 is a flag (AVLCore.c).
+            // Distance is measured in meters; the high bit is a protocol flag.
             position.set(Position.KEY_DISTANCE, buf.readUnsignedInt() & 0x7FFFFFFFL);
-            buf.readUnsignedInt(); // Odomiter_TraveledDistance is written as 0 and is not an odometer
+            buf.readUnsignedInt(); // Reserved/traveled-distance field
 
-            // GetExIO (IOTask.c): bit 7 external power, bit 6 ACC, bit 5 SOS key.
+            // IO status: bit 7 external power, bit 6 ignition, bit 5 SOS.
             int ioStatus = buf.readUnsignedByte();
             position.set("externalPower", BitUtil.check(ioStatus, 7));
             position.set(Position.KEY_IGNITION, BitUtil.check(ioStatus, 6));

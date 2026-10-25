@@ -80,7 +80,7 @@ public class RadshidProtocolDecoderTest extends ProtocolTest {
         assertEquals(2, ((List<?>) decoded).size());
         NetworkMessage message = channel.readOutbound();
         ByteBuf response = (ByteBuf) message.getMessage();
-        // Length 0x60 echoed big-endian. GSMPackGenerator.c:192-198, GSMTask.c bigpack->len.
+        // The request payload length is echoed in big-endian order.
         assertEquals("0700000082010000006001", ByteBufUtil.hexDump(response));
 
     }
