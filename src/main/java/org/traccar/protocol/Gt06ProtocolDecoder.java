@@ -1305,6 +1305,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 return position;
 
+            } else if (subType == 0x15) {
+
+                int count = buf.readUnsignedByte();
+                for (int i = 1; i <= count; i++) {
+                    buf.skipBytes(8); // sensor id
+                    position.set(Position.PREFIX_TEMP + i, buf.readShort() / 100.0);
+                }
+                return position;
+
             } else if (subType == 0x1b) {
 
                 if (Character.isLetter(buf.getUnsignedByte(buf.readerIndex()))) {
