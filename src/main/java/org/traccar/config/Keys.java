@@ -789,10 +789,11 @@ public final class Keys {
      * List of OpenID Connect clients for the built-in provider.
      * Value should be a comma-separated list of 'clientId:clientSecret:redirectUri' entries.
      * Multiple redirect URIs can be specified using '|' as a separator.
+     * A user attribute overrides the global list and only allows authorization for that user.
      */
     public static final ConfigKey<String> OPENID_CLIENTS = new StringConfigKey(
             "openid.clients",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.USER));
 
     /**
      * Force OpenID Connect authentication. When enabled, the Traccar login page will be skipped

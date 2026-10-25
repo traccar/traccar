@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,9 @@ public class OidcResource extends BaseResource {
             @QueryParam("response_type") String responseType,
             @QueryParam("code_challenge") String codeChallenge,
             @QueryParam("code_challenge_method") String codeChallengeMethod,
-            @QueryParam("nonce") String nonce) {
+            @QueryParam("nonce") String nonce) throws StorageException {
 
-        ClientConfig client = getClients().get(clientId);
+        ClientConfig client = getClients(permissionsService.getUser(getUserId())).get(clientId);
         if (client == null) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
@@ -120,22 +120,23 @@ public class OidcResource extends BaseResource {
             clientSecret = credentials[1];
         }
 
-        ClientConfig client = getClients().get(clientId);
-        if (client == null || !client.secret().equals(clientSecret)) {
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        }
-
         AuthorizationCode authCode = sessionManager.consumeCode(
                 code, clientId, redirectUri != null ? URI.create(redirectUri) : null, codeVerifier);
         if (authCode == null) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
+        User user = permissionsService.getUser(authCode.userId());
+        ClientConfig client = getClients(user).get(clientId);
+        if (client == null || !client.secret().equals(clientSecret)
+                || !client.redirectUris().contains(authCode.redirectUri())) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
+
         String token = tokenManager.generateToken(authCode.userId());
         TokenManager.TokenData tokenData = tokenManager.decodeToken(token);
         long expiresIn = Math.max(0, (tokenData.getExpiration().getTime() - System.currentTimeMillis()) / 1000);
         Set<String> scopes = sessionManager.parseScopes(authCode.scope());
-        User user = permissionsService.getUser(authCode.userId());
         String idToken = sessionManager.generateIdToken(authCode, clientId, tokenData, scopes, user);
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -165,8 +166,8 @@ public class OidcResource extends BaseResource {
         return sessionManager.getJwks();
     }
 
-    private Map<String, ClientConfig> getClients() {
-        String value = config.getString(Keys.OPENID_CLIENTS);
+    private Map<String, ClientConfig> getClients(User user) {
+        String value = user.getString(Keys.OPENID_CLIENTS.getKey(), config.getString(Keys.OPENID_CLIENTS));
         if (value == null || value.isBlank()) {
             return Collections.emptyMap();
         }
