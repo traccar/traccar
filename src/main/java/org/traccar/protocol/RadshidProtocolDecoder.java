@@ -35,14 +35,10 @@ import java.util.List;
 
 public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
-    // Radshid packet CRC: initial value 0, high-byte input, left shifts, and
-    // the protocol polynomial 0xA001.
     private static final int CRC_POLYNOMIAL = 0xA001;
 
-    // Fixed event prefix, including the extra-length byte.
     private static final int EVENT_PREFIX_LENGTH = 44;
 
-    // Packed debug-extra sizes. Versions 11 and 13 share one layout.
     private static final int EXTRA_V7_TEMPERATURE = 27;
     private static final int EXTRA_V8_STATIC_LOCATION = 36;
     private static final int EXTRA_V10_CCID = 37;
@@ -73,15 +69,12 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             response.writeIntLE(0x07);
             response.writeByte(0x82);
             response.writeByte(packetTag);
-            // The acknowledgement carries the request payload length in big-endian order.
-            // Its own length prefix remains little-endian.
             response.writeInt(requestLength);
             response.writeByte(0x01);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
-    // Event codes observed in the Radshid packet format. Non-alarm events return null.
     private String decodeAlarm(int event) {
         return switch (event) {
             case 0xD6, 0xD7 -> Position.ALARM_JAMMING;
@@ -100,7 +93,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeGpsStatus(Position position, int gpsStatus) {
-        // 0x00 and 0x02 are GPS fixes; 0x03 is a valid approximate location.
         position.set(Position.KEY_GPS, gpsStatus);
         switch (gpsStatus) {
             case 0x00, 0x02 -> position.setValid(true);
@@ -121,8 +113,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
         int version = buf.getUnsignedByte(extraStart);
-        // The first extra byte is the debug-extra version, not a type code.
-        // Unsupported versions, including future layouts, are skipped.
         if (version == 7 || version == 8 || version == 10 || version == 11 || version == 13) {
             decodeDebugExtra(buf, position, extraStart, extraLength, version);
         }
@@ -216,7 +206,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
         long rawLength = buf.readUnsignedIntLE();
-        // Length covers the bytes after the prefix, including the CRC trailer.
         if (rawLength < 8 || rawLength > buf.readableBytes()) {
             return null;
         }
@@ -224,7 +213,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         int payloadStart = buf.readerIndex();
         int eventLimit = payloadStart + payloadLength - 2;
 
-        // CRC covers the payload excluding the length prefix and the two CRC bytes.
         int actualCrc = buf.getUnsignedShortLE(eventLimit);
         if (crc16(buf, payloadStart, payloadLength - 2) != actualCrc) {
             return null;
@@ -246,7 +234,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            buf.readUnsignedByte(); // event version
+            buf.readUnsignedByte();
 
             int eventCode = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, eventCode);
@@ -261,16 +249,13 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000L));
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
-            buf.readUnsignedByte(); // max gps speed
-            buf.readUnsignedByte(); // max sensor speed
+            buf.readUnsignedByte();
+            buf.readUnsignedByte();
 
-            // This field is the geofence id in the Radshid event layout.
             position.set("geofenceId", buf.readUnsignedShort());
-            // Distance is measured in meters; the high bit is a protocol flag.
             position.set(Position.KEY_DISTANCE, buf.readUnsignedInt() & 0x7FFFFFFFL);
-            buf.readUnsignedInt(); // Reserved/traveled-distance field
+            buf.readUnsignedInt();
 
-            // IO status: bit 7 external power, bit 6 ignition, bit 5 SOS.
             int ioStatus = buf.readUnsignedByte();
             position.set("externalPower", BitUtil.check(ioStatus, 7));
             position.set(Position.KEY_IGNITION, BitUtil.check(ioStatus, 6));
