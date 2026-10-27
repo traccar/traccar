@@ -171,7 +171,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     private String readRefrigeratorData(ByteBuf buf) {
         int status = buf.getUnsignedShortLE(buf.readerIndex() + 1);
-        int length = 7;
+        int length = 1 + 2 + 4;
         for (int i = 0; i < REFRIGERATOR_FIELD_LENGTHS.length; i++) {
             if (BitUtil.check(status, i)) {
                 length += REFRIGERATOR_FIELD_LENGTHS[i];
@@ -211,8 +211,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x008e -> {
                     position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    position.set("snrAvg", buf.readUnsignedByte());
-                    position.set("snrMax", buf.readUnsignedByte());
                 }
                 default -> {
                     Integer length = EXTENDED_TAG_LENGTH_MAP.get(tag);
