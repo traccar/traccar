@@ -17,14 +17,12 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,7 +34,6 @@ public class OptinexusVendorRecordsTest {
     private static final String ATTRIBUTE = "optinexusTenantId";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Map<Long, Group> groups = new HashMap<>();
 
     private Storage storage;
     private OpenIdTenantLinker linker;
@@ -46,25 +43,21 @@ public class OptinexusVendorRecordsTest {
     public void setUp() throws StorageException {
         storage = new MemoryStorage();
         CacheManager cacheManager = mock(CacheManager.class);
-        when(cacheManager.getObject(any(), anyLong())).thenAnswer(invocation -> {
-            Class<?> type = invocation.getArgument(0);
-            return type == Group.class ? groups.get((Long) invocation.getArgument(1)) : null;
-        });
         linker = mock(OpenIdTenantLinker.class);
         when(linker.tenantsOf(anyLong())).thenReturn(Set.of());
         Config config = new Config();
         config.setString(Keys.OPTINEXUS_EVENTS_ENABLE, "true");
-        OptinexusEventRecorder recorder = new OptinexusEventRecorder(config, storage, cacheManager, objectMapper);
+        OptinexusVehicleMaster vehicleMaster = new OptinexusVehicleMaster(config, storage, objectMapper);
         OptinexusDriverMaster driverMaster = new OptinexusDriverMaster(config, storage, objectMapper, linker);
-        records = new OptinexusVendorRecords(storage, cacheManager, recorder, driverMaster, linker);
+        records = new OptinexusVendorRecords(storage, cacheManager, vehicleMaster, driverMaster, linker);
     }
 
-    private void tenantGroup(long id, String tenantId) {
+    private long tenantGroup(String tenantId) throws StorageException {
         Group group = new Group();
-        group.setId(id);
-        group.setName("Group " + id);
+        group.setName("Tenant group");
         group.set(ATTRIBUTE, tenantId);
-        groups.put(id, group);
+        group.setId(storage.addObject(group, new Request(new Columns.Exclude("id"))));
+        return group.getId();
     }
 
     private Device device(long groupId, String registration) throws StorageException {
@@ -96,10 +89,10 @@ public class OptinexusVendorRecordsTest {
 
     @Test
     public void marksTheMatchingDeviceOfTheSameTenantAsAVendorsVehicle() throws Exception {
-        tenantGroup(1, TENANT_A);
-        tenantGroup(2, TENANT_B);
-        Device mine = device(1, "B 5 VV");
-        Device other = device(2, "B 5 VV");
+        long a = tenantGroup(TENANT_A);
+        long b = tenantGroup(TENANT_B);
+        Device mine = device(a, "B 5 VV");
+        Device other = device(b, "B 5 VV");
 
         assertEquals("applied", records.handle(vehicle(TENANT_A, "B5VV", 1, true)));
 
@@ -114,10 +107,10 @@ public class OptinexusVendorRecordsTest {
 
     @Test
     public void aRecordThatArrivesFirstIsAppliedWhenTheDeviceIsSaved() throws Exception {
-        tenantGroup(1, TENANT_A);
+        long a = tenantGroup(TENANT_A);
         assertEquals("applied", records.handle(vehicle(TENANT_A, "B5VV", 1, true)));
 
-        Device late = device(1, "b-5-vv");
+        Device late = device(a, "b-5-vv");
         records.enrich(late);
 
         assertEquals("Vendor Jaya", stored(late).getAttributes().get("vendorName"));
@@ -125,8 +118,8 @@ public class OptinexusVendorRecordsTest {
 
     @Test
     public void anOlderVersionIsStaleAndANewerOneUpdatesTheDevice() throws Exception {
-        tenantGroup(1, TENANT_A);
-        Device device = device(1, "B 5 VV");
+        long a = tenantGroup(TENANT_A);
+        Device device = device(a, "B 5 VV");
         records.handle(vehicle(TENANT_A, "B5VV", 10, true));
 
         assertEquals("stale", records.handle(vehicle(TENANT_A, "B5VV", 9, false)));
@@ -137,8 +130,8 @@ public class OptinexusVendorRecordsTest {
 
     @Test
     public void onlyOptideliMayTellAndOnlyAboutValidEvents() throws Exception {
-        tenantGroup(1, TENANT_A);
-        Device device = device(1, "B 5 VV");
+        long a = tenantGroup(TENANT_A);
+        Device device = device(a, "B 5 VV");
 
         assertEquals("ignored", records.handle(event("optideli.vendor_vehicle.upserted", TENANT_A, "optifleet", "B5VV", 1, true, "")));
         assertEquals("ignored", records.handle(event("optideli.vehicle.upserted", TENANT_A, "optideli", "B5VV", 1, true, "")));

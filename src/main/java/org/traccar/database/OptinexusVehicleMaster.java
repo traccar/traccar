@@ -21,10 +21,12 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.OptinexusOutboxEvent;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -54,20 +56,47 @@ public class OptinexusVehicleMaster {
 
     static final String EVENT_KEY = "optiradar.vehicle.upserted";
 
+    private static final int MAX_GROUP_DEPTH = 10;
+
     private static final AtomicLong LAST_VERSION = new AtomicLong();
 
     private final Storage storage;
     private final ObjectMapper objectMapper;
-    private final OptinexusEventRecorder recorder;
     private final boolean enabled;
+    private final String tenantAttribute;
 
     @Inject
-    public OptinexusVehicleMaster(
-            Config config, Storage storage, ObjectMapper objectMapper, OptinexusEventRecorder recorder) {
+    public OptinexusVehicleMaster(Config config, Storage storage, ObjectMapper objectMapper) {
         this.storage = storage;
         this.objectMapper = objectMapper;
-        this.recorder = recorder;
         this.enabled = config.getBoolean(Keys.OPTINEXUS_EVENTS_ENABLE);
+        this.tenantAttribute = config.getString(Keys.OPENID_TENANT_GROUP_ATTRIBUTE);
+    }
+
+    /**
+     * The OptiNexus tenant of the device: the identifier on its group, else on the nearest ancestor group. The groups are
+     * read from storage, not from the cache: a device that was just saved is not in the cache yet. Anything that is not a
+     * UUID counts as no tenant.
+     */
+    public String tenantOf(Device device) throws StorageException {
+        long groupId = device.getGroupId();
+        for (int depth = 0; groupId > 0 && depth < MAX_GROUP_DEPTH; depth++) {
+            Group group = storage.getObject(Group.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", groupId)));
+            if (group == null) {
+                return null;
+            }
+            String value = group.getString(tenantAttribute);
+            if (value != null && !value.isBlank()) {
+                try {
+                    return UUID.fromString(value.trim()).toString().toLowerCase(Locale.ROOT);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
+            }
+            groupId = group.getGroupId();
+        }
+        return null;
     }
 
     /** The identity key shared by all platforms: upper case, letters and digits only. */
@@ -102,7 +131,7 @@ public class OptinexusVehicleMaster {
         }
         try {
             String registration = registrationOf(device);
-            String tenantId = registration != null ? recorder.tenantOf(device) : null;
+            String tenantId = registration != null ? tenantOf(device) : null;
             if (registration == null || tenantId == null) {
                 return false;
             }

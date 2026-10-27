@@ -9,7 +9,6 @@ import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.OptinexusOutboxEvent;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -24,10 +23,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class OptinexusVehicleMasterTest {
 
@@ -36,40 +31,26 @@ public class OptinexusVehicleMasterTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<Long, Device> devices = new HashMap<>();
-    private final Map<Long, Group> groups = new HashMap<>();
 
     private Storage storage;
-    private CacheManager cacheManager;
 
     @BeforeEach
     public void setUp() {
         storage = new MemoryStorage();
-        cacheManager = mock(CacheManager.class);
-        when(cacheManager.getObject(any(), anyLong())).thenAnswer(invocation -> {
-            Class<?> type = invocation.getArgument(0);
-            long id = invocation.getArgument(1);
-            if (type == Device.class) {
-                return devices.get(id);
-            } else if (type == Group.class) {
-                return groups.get(id);
-            }
-            return null;
-        });
     }
 
     private OptinexusVehicleMaster master(boolean enabled) {
         Config config = new Config();
         config.setString(Keys.OPTINEXUS_EVENTS_ENABLE, String.valueOf(enabled));
-        OptinexusEventRecorder recorder = new OptinexusEventRecorder(config, storage, cacheManager, objectMapper);
-        return new OptinexusVehicleMaster(config, storage, objectMapper, recorder);
+        return new OptinexusVehicleMaster(config, storage, objectMapper);
     }
 
-    private void addTenantGroup(long id) {
+    private long addTenantGroup() throws StorageException {
         Group group = new Group();
-        group.setId(id);
-        group.setName("Group " + id);
+        group.setName("Tenant group");
         group.set(ATTRIBUTE, TENANT_A);
-        groups.put(id, group);
+        group.setId(storage.addObject(group, new Request(new Columns.Exclude("id"))));
+        return group.getId();
     }
 
     private Device addDevice(long id, long groupId, String registration) {
@@ -93,8 +74,8 @@ public class OptinexusVehicleMasterTest {
 
     @Test
     public void queuesTheTelematicsGroupOfADeviceWithARegistrationNumberUnderTheNormalisedKey() throws Exception {
-        addTenantGroup(1);
-        Device device = addDevice(10, 1, "b 1234-xy");
+        long g = addTenantGroup();
+        Device device = addDevice(10, g, "b 1234-xy");
 
         assertTrue(master(true).publish(device));
 
@@ -115,21 +96,21 @@ public class OptinexusVehicleMasterTest {
 
     @Test
     public void sharesNothingWithoutARegistrationNumberATenantOrTheSwitch() throws Exception {
-        addTenantGroup(1);
-        Device named = addDevice(10, 1, null);
+        long g = addTenantGroup();
+        Device named = addDevice(10, g, null);
         named.setName("B 1234 XY");
         Device noTenant = addDevice(11, 0, "B 1 A");
 
         assertFalse(master(true).publish(named), "the name alone is not a registration number");
         assertFalse(master(true).publish(noTenant), "an event without a tenant has nowhere to go");
-        assertFalse(master(false).publish(addDevice(12, 1, "B 2 A")), "switched off");
+        assertFalse(master(false).publish(addDevice(12, g, "B 2 A")), "switched off");
         assertEquals(0, rows().size());
     }
 
     @Test
     public void thePlateAttributeCountsToo() throws Exception {
-        addTenantGroup(1);
-        Device device = addDevice(10, 1, null);
+        long g = addTenantGroup();
+        Device device = addDevice(10, g, null);
         device.set("plate", "D 8101 AH");
 
         assertTrue(master(true).publish(device));
@@ -138,8 +119,8 @@ public class OptinexusVehicleMasterTest {
 
     @Test
     public void versionsOnlyIncrease() throws Exception {
-        addTenantGroup(1);
-        Device device = addDevice(10, 1, "B 1 A");
+        long g = addTenantGroup();
+        Device device = addDevice(10, g, "B 1 A");
         OptinexusVehicleMaster master = master(true);
 
         master.publish(device);
@@ -159,9 +140,9 @@ public class OptinexusVehicleMasterTest {
 
     @Test
     public void publishAllQueuesOnlyTheDevicesThatQualify() throws Exception {
-        addTenantGroup(1);
-        storage.addObject(addDevice(10, 1, "B 1 A"), new Request(new Columns.Exclude("id")));
-        storage.addObject(addDevice(11, 1, null), new Request(new Columns.Exclude("id")));
+        long g = addTenantGroup();
+        storage.addObject(addDevice(10, g, "B 1 A"), new Request(new Columns.Exclude("id")));
+        storage.addObject(addDevice(11, g, null), new Request(new Columns.Exclude("id")));
 
         int queued = master(true).publishAll();
 

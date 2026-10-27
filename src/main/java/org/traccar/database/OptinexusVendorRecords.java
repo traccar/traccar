@@ -65,17 +65,17 @@ public class OptinexusVendorRecords {
 
     private final Storage storage;
     private final CacheManager cacheManager;
-    private final OptinexusEventRecorder recorder;
+    private final OptinexusVehicleMaster vehicles;
     private final OptinexusDriverMaster drivers;
     private final OpenIdTenantLinker linker;
 
     @Inject
     public OptinexusVendorRecords(
-            Storage storage, CacheManager cacheManager, OptinexusEventRecorder recorder, OptinexusDriverMaster drivers,
+            Storage storage, CacheManager cacheManager, OptinexusVehicleMaster vehicles, OptinexusDriverMaster drivers,
             OpenIdTenantLinker linker) {
         this.storage = storage;
         this.cacheManager = cacheManager;
-        this.recorder = recorder;
+        this.vehicles = vehicles;
         this.drivers = drivers;
         this.linker = linker;
     }
@@ -141,7 +141,7 @@ public class OptinexusVendorRecords {
         if (OptinexusVendorRecord.VEHICLE.equals(kind)) {
             for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
                 if (key.equals(OptinexusVehicleMaster.key(OptinexusVehicleMaster.registrationOf(device)))
-                        && tenantId.equals(recorder.tenantOf(device))) {
+                        && tenantId.equals(vehicles.tenantOf(device))) {
                     apply(device, record, Device.class);
                 }
             }
@@ -161,7 +161,7 @@ public class OptinexusVendorRecords {
     public void enrich(Device device) {
         try {
             String registration = OptinexusVehicleMaster.registrationOf(device);
-            String tenantId = registration != null ? recorder.tenantOf(device) : null;
+            String tenantId = registration != null ? vehicles.tenantOf(device) : null;
             OptinexusVendorRecord record = tenantId == null ? null
                     : find(tenantId, OptinexusVendorRecord.VEHICLE, OptinexusVehicleMaster.key(registration));
             if (record != null) {
