@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-optinexus-vendors">
+
+  <changeSet author="optinexus" id="changelog-optinexus-vendors">
+
+    <!-- The vehicles and drivers of a tenant's vendors, as OptiDeli reports them (kept until a device or driver with the same key exists). -->
+    <createTable tableName="tc_optinexus_vendor_records">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="tenantid" type="VARCHAR(36)">
+        <constraints nullable="false" />
+      </column>
+      <column name="kind" type="VARCHAR(10)">
+        <constraints nullable="false" />
+      </column>
+      <column name="recordkey" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+      <column name="version" type="BIGINT">
+        <constraints nullable="false" />
+      </column>
+      <column name="payload" type="VARCHAR(2000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="updatedat" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createIndex indexName="tc_optinexus_vendor_records_key_idx" tableName="tc_optinexus_vendor_records" unique="true">
+      <column name="tenantid" />
+      <column name="kind" />
+      <column name="recordkey" />
+    </createIndex>
+
+  </changeSet>
+
+</databaseChangeLog>

@@ -39,5 +39,6 @@
   <include file="changelog-6.15.0.xml" relativeToChangelogFile="true" />
 
   <include file="changelog-optinexus-events.xml" relativeToChangelogFile="true" />
+  <include file="changelog-optinexus-vendors.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

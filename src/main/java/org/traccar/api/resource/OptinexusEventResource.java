@@ -15,10 +15,12 @@
  */
 package org.traccar.api.resource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.BaseResource;
 import org.traccar.database.OptinexusTenantEvents;
+import org.traccar.database.OptinexusVendorRecords;
 import org.traccar.database.OptinexusWebhookVerifier;
 import org.traccar.storage.StorageException;
 
@@ -46,11 +48,16 @@ public class OptinexusEventResource extends BaseResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OptinexusEventResource.class);
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     @Inject
     private OptinexusWebhookVerifier verifier;
 
     @Inject
     private OptinexusTenantEvents events;
+
+    @Inject
+    private OptinexusVendorRecords vendorRecords;
 
     @PermitAll
     @POST
@@ -70,7 +77,9 @@ public class OptinexusEventResource extends BaseResource {
             return Response.status(Response.Status.UNAUTHORIZED).entity(Map.of("error", "invalid_signature")).build();
         }
         try {
-            return Response.accepted(Map.of("result", events.handle(body))).build();
+            String type = MAPPER.readTree(body).path("event_type").asText();
+            String result = OptinexusVendorRecords.handles(type) ? vendorRecords.handle(body) : events.handle(body);
+            return Response.accepted(Map.of("result", result)).build();
         } catch (StorageException e) {
             LOGGER.error("OptiNexus webhook could not be applied", e);
             return Response.serverError().entity(Map.of("error", "storage")).build();

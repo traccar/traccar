@@ -100,10 +100,7 @@ public class OptinexusDriverMaster {
     public int publishAll() throws StorageException {
         int count = 0;
         for (Driver driver : storage.getObjects(Driver.class, new Request(new Columns.All()))) {
-            Set<String> found = new HashSet<>();
-            for (Permission permission : storage.getPermissions(User.class, 0, Driver.class, driver.getId())) {
-                found.addAll(tenants.tenantsOf(permission.getOwnerId()));
-            }
+            Set<String> found = tenantsOfDriver(driver);
             if (found.size() == 1) {
                 try {
                     count += queue(driver, found.iterator().next()) ? 1 : 0;
@@ -113,6 +110,15 @@ public class OptinexusDriverMaster {
             }
         }
         return count;
+    }
+
+    /** The tenants of the users a driver is linked to (a tenant user's drivers are linked to that user). */
+    public Set<String> tenantsOfDriver(Driver driver) throws StorageException {
+        Set<String> found = new HashSet<>();
+        for (Permission permission : storage.getPermissions(User.class, 0, Driver.class, driver.getId())) {
+            found.addAll(tenants.tenantsOf(permission.getOwnerId()));
+        }
+        return found;
     }
 
     private boolean queue(Driver driver, String tenantId) throws Exception {
