@@ -17,6 +17,8 @@ package org.traccar.web;
 
 import com.google.inject.Provider;
 import org.traccar.api.security.PermissionsService;
+import org.traccar.config.Config;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.Server;
 import org.traccar.storage.StorageException;
 
@@ -30,16 +32,20 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 @Singleton
 public class OverrideTextFilter implements Filter {
 
     private final Provider<PermissionsService> permissionsServiceProvider;
+    private final String basePath;
 
     @Inject
-    public OverrideTextFilter(Provider<PermissionsService> permissionsServiceProvider) {
+    public OverrideTextFilter(Provider<PermissionsService> permissionsServiceProvider, Config config) {
         this.permissionsServiceProvider = permissionsServiceProvider;
+        String path = URI.create(WebHelper.retrieveWebUrl(config)).getRawPath();
+        basePath = path != null ? path + "/" : "/";
     }
 
     @Override
@@ -87,7 +93,9 @@ public class OverrideTextFilter implements Filter {
                         .replace("${colorPrimary}", colorPrimary);
 
                 if (isHtml) {
-                    alteredContent = alteredContent.replace("<!--${customHead}-->", server.getString("customHead", ""));
+                    alteredContent = alteredContent
+                            .replace("<base href=\"/\" />", "<base href=\"" + basePath + "\" />")
+                            .replace("<!--${customHead}-->", server.getString("customHead", ""));
                 }
 
                 byte[] data = alteredContent.getBytes(StandardCharsets.UTF_8);

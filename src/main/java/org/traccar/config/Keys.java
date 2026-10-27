@@ -2215,6 +2215,7 @@ public final class Keys {
 
     /**
      * Public URL for the web app. Used for notifications, report links, and OpenID Connect.
+     * Its path also sets the HTML base path when hosted behind a reverse proxy.
      * If not provided, Traccar will attempt to get a URL from the server IP address, but it might be a local address.
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(
