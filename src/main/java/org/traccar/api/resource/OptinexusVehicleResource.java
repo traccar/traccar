@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.database.OptinexusDriverMaster;
 import org.traccar.database.OptinexusVehicleMaster;
 import org.traccar.storage.StorageException;
 
@@ -27,7 +28,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.Map;
 
 /**
- * Administrator action to share the vehicles of all tenants with the other platforms again (first start-up of the
+ * Administrator action to share the vehicles and drivers of all tenants with the other platforms again (first start-up of the
  * sync, or after an outage). Saving a device already shares its vehicle, so this is only needed for devices that
  * existed before.
  */
@@ -38,11 +39,14 @@ public class OptinexusVehicleResource extends BaseResource {
     @Inject
     private OptinexusVehicleMaster vehicleMaster;
 
+    @Inject
+    private OptinexusDriverMaster driverMaster;
+
     @Path("publish")
     @POST
     public Map<String, Integer> publish() throws StorageException {
         permissionsService.checkAdmin(getUserId());
-        return Map.of("queued", vehicleMaster.publishAll());
+        return Map.of("queued", vehicleMaster.publishAll(), "drivers", driverMaster.publishAll());
     }
 
 }

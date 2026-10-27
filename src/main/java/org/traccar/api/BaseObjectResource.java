@@ -17,10 +17,12 @@
 package org.traccar.api;
 
 import org.traccar.api.security.ServiceAccountUser;
+import org.traccar.database.OptinexusDriverMaster;
 import org.traccar.database.OptinexusVehicleMaster;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
+import org.traccar.model.Driver;
 import org.traccar.model.Group;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
@@ -56,6 +58,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Inject
     private OptinexusVehicleMaster vehicleMaster;
+
+    @Inject
+    private OptinexusDriverMaster driverMaster;
 
     @Inject
     private LogAction actionLogger;
@@ -95,6 +100,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (entity instanceof Device device) {
             vehicleMaster.publish(device);
+        }
+        if (entity instanceof Driver driver) {
+            driverMaster.publish(driver, getUserId());
         }
 
         if (getUserId() != ServiceAccountUser.ID) {
@@ -142,6 +150,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (entity instanceof Device device) {
             vehicleMaster.publish(device);
+        }
+        if (entity instanceof Driver driver) {
+            driverMaster.publish(driver, getUserId());
         }
 
         return Response.ok(entity).build();
