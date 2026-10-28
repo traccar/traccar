@@ -16,44 +16,35 @@
 package org.traccar.protocol;
 
 import org.traccar.Protocol;
-import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
-public class JmakProtocolSmsEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+public class JmakProtocolSmsEncoder extends JmakProtocolEncoder {
 
     public JmakProtocolSmsEncoder(Protocol protocol) {
         super(protocol);
     }
 
     @Override
-    public String formatValue(String key, Object value) {
-        if (key.equals(Command.KEY_ENABLE)) {
-            return (Boolean) value ? "1" : "0";
-        }
-        return null;
+    protected String formatSet(int parameter, String value) {
+        return "s;" + parameter + ";" + value;
+    }
+
+    @Override
+    protected String formatEnable(int parameter, String value) {
+        return "e;" + parameter + ";" + value;
+    }
+
+    @Override
+    protected String formatMessage(String... parameters) {
+        return "JMAK#" + String.join("#", parameters) + "#";
     }
 
     @Override
     protected Object encodeCommand(Command command) {
-
-        return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> formatCommand(command, "%s", Command.KEY_DATA);
-            case Command.TYPE_ENGINE_STOP -> "JMAK#s;34;1#";
-            case Command.TYPE_ENGINE_RESUME -> "JMAK#s;34;0#";
-            case Command.TYPE_OUTPUT_CONTROL -> formatCommand(
-                    command, "JMAK#s;" + JmakProtocolEncoder.getOutputParameter(command) + ";%s#", Command.KEY_DATA);
-            case Command.TYPE_POSITION_PERIODIC -> formatCommand(command, "JMAK#s;2;%s#", Command.KEY_FREQUENCY);
-            case Command.TYPE_SET_ODOMETER -> formatCommand(command, "JMAK#s;30;%s#", Command.KEY_DATA);
-            case Command.TYPE_SET_CONNECTION -> formatCommand(
-                    command, "JMAK#s;" + JmakProtocolEncoder.getServerParameter(command) + ";%s#s;12;%s#",
-                    Command.KEY_SERVER, Command.KEY_PORT);
-            case Command.TYPE_REBOOT_DEVICE -> "JMAK#REBOOT#";
-            case Command.TYPE_SET_SPEED_LIMIT -> formatCommand(command, "JMAK#e;16;1#s;17;%s#", Command.KEY_DATA);
-            case Command.TYPE_ALARM_BATTERY -> formatCommand(command, "JMAK#e;57;%s#", this, Command.KEY_ENABLE);
-            case Command.TYPE_ALARM_REMOVE -> formatCommand(command, "JMAK#e;55;%s#", this, Command.KEY_ENABLE);
-            case Command.TYPE_ALARM_VIBRATION -> formatCommand(command, "JMAK#e;59;%s#", Command.KEY_DATA);
-            default -> null;
-        };
+        if (command.getType().equals(Command.TYPE_REBOOT_DEVICE)) {
+            return "JMAK#REBOOT#";
+        }
+        return super.encodeCommand(command);
     }
 
 }
