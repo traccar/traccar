@@ -134,7 +134,9 @@ public class CacheManager implements BroadcastInterface {
 
     public synchronized void addDevice(long deviceId, Object key) throws Exception {
         var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
-        if (references.isEmpty()) {
+        boolean load = references.isEmpty();
+        references.add(key);
+        if (load) {
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.All(), new Condition.Equals("id", deviceId)));
             graph.addObject(device);
@@ -161,7 +163,6 @@ public class CacheManager implements BroadcastInterface {
                 }
             }
         }
-        references.add(key);
         LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
     }
 

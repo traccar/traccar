@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.model.Device;
+import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -13,6 +14,7 @@ import org.traccar.storage.query.Request;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,6 +57,26 @@ public class CacheManagerTest {
         cacheManager.updatePosition(replacement);
 
         assertSame(replacement, cacheManager.getPosition(deviceId));
+    }
+
+    @Test
+    public void testSelfLinkedDevice() throws Exception {
+
+        Storage storage = mock(Storage.class);
+        BroadcastService broadcastService = mock(BroadcastService.class);
+        Device device = new Device();
+        device.setId(1);
+        when(storage.getObject(eq(Server.class), any(Request.class))).thenReturn(new Server());
+        when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
+        when(storage.getPermissions(eq(Device.class), eq(Device.class)))
+                .thenReturn(List.of(new Permission(Device.class, 1, Device.class, 1)));
+        doNothing().when(broadcastService).registerListener(any());
+
+        CacheManager cacheManager = new CacheManager(new Config(), storage, broadcastService);
+
+        cacheManager.addDevice(1, new Object());
+
+        assertNotNull(cacheManager.getObject(Device.class, 1));
     }
 
 }
