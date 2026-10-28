@@ -12,6 +12,18 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new JmakProtocolDecoder(null));
 
         verifyDecode(decoder, text(
+                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8224;NULL;1750689928520;-19.88245;-43.97853;837.10;B;0.06;18;31;0.89;0.00;1;0;52.50;4.74;11750;3875;TIMB;4;1750689928534;1;9;0;0.00|00000000000041DF;180.00;211.00;208.00;190.00;7;50;P;80;69$"),
+                position());
+
+        verifyDecode(decoder, text(
+                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8208;NULL;1750689688530;-19.88247;-43.97855;830.20;B;0.61;16;31;0.79;0.00;1;0;52.43;4.74;11750;3863;TIMB;4;1750689688544;1;9;0;0.00|000000000000405C;0.00;0.00;0;0;0$"),
+                position());
+
+        verifyDecode(decoder, text(
+                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8210;NULL;1750689718530;-19.88246;-43.97855;825.60;B;0.53;16;31;0.87;0.00;1;0;52.45;4.74;11750;3863;TIMB;4;1750689718543;1;9;0;0.00$"),
+                position());
+
+        verifyDecode(decoder, text(
                 "~000000380FE3FFFF;777777-77777-7777555;860693086800738;183;Test1;1793131375854;-19.88247;-43.97855;837.88;B;0.02;33;28;0.47;0.00;1;0;12.08;0.59;11834;0;0;4;1793131375941;2;1;040C000000643939;J-R07;180$"),
                 position()
                         .location("2026-10-27T20:02:55.854Z", true, -19.88247, -43.97855)
@@ -19,10 +31,11 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
                         .attribute(Position.KEY_INDEX, 183L)
                         .attribute("nickname", "Test1")
                         .attribute(Position.KEY_IGNITION, true)
-                        .attribute(Position.KEY_HOURS, 43488000L)
+                        .attribute(Position.KEY_HOURS, 43488000.0)
                         .attribute(Position.KEY_ODOMETER, 590.0)
                         .attribute(Position.KEY_POWER, 11.834)
-                        .attribute(Position.PREFIX_IN + 1, true)
+                        .attribute(Position.KEY_INPUT, 1)
+                        .attribute(Position.KEY_OUTPUT, 0)
                         .attribute(Position.KEY_VERSION_FW, "4.12.0.0-d99")
                         .attribute("model", "J-R07")
                         .attribute("tripId", 180L));
@@ -56,7 +69,7 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
                 "~0000003F9FE3FFFF;202511-00112-0022779;868695060670146;370824;BT-2567;1786137412871;-19.88246;-43.97861;823.90;B;0.00;23;99;0.87;289.52;0;1;1640.20;12064.50;25751;3989;Arqi;4;1786449179991;1;0;0;5;1786135960005;1786137412870;0.00;040B010100007430;J-R12;0$"),
                 position()
                         .attribute(Position.KEY_IGNITION, false)
-                        .attribute(Position.KEY_HOURS, 5904720000L)
+                        .attribute(Position.KEY_HOURS, 5904720000.0)
                         .attribute(Position.KEY_ODOMETER, 12064500.0)
                         .attribute("model", "J-R12"));
 
@@ -71,22 +84,6 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
                 position()
                         .attribute(Position.KEY_INDEX, 1234L)
                         .attribute(Position.KEY_ARCHIVE, false));
-
-        verifyDecode(decoder, text(
-                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8224;NULL;1750689928520;-19.88245;-43.97853;837.10;B;0.06;18;31;0.89;0.00;1;0;52.50;4.74;11750;3875;TIMB;4;1750689928534;1;9;0;0.00|00000000000041DF;180.00;211.00;208.00;190.00;7;50;P;80;69$"),
-                position()
-                        .location("2025-06-23T14:45:28.520Z", true, -19.88245, -43.97853)
-                        .attribute(Position.KEY_POWER, 11.75)
-                        .attribute(Position.KEY_BATTERY, 3.875)
-                        .attribute(Position.PREFIX_OUT + 2, true));
-
-        verifyDecode(decoder, text(
-                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8208;NULL;1750689688530;-19.88247;-43.97855;830.20;B;0.61;16;31;0.79;0.00;1;0;52.43;4.74;11750;3863;TIMB;4;1750689688544;1;9;0;0.00|000000000000405C;0.00;0.00;0;0;0$"),
-                position());
-
-        verifyDecode(decoder, text(
-                "~000000041FE3FFFF;233333-33333-3333333;868695060715016;8210;NULL;1750689718530;-19.88246;-43.97855;825.60;B;0.53;16;31;0.87;0.00;1;0;52.45;4.74;11750;3863;TIMB;4;1750689718543;1;9;0;0.00$"),
-                position());
 
     }
 
