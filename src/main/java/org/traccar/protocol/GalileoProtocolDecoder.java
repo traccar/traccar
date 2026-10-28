@@ -207,10 +207,11 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x0082 -> cellTower.setLocationAreaCode(buf.readUnsignedShortLE());
                 case 0x0083 -> cellTower.setMobileCountryCode(buf.readUnsignedShortLE());
                 case 0x0084 -> cellTower.setMobileNetworkCode(buf.readUnsignedShortLE());
-                case 0x0085 -> cellTower.setSignalStrength((int) buf.readUnsignedByte());
+                case 0x0085 -> cellTower.setSignalStrength((int) buf.readByte());
                 case 0x008e -> {
                     position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    buf.skipBytes(2);
                 }
                 default -> {
                     Integer length = EXTENDED_TAG_LENGTH_MAP.get(tag);
