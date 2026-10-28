@@ -55,6 +55,7 @@ public class OptinexusVendorRecords {
     private static final Logger LOGGER = LoggerFactory.getLogger(OptinexusVendorRecords.class);
 
     public static final String VEHICLE_EVENT = "optideli.vendor_vehicle.upserted";
+    public static final String FLEET_EVENT = "optideli.fleet_vehicle.upserted";
     public static final String DRIVER_EVENT = "optideli.vendor_driver.upserted";
 
     public static final String APPLIED = "applied";
@@ -81,7 +82,7 @@ public class OptinexusVendorRecords {
     }
 
     public static boolean handles(String eventType) {
-        return VEHICLE_EVENT.equals(eventType) || DRIVER_EVENT.equals(eventType);
+        return VEHICLE_EVENT.equals(eventType) || FLEET_EVENT.equals(eventType) || DRIVER_EVENT.equals(eventType);
     }
 
     /**
@@ -110,7 +111,7 @@ public class OptinexusVendorRecords {
         if (key.isEmpty() || !payload.path("version").canConvertToLong()) {
             throw new IllegalArgumentException("The event names no key or version");
         }
-        String kind = VEHICLE_EVENT.equals(type) ? OptinexusVendorRecord.VEHICLE : OptinexusVendorRecord.DRIVER;
+        String kind = DRIVER_EVENT.equals(type) ? OptinexusVendorRecord.DRIVER : OptinexusVendorRecord.VEHICLE;
 
         OptinexusVendorRecord record = find(tenantId, kind, key);
         long version = payload.path("version").asLong();
@@ -122,6 +123,9 @@ public class OptinexusVendorRecords {
         keep.put("vendorName", payload.path("vendor").path("name").asText(""));
         keep.put("carrierType", payload.path("transport").path("carrier_type_code").asText(""));
         keep.put("active", payload.path("active").asBoolean(true));
+        keep.put("ownership", FLEET_EVENT.equals(type) ? "TENANT" : "VENDOR");
+        keep.put("plate", payload.path("registration_number").asText(""));
+        keep.put("trackerId", payload.path("tracker_id").asText("").trim());
         if (record == null) {
             record = new OptinexusVendorRecord();
             record.setTenantId(tenantId);
@@ -139,11 +143,17 @@ public class OptinexusVendorRecords {
         }
 
         if (OptinexusVendorRecord.VEHICLE.equals(kind)) {
+            boolean found = false;
             for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
                 if (key.equals(OptinexusVehicleMaster.key(OptinexusVehicleMaster.registrationOf(device)))
                         && tenantId.equals(vehicles.tenantOf(device))) {
                     apply(device, record, Device.class);
+                    syncDevice(device, record);
+                    found = true;
                 }
+            }
+            if (!found) {
+                createPlaceholder(tenantId, key, record);
             }
         } else {
             for (Driver driver : storage.getObjects(Driver.class, new Request(new Columns.All()))) {
@@ -166,6 +176,7 @@ public class OptinexusVendorRecords {
                     : find(tenantId, OptinexusVendorRecord.VEHICLE, OptinexusVehicleMaster.key(registration));
             if (record != null) {
                 apply(device, record, Device.class);
+                syncDevice(device, record);
             }
         } catch (Exception e) {
             LOGGER.warn("Vendor record not applied to device {}", device.getId(), e);
@@ -190,6 +201,103 @@ public class OptinexusVendorRecords {
         }
     }
 
+    /**
+     * A vehicle OptiDeli knows has no device here yet: make one in the tenant group so the vehicle is there to be found. Its identifier is
+     * the identifier the tracker reports when OptiDeli has it, else a placeholder an operator replaces later. Nothing is made when the
+     * tenant has no group; an identifier that already belongs to a device of another tenant is never taken over.
+     */
+    private void createPlaceholder(String tenantId, String key, OptinexusVendorRecord record) throws StorageException {
+        try {
+            JsonNode kept = MAPPER.readTree(record.getPayload());
+            String plate = kept.path("plate").asText("");
+            if (plate.isBlank()) {
+                return;
+            }
+            org.traccar.model.Group group;
+            try {
+                group = linker.findGroup(tenantId);
+            } catch (java.security.GeneralSecurityException e) {
+                LOGGER.info("Tenant {} has no group here, no device made for vehicle {}", tenantId, key);
+                return;
+            }
+            if (group == null) {
+                return;
+            }
+            String tracker = kept.path("trackerId").asText("");
+            String uniqueId = OptinexusVehicleMaster.PLACEHOLDER_PREFIX + key;
+            if (!tracker.isEmpty()) {
+                Device owner = byUniqueId(tracker);
+                if (owner == null) {
+                    uniqueId = tracker;
+                } else if (tenantId.equals(vehicles.tenantOf(owner))) {
+                    adopt(owner, plate);
+                    apply(owner, record, Device.class);
+                    syncDevice(owner, record);
+                    return;
+                } else {
+                    LOGGER.warn("The tracker identifier of vehicle {} belongs to a device of another tenant, placeholder used", key);
+                }
+            }
+            if (byUniqueId(uniqueId) != null) {
+                return; // the placeholder of this vehicle is already there
+            }
+            Device device = new Device();
+            device.setName(plate.trim());
+            device.setUniqueId(uniqueId);
+            device.setGroupId(group.getId());
+            device.set("registrationNumber", plate.trim());
+            device.setDisabled(!kept.path("active").asBoolean(true));
+            device.setId(storage.addObject(device, new Request(new Columns.Exclude("id"))));
+            apply(device, record, Device.class);
+        } catch (StorageException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    /** Keeps the device in line with the record: its tracker identifier once known, and switched off while the vehicle is inactive. */
+    private void syncDevice(Device device, OptinexusVendorRecord record) throws StorageException {
+        try {
+            JsonNode kept = MAPPER.readTree(record.getPayload());
+            boolean changed = false;
+            String tracker = kept.path("trackerId").asText("");
+            if (!tracker.isEmpty() && OptinexusVehicleMaster.isPlaceholder(device) && byUniqueId(tracker) == null) {
+                device.setUniqueId(tracker);
+                storage.updateObject(device, new Request(
+                        new Columns.Include("uniqueId"), new Condition.Equals("id", device.getId())));
+                changed = true;
+            }
+            boolean disabled = !kept.path("active").asBoolean(true);
+            if (device.getDisabled() != disabled) {
+                device.setDisabled(disabled);
+                storage.updateObject(device, new Request(
+                        new Columns.Include("disabled"), new Condition.Equals("id", device.getId())));
+                changed = true;
+            }
+            if (changed) {
+                cacheManager.invalidateObject(true, Device.class, device.getId(), ObjectOperation.UPDATE);
+            }
+        } catch (StorageException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    private void adopt(Device device, String plate) throws StorageException {
+        if (OptinexusVehicleMaster.registrationOf(device) == null) {
+            device.set("registrationNumber", plate.trim());
+            storage.updateObject(device, new Request(
+                    new Columns.Include("attributes"), new Condition.Equals("id", device.getId())));
+        }
+    }
+
+    private Device byUniqueId(String uniqueId) throws StorageException {
+        return storage.getObject(Device.class, new Request(
+                new Columns.All(), new Condition.Equals("uniqueId", uniqueId)));
+    }
+
     private OptinexusVendorRecord find(String tenantId, String kind, String key) throws StorageException {
         return storage.getObject(OptinexusVendorRecord.class, new Request(new Columns.All(), new Condition.And(
                 new Condition.Equals("tenantId", tenantId),
@@ -210,7 +318,7 @@ public class OptinexusVendorRecords {
     private <T extends org.traccar.model.ExtendedModel> void applyKept(
             T entity, OptinexusVendorRecord record, Class<T> type) throws Exception {
         JsonNode kept = MAPPER.readTree(record.getPayload());
-        boolean changed = set(entity, "ownership", "VENDOR");
+        boolean changed = set(entity, "ownership", kept.path("ownership").asText("VENDOR"));
         changed |= set(entity, "vendorCode", kept.path("vendorCode").asText(""));
         changed |= set(entity, "vendorName", kept.path("vendorName").asText(""));
         if (entity instanceof Device) {

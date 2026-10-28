@@ -56,6 +56,9 @@ public class OptinexusVehicleMaster {
 
     static final String EVENT_KEY = "optiradar.vehicle.upserted";
 
+    /** The identifier of a device made for a vehicle OptiDeli knows, before anybody gave the identifier the tracker reports. */
+    public static final String PLACEHOLDER_PREFIX = "BELUM-";
+
     private static final int MAX_GROUP_DEPTH = 10;
 
     private static final AtomicLong LAST_VERSION = new AtomicLong();
@@ -115,6 +118,10 @@ public class OptinexusVehicleMaster {
         return null;
     }
 
+    public static boolean isPlaceholder(Device device) {
+        return device.getUniqueId() != null && device.getUniqueId().startsWith(PLACEHOLDER_PREFIX);
+    }
+
     private static long nextVersion() {
         return LAST_VERSION.updateAndGet(last -> Math.max(System.currentTimeMillis(), last + 1));
     }
@@ -126,7 +133,8 @@ public class OptinexusVehicleMaster {
      * @return whether an event was queued
      */
     public boolean publish(Device device) {
-        if (!enabled || device == null) {
+        // A placeholder does not report anything yet: sharing it would tell the other platforms about a tracker that does not exist.
+        if (!enabled || device == null || isPlaceholder(device)) {
             return false;
         }
         try {

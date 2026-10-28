@@ -52,11 +52,18 @@ public class OptinexusVendorRecordsTest {
         records = new OptinexusVendorRecords(storage, cacheManager, vehicleMaster, driverMaster, linker);
     }
 
-    private long tenantGroup(String tenantId) throws StorageException {
+    private Config config() {
+        Config config = new Config();
+        config.setString(Keys.OPTINEXUS_EVENTS_ENABLE, "true");
+        return config;
+    }
+
+    private long tenantGroup(String tenantId) throws Exception {
         Group group = new Group();
         group.setName("Tenant group");
         group.set(ATTRIBUTE, tenantId);
         group.setId(storage.addObject(group, new Request(new Columns.Exclude("id"))));
+        when(linker.findGroup(tenantId)).thenReturn(group);
         return group.getId();
     }
 
@@ -157,6 +164,86 @@ public class OptinexusVendorRecordsTest {
         Driver saved = storage.getObjects(Driver.class, new Request(new Columns.All())).get(0);
         assertEquals("VENDOR", saved.getAttributes().get("ownership"));
         assertEquals("Vendor Jaya", saved.getAttributes().get("vendorName"));
+    }
+
+    private String fleet(String tenantId, String plate, long version, boolean active, String tracker) {
+        return event("optideli.fleet_vehicle.upserted", tenantId, "optideli", plate.toUpperCase().replaceAll("[^A-Z0-9]", ""),
+                version, active, ",\"registration_number\":\"" + plate + "\"" + (tracker == null ? "" : ",\"tracker_id\":\"" + tracker + "\"")
+                        + ",\"transport\":{\"carrier_type_code\":\"CDD\"}");
+    }
+
+    private Device byName(String name) throws StorageException {
+        return storage.getObjects(Device.class, new Request(new Columns.All())).stream()
+                .filter(d -> name.equals(d.getName())).findFirst().orElse(null);
+    }
+
+    @Test
+    public void aVehicleOfTheTenantWithoutADeviceGetsAPlaceholderThatIsNotSharedAndIsReplacedByTheRealIdentifier()
+            throws Exception {
+        long a = tenantGroup(TENANT_A);
+
+        assertEquals("applied", records.handle(fleet(TENANT_A, "B 7 TK", 1, true, null)));
+
+        Device placeholder = byName("B 7 TK");
+        assertEquals("BELUM-B7TK", placeholder.getUniqueId());
+        assertEquals(a, placeholder.getGroupId());
+        assertEquals("B 7 TK", placeholder.getAttributes().get("registrationNumber"));
+        assertEquals("TENANT", placeholder.getAttributes().get("ownership"));
+        assertEquals(false, placeholder.getDisabled());
+        OptinexusVehicleMaster master = new OptinexusVehicleMaster(config(), storage, objectMapper);
+        assertEquals(false, master.publish(placeholder), "a placeholder is not a tracker the other platforms should hear of");
+
+        assertEquals("applied", records.handle(fleet(TENANT_A, "B 7 TK", 2, true, "358123456789012")));
+        assertEquals("358123456789012", byName("B 7 TK").getUniqueId());
+        assertEquals(1, storage.getObjects(Device.class, new Request(new Columns.All())).size());
+    }
+
+    @Test
+    public void aKnownTrackerIdentifierMakesTheRealDeviceAtOnceAndAnInactiveVehicleIsSwitchedOff() throws Exception {
+        tenantGroup(TENANT_A);
+
+        records.handle(fleet(TENANT_A, "B 8 TK", 1, true, "IMEI-8"));
+        assertEquals("IMEI-8", byName("B 8 TK").getUniqueId());
+
+        records.handle(fleet(TENANT_A, "B 8 TK", 2, false, "IMEI-8"));
+        assertEquals(true, byName("B 8 TK").getDisabled());
+        records.handle(fleet(TENANT_A, "B 8 TK", 3, true, "IMEI-8"));
+        assertEquals(false, byName("B 8 TK").getDisabled());
+    }
+
+    @Test
+    public void anIdentifierOfAnotherTenantsDeviceIsNeverTakenOverAndAnUnregisteredDeviceOfTheSameTenantIsAdopted()
+            throws Exception {
+        long a = tenantGroup(TENANT_A);
+        long b = tenantGroup(TENANT_B);
+        Device foreign = new Device();
+        foreign.setName("Foreign");
+        foreign.setUniqueId("IMEI-X");
+        foreign.setGroupId(b);
+        foreign.setId(storage.addObject(foreign, new Request(new Columns.Exclude("id"))));
+        Device own = new Device();
+        own.setName("Registered by an operator");
+        own.setUniqueId("IMEI-Y");
+        own.setGroupId(a);
+        own.setId(storage.addObject(own, new Request(new Columns.Exclude("id"))));
+
+        records.handle(fleet(TENANT_A, "B 9 TK", 1, true, "IMEI-X"));
+        assertEquals("BELUM-B9TK", byName("B 9 TK").getUniqueId());
+        assertNull(byName("Foreign").getAttributes().get("ownership"));
+
+        records.handle(fleet(TENANT_A, "B 10 TK", 1, true, "IMEI-Y"));
+        Device adopted = byName("Registered by an operator");
+        assertEquals("B 10 TK", adopted.getAttributes().get("registrationNumber"));
+        assertEquals("TENANT", adopted.getAttributes().get("ownership"));
+        assertNull(byName("B 10 TK"), "no second device is made");
+    }
+
+    @Test
+    public void aTenantWithoutAGroupGetsNoDeviceAndNoError() throws Exception {
+        when(linker.findGroup(TENANT_A)).thenThrow(new java.security.GeneralSecurityException("no group"));
+
+        assertEquals("applied", records.handle(fleet(TENANT_A, "B 11 TK", 1, true, null)));
+        assertEquals(0, storage.getObjects(Device.class, new Request(new Columns.All())).size());
     }
 
 }
