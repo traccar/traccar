@@ -238,7 +238,7 @@ public class Position extends Message {
     }
 
     public void setLatitude(double latitude) {
-        if (latitude < -90 || latitude > 90) {
+        if (latitude < -90 || latitude > 90 || Double.isNaN(latitude)) {
             throw new IllegalArgumentException("Latitude out of range");
         }
         this.latitude = latitude;
@@ -251,7 +251,7 @@ public class Position extends Message {
     }
 
     public void setLongitude(double longitude) {
-        if (longitude < -180 || longitude > 180) {
+        if (longitude < -180 || longitude > 180 || Double.isNaN(longitude)) {
             throw new IllegalArgumentException("Longitude out of range");
         }
         this.longitude = longitude;

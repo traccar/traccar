@@ -52,11 +52,14 @@ class PositionErrorGuessingTest {
     }
 
     @Test
-    @DisplayName("NaN latitude and longitude are accepted")
-    void nanLatitudeAndLongitudeAccepted() {
-        position.setLatitude(Double.NaN);
-        position.setLongitude(Double.NaN);
-        assertEquals(Double.NaN, position.getLatitude());
-        assertEquals(Double.NaN, position.getLongitude());
+    @DisplayName("NaN latitude is not accepted")
+    void nanLatitudeIsNotAccepted() {
+        assertThrows(IllegalArgumentException.class, () -> position.setLatitude(Double.NaN));
+    }
+
+    @Test
+    @DisplayName("NaN  longitude is not accepted")
+    void nanLongitudeIsNotAccepted() {
+        assertThrows(IllegalArgumentException.class, () -> position.setLongitude(Double.NaN));
     }
 }
