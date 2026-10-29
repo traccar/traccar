@@ -23,6 +23,16 @@
       </column>
     </createTable>
 
+    <delete tableName="tc_device_device">
+      <where>
+        EXISTS (
+          SELECT 1 FROM (SELECT DISTINCT deviceid, linkeddeviceid FROM tc_device_device) links
+          WHERE links.deviceid = tc_device_device.linkeddeviceid
+            AND links.linkeddeviceid = tc_device_device.deviceid
+        )
+      </where>
+    </delete>
+
   </changeSet>
 
 </databaseChangeLog>

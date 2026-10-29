@@ -19,6 +19,8 @@ package org.traccar.api.resource;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
+import org.traccar.model.LinkedDevice;
 import org.traccar.model.Permission;
 import org.traccar.model.UserRestrictions;
 import org.traccar.session.cache.CacheManager;
@@ -37,7 +39,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +77,23 @@ public class PermissionsResource extends BaseResource {
         }
     }
 
+    private void checkDeviceHierarchy(long deviceId, long linkedDeviceId) throws StorageException {
+        var links = storage.getPermissions(Device.class, LinkedDevice.class);
+        var pending = new ArrayDeque<Long>();
+        var visited = new HashSet<Long>();
+        pending.add(linkedDeviceId);
+        while (!pending.isEmpty()) {
+            long currentId = pending.removeLast();
+            if (currentId == deviceId) {
+                throw new IllegalArgumentException("Device link cycle detected");
+            }
+            if (visited.add(currentId)) {
+                links.stream().filter(link -> link.getOwnerId() == currentId)
+                        .map(Permission::getPropertyId).forEach(pending::add);
+            }
+        }
+    }
+
     @GET
     public List<Permission> get(@Context UriInfo uriInfo) throws StorageException {
         permissionsService.checkAdmin(getUserId());
@@ -94,6 +115,10 @@ public class PermissionsResource extends BaseResource {
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission);
+            if (permission.getOwnerClass().equals(Device.class)
+                    && permission.getPropertyClass().equals(LinkedDevice.class)) {
+                checkDeviceHierarchy(permission.getOwnerId(), permission.getPropertyId());
+            }
             storage.addPermission(permission);
             cacheManager.invalidatePermission(
                     true,
