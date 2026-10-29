@@ -213,9 +213,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 27)) {
-            int io = Integer.parseInt(values[index++]);
-            position.set(Position.KEY_INPUT, BitUtil.between(io, 0, 2) | BitUtil.between(io, 4, 6) << 2);
-            position.set(Position.KEY_OUTPUT, BitUtil.between(io, 2, 4) | BitUtil.between(io, 6, 7) << 2);
+            position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
         }
 
         if (BitUtil.check(mask, 28)) {
