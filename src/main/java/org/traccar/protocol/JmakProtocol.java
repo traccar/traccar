@@ -29,8 +29,7 @@ public class JmakProtocol extends BaseProtocol {
 
     @Inject
     public JmakProtocol(Config config) {
-        setSupportedDataCommands(
-                Command.TYPE_CUSTOM,
+        String[] commands = {
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_OUTPUT_CONTROL,
@@ -41,28 +40,17 @@ public class JmakProtocol extends BaseProtocol {
                 Command.TYPE_SET_SPEED_LIMIT,
                 Command.TYPE_ALARM_BATTERY,
                 Command.TYPE_ALARM_REMOVE,
-                Command.TYPE_ALARM_VIBRATION);
-        setTextCommandEncoder(new JmakProtocolSmsEncoder(this));
-        setSupportedTextCommands(
-                Command.TYPE_CUSTOM,
-                Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_OUTPUT_CONTROL,
-                Command.TYPE_POSITION_PERIODIC,
-                Command.TYPE_SET_ODOMETER,
-                Command.TYPE_SET_CONNECTION,
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_SET_SPEED_LIMIT,
-                Command.TYPE_ALARM_BATTERY,
-                Command.TYPE_ALARM_REMOVE,
-                Command.TYPE_ALARM_VIBRATION);
+                Command.TYPE_ALARM_VIBRATION};
+        setSupportedDataCommands(commands);
+        setTextCommandEncoder(new JmakProtocolEncoder(this, true));
+        setSupportedTextCommands(commands);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new JmakFrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
-                pipeline.addLast(new JmakProtocolEncoder(JmakProtocol.this));
+                pipeline.addLast(new JmakProtocolEncoder(JmakProtocol.this, false));
                 pipeline.addLast(new JmakProtocolDecoder(JmakProtocol.this));
             }
         });
