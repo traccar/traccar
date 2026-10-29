@@ -40,6 +40,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .number("#(d+)")                     // imei
+            .groupBegin()
+            .text("#REPLY#")
+            .expression("(.+)")                  // result
+            .or()
             .expression("#[^#]*")                // user
             .number("#d*")                       // password
             .groupBegin()
@@ -51,6 +55,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .expression("#([^#]+)")              // status
             .number("#d+")                       // number of records
+            .groupEnd()
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -122,7 +127,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         sentence = sentence.trim();
 
-        String header = sentence.substring(0, sentence.indexOf('\r'));
+        int index = sentence.indexOf('\r');
+        String header = index > 0 ? sentence.substring(0, index) : sentence;
         Parser parser = new Parser(PATTERN_HEADER, header);
         if (!parser.matches()) {
             return null;
@@ -131,6 +137,18 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
+        }
+
+        if (parser.hasNext()) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            String result = parser.next() + (index > 0 ? sentence.substring(index) : "");
+            if (result.endsWith("##")) {
+                result = result.substring(0, result.length() - 2);
+            }
+            position.set(Position.KEY_RESULT, result);
+            return position;
         }
 
         Boolean door = null;

@@ -12,6 +12,10 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Tlt2hProtocolDecoder(null));
 
         verifyDecode(decoder, text(
+                "#862255061947757#REPLY#MODE,OK##\r\n"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_RESULT, "MODE,OK"));
+
+        verifyDecode(decoder, text(
                 "#862255061752835#MT710#0000#AUTO#1\r\n"
                     + "#4106#$GPRMC,151410.00,A,3010.4103,N,08146.2728,W,,214.90,010324,,,A*58\r\n"),
                 position(Checks.ATTRIBUTES));
