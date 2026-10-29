@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,7 +72,9 @@ public class NotificationFormatter {
         if (event.getMaintenanceId() != 0) {
             velocityContext.put("maintenance", cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
         }
-        String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        String eventDriverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        String driverUniqueId = eventDriverUniqueId == null && position != null
+                ? position.getString(Position.KEY_DRIVER_UNIQUE_ID) : eventDriverUniqueId;
         if (driverUniqueId != null) {
             velocityContext.put("driver", cacheManager.getDeviceObjects(device.getId(), Driver.class).stream()
                     .filter(driver -> driver.getUniqueId().equals(driverUniqueId)).findFirst().orElse(null));
