@@ -38,24 +38,21 @@ public class JmakProtocolEncoder extends StringProtocolEncoder {
     private static final int PARAMETER_OUTPUT_2 = 94;
     private static final int PARAMETER_OUTPUT_3 = 167;
 
-    private final boolean text;
+    private final boolean textChannel;
 
-    public JmakProtocolEncoder(Protocol protocol, boolean text) {
+    public JmakProtocolEncoder(Protocol protocol, boolean textChannel) {
         super(protocol);
-        this.text = text;
+        this.textChannel = textChannel;
     }
 
-    private String formatCommand(Object... values) {
-        StringJoiner joiner = text ? new StringJoiner("#", "JMAK#", "#") : new StringJoiner("|", "$", "#");
-        for (int i = 0; i < values.length; i += 2) {
-            int parameter = (int) values[i];
-            if (text) {
-                boolean event = parameter == PARAMETER_OVERSPEED_EVENT || parameter == PARAMETER_POWER_CUT_EVENT
-                        || parameter == PARAMETER_LOW_BATTERY_EVENT || parameter == PARAMETER_MOVEMENT_EVENT;
-                joiner.add((event ? "e;" : "s;") + parameter + ";" + values[i + 1]);
-            } else {
-                joiner.add(parameter + ";" + values[i + 1] + ";");
-            }
+    private String formatParameter(char action, int parameter, Object value) {
+        return textChannel ? action + ";" + parameter + ";" + value : parameter + ";" + value + ";";
+    }
+
+    private String formatCommand(String... parameters) {
+        StringJoiner joiner = textChannel ? new StringJoiner("#", "JMAK#", "#") : new StringJoiner("|", "$", "#");
+        for (String parameter : parameters) {
+            joiner.add(parameter);
         }
         return joiner.toString();
     }
@@ -65,33 +62,38 @@ public class JmakProtocolEncoder extends StringProtocolEncoder {
 
         return switch (command.getType()) {
             case Command.TYPE_CUSTOM -> command.getString(Command.KEY_DATA);
-            case Command.TYPE_ENGINE_STOP -> formatCommand(PARAMETER_OUTPUT_1, 1);
-            case Command.TYPE_ENGINE_RESUME -> formatCommand(PARAMETER_OUTPUT_1, 0);
+            case Command.TYPE_ENGINE_STOP -> formatCommand(formatParameter('s', PARAMETER_OUTPUT_1, 1));
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(formatParameter('s', PARAMETER_OUTPUT_1, 0));
             case Command.TYPE_OUTPUT_CONTROL -> {
                 int parameter = switch (command.getInteger(Command.KEY_INDEX)) {
                     case 2 -> PARAMETER_OUTPUT_2;
                     case 3 -> PARAMETER_OUTPUT_3;
                     default -> PARAMETER_OUTPUT_1;
                 };
-                yield formatCommand(parameter, command.getString(Command.KEY_DATA));
+                yield formatCommand(formatParameter('s', parameter, command.getString(Command.KEY_DATA)));
             }
             case Command.TYPE_POSITION_PERIODIC -> formatCommand(
-                    PARAMETER_REPORT_INTERVAL, command.getString(Command.KEY_FREQUENCY));
-            case Command.TYPE_SET_ODOMETER -> formatCommand(PARAMETER_ODOMETER, command.getString(Command.KEY_DATA));
+                    formatParameter('s', PARAMETER_REPORT_INTERVAL, command.getString(Command.KEY_FREQUENCY)));
+            case Command.TYPE_SET_ODOMETER -> formatCommand(
+                    formatParameter('s', PARAMETER_ODOMETER, command.getString(Command.KEY_DATA)));
             case Command.TYPE_SET_CONNECTION -> {
                 String server = command.getString(Command.KEY_SERVER);
                 int parameter = server.matches("[\\d.]+") ? PARAMETER_SERVER_IP : PARAMETER_SERVER_DOMAIN;
-                yield formatCommand(parameter, server, PARAMETER_SERVER_PORT, command.getString(Command.KEY_PORT));
+                yield formatCommand(
+                        formatParameter('s', parameter, server),
+                        formatParameter('s', PARAMETER_SERVER_PORT, command.getString(Command.KEY_PORT)));
             }
-            case Command.TYPE_REBOOT_DEVICE -> text ? "JMAK#REBOOT#" : formatCommand(PARAMETER_REBOOT, 1);
+            case Command.TYPE_REBOOT_DEVICE -> textChannel
+                    ? "JMAK#REBOOT#" : formatCommand(formatParameter('s', PARAMETER_REBOOT, 1));
             case Command.TYPE_SET_SPEED_LIMIT -> formatCommand(
-                    PARAMETER_OVERSPEED_EVENT, 1, PARAMETER_OVERSPEED_LIMIT, command.getString(Command.KEY_DATA));
+                    formatParameter('e', PARAMETER_OVERSPEED_EVENT, 1),
+                    formatParameter('s', PARAMETER_OVERSPEED_LIMIT, command.getString(Command.KEY_DATA)));
             case Command.TYPE_ALARM_BATTERY -> formatCommand(
-                    PARAMETER_LOW_BATTERY_EVENT, command.getBoolean(Command.KEY_ENABLE) ? 1 : 0);
+                    formatParameter('e', PARAMETER_LOW_BATTERY_EVENT, command.getBoolean(Command.KEY_ENABLE) ? 1 : 0));
             case Command.TYPE_ALARM_REMOVE -> formatCommand(
-                    PARAMETER_POWER_CUT_EVENT, command.getBoolean(Command.KEY_ENABLE) ? 1 : 0);
+                    formatParameter('e', PARAMETER_POWER_CUT_EVENT, command.getBoolean(Command.KEY_ENABLE) ? 1 : 0));
             case Command.TYPE_ALARM_VIBRATION -> formatCommand(
-                    PARAMETER_MOVEMENT_EVENT, command.getString(Command.KEY_DATA));
+                    formatParameter('e', PARAMETER_MOVEMENT_EVENT, command.getString(Command.KEY_DATA)));
             default -> null;
         };
     }
