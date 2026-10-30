@@ -292,12 +292,14 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index++]));
         }
 
+        String fuelUnit = null;
         if (BitUtil.check(mask, 7)) {
-            index += 1;
+            fuelUnit = values[index++];
         }
 
         if (BitUtil.check(mask, 8)) {
-            position.set(Position.KEY_FUEL, Double.parseDouble(values[index++]));
+            boolean liters = fuelUnit == null || fuelUnit.equals("L");
+            position.set(liters ? Position.KEY_FUEL : Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 9)) {
@@ -322,6 +324,102 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(mask, 14)) {
             position.set("oilTemperature", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set("tripFuelUsed", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            position.set("engineTorque", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set("fuelEconomy", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            position.set("oilPressure", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            position.set("brakePressure1", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            position.set("brakePressure2", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            position.set("pto", Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            position.set("gear", Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 24)) {
+            position.set("engineBrake", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 25)) {
+            position.set("transmissionOilTemp", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 26)) {
+            position.set("transmissionOilPressure", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 27)) {
+            position.set("boostPressure", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 28)) {
+            position.set("intakeTemp", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 29)) {
+            position.set("fuelTemp", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 30)) {
+            position.set("adBlueLevel", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 31)) {
+            position.set("adBlueTemp", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 32)) {
+            position.set("scrPressure", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 33)) {
+            position.set("dpfPressure", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 34)) {
+            position.set("dpfRegeneration", Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 35)) {
+            position.set("ambientTemperature", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 36)) {
+            position.set("batteryVoltage", Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 37)) {
+            position.set("wiper", Integer.parseInt(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 38)) {
+            position.set("instantFuelConsumption", Double.parseDouble(values[index++]));
         }
     }
 
