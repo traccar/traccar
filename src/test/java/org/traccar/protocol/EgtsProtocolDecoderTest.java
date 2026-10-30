@@ -33,6 +33,20 @@ public class EgtsProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeTermIdentityWithoutImei() throws Exception {
+
+        var decoder = inject(new EgtsProtocolDecoder(null));
+
+        verifyDecode(decoder, binary(
+                "0100000B0013000100015B08000100013412000000010105003412000000DE01"));
+
+        verifyDecode(decoder, binary(
+                "0100000B001F00020001B0180002000002011015006400000000000030000000300100005A00000000008565"),
+                position());
+
+    }
+
+    @Test
     public void testDecodeWithAuth() throws Exception {
 
         var decoder = inject(new EgtsProtocolDecoder(null));

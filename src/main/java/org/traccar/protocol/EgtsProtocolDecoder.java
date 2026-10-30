@@ -175,8 +175,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_TERM_IDENTITY) {
                     useObjectIdAsDeviceId = false;
 
-                    buf.readUnsignedIntLE(); // object id
+                    long tid = buf.readUnsignedIntLE(); // object id
                     int flags = buf.readUnsignedByte();
+
+                    if (!BitUtil.check(flags, 1) && !BitUtil.check(flags, 2) && tid != 0L) {
+                        getDeviceSession(channel, remoteAddress, String.valueOf(tid));
+                    }
 
                     if (BitUtil.check(flags, 0)) {
                         buf.readUnsignedShortLE(); // home dispatcher identifier
