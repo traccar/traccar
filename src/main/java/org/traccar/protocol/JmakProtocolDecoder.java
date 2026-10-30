@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
@@ -55,7 +57,8 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         String[] parts = sentence.substring(1, sentence.length() - 1).split("\\|");
 
         String[] values = parts[0].split(";");
-        DeviceSession session = getDeviceSession(channel, remoteAddress, values[2]);
+        boolean serial = BitUtil.check(Long.parseLong(values[0], 16), 0);
+        DeviceSession session = getDeviceSession(channel, remoteAddress, values[serial ? 2 : 1]);
         if (session == null) {
             return null;
         }
@@ -90,7 +93,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 2)) {
-            position.set(Position.PREFIX_COUNT, Long.parseLong(values[index++]));
+            position.set(Position.KEY_INDEX, Long.parseLong(values[index++]));
         }
 
         if (BitUtil.check(mask, 3)) {
@@ -144,7 +147,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 15)) {
-            position.set("backup", Integer.parseInt(values[index++]) == 1);
+            position.set(Position.KEY_ARCHIVE, Integer.parseInt(values[index++]) == 1);
         }
 
         if (BitUtil.check(mask, 16)) {
@@ -167,6 +170,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(mask, 19)) {
             eventStatus = Integer.parseInt(values[index++]);
             position.set("eventStatus", eventStatus);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
         } else {
             eventStatus = 0;
         }
@@ -179,16 +183,16 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             eventName = null;
         }
 
-        if (eventId == 126 && eventStatus == 4 && eventName != null) {
+        if (eventId == 126 && (eventStatus == 1 || eventStatus == 8) && eventName != null) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, eventName);
         }
 
         if (BitUtil.check(mask, 21)) {
-            position.set(Position.KEY_VIN, Integer.parseInt(values[index++]));
+            position.set(Position.KEY_POWER, Integer.parseInt(values[index++]) / 1000.0);
         }
 
         if (BitUtil.check(mask, 22)) {
-            position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]));
+            position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) / 1000.0);
         }
 
         if (BitUtil.check(mask, 23)) {
@@ -208,15 +212,14 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 27)) {
-            int io = Integer.parseInt(values[index++]);
-            position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 0));
-            position.set(Position.PREFIX_IN + 2, BitUtil.check(io, 1));
-            position.set(Position.PREFIX_OUT + 1, BitUtil.check(io, 2));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 3));
+            position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
         }
 
         if (BitUtil.check(mask, 28)) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, values[index++]);
+            String tag = values[index++];
+            if (!tag.equals("0")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, tag);
+            }
         }
 
         if (BitUtil.check(mask, 29)) {
@@ -240,7 +243,20 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 34)) {
-            index += 1;
+            position.set(Position.PREFIX_ADC + 1, Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 35)) {
+            position.set(Position.KEY_VERSION_FW, decodeVersion(
+                    Unpooled.wrappedBuffer(DataConverter.parseHex(values[index++]))));
+        }
+
+        if (BitUtil.check(mask, 36)) {
+            position.set("model", values[index++]);
+        }
+
+        if (BitUtil.check(mask, 37)) {
+            position.set("tripId", Long.parseLong(values[index++]));
         }
     }
 
@@ -307,6 +323,28 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(mask, 14)) {
             position.set("oilTemperature", Double.parseDouble(values[index++]));
         }
+    }
+
+    private String decodeAlarm(int event, int status) {
+        return switch (event) {
+            case 111, 133 -> status > 0 ? Position.ALARM_OVERSPEED : null;
+            case 112 -> status > 0 ? Position.ALARM_HIGH_RPM : null;
+            case 115 -> Position.ALARM_BRAKING;
+            case 116 -> Position.ALARM_ACCELERATION;
+            case 117 -> Position.ALARM_CORNERING;
+            case 120 -> status > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT;
+            case 124 -> status > 0 ? Position.ALARM_POWER_CUT : Position.ALARM_POWER_RESTORED;
+            case 125 -> Position.ALARM_LOW_BATTERY;
+            case 127 -> Position.ALARM_MOVEMENT;
+            default -> null;
+        };
+    }
+
+    private String decodeVersion(ByteBuf buf) {
+        String version = String.format("%d.%d.%d.%d",
+                buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+        String build = buf.readCharSequence(4, StandardCharsets.US_ASCII).toString().trim();
+        return build.isEmpty() ? version : version + "-" + build;
     }
 
 }
