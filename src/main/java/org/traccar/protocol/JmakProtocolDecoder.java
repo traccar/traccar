@@ -170,6 +170,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(mask, 19)) {
             eventStatus = Integer.parseInt(values[index++]);
             position.set("eventStatus", eventStatus);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
         } else {
             eventStatus = 0;
         }
@@ -181,8 +182,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         } else {
             eventName = null;
         }
-
-        position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
 
         if (eventId == 126 && (eventStatus == 1 || eventStatus == 8) && eventName != null) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, eventName);
@@ -337,7 +336,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             case 124 -> status > 0 ? Position.ALARM_POWER_CUT : Position.ALARM_POWER_RESTORED;
             case 125 -> Position.ALARM_LOW_BATTERY;
             case 127 -> Position.ALARM_MOVEMENT;
-            case 130 -> status > 1 ? Position.ALARM_JAMMING : null;
             default -> null;
         };
     }
