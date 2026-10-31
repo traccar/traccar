@@ -1,15 +1,26 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Test;
 import org.traccar.CharacterDelimiterFrameDecoder;
+import org.traccar.Protocol;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
+import org.traccar.session.ConnectionManager;
+import org.traccar.session.DeviceSession;
 
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AccentProtocolDecoderTest extends ProtocolTest {
 
@@ -18,35 +29,28 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new AccentProtocolDecoder(null));
 
-        verifyNull(decoder, text(
+        verifyDecode(decoder, text(
                 "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"));
 
-        verifyNull(decoder, text(
+        verifyDecode(decoder, text(
                 "860141077743871 AA00124427@14/01/27,12:44:20+00"));
 
-        verifyNull(decoder, text(
+        verifyDecode(decoder, text(
                 "AAAA"));
 
-        verifyNull(decoder, text(
-                "860141077743871 AA01MF2"));
-
-        verifyNull(decoder, text(
-                "860141077743871 AA01MF2_XS"));
-
-        verifyPosition(decoder, text(
+        verifyDecode(decoder, text(
                 "860141077743871 AA23010279022CB3190099432C0011122A18FFFFFFFF800000000000010000000026D70B14"),
-                position("2026-09-24 18:22:49.000", true, 36.80644, 10.07367));
+                position().location("2026-09-24T18:22:49.000Z", true, 36.80644, 10.07367)
+                        .attribute(Position.KEY_BATTERY, 4.2));
 
-        verifyAttribute(decoder, text(
-                "860141077743871 AA23010279022CB3190099432C0011122A18FFFFFFFF800000000000010000000026D70B14"),
-                Position.KEY_BATTERY, 4.2);
+        verifyDecode(decoder, text(
+                "861001002935274 AA2101171A022D833D009A2BAA0000A0000000006380FC000000000400000000001458"),
+                position());
 
-        verifyPosition(decoder, text(
-                "861001002935274 AA2101171A022D833D009A2BAA0000A0000000006380FC000000000400000000001458"));
-
-        verifyPosition(decoder, text(
+        verifyDecode(decoder, text(
                 "861001002935274 AA1300ADCA01F0CE94009CB42D0000212A00FD01FEE3801300000000071739875B1B8C"
-                        + "0000000000000000000000000000000C1A"));
+                        + "0000000000000000000000000000000C1A"),
+                position());
 
     }
 
@@ -89,6 +93,57 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
             }
         }
         assertEquals(7, positions);
+
+    }
+
+    @Test
+    public void testIdentityOnFirstPosition() throws Exception {
+
+        var session = new DeviceSession(
+                1L, "861001002935274", null, mock(Protocol.class), mock(Channel.class), mock(SocketAddress.class));
+        var connectionManager = mock(ConnectionManager.class);
+        when(connectionManager.getDeviceSession(any(), any(), any(), any(String[].class))).thenReturn(session);
+
+        var decoder = new AccentProtocolDecoder(null);
+        decoder.setConnectionManager(connectionManager);
+
+        String location = "AA23010279022CB3190099432C0011122A18FFFFFFFF800000000000010000000026D70B14";
+
+        assertNull(decoder.decode(
+                null, null, "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"));
+
+        var first = (Position) decoder.decode(null, null, location);
+        assertEquals("1.0.103R10", first.getString(Position.KEY_VERSION_FW));
+        assertEquals("8921602050440128136F", first.getString(Position.KEY_ICCID));
+        assertEquals("861001002935274", first.getString("imei"));
+
+        var second = (Position) decoder.decode(null, null, location);
+        assertFalse(second.hasAttribute(Position.KEY_VERSION_FW));
+        assertFalse(second.hasAttribute(Position.KEY_ICCID));
+        assertFalse(second.hasAttribute("imei"));
+
+        assertNull(decoder.decode(null, null,
+                "861001002935274 AA00124427@14/01/27,12:44:20+00 ,ICC:8921602050440128136F, IMEI:861001002935274"));
+
+        var connected = (Position) decoder.decode(null, null, location);
+        assertFalse(connected.hasAttribute(Position.KEY_VERSION_FW));
+        assertEquals("8921602050440128136F", connected.getString(Position.KEY_ICCID));
+        assertEquals("861001002935274", connected.getString("imei"));
+
+    }
+
+    @Test
+    public void testUseFmsFromInfoFrame() throws Exception {
+
+        var decoder = inject(new AccentProtocolDecoder(null));
+        String location = "861001002935274 AA1300ADCA01F0CE94009CB42D0000212A00FD01FEE3801300000000071739875B1B8C"
+                + "0000000000000000000000000000000C1A";
+
+        assertNull(decoder.decode(null, null, "860141077743871 AA01MF2_XS"));
+        assertFalse(((Position) decoder.decode(null, null, location)).hasAttribute(Position.KEY_RPM));
+
+        assertNull(decoder.decode(null, null, "860141077743871 AA01MF2"));
+        assertTrue(((Position) decoder.decode(null, null, location)).hasAttribute(Position.KEY_RPM));
 
     }
 

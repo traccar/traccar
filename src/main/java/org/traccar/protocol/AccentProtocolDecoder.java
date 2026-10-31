@@ -16,8 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -29,42 +27,31 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
-
-import jakarta.inject.Inject;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class AccentProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccentProtocolDecoder.class);
-
     private static final String ATTRIBUTE_FMS = "useFms";
-    private static final String ATTRIBUTE_J1708 = "accent.j1708";
+    private static final String ATTRIBUTE_J1708 = "useJ1708";
     private static final String ATTRIBUTE_FUEL_SOURCE = "accent.fuelSrc";
+    private static final String KEY_IMEI = "imei";
 
-    private Storage storage;
+    private String deviceId;
+    private String firmware;
+    private String iccid;
+    private String imei;
+    private Boolean useFms;
 
     public AccentProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    @Inject
-    public void setStorage(Storage storage) {
-        this.storage = storage;
-    }
-
     private static final Pattern PATTERN_INFO = new PatternBuilder()
             .text("AA01")
-            .expression("([^,]*)")              // firmware
-            .text(", ICC:")
-            .expression("([^,]*)")              // iccid
-            .text(", IMEI:")
+            .expression("([^,]*), ICC:")        // firmware version
+            .expression("([^,]*), IMEI:")       // iccid
             .number("(d+)")                     // imei
             .any()
             .compile();
@@ -114,10 +101,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String uniqueId = null;
         int space = sentence.indexOf(' ');
         if (space > 0 && !sentence.startsWith("AA")) {
-            uniqueId = sentence.substring(0, space);
+            deviceId = sentence.substring(0, space);
             sentence = sentence.substring(space + 1).trim();
         }
 
@@ -126,31 +112,44 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (sentence.contains("AA01MF2")) {
-            DeviceSession deviceSession = uniqueId == null
-                    ? getDeviceSession(channel, remoteAddress)
-                    : getDeviceSession(channel, remoteAddress, uniqueId);
-            if (deviceSession != null) {
-                updateUseFms(deviceSession, !sentence.contains("AA01MF2_XS"));
-            }
+        if (sentence.startsWith("AA01MF2")) {
+            useFms = !sentence.startsWith("AA01MF2_XS");
             return null;
         }
 
         Parser info = new Parser(PATTERN_INFO, sentence);
         if (info.matches()) {
-            String firmware = info.next();
-            String iccid = info.next();
-            String imei = info.next();
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-            if (deviceSession != null) {
-                updateIdentity(deviceSession, firmware, iccid, imei);
+            firmware = info.next();
+            iccid = info.next();
+            imei = info.next();
+            if (deviceId == null) {
+                deviceId = imei;
+            }
+            if (getDeviceSession(channel, remoteAddress, deviceId) == null) {
+                deviceId = null;
+                firmware = null;
+                iccid = null;
+                imei = null;
             }
             return null;
         }
 
         if (sentence.startsWith("AA00")) {
-            if (uniqueId != null) {
-                getDeviceSession(channel, remoteAddress, uniqueId);
+            String icc = field(sentence, "ICC:");
+            String modem = field(sentence, "IMEI:");
+            if (icc != null) {
+                iccid = icc;
+            }
+            if (modem != null) {
+                imei = modem;
+            }
+            if (deviceId == null) {
+                deviceId = modem;
+            }
+            if (deviceId != null && getDeviceSession(channel, remoteAddress, deviceId) == null) {
+                deviceId = null;
+                iccid = null;
+                imei = null;
             }
             return null;
         }
@@ -160,11 +159,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        sendAck(channel, remoteAddress);
-
-        DeviceSession deviceSession = uniqueId == null
-                ? getDeviceSession(channel, remoteAddress)
-                : getDeviceSession(channel, remoteAddress, uniqueId);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             return null;
         }
@@ -220,6 +215,8 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, event);
         position.set("addedInfo", addedInfo);
 
+        applyIdentity(position);
+
         if (sentence.length() == 104 || sentence.length() == 106) {
             decodeCan(position, sentence);
             position.set(Position.KEY_SATELLITES, hex(sentence, 100, 102));
@@ -229,50 +226,31 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private void updateUseFms(DeviceSession deviceSession, boolean useFms) {
-        Device device = deviceFor(deviceSession);
-        if (device == null || (device.hasAttribute(ATTRIBUTE_FMS) && device.getBoolean(ATTRIBUTE_FMS) == useFms)) {
-            return;
-        }
-        device.set(ATTRIBUTE_FMS, useFms);
-        saveAttributes(device);
-    }
-
-    private void updateIdentity(DeviceSession deviceSession, String firmware, String iccid, String imei) {
-        Device device = deviceFor(deviceSession);
-        if (device == null) {
-            return;
-        }
-        boolean changed = setIfChanged(device, Position.KEY_VERSION_FW, firmware);
-        changed |= setIfChanged(device, Position.KEY_ICCID, iccid);
-        changed |= setIfChanged(device, "imei", imei);
-        if (changed) {
-            saveAttributes(device);
-        }
-    }
-
-    private Device deviceFor(DeviceSession deviceSession) {
-        if (getCacheManager() == null || storage == null) {
+    private static String field(String sentence, String label) {
+        int index = sentence.indexOf(label);
+        if (index < 0) {
             return null;
         }
-        return getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
+        int start = index + label.length();
+        int end = sentence.indexOf(',', start);
+        String value = (end < 0 ? sentence.substring(start) : sentence.substring(start, end)).trim();
+        return value.isEmpty() ? null : value;
     }
 
-    private static boolean setIfChanged(Device device, String key, String value) {
-        if (value == null || value.isEmpty() || value.equals(device.getString(key))) {
-            return false;
+    private void applyIdentity(Position position) {
+        if (firmware == null && iccid == null) {
+            return;
         }
-        device.set(key, value);
-        return true;
-    }
-
-    private void saveAttributes(Device device) {
-        try {
-            storage.updateObject(device, new Request(
-                    new Columns.Include("attributes"),
-                    new Condition.Equals("id", device.getId())));
-        } catch (StorageException e) {
-            LOGGER.warn("Update device attributes error", e);
+        if (firmware != null) {
+            position.set(Position.KEY_VERSION_FW, firmware);
+            firmware = null;
+        }
+        if (iccid != null) {
+            position.set(Position.KEY_ICCID, iccid);
+            iccid = null;
+        }
+        if (imei != null) {
+            position.set(KEY_IMEI, imei);
         }
     }
 
@@ -284,8 +262,19 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         if (device == null) {
             return;
         }
-        boolean fms = device.getBoolean(ATTRIBUTE_FMS);
-        boolean j1708 = device.getBoolean(ATTRIBUTE_J1708);
+        boolean configured = device.hasAttribute(ATTRIBUTE_FMS) || device.hasAttribute(ATTRIBUTE_J1708);
+        boolean fms;
+        boolean j1708;
+        if (configured) {
+            fms = device.getBoolean(ATTRIBUTE_FMS);
+            j1708 = device.getBoolean(ATTRIBUTE_J1708);
+        } else if (useFms != null) {
+            fms = useFms;
+            j1708 = false;
+        } else {
+            fms = true;
+            j1708 = false;
+        }
         if (!fms && !j1708) {
             return;
         }
