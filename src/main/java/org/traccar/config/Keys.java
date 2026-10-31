@@ -1802,7 +1802,16 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Throttling interval if the limit is exceeded. The value is in seconds.
+     * Throttle positions if the daily stored position limit is reached across all devices on this server.
+     * Uses filter.dailyLimitInterval for the throttling interval for each device.
+     * A zero or negative value disables the limit. The count resets daily and on server restart.
+     */
+    public static final ConfigKey<Integer> FILTER_GLOBAL_DAILY_LIMIT = new IntegerConfigKey(
+            "filter.globalDailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Throttling interval if the device or global daily limit is exceeded. The value is in seconds.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
             "filter.dailyLimitInterval",
