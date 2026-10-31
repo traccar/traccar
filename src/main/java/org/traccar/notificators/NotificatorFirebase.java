@@ -32,8 +32,6 @@ import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -50,12 +48,15 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -100,6 +101,7 @@ public class NotificatorFirebase extends Notificator {
 
         List<String> registrationTokens = new ArrayList<>(
                 Arrays.asList(user.getString("notificationTokens").split("[, ]")));
+        registrationTokens.sort(Comparator.comparing(token -> token.length() == 22));
 
         var androidConfig = AndroidConfig.builder()
                 .setNotification(AndroidNotification.builder().setSound("default").build());
@@ -114,8 +116,14 @@ public class NotificatorFirebase extends Notificator {
 
         var messageBuilder = MulticastMessage.builder()
                 .setAndroidConfig(androidConfig.build())
-                .setApnsConfig(apnsConfig.build())
-                .addAllTokens(registrationTokens);
+                .setApnsConfig(apnsConfig.build());
+        for (String token : registrationTokens) {
+            if (token.length() == 22) {
+                messageBuilder.addFid(token);
+            } else {
+                messageBuilder.addToken(token);
+            }
+        }
 
         if (!"data".equals(mode)) {
             messageBuilder.setNotification(com.google.firebase.messaging.Notification.builder()
@@ -167,8 +175,8 @@ public class NotificatorFirebase extends Notificator {
                         }
                         try {
                             storage.updateObject(user, new Request(
-                                new Columns.Include("attributes"),
-                                new Condition.Equals("id", user.getId())));
+                                    new Columns.Include("attributes"),
+                                    new Condition.Equals("id", user.getId())));
                             cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                         } catch (Exception e) {
                             LOGGER.warn("Firebase token cleanup error", e);

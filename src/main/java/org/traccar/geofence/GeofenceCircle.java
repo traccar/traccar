@@ -15,10 +15,10 @@
  */
 package org.traccar.geofence;
 
+import org.traccar.helper.DistanceCalculator;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
-
-import org.traccar.helper.DistanceCalculator;
 
 public class GeofenceCircle extends GeofenceGeometry {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,24 @@
 package org.traccar.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
 public class TraccarCommandSender implements CommandSender {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TraccarCommandSender.class);
 
     private final Client client;
 
@@ -86,10 +83,17 @@ public class TraccarCommandSender implements CommandSender {
         message.data = data;
 
         var request = client.target(url).request().header("Authorization", "key=" + key);
-        try {
-            request.post(Entity.json(message));
-        } catch (Exception e) {
-            LOGGER.warn("Command push error", e);
+        try (var response = request.post(Entity.json(message))) {
+            if (response.getStatus() / 100 != 2) {
+                throw new IOException("HTTP code " + response.getStatus());
+            }
+            var json = response.readEntity(JsonObject.class);
+            for (var result : json.getJsonArray("responses").getValuesAs(JsonObject.class)) {
+                if (!result.getBoolean("success")) {
+                    var error = result.getJsonObject("error");
+                    throw new IOException(error.getString("message"));
+                }
+            }
         }
     }
 

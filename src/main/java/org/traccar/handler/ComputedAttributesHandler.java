@@ -16,7 +16,6 @@
  */
 package org.traccar.handler;
 
-import jakarta.inject.Inject;
 import org.apache.commons.jexl3.JexlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import org.traccar.model.Attribute;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
 import java.util.Comparator;
 
 public class ComputedAttributesHandler extends BasePositionHandler {

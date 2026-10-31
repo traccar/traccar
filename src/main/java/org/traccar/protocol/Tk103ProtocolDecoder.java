@@ -19,12 +19,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.DataConverter;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -32,6 +31,7 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -444,7 +444,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
             position.set("current", buf.readUnsignedShortLE() / 10.0);
             position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
-            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set(Position.KEY_ENERGY_LEVEL, buf.readUnsignedByte());
             position.set("batteryOverheat", buf.readUnsignedByte() > 0);
             position.set("chargeProtection", buf.readUnsignedByte() > 0);
             position.set("dischargeProtection", buf.readUnsignedByte() > 0);
@@ -480,7 +480,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("cumulativeVoltage", buf.readUnsignedShortLE() / 10.0);
                         position.set("gatherVoltage", buf.readUnsignedShortLE() / 10.0);
                         position.set("current", (buf.readUnsignedShortLE() - 30000) / 10.0);
-                        position.set("soc", buf.readUnsignedShortLE() / 10.0);
+                        position.set(Position.KEY_ENERGY_LEVEL, buf.readUnsignedShortLE() / 10.0);
                     }
                     case 0x91 -> {
                         position.set("maxCellVoltage", buf.readUnsignedShortLE() / 1000.0);

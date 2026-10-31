@@ -43,7 +43,6 @@ import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
-import jakarta.servlet.http.HttpServletRequest;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -53,6 +52,7 @@ import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,7 +87,7 @@ public class OpenIdProvider {
         clientId = new ClientID(config.getString(Keys.OPENID_CLIENT_ID));
         clientAuth = new ClientSecretBasic(clientId, new Secret(config.getString(Keys.OPENID_CLIENT_SECRET)));
 
-        baseUrl = URI.create(WebHelper.retrieveWebUrl(config));
+        baseUrl = URI.create(WebHelper.retrieveWebUrl(config) + "/");
         callbackUrl = URI.create(WebHelper.retrieveWebUrl(config) + "/api/session/openid/callback");
 
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {

@@ -21,14 +21,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocol;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.config.Keys;
-import org.traccar.helper.BufferUtil;
-import org.traccar.model.WifiAccessPoint;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.BufferUtil;
+import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
@@ -37,10 +36,11 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -56,9 +56,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
-
-    public static final Charset CHARSET_GBK =
-            Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
     public Jt808ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -407,7 +404,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // encoding
 
-            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, CHARSET_GBK).toString());
+            position.set(Position.KEY_RESULT,
+                    buf.readCharSequence(buf.readableBytes() - 2, CharsetUtil.GBK).toString());
 
             return position;
 
@@ -608,10 +606,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("heartbeatInterval", buf.readUnsignedInt());
                         break;
                     case 0x0010:
-                        position.set("apn", buf.readCharSequence(length, CHARSET_GBK).toString());
+                        position.set("apn", buf.readCharSequence(length, CharsetUtil.GBK).toString());
                         break;
                     case 0x0013:
-                        position.set("server", buf.readCharSequence(length, CHARSET_GBK).toString());
+                        position.set("server", buf.readCharSequence(length, CharsetUtil.GBK).toString());
                         break;
                     case 0x0018:
                         position.set("port", buf.readUnsignedInt());
@@ -635,7 +633,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
                         break;
                     case 0x0083:
-                        position.set("plateNumber", buf.readCharSequence(length, CHARSET_GBK).toString().trim());
+                        position.set("plateNumber", buf.readCharSequence(length, CharsetUtil.GBK).toString().trim());
                         break;
                     default:
                         break;
@@ -1017,11 +1015,13 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xDA:
-                    buf.readUnsignedShort(); // string cut count
-                    int deviceStatus = buf.readUnsignedByte();
-                    position.set("string", BitUtil.check(deviceStatus, 0));
-                    position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
-                    position.set("cover", BitUtil.check(deviceStatus, 3));
+                    if (length >= 3) {
+                        buf.readUnsignedShort(); // string cut count
+                        int deviceStatus = buf.readUnsignedByte();
+                        position.set("string", BitUtil.check(deviceStatus, 0));
+                        position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
+                        position.set("cover", BitUtil.check(deviceStatus, 3));
+                    }
                     break;
                 case 0xE2:
                     if (!"DT800".equals(model)) {
@@ -1278,7 +1278,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF0:
-                    while (buf.readerIndex() < endIndex) {
+                    while (endIndex - buf.readerIndex() >= 13) {
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedShort();
                         long cid = buf.readUnsignedInt();
@@ -1416,6 +1416,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xF7:
                     if (length == 2) {
                         position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() / 10.0);
+                    } else if (length >= 9) {
+                        buf.skipBytes(length); // apn information
                     } else {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedInt() / 1000.0);
                         if (length >= 5) {
@@ -1693,6 +1695,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            String model = getDeviceModel(deviceSession);
+            if (model != null && model.startsWith("JC")) {
+                getLastLocation(position, null);
+                position.set(Position.KEY_RESULT,
+                        buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString());
+                return position;
+            }
+
             Date time = readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE));
 
             if (buf.readUnsignedByte() > 0) {
@@ -1719,7 +1729,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             case 0x052A -> position.set(Position.KEY_FUEL, buf.readUnsignedShort() / 100.0);
                             case 0x0105, 0x052C -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() / 100.0);
                             case 0x014A, 0x0537, 0x0538, 0x0539 ->
-                                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
+                                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
                             case 0x052B -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                             case 0x052D -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
                             case 0x052E -> position.set("airTemp", buf.readUnsignedByte() - 40);

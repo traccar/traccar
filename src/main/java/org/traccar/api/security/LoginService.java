@@ -175,10 +175,10 @@ public class LoginService {
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
 
         } else if (!Objects.equals(name, user.getName())
-                || administrator != null && user.getAdministrator() != administrator) {
+                || administrator != null && user.getFixedEmail() && user.getAdministrator() != administrator) {
 
             user.setName(name);
-            if (administrator != null) {
+            if (administrator != null && user.getFixedEmail()) {
                 user.setAdministrator(administrator);
             }
             storage.updateObject(user, new Request(
@@ -189,6 +189,7 @@ public class LoginService {
         checkUserEnabled(user);
         return new LoginResult(user);
     }
+
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");

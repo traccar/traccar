@@ -16,11 +16,12 @@
  */
 package org.traccar.handler.events;
 
-import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+
+import jakarta.inject.Inject;
 
 public class MaintenanceEventHandler extends BasePositionEventHandler {
 
@@ -41,8 +42,8 @@ public class MaintenanceEventHandler extends BasePositionEventHandler {
                 double newValue = getValue(position, maintenance.getType());
                 if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
                     if (oldValue < maintenance.getStart()
-                        || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
-                        < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
+                            || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
+                            < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
                         Event event = new Event(Event.TYPE_MAINTENANCE, position);
                         event.setMaintenanceId(maintenance.getId());
                         event.set(maintenance.getType(), newValue);

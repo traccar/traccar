@@ -16,10 +16,9 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 import java.util.Date;

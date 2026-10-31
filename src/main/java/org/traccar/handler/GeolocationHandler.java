@@ -68,18 +68,18 @@ public class GeolocationHandler extends BasePositionHandler {
 
             geolocationProvider.getLocation(position.getNetwork(),
                     new GeolocationProvider.LocationProviderCallback() {
-                @Override
-                public void onSuccess(double latitude, double longitude, double accuracy) {
-                    updatePosition(position, latitude, longitude, accuracy);
-                    callback.processed(false);
-                }
+                        @Override
+                        public void onSuccess(double latitude, double longitude, double accuracy) {
+                            updatePosition(position, latitude, longitude, accuracy);
+                            callback.processed(false);
+                        }
 
-                @Override
-                public void onFailure(Throwable e) {
-                    LOGGER.warn("Geolocation network error", e);
-                    callback.processed(false);
-                }
-            });
+                        @Override
+                        public void onFailure(Throwable e) {
+                            LOGGER.warn("Geolocation network error", e);
+                            callback.processed(false);
+                        }
+                    });
         } else {
             callback.processed(false);
         }

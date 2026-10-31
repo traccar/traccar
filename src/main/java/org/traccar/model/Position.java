@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.traccar.model;
 
-import java.util.Date;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
+
+import java.util.Date;
+import java.util.List;
 
 @StorageName("tc_positions")
 public class Position extends Message {
@@ -59,11 +59,14 @@ public class Position extends Message {
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
     public static final String KEY_FUEL_LEVEL = "fuelLevel"; // percentage
+    public static final String KEY_ENERGY = "energy"; // kwh
+    public static final String KEY_ENERGY_LEVEL = "energyLevel"; // percentage
 
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
+    public static final String KEY_BUSINESS = "business";
     public static final String KEY_FLAGS = "flags";
     public static final String KEY_ANTENNA = "antenna";
     public static final String KEY_CHARGE = "charge";

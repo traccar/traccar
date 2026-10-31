@@ -16,7 +16,6 @@
 package org.traccar.helper;
 
 import io.netty.channel.ChannelHandlerContext;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -25,6 +24,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;

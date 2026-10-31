@@ -15,8 +15,6 @@
  */
 package org.traccar.session.cache;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
@@ -48,6 +46,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
@@ -169,11 +169,18 @@ public class CacheManager implements BroadcastInterface {
         var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
         references.remove(key);
         if (references.isEmpty()) {
+            removeLinkedDevices(deviceId);
             graph.removeObject(Device.class, deviceId);
             devicePositions.remove(deviceId);
             deviceReferences.remove(deviceId);
         }
         LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
+    }
+
+    private void removeLinkedDevices(long deviceId) {
+        for (Device linkedDevice : getDeviceObjects(deviceId, Device.class)) {
+            removeDevice(linkedDevice.getId(), deviceId);
+        }
     }
 
     private static boolean appendPosition(Deque<Position> positions, Position position) {
@@ -230,6 +237,9 @@ public class CacheManager implements BroadcastInterface {
 
         synchronized (this) {
             if (operation == ObjectOperation.DELETE) {
+                if (clazz.equals(Device.class)) {
+                    removeLinkedDevices(id);
+                }
                 graph.removeObject(clazz, id);
             }
             if (operation != ObjectOperation.UPDATE) {
@@ -315,12 +325,20 @@ public class CacheManager implements BroadcastInterface {
             return;
         }
 
+        boolean cachedDeviceLink = fromClass.equals(Device.class) && toClass.equals(Device.class)
+                && graph.getObject(fromClass, fromId) != null;
         if (link) {
+            if (cachedDeviceLink) {
+                addDevice(toId, fromId);
+            }
             if (!graph.addLink(fromClass, fromId, toClass, toId, createObjectSupplier(toClass, toId))) {
                 initializeCache(graph.getObject(toClass, toId));
             }
         } else {
             graph.removeLink(fromClass, fromId, toClass, toId);
+            if (cachedDeviceLink) {
+                removeDevice(toId, fromId);
+            }
         }
     }
 

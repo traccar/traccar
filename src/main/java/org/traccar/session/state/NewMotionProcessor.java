@@ -28,10 +28,20 @@ public final class NewMotionProcessor {
     private NewMotionProcessor() {}
 
     public static void updateState(
-            NewMotionState state, Position position, double minDistance, long minDuration, long stopGap) {
+            NewMotionState state, Position position,
+            double minDistance, long minDuration, long stopGap, boolean useIgnition) {
 
         List<Event> events = new ArrayList<>();
         state.setEvents(events);
+
+        if (useIgnition && position.hasAttribute(Position.KEY_IGNITION)) {
+            boolean ignition = position.getBoolean(Position.KEY_IGNITION);
+            if (state.getMotionStreak() != ignition) {
+                state.setMotionStreak(ignition);
+                addEvent(state, events, ignition ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED, position);
+            }
+            return;
+        }
 
         Deque<Position> positions = state.getPositions();
         if (positions.isEmpty()) {

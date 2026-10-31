@@ -23,6 +23,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
+import org.traccar.helper.CharsetUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
@@ -71,7 +72,7 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                                 Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                     } else if (model != null && Set.of("BSJ", "C5", "C5L").contains(model)) {
                         data.writeByte(1); // flag
-                        data.writeCharSequence(command.getString(Command.KEY_DATA), Jt808ProtocolDecoder.CHARSET_GBK);
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), CharsetUtil.GBK);
                         return decoder.formatMessage(
                                 Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                     } else if (model != null && model.startsWith("JC")) {
@@ -159,12 +160,12 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                             Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                 case Command.TYPE_MESSAGE:
                     data.writeByte(0x04); // display on terminal
-                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), Jt808ProtocolDecoder.CHARSET_GBK);
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), CharsetUtil.GBK);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_VOICE_MESSAGE:
                     data.writeByte(0x08); // tts voice broadcast
-                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), Jt808ProtocolDecoder.CHARSET_GBK);
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), CharsetUtil.GBK);
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_REQUEST_PHOTO:

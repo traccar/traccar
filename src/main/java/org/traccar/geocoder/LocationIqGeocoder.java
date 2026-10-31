@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import jakarta.ws.rs.client.Client;
 public class LocationIqGeocoder extends NominatimGeocoder {
 
     private static final String DEFAULT_URL = "https://us1.locationiq.com/v1/reverse.php";
+    private static final String DEFAULT_KEY = "pk.689d849289c8c63708068b2ff1f63b2d";
 
     public LocationIqGeocoder(
             Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(client, url != null ? url : DEFAULT_URL, key, language, cacheSize, addressFormat);
+        super(client, url != null ? url : DEFAULT_URL, key != null ? key : DEFAULT_KEY,
+                language, cacheSize, addressFormat);
     }
 
 }

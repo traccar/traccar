@@ -17,13 +17,13 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -55,7 +55,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             .any()                               // unknown 3 fields
             .compile();
 
-   private static final Pattern PATTERN_C = new PatternBuilder()
+    private static final Pattern PATTERN_C = new PatternBuilder()
             .text("!C,")
             .expression(PATTERN_FIX.pattern())
             .expression(PATTERN_STATE.pattern())

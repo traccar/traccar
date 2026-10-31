@@ -49,9 +49,9 @@ import org.traccar.protocol.BstplProtocol;
 import org.traccar.protocol.BwsProtocol;
 import org.traccar.protocol.C2stekProtocol;
 import org.traccar.protocol.CalAmpProtocol;
+import org.traccar.protocol.CarTrackProtocol;
 import org.traccar.protocol.CarcellProtocol;
 import org.traccar.protocol.CarscopProtocol;
-import org.traccar.protocol.CarTrackProtocol;
 import org.traccar.protocol.CastelProtocol;
 import org.traccar.protocol.CautelaProtocol;
 import org.traccar.protocol.CellocatorProtocol;
@@ -145,8 +145,8 @@ import org.traccar.protocol.MeiligaoProtocol;
 import org.traccar.protocol.MeitrackProtocol;
 import org.traccar.protocol.MictrackProtocol;
 import org.traccar.protocol.MilesmateProtocol;
-import org.traccar.protocol.Minifinder2Protocol;
 import org.traccar.protocol.MiniFinderProtocol;
+import org.traccar.protocol.Minifinder2Protocol;
 import org.traccar.protocol.MobilogixProtocol;
 import org.traccar.protocol.MoovboxProtocol;
 import org.traccar.protocol.MotorProtocol;
@@ -154,8 +154,8 @@ import org.traccar.protocol.Mta6Protocol;
 import org.traccar.protocol.MtxProtocol;
 import org.traccar.protocol.MxtProtocol;
 import org.traccar.protocol.NavigilProtocol;
-import org.traccar.protocol.NavisetProtocol;
 import org.traccar.protocol.NavisProtocol;
+import org.traccar.protocol.NavisetProtocol;
 import org.traccar.protocol.NdtpV6Protocol;
 import org.traccar.protocol.NeosProtocol;
 import org.traccar.protocol.NetProtocol;
@@ -169,6 +169,7 @@ import org.traccar.protocol.OigoProtocol;
 import org.traccar.protocol.OkoProtocol;
 import org.traccar.protocol.OmnicommProtocol;
 import org.traccar.protocol.OpenGtsProtocol;
+import org.traccar.protocol.OrbcommProtocol;
 import org.traccar.protocol.OrionProtocol;
 import org.traccar.protocol.OsmAndProtocol;
 import org.traccar.protocol.OutsafeProtocol;
@@ -211,14 +212,14 @@ import org.traccar.protocol.SatsolProtocol;
 import org.traccar.protocol.SigfoxProtocol;
 import org.traccar.protocol.SiwiProtocol;
 import org.traccar.protocol.SkypatrolProtocol;
-import org.traccar.protocol.SmartcarProtocol;
 import org.traccar.protocol.SmartSoleProtocol;
+import org.traccar.protocol.SmartcarProtocol;
 import org.traccar.protocol.SmokeyProtocol;
 import org.traccar.protocol.SnapperProtocol;
 import org.traccar.protocol.SolarPoweredProtocol;
 import org.traccar.protocol.SpotProtocol;
-import org.traccar.protocol.StarcomProtocol;
 import org.traccar.protocol.StarLinkProtocol;
+import org.traccar.protocol.StarcomProtocol;
 import org.traccar.protocol.StartekProtocol;
 import org.traccar.protocol.StbProtocol;
 import org.traccar.protocol.Stl060Protocol;
@@ -236,6 +237,7 @@ import org.traccar.protocol.TechtoCruzProtocol;
 import org.traccar.protocol.TekProtocol;
 import org.traccar.protocol.TelemaxProtocol;
 import org.traccar.protocol.TelicProtocol;
+import org.traccar.protocol.TeltonikaIridiumProtocol;
 import org.traccar.protocol.TeltonikaProtocol;
 import org.traccar.protocol.TeraTrackProtocol;
 import org.traccar.protocol.ThinkPowerProtocol;
@@ -288,15 +290,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PortConfigSuffix extends ConfigSuffix<Integer> {
+public final class ProtocolConfig {
+
+    private ProtocolConfig() {}
 
     private static final Map<String, Integer> PORTS = new HashMap<>();
+    private static final Map<String, Class<? extends BaseProtocol>> PROTOCOLS = new HashMap<>();
 
     private static void put(Class<? extends BaseProtocol> protocolClass, int port) {
-        PORTS.put(BaseProtocol.nameFromClass(protocolClass), port);
+        String name = BaseProtocol.nameFromClass(protocolClass);
+        PORTS.put(name, port);
+        PROTOCOLS.put(name, protocolClass);
     }
 
     static {
+        put(OrbcommProtocol.class, 0);
         put(Gps103Protocol.class, 5001);
         put(Tk103Protocol.class, 5002);
         put(Gl100Protocol.class, 5003);
@@ -563,15 +571,25 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         put(RadshidProtocol.class, 5265);
         put(R16hProtocol.class, 5266);
         put(JimiPhotoProtocol.class, 5267);
-        put(AccentProtocol.class, 5268);
+        put(TeltonikaIridiumProtocol.class, 5268);
+        put(AccentProtocol.class, 5269);
     }
 
-    PortConfigSuffix(String key, List<KeyType> types) {
-        super(key, types, null);
+    public static Map<String, Class<? extends BaseProtocol>> getProtocolClasses() {
+        return Map.copyOf(PROTOCOLS);
     }
 
-    @Override
-    public ConfigKey<Integer> withPrefix(String protocol) {
-        return new IntegerConfigKey(protocol + keySuffix, types, PORTS.get(protocol));
+    static class PortSuffix extends ConfigSuffix<Integer> {
+
+        PortSuffix(String key, List<KeyType> types) {
+            super(key, types, null);
+        }
+
+        @Override
+        public ConfigKey<Integer> withPrefix(String protocol) {
+            return new IntegerConfigKey(protocol + keySuffix, types, PORTS.get(protocol));
+        }
+
     }
+
 }

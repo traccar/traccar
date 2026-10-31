@@ -16,10 +16,11 @@
  */
 package org.traccar.geocoder;
 
+import org.traccar.helper.CoordinateUtil;
+
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
-import org.traccar.helper.CoordinateUtil;
 
 public class AutoNaviGeocoder extends JsonGeocoder {
 

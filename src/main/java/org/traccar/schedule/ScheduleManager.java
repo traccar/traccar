@@ -17,12 +17,11 @@ package org.traccar.schedule;
 
 import com.google.inject.Injector;
 import org.traccar.LifecycleObject;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Stream;

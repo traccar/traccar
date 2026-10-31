@@ -15,14 +15,14 @@
  */
 package org.traccar.protocol;
 
-import java.util.TimeZone;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
+
+import java.util.TimeZone;
 
 public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
 

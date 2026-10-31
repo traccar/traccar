@@ -19,12 +19,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Date;
@@ -65,7 +65,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         data.writeShortLE(0); // OK
 
         ByteBuf header = Unpooled.buffer(20);
-        header.writeByte(1); header.writeByte(0);
+        header.writeByte(1);
+        header.writeByte(0);
         header.writeShortLE(senderSequenceNumber++);
         header.writeShortLE(MSG_ACKNOWLEDGEMENT);
         header.writeShortLE(header.capacity() + data.capacity());

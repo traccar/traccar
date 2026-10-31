@@ -898,6 +898,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         String vin = model.startsWith("GV500") ? v[index++] : null;
         index += 1; // device name
         long mask = extended ? Long.parseLong(v[index++], 16) : 0;
+        if (!v[index].isEmpty() && !v[index].chars().allMatch(Character::isDigit)) {
+            return null; // non-standard format, handled by basic decoder
+        }
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
         Integer reportType = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]);
 
@@ -1151,10 +1154,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String model = getDeviceModel(deviceSession, protocolVersion);
+        if (model.startsWith("GV500")) {
+            index += 1; // vin
+        }
         index += 1; // device name
-        if (model.equals("CV200")) {
+        if (model.equals("CV200")
+                || type.startsWith("V") && model.matches("GV500MAP|GV55W|GV350CEU|GV355CEU")) {
             index += 1; // reserved
             index += 1; // report type
+        } else if (type.startsWith("V") && model.equals("GV50M")) {
+            index += 1; // virtual ignition mode
         }
         index += 1; // duration of ignition on/off
 
@@ -1654,18 +1663,23 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        String model = getDeviceModel(deviceSession, protocolVersion);
+
         if (v[index + 2].matches("\\p{XDigit}{1,2}")) {
             int reportType = Integer.parseInt(v[index + 2], 16);
             switch (type) {
                 case "STR", "CTN" -> {
                     String battery = v[index + 5];
-                    if (getDeviceModel(deviceSession, protocolVersion).matches("GL5[03]0") && !battery.isEmpty()) {
+                    if (model.matches("GL5[03]0") && !battery.isEmpty()) {
                         position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(battery));
                     }
                 }
                 case "NMR" -> position.set(Position.KEY_MOTION, reportType == 1);
                 case "DIS" -> position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
-                case "IGL" -> position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
+                case "IGL" -> {
+                    int ignitionOnValue = model.matches("GV50M.*|GV300N?|GV350M|GV600MG|GV350CEU|GV355CEU") ? 0 : 1;
+                    position.set(Position.KEY_IGNITION, reportType % 0x10 == ignitionOnValue);
+                }
                 case "HBM" -> {
                     switch (reportType % 0x10) {
                         case 0, 3 -> position.addAlarm(Position.ALARM_BRAKING);

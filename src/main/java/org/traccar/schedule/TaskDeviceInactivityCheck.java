@@ -88,7 +88,8 @@ public class TaskDeviceInactivityCheck extends SingleScheduleTask {
             return deviceValue;
         } else {
             long groupId = device.getGroupId();
-            while (groupId > 0) {
+            int depth = Storage.MAX_GROUP_DEPTH;
+            while (groupId > 0 && depth-- > 0) {
                 Group group = groups.get(groupId);
                 if (group == null) {
                     return 0;

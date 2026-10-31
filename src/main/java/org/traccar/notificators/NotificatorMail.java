@@ -16,8 +16,6 @@
  */
 package org.traccar.notificators;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.traccar.mail.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -25,6 +23,8 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 
 @Singleton

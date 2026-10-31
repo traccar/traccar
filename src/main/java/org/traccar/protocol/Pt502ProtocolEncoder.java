@@ -15,11 +15,11 @@
  */
 package org.traccar.protocol;
 
-import java.util.TimeZone;
-
+import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
+
+import java.util.TimeZone;
 
 public class Pt502ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
 

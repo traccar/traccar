@@ -20,12 +20,11 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BufferUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -36,6 +35,7 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -1303,6 +1303,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
                 position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
+                return position;
+
+            } else if (subType == 0x15) {
+
+                int count = buf.readUnsignedByte();
+                for (int i = 1; i <= count; i++) {
+                    buf.skipBytes(8); // sensor id
+                    position.set(Position.PREFIX_TEMP + i, buf.readShort() / 100.0);
+                }
                 return position;
 
             } else if (subType == 0x1b) {

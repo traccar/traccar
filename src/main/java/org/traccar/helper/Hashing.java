@@ -15,11 +15,11 @@
  */
 package org.traccar.helper;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 public final class Hashing {
 
@@ -34,6 +34,7 @@ public final class Hashing {
 
     private static final SecretKeyFactory LEGACY_FACTORY;
     private static final SecretKeyFactory FACTORY;
+
     static {
         try {
             LEGACY_FACTORY = SecretKeyFactory.getInstance(LEGACY_ALGORITHM);

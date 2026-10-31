@@ -16,15 +16,15 @@
 package org.traccar.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.api.security.OidcSessionManager;
+import org.traccar.config.Config;
+import org.traccar.helper.WebHelper;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.traccar.api.security.OidcSessionManager;
-import org.traccar.config.Config;
-import org.traccar.helper.WebHelper;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;

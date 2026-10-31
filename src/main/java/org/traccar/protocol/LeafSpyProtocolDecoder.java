@@ -22,9 +22,9 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +70,7 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.setSpeed(convertSpeed(Double.parseDouble(value) / 63, "kmh"));
                     }
                     case "Elv" -> position.setAltitude(Double.parseDouble(value));
-                    case "SOC" -> position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
+                    case "SOC" -> position.set(Position.KEY_ENERGY_LEVEL, Double.parseDouble(value));
                     case "user" -> position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                     case "ChrgMode" -> position.set(Position.KEY_CHARGE, Integer.parseInt(value) != 0);
                     case "Odo" -> position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(value) * 1000);

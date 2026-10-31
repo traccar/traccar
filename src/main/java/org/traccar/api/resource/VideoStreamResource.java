@@ -16,22 +16,28 @@
 package org.traccar.api.resource;
 
 import io.netty.buffer.ByteBuf;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
+import org.glassfish.jersey.server.CloseableService;
 import org.traccar.api.BaseResource;
 import org.traccar.media.VideoStreamManager;
 import org.traccar.model.Device;
 import org.traccar.storage.StorageException;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @Path("stream")
 public class VideoStreamResource extends BaseResource {
 
     @Inject
     private VideoStreamManager streamManager;
+
+    @Context
+    private CloseableService closeableService;
 
     @GET
     @Path("{deviceId}/{channel}/live.m3u8")
@@ -52,6 +58,10 @@ public class VideoStreamResource extends BaseResource {
 
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         ByteBuf data = streamManager.getSegment(deviceId, channel, index);
+        if (data == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        closeableService.add(data::release);
         StreamingOutput stream = output -> data.getBytes(data.readerIndex(), output, data.readableBytes());
         return Response.ok(stream, "video/mp2t").build();
     }

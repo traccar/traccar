@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -31,6 +30,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -199,7 +199,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             }
 
             ByteBuf response = Unpooled.buffer(length);
-            response.writeByte('@'); response.writeByte('@');
+            response.writeByte('@');
+            response.writeByte('@');
             response.writeShortLE(length);
             response.writeByte(version);
             response.writeBytes(id);
@@ -210,7 +211,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             }
             response.writeShortLE(
                     Checksum.crc16(Checksum.CRC16_X25, response.nioBuffer(0, response.writerIndex())));
-            response.writeByte(0x0D); response.writeByte(0x0A);
+            response.writeByte(0x0D);
+            response.writeByte(0x0A);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
@@ -222,7 +224,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             int length = 2 + 2 + id.readableBytes() + 2 + 4 + 8 + 2 + 2;
 
             ByteBuf response = Unpooled.buffer(length);
-            response.writeByte('@'); response.writeByte('@');
+            response.writeByte('@');
+            response.writeByte('@');
             response.writeShortLE(length);
             response.writeBytes(id);
             response.writeShort(type);
@@ -232,7 +235,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             }
             response.writeShortLE(
                     Checksum.crc16(Checksum.CRC16_X25, response.nioBuffer(0, response.writerIndex())));
-            response.writeByte(0x0D); response.writeByte(0x0A);
+            response.writeByte(0x0D);
+            response.writeByte(0x0A);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }

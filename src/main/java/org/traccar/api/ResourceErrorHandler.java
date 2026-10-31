@@ -15,13 +15,13 @@
  */
 package org.traccar.api;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.CompletionException;

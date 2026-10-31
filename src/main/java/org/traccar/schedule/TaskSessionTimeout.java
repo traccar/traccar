@@ -15,11 +15,11 @@
  */
 package org.traccar.schedule;
 
-import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
 
+import jakarta.inject.Inject;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 

@@ -15,7 +15,6 @@
  */
 package org.traccar.reports;
 
-import jakarta.inject.Inject;
 import org.jxls.util.JxlsHelper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -31,6 +30,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

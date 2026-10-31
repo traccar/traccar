@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.15.3'
+  version: '6.16.0'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1
@@ -4377,6 +4377,9 @@ components:
         deviceName:
           type: string
           description: Human readable device name
+        business:
+          type: boolean
+          description: Business attribute from the trip's starting position. False if absent.
         maxSpeed:
           type: number
           description: in knots

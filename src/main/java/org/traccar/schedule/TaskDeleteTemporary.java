@@ -15,7 +15,6 @@
  */
 package org.traccar.schedule;
 
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.User;
@@ -24,6 +23,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +49,7 @@ public class TaskDeleteTemporary extends SingleScheduleTask {
     @Override
     public void run() {
         try {
-           storage.removeObject(User.class, new Request(
+            storage.removeObject(User.class, new Request(
                     new Condition.And(
                             new Condition.Equals("temporary", true),
                             new Condition.Compare("expirationTime", "<", new Date()))));

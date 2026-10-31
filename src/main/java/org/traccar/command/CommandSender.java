@@ -7,5 +7,6 @@ import java.util.Collection;
 
 public interface CommandSender {
     Collection<String> getSupportedCommands();
+
     void sendCommand(Device device, Command command) throws Exception;
 }

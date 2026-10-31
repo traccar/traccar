@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -32,6 +31,7 @@ import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -204,9 +204,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d+,)?")                  // battery
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
             .groupBegin()
-            .expression(",[^,]*,")
-            .expression("[^,]*,")
-            .expression("[^,]*")                 // sim info
+            .text(",,")
+            .expression("[^,]*,")                // phone or ip
+            .number("(d+)")                      // iccid
+            .expression("[^,]*")                 // padding
             .groupEnd("?")
             .groupBegin()
             .number(",(x{8})")
@@ -396,6 +397,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
         } else {
             position.setTime(new Date());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ICCID, parser.next());
         }
 
         if (parser.hasNext()) {
