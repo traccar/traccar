@@ -344,12 +344,10 @@ public class CacheManager implements BroadcastInterface {
 
     private void initializeCache(BaseModel object) throws Exception {
         if (object instanceof User) {
-            for (Permission permission : storage.getPermissions(User.class, Notification.class)) {
-                if (permission.getOwnerId() == object.getId()) {
-                    invalidatePermission(
-                            permission.getOwnerClass(), permission.getOwnerId(),
-                            permission.getPropertyClass(), permission.getPropertyId(), true);
-                }
+            for (Permission permission : storage.getPermissions(User.class, object.getId(), Notification.class, 0)) {
+                invalidatePermission(
+                        permission.getOwnerClass(), permission.getOwnerId(),
+                        permission.getPropertyClass(), permission.getPropertyId(), true);
             }
         } else {
             if (object instanceof GroupedModel groupedModel) {
@@ -358,21 +356,18 @@ public class CacheManager implements BroadcastInterface {
                     invalidatePermission(object.getClass(), object.getId(), Group.class, groupId, true);
                 }
 
-                for (Permission permission : storage.getPermissions(User.class, object.getClass())) {
-                    if (permission.getPropertyId() == object.getId()) {
-                        invalidatePermission(
-                                object.getClass(), object.getId(), User.class, permission.getOwnerId(), true);
-                    }
+                for (Permission permission : storage.getPermissions(User.class, 0, object.getClass(), object.getId())) {
+                    invalidatePermission(
+                            object.getClass(), object.getId(), User.class, permission.getOwnerId(), true);
                 }
 
                 for (Class<? extends BaseModel> clazz : GROUPED_CLASSES) {
                     if (!clazz.equals(Device.class) || object.getClass().equals(Device.class)) {
-                        for (Permission permission : storage.getPermissions(object.getClass(), clazz)) {
-                            if (permission.getOwnerId() == object.getId()) {
-                                invalidatePermission(
-                                        object.getClass(), object.getId(),
-                                        clazz, permission.getPropertyId(), true);
-                            }
+                        for (Permission permission : storage.getPermissions(
+                                object.getClass(), object.getId(), clazz, 0)) {
+                            invalidatePermission(
+                                    object.getClass(), object.getId(),
+                                    clazz, permission.getPropertyId(), true);
                         }
                     }
                 }
