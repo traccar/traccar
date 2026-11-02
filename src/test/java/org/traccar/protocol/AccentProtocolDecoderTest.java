@@ -30,10 +30,21 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new AccentProtocolDecoder(null));
 
         verifyDecode(decoder, text(
-                "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"));
+                "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"),
+                position(Checks.ATTRIBUTES)
+                        .outdated(true)
+                        .attribute(Position.KEY_TYPE, "INF")
+                        .attribute("firstConnect", true)
+                        .attribute(Position.KEY_VERSION_FW, "1.0.103R10")
+                        .attribute(Position.KEY_ICCID, "8921602050440128136F")
+                        .attribute("imei", "861001002935274"));
 
         verifyDecode(decoder, text(
-                "860141077743871 AA00124427@14/01/27,12:44:20+00"));
+                "860141077743871 AA00124427@14/01/27,12:44:20+00"),
+                position(Checks.ATTRIBUTES)
+                        .outdated(true)
+                        .attribute(Position.KEY_TYPE, "INF")
+                        .attribute("firstConnect", false));
 
         verifyDecode(decoder, text(
                 "AAAA"));
@@ -109,26 +120,33 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
 
         String location = "AA23010279022CB3190099432C0011122A18FFFFFFFF800000000000010000000026D70B14";
 
-        assertNull(decoder.decode(
-                null, null, "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"));
+        var info = (Position) decoder.decode(
+                null, null, "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274");
+        assertEquals("INF", info.getString(Position.KEY_TYPE));
+        assertTrue(info.getBoolean("firstConnect"));
+        assertEquals("1.0.103R10", info.getString(Position.KEY_VERSION_FW));
+        assertEquals("8921602050440128136F", info.getString(Position.KEY_ICCID));
+        assertEquals("861001002935274", info.getString("imei"));
+        assertTrue(info.getOutdated());
 
         var first = (Position) decoder.decode(null, null, location);
-        assertEquals("1.0.103R10", first.getString(Position.KEY_VERSION_FW));
-        assertEquals("8921602050440128136F", first.getString(Position.KEY_ICCID));
-        assertEquals("861001002935274", first.getString("imei"));
+        assertFalse(first.hasAttribute(Position.KEY_TYPE));
+        assertFalse(first.hasAttribute(Position.KEY_VERSION_FW));
+        assertFalse(first.hasAttribute(Position.KEY_ICCID));
+        assertFalse(first.hasAttribute("imei"));
 
-        var second = (Position) decoder.decode(null, null, location);
-        assertFalse(second.hasAttribute(Position.KEY_VERSION_FW));
-        assertFalse(second.hasAttribute(Position.KEY_ICCID));
-        assertFalse(second.hasAttribute("imei"));
+        var connect = (Position) decoder.decode(null, null,
+                "861001002935274 AA00124427@14/01/27,12:44:20+00 ,ICC:8921602050440128136F, IMEI:861001002935274");
+        assertEquals("INF", connect.getString(Position.KEY_TYPE));
+        assertFalse(connect.getBoolean("firstConnect"));
+        assertFalse(connect.hasAttribute(Position.KEY_VERSION_FW));
+        assertEquals("8921602050440128136F", connect.getString(Position.KEY_ICCID));
+        assertEquals("861001002935274", connect.getString("imei"));
+        assertTrue(connect.getOutdated());
 
-        assertNull(decoder.decode(null, null,
-                "861001002935274 AA00124427@14/01/27,12:44:20+00 ,ICC:8921602050440128136F, IMEI:861001002935274"));
-
-        var connected = (Position) decoder.decode(null, null, location);
-        assertFalse(connected.hasAttribute(Position.KEY_VERSION_FW));
-        assertEquals("8921602050440128136F", connected.getString(Position.KEY_ICCID));
-        assertEquals("861001002935274", connected.getString("imei"));
+        var after = (Position) decoder.decode(null, null, location);
+        assertFalse(after.hasAttribute(Position.KEY_ICCID));
+        assertFalse(after.hasAttribute("imei"));
 
     }
 

@@ -37,10 +37,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
     private static final String ATTRIBUTE_J1708 = "useJ1708";
     private static final String ATTRIBUTE_FUEL_SOURCE = "accent.fuelSrc";
     private static final String KEY_IMEI = "imei";
+    private static final String KEY_FIRST_CONNECT = "firstConnect";
+    private static final String TYPE_INF = "INF";
 
-    private String deviceId;
-    private String firmware;
-    private String iccid;
     private String imei;
     private Boolean useFms;
 
@@ -101,9 +100,10 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String uniqueId = null;
         int space = sentence.indexOf(' ');
         if (space > 0 && !sentence.startsWith("AA")) {
-            deviceId = sentence.substring(0, space);
+            uniqueId = sentence.substring(0, space);
             sentence = sentence.substring(space + 1).trim();
         }
 
@@ -119,39 +119,49 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
 
         Parser info = new Parser(PATTERN_INFO, sentence);
         if (info.matches()) {
-            firmware = info.next();
-            iccid = info.next();
+            String firmware = info.next();
+            String iccid = info.next();
             imei = info.next();
-            if (deviceId == null) {
-                deviceId = imei;
-            }
-            if (getDeviceSession(channel, remoteAddress, deviceId) == null) {
-                deviceId = null;
-                firmware = null;
-                iccid = null;
+            DeviceSession deviceSession = getDeviceSession(
+                    channel, remoteAddress, uniqueId != null ? uniqueId : imei);
+            if (deviceSession == null) {
                 imei = null;
+                return null;
             }
-            return null;
+            Position position = createPosition(deviceSession, true);
+            if (!firmware.isEmpty()) {
+                position.set(Position.KEY_VERSION_FW, firmware);
+            }
+            if (!iccid.isEmpty()) {
+                position.set(Position.KEY_ICCID, iccid);
+            }
+            position.set(KEY_IMEI, imei);
+            return position;
         }
 
         if (sentence.startsWith("AA00")) {
-            String icc = field(sentence, "ICC:");
+            String iccid = field(sentence, "ICC:");
             String modem = field(sentence, "IMEI:");
-            if (icc != null) {
-                iccid = icc;
-            }
             if (modem != null) {
                 imei = modem;
             }
-            if (deviceId == null) {
-                deviceId = modem;
+            String id = uniqueId != null ? uniqueId : imei;
+            if (id == null) {
+                return null;
             }
-            if (deviceId != null && getDeviceSession(channel, remoteAddress, deviceId) == null) {
-                deviceId = null;
-                iccid = null;
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+            if (deviceSession == null) {
                 imei = null;
+                return null;
             }
-            return null;
+            Position position = createPosition(deviceSession, false);
+            if (iccid != null) {
+                position.set(Position.KEY_ICCID, iccid);
+            }
+            if (imei != null) {
+                position.set(KEY_IMEI, imei);
+            }
+            return position;
         }
 
         Parser parser = new Parser(PATTERN_DATA, sentence);
@@ -159,7 +169,10 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        String id = uniqueId != null ? uniqueId : imei;
+        DeviceSession deviceSession = id != null
+                ? getDeviceSession(channel, remoteAddress, id)
+                : getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
         }
@@ -215,8 +228,6 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, event);
         position.set("addedInfo", addedInfo);
 
-        applyIdentity(position);
-
         if (sentence.length() == 104 || sentence.length() == 106) {
             decodeCan(position, sentence);
             position.set(Position.KEY_SATELLITES, hex(sentence, 100, 102));
@@ -237,21 +248,13 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         return value.isEmpty() ? null : value;
     }
 
-    private void applyIdentity(Position position) {
-        if (firmware == null && iccid == null) {
-            return;
-        }
-        if (firmware != null) {
-            position.set(Position.KEY_VERSION_FW, firmware);
-            firmware = null;
-        }
-        if (iccid != null) {
-            position.set(Position.KEY_ICCID, iccid);
-            iccid = null;
-        }
-        if (imei != null) {
-            position.set(KEY_IMEI, imei);
-        }
+    private Position createPosition(DeviceSession deviceSession, boolean firstConnect) {
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_TYPE, TYPE_INF);
+        position.set(KEY_FIRST_CONNECT, firstConnect);
+        getLastLocation(position, null);
+        return position;
     }
 
     private void decodeCan(Position position, String frame) {
