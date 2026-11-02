@@ -717,7 +717,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeUdp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         if (buf.getInt(buf.readerIndex()) == 0) {
-            // command response in tcp framing, same as the command sent by the encoder
             buf.skipBytes(4); // preamble
             buf.readUnsignedInt(); // data length
             return parseData(channel, remoteAddress, buf, 0);
