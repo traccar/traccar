@@ -37,8 +37,8 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
     private static final String ATTRIBUTE_J1708 = "useJ1708";
     private static final String ATTRIBUTE_FUEL_SOURCE = "accent.fuelSrc";
     private static final String KEY_IMEI = "imei";
-    private static final String KEY_FIRST_CONNECT = "firstConnect";
     private static final String TYPE_INF = "INF";
+    private static final String TYPE_PNA = "PNA";
 
     private String imei;
     private Boolean useFms;
@@ -75,6 +75,18 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)")                      // event
             .number("(x{8})")                    // added info
             .number("(x{4})")                    // date
+            .groupBegin()
+            .number("(xx)")                      // CAN fuel
+            .number("(xx)")                      // coolant
+            .number("(x{8})")                    // accumulated odometer
+            .number("xx")                        // reserved
+            .number("(xxxx)")                    // rpm
+            .number("(xxxx)")                    // consumption
+            .number("(x{8})")                    // fuel used
+            .number("(xx)")                      // satellites
+            .number("(xx)")                      // rssi
+            .number("(xx)").optional()           // 106-char frame
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -128,7 +140,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 imei = null;
                 return null;
             }
-            Position position = createPosition(deviceSession, true);
+            Position position = createPosition(deviceSession, TYPE_PNA);
             if (!firmware.isEmpty()) {
                 position.set(Position.KEY_VERSION_FW, firmware);
             }
@@ -154,7 +166,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 imei = null;
                 return null;
             }
-            Position position = createPosition(deviceSession, false);
+            Position position = createPosition(deviceSession, TYPE_INF);
             if (iccid != null) {
                 position.set(Position.KEY_ICCID, iccid);
             }
@@ -183,18 +195,18 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         int seconds = parser.nextHexInt();
         long latitude = Long.parseLong(parser.next(), 16);
         long longitude = Long.parseLong(parser.next(), 16);
-        int speed = parser.nextHexInt();
-        int course = parser.nextHexInt();
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 10.0));
+        position.setCourse(parser.nextHexInt());
         int power = parser.nextHexInt();
-        int fuel = parser.nextHexInt();
-        int accelX = parser.nextHexInt();
-        int accelY = parser.nextHexInt();
-        int accelZ = parser.nextHexInt();
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        position.set("x", (int) (byte) parser.nextHexInt(0));
+        position.set("y", (int) (byte) parser.nextHexInt(0));
+        position.set("z", (int) (byte) parser.nextHexInt(0));
         int flags = parser.nextHexInt();
         int temperature = parser.nextHexInt();
-        long odometer = Long.parseLong(parser.next(), 16);
-        int event = parser.nextHexInt();
-        long addedInfo = Long.parseLong(parser.next(), 16);
+        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
+        position.set(Position.KEY_EVENT, parser.nextHexInt());
+        position.set("addedInfo", Long.parseLong(parser.next(), 16));
         int packedDate = parser.nextHexInt();
 
         position.setTime(new DateBuilder()
@@ -204,15 +216,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(BitUtil.check(flags, 6));
         position.setLatitude(coordinate(latitude, BitUtil.check(flags, 0)));
         position.setLongitude(coordinate(longitude, BitUtil.check(flags, 1)));
-        position.setSpeed(UnitsConverter.knotsFromKph(speed / 10.0));
-        position.setCourse(course);
 
         position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
         position.set(Position.KEY_CHARGE, !BitUtil.check(power, 7));
-        position.set(Position.KEY_FUEL_LEVEL, fuel);
-        position.set("x", (int) (byte) accelX);
-        position.set("y", (int) (byte) accelY);
-        position.set("z", (int) (byte) accelZ);
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 3));
@@ -224,14 +230,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.set(Position.PREFIX_TEMP + 1, (short) temperature / 16.0);
         }
-        position.set(Position.KEY_ODOMETER, odometer * 1000);
-        position.set(Position.KEY_EVENT, event);
-        position.set("addedInfo", addedInfo);
 
-        if (sentence.length() == 104 || sentence.length() == 106) {
-            decodeCan(position, sentence);
-            position.set(Position.KEY_SATELLITES, hex(sentence, 100, 102));
-            position.set(Position.KEY_RSSI, hex(sentence, 102, 104));
+        if (parser.hasNext(8)) {
+            decodeCan(position, parser);
         }
 
         return position;
@@ -248,27 +249,25 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         return value.isEmpty() ? null : value;
     }
 
-    private Position createPosition(DeviceSession deviceSession, boolean firstConnect) {
+    private Position createPosition(DeviceSession deviceSession, String type) {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.set(Position.KEY_TYPE, TYPE_INF);
-        position.set(KEY_FIRST_CONNECT, firstConnect);
+        position.set(Position.KEY_TYPE, type);
         getLastLocation(position, null);
         return position;
     }
 
-    private void decodeCan(Position position, String frame) {
-        if (getCacheManager() == null) {
-            return;
-        }
-        Device device = getCacheManager().getObject(Device.class, position.getDeviceId());
-        if (device == null) {
-            return;
-        }
-        boolean configured = device.hasAttribute(ATTRIBUTE_FMS) || device.hasAttribute(ATTRIBUTE_J1708);
+    private void decodeCan(Position position, Parser parser) {
+        Device device = getCacheManager() != null
+                ? getCacheManager().getObject(Device.class, position.getDeviceId()) : null;
+        boolean configured = device != null
+                && (device.hasAttribute(ATTRIBUTE_FMS) || device.hasAttribute(ATTRIBUTE_J1708));
         boolean fms;
         boolean j1708;
-        if (configured) {
+        if (device == null) {
+            fms = false;
+            j1708 = false;
+        } else if (configured) {
             fms = device.getBoolean(ATTRIBUTE_FMS);
             j1708 = device.getBoolean(ATTRIBUTE_J1708);
         } else if (useFms != null) {
@@ -278,37 +277,49 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             fms = true;
             j1708 = false;
         }
-        if (!fms && !j1708) {
-            return;
-        }
 
-        int fuel = device.getInteger(ATTRIBUTE_FUEL_SOURCE) % 16 == 1
-                ? hex(frame, 34, 36) : hex(frame, 70, 72);
-        long accumulated = Long.parseLong(frame.substring(74, 82), 16);
-        long fuelUsed = Long.parseLong(frame.substring(92, 100), 16);
-        position.set(Position.KEY_FUEL_LEVEL, fuel);
-        position.set(Position.KEY_RPM, hex(frame, 84, 88));
-
-        if (fms) {
-            position.set(Position.KEY_COOLANT_TEMP, hex(frame, 72, 74) - 40);
-            position.set(Position.KEY_ODOMETER, Math.round(accumulated * 1000));
-            int consumption = hex(frame, 88, 92);
-            if (consumption != 0) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, 51200 / consumption);
-            }
-            position.set(Position.KEY_FUEL_USED, fuelUsed / 2.0);
-            if (frame.length() == 106) {
-                position.set("brakeCount", hex(frame, 102, 104));
-            }
+        if ((fms || j1708) && device.getInteger(ATTRIBUTE_FUEL_SOURCE) % 16 != 1) {
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
         } else {
-            position.set(Position.KEY_COOLANT_TEMP, (hex(frame, 72, 74) - 32) * 5 / 9);
-            position.set(Position.KEY_ODOMETER, Math.round(accumulated * 1.609344 / 10 * 1000));
-            position.set(Position.KEY_FUEL_USED, fuelUsed / 8.0 * 3.78541178);
+            parser.skip(1);
         }
-    }
-
-    private static int hex(String frame, int from, int to) {
-        return Integer.parseInt(frame.substring(from, to), 16);
+        if (fms) {
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
+        } else if (j1708) {
+            position.set(Position.KEY_COOLANT_TEMP, (parser.nextHexInt() - 32) * 5 / 9);
+        } else {
+            parser.skip(1);
+        }
+        if (fms) {
+            position.set(Position.KEY_ODOMETER, Math.round(Long.parseLong(parser.next(), 16) * 1000));
+        } else if (j1708) {
+            position.set(Position.KEY_ODOMETER, Math.round(Long.parseLong(parser.next(), 16) * 1.609344 / 10 * 1000));
+        } else {
+            parser.skip(1);
+        }
+        if (fms || j1708) {
+            position.set(Position.KEY_RPM, parser.nextHexInt());
+        } else {
+            parser.skip(1);
+        }
+        int consumption = parser.nextHexInt();
+        if (fms && consumption != 0) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, 51200 / consumption);
+        }
+        if (fms) {
+            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
+        } else if (j1708) {
+            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 8.0 * 3.78541178);
+        } else {
+            parser.skip(1);
+        }
+        position.set(Position.KEY_SATELLITES, parser.nextHexInt());
+        int rssi = parser.nextHexInt();
+        position.set(Position.KEY_RSSI, rssi);
+        if (parser.hasNext() && fms) {
+            parser.next();
+            position.set("brakeCount", rssi);
+        }
     }
 
 }
