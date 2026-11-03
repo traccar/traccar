@@ -23,6 +23,7 @@ import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
+import org.traccar.config.Config;
 import reactor.core.publisher.Mono;
 
 import jakarta.inject.Inject;
@@ -45,7 +46,8 @@ public class McpServerHolder implements AutoCloseable {
     private final McpAsyncServer server;
 
     @Inject
-    public McpServerHolder(ObjectMapper objectMapper, McpToolRegistry toolRegistry, McpApiInvoker apiInvoker) {
+    public McpServerHolder(
+            ObjectMapper objectMapper, McpToolRegistry toolRegistry, McpApiInvoker apiInvoker, Config config) {
 
         this.apiInvoker = apiInvoker;
 
@@ -65,6 +67,8 @@ public class McpServerHolder implements AutoCloseable {
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
                 .tools(toolRegistry.getTools().stream().map(this::createApiTool).toList())
+                .tools(McpShowMap.tool())
+                .resources(McpShowMap.resource(config))
                 .build();
     }
 
