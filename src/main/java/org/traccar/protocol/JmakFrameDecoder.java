@@ -64,26 +64,17 @@ public class JmakFrameDecoder extends JsonFrameDecoder {
         long mask = buf.getLong(index);
         index += 8;
 
-        int length = 0;
+        int messageLength = 0;
         for (int i = 0; i < FIELD_LENGTHS.length; i++) {
             if (BitUtil.check(mask, i)) {
-                if (i == 29) {
-                    if (index >= buf.writerIndex()) {
-                        return null;
-                    }
-                    length = buf.getUnsignedByte(index);
+                if (i == 29 && index < buf.writerIndex()) {
+                    messageLength = buf.getUnsignedByte(index);
                 }
-                index += i == 30 ? length : FIELD_LENGTHS[i];
+                index += i == 30 ? messageLength : FIELD_LENGTHS[i];
             }
         }
 
-        if (index >= buf.writerIndex()) {
-            return null;
-        }
-        if (buf.getByte(index) != '$') {
-            if (buf.writerIndex() < index + 8) {
-                return null;
-            }
+        if (buf.writerIndex() >= index + 8 && buf.getByte(index) != '$') {
             long canMask = buf.getLong(index);
             index += 8;
             for (int i = 0; i < CAN_LENGTHS.length; i++) {
@@ -91,16 +82,12 @@ public class JmakFrameDecoder extends JsonFrameDecoder {
                     index += CAN_LENGTHS[i];
                 }
             }
-            if (index >= buf.writerIndex()) {
-                return null;
-            }
         }
 
-        if (buf.getByte(index) == '$') {
+        if (index < buf.writerIndex() && buf.getByte(index) == '$') {
             return buf.readRetainedSlice(index + 1 - buf.readerIndex());
         }
 
-        buf.skipBytes(1);
         return null;
     }
 }

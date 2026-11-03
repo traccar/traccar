@@ -481,20 +481,30 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readLong()));
         }
 
-        double latitude = BitUtil.check(mask, 5) ? buf.readUnsignedInt() / 100000.0 : 0;
-        double longitude = BitUtil.check(mask, 6) ? buf.readUnsignedInt() / 100000.0 : 0;
-        double altitude = BitUtil.check(mask, 7) ? buf.readUnsignedMedium() / 100.0 : 0;
+        if (BitUtil.check(mask, 5)) {
+            position.setLatitude(buf.readUnsignedInt() / 100000.0);
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            position.setLongitude(buf.readUnsignedInt() / 100000.0);
+        }
+
+        if (BitUtil.check(mask, 7)) {
+            position.setAltitude(buf.readUnsignedMedium() / 100.0);
+        }
 
         if (BitUtil.check(mask, 8)) {
             int flags = buf.readUnsignedByte();
-            latitude = BitUtil.check(flags, 0) ? -latitude : latitude;
-            longitude = BitUtil.check(flags, 1) ? -longitude : longitude;
-            altitude = BitUtil.check(flags, 2) ? -altitude : altitude;
+            if (BitUtil.check(flags, 0)) {
+                position.setLatitude(-position.getLatitude());
+            }
+            if (BitUtil.check(flags, 1)) {
+                position.setLongitude(-position.getLongitude());
+            }
+            if (BitUtil.check(flags, 2)) {
+                position.setAltitude(-position.getAltitude());
+            }
         }
-
-        position.setLatitude(latitude);
-        position.setLongitude(longitude);
-        position.setAltitude(altitude);
 
         if (BitUtil.check(mask, 9)) {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() / 100.0));
@@ -598,10 +608,10 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        int length = BitUtil.check(mask, 29) ? buf.readUnsignedByte() : 0; // transparent message length
+        int messageLength = BitUtil.check(mask, 29) ? buf.readUnsignedByte() : 0;
 
         if (BitUtil.check(mask, 30)) {
-            position.set("message", ByteBufUtil.hexDump(buf.readSlice(length)));
+            position.set("message", ByteBufUtil.hexDump(buf.readSlice(messageLength)));
         }
 
         if (BitUtil.check(mask, 31)) {
