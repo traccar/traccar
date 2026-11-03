@@ -40,11 +40,12 @@ public final class McpShowMap {
         var schema = McpSchema.Tool.builder("show_map", inputSchema())
                 .title("Show map")
                 .description("Shows the user a map using maplibre with openfreemap style.")
-                .meta(Map.of("ui", Map.of("resourceUri", RESOURCE_URI )))
+                .meta(Map.of("ui", Map.of("resourceUri", RESOURCE_URI)))
                 .build();
-        return new McpServerFeatures.AsyncToolSpecification(schema, (exchange, request) -> Mono.just(McpSchema.CallToolResult.builder()
-                .structuredContent(request.arguments())
-                .build()));
+        return new McpServerFeatures.AsyncToolSpecification(schema, (exchange, request) ->
+                Mono.just(McpSchema.CallToolResult.builder()
+                        .structuredContent(request.arguments())
+                        .build()));
     }
 
     public static McpServerFeatures.AsyncResourceSpecification resource(Config config) {
@@ -87,6 +88,10 @@ public final class McpShowMap {
         schema.put("type", "object");
         schema.put("description", "Render GeoJSON layers and markers on a map.");
         schema.put("properties", Map.of(
+                "style", Map.of(
+                        "type", "string",
+                        "enum", List.of("liberty", "bright", "positron", "dark", "fiord"),
+                        "description", "OpenFreeMap basemap, liberty by default."),
                 "layers", Map.of("type", "array", "items", layer),
                 "markers", Map.of(
                         "type", "array",
@@ -100,8 +105,8 @@ public final class McpShowMap {
                                         "label", Map.of("type", "string"),
                                         "color", Map.of("type", "string"),
                                         "style", Map.of("type", "string",
-                                                "enum", List.of("pin", "numbered", "start", "end")),
-                                        "popup", Map.of("type", "string"))))));
+                                                "enum", List.of("pin", "text"),
+                                                "description", "pin (default) or text, which shows the label"))))));
         return schema;
     }
 }
