@@ -712,6 +712,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         if ("G1C Pro".equals(model)) {
             position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
         }
+        if ("MV710G".equals(model)) {
+            position.set(Position.KEY_ARMED, BitUtil.check(status, 6));
+        }
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
         if ("MV810G".equals(model) || "MV710G".equals(model)) {
             position.set(Position.KEY_DOOR, BitUtil.check(status, 16));
