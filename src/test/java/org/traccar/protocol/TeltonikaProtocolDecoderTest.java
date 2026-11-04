@@ -230,6 +230,13 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
                         .attribute("tag1Rssi", -48)
                         .attribute("tag1Mac", "7cd9f4123456"));
 
+        verifyDecode(decoder, binary(
+                "00000000000000798e010000019a15a92d00000000000000000000000000000000000000000c00042a38012a40fb33b2c42a45010005005601c733abfb2e2a3c002a2a50ffa600140bea00000000000333bc00087cd9f4abcdef0000340e000853656e736f722032028100143839303030303030303030303030303030303031010000d295"),
+                position()
+                        .attribute("tag1Pitch", -5)
+                        .attribute("tag1Humidity", 45.5)
+                        .attribute("tag2Mac", "7cd9f4abcdef"));
+
         decoder.setModelOverride("ATC700");
 
         verifyDecode(decoder, binary(

@@ -212,7 +212,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(26, any, (p, b) -> p.set("bleTemp2", b.readShort() / 100.0));
         register(27, any, (p, b) -> p.set("bleTemp3", b.readShort() / 100.0));
         register(28, any, (p, b) -> p.set("bleTemp4", b.readShort() / 100.0));
-        register(29, ftXXX, (p, b) -> p.set("tag1Voltage", b.readUnsignedShort()));
         register(30, fmbXXX, (p, b) -> p.set("faultCount", b.readUnsignedByte()));
         register(31, fmbXXX, (p, b) -> p.set(Position.KEY_ENGINE_LOAD, b.readUnsignedByte()));
         register(32, fmbXXX, (p, b) -> p.set(Position.KEY_COOLANT_TEMP, b.readByte()));
@@ -329,16 +328,35 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
-        register(10808, ftXXX, (p, b) -> p.set("tag1Magnet", b.readUnsignedByte() > 0));
-        register(10820, ftXXX, (p, b) -> p.set("tag1LowBattery", b.readUnsignedByte() > 0));
-        register(13233, ftXXX, (p, b) -> {
-            int rssi = b.readByte();
-            if (rssi != 0) {
-                p.set("tag1Rssi", rssi);
-            }
-        });
         register(13266, ftXXX, (p, b) -> p.set("activeLogFile", b.readUnsignedByte()));
         register(13267, ftXXX, (p, b) -> p.set("maxLogFiles", b.readUnsignedByte()));
+
+        int[] tagVoltage = {29, 20, 22, 23, 523, 13222, 13223, 13224, 13225, 13226};
+        int[] tagLowBattery = {10820, 10821, 10822, 10823, 13253, 13254, 13255, 13256, 13257, 13258};
+        int[] tagHumidity = {86, 104, 106, 108, 525, 13335, 13336, 13337, 13338, 13339};
+        int[] tagMagnet = {10808, 10809, 10810, 10811, 13460, 13461, 13462, 13463, 13464, 13465};
+        int[] tagMotionCount = {10812, 10813, 10814, 10815, 13468, 13469, 13470, 13471, 13472, 13473};
+        int[] tagPitch = {10816, 10817, 10818, 10819, 13474, 13475, 13476, 13477, 13478, 13479};
+        int[] tagRoll = {10832, 10833, 10834, 10835, 13480, 13481, 13482, 13483, 13484, 13485};
+        for (int i = 0; i < 10; i++) {
+            String tag = "tag" + (i + 1);
+            register(tagVoltage[i], ftXXX, (p, b) -> p.set(tag + "Voltage", b.readUnsignedShort()));
+            register(tagLowBattery[i], ftXXX, (p, b) -> p.set(tag + "LowBattery", b.readUnsignedByte() > 0));
+            register(tagHumidity[i], ftXXX, (p, b) -> p.set(tag + "Humidity", b.readUnsignedShort() / 10.0));
+            register(tagMagnet[i], ftXXX, (p, b) -> p.set(tag + "Magnet", b.readUnsignedByte() > 0));
+            register(tagMotionCount[i], ftXXX, (p, b) -> p.set(tag + "MotionCount", b.readUnsignedShort()));
+            register(tagPitch[i], ftXXX, (p, b) -> p.set(tag + "Pitch", (int) b.readByte()));
+            register(tagRoll[i], ftXXX, (p, b) -> p.set(tag + "AngleRoll", (int) b.readShort()));
+            register(13233 + i, ftXXX, (p, b) -> {
+                int rssi = b.readByte();
+                if (rssi != 0) {
+                    p.set(tag + "Rssi", rssi);
+                }
+            });
+            if (i >= 4) {
+                register(13223 + i, ftXXX, (p, b) -> p.set(tag + "Temp", b.readShort() / 100.0));
+            }
+        }
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -581,15 +599,15 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             buf.readSlice(length).toString(StandardCharsets.US_ASCII).replace(',', ' '));
                 } else if (id == 641) {
                     position.set(Position.KEY_ICCID, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                } else if (id == 13243 && length >= 6) {
+                } else if (id >= 13243 && id <= 13252 && length >= 6) {
                     String mac = ByteBufUtil.hexDump(buf.readSlice(length), 0, 6);
                     if (!mac.equals("000000000000")) {
-                        position.set("tag1Mac", mac);
+                        position.set("tag" + (id - 13242) + "Mac", mac);
                     }
-                } else if (id == 13325) {
+                } else if (id >= 13325 && id <= 13334) {
                     String name = buf.readSlice(length).toString(StandardCharsets.UTF_8).replace("\0", "").trim();
                     if (!name.isEmpty()) {
-                        position.set("tag1Name", name);
+                        position.set("tag" + (id - 13324) + "Name", name);
                     }
                 } else if (id == 385) {
                     ByteBuf data = buf.readSlice(length);
