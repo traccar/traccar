@@ -1631,19 +1631,24 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         index += 1; // device name
-        index += 1; // report type
-        index += 1; // reserved
-        index += 1; // reserved
+        if (v.length != 7) {
+            index += 1; // report type
+            index += 1; // reserved
+            index += 1; // reserved
+        }
 
         position.set("data", v[index++]);
 
-        decodeLocation(position, model, v, index);
-
         Date time = DateUtil.parse(DATE_FORMAT, v[v.length - 2]);
-        if (ignoreFixTime) {
-            position.setTime(time);
+        if (v.length == 7) {
+            getLastLocation(position, time);
         } else {
-            position.setDeviceTime(time);
+            decodeLocation(position, model, v, index);
+            if (ignoreFixTime) {
+                position.setTime(time);
+            } else {
+                position.setDeviceTime(time);
+            }
         }
 
         return position;

@@ -12,6 +12,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+BUFF:GTDAT,F50A01,000000000000000,gl300m,,20260227064529,209D$"),
+                position(Checks.ATTRIBUTES).attribute("data", null));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTDAT,2C0204,135790246811220,GL300W,config command to the CAN bus device,20121117112247,032D$"),
+                position(Checks.ATTRIBUTES).attribute("data", "config command to the CAN bus device"));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTIGN,5E0100,135790246811220,1G1JC5444R7252367,,1200,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18D8,6141,00,00003:27:00,2000.0,20090214093254,11F0$"),
                 position().attribute(Position.KEY_IGNITION, true));
 
