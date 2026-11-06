@@ -77,33 +77,41 @@ public final class NewMotionProcessor {
 
             Position oldest = positions.peekFirst();
             long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
-            if (duration >= minDuration) {
-                state.setMotionStreak(false);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+            if (duration < minDuration) {
+                return;
             }
         } else {
             double distance = DistanceCalculator.distance(
                     state.getEventLatitude(), state.getEventLongitude(),
                     position.getLatitude(), position.getLongitude());
-            if (distance >= minDistance) {
-                state.setMotionStreak(true);
-                Position startPosition = position;
-                Position next = position;
-                for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
-                    Position candidate = iterator.next();
-                    boolean beforeStop = !candidate.getFixTime().after(state.getEventTime());
-                    double legDistance = DistanceCalculator.distance(candidate, next);
-                    long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
-                    boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
-                    if (beforeStop || next != position && !legMoving) {
-                        break;
-                    }
-                    startPosition = candidate;
-                    next = candidate;
-                }
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, startPosition);
+            if (distance < minDistance) {
+                return;
             }
         }
+
+        boolean moving = !state.getMotionStreak();
+        Position eventPosition = position;
+        Position next = position;
+        for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+            Position candidate = iterator.next();
+            if (!candidate.getFixTime().after(state.getEventTime())) {
+                break;
+            }
+
+            double legDistance = DistanceCalculator.distance(candidate, next);
+            long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
+            boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
+            boolean firstStartLeg = moving && next == position;
+            if (!firstStartLeg && legMoving != moving) {
+                break;
+            }
+
+            eventPosition = candidate;
+            next = candidate;
+        }
+
+        state.setMotionStreak(moving);
+        addEvent(state, events, moving ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED, eventPosition);
     }
 
     private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {

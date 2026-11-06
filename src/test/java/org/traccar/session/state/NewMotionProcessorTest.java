@@ -311,9 +311,9 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(Event.TYPE_DEVICE_MOVING, events.get(0).getType());
         assertEquals(input.get(2).getFixTime(), events.get(0).getEventTime());
         assertEquals(Event.TYPE_DEVICE_STOPPED, events.get(1).getType());
-        assertEquals(input.get(6).getFixTime(), events.get(1).getEventTime());
+        assertEquals(input.get(5).getFixTime(), events.get(1).getEventTime());
         assertEquals(Event.TYPE_DEVICE_MOVING, events.get(2).getType());
-        assertEquals(input.get(7).getFixTime(), events.get(2).getEventTime());
+        assertEquals(input.get(6).getFixTime(), events.get(2).getEventTime());
     }
 
     @Test
