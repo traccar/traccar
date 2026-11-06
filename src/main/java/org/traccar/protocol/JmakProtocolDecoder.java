@@ -43,15 +43,15 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
-        if (buf.getByte(buf.readerIndex()) == '^') {
+        byte type = buf.getByte(buf.readerIndex());
+        if (type == '^') {
             return decodeBinary(channel, remoteAddress, buf);
-        }
-
-        String sentence = buf.toString(StandardCharsets.US_ASCII);
-        if (sentence.startsWith("{")) {
+        } else if (type == '{') {
             sendResponse(channel, remoteAddress);
             return null;
         }
+
+        String sentence = buf.toString(StandardCharsets.US_ASCII);
 
         if (!sentence.startsWith("~") || !sentence.endsWith("$")) {
             return null;

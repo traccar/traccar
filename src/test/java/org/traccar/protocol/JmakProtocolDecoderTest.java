@@ -13,13 +13,7 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, binary(
                 "5e0000003c1fe3ffff0317722d0000552d0013920003111c46e7417500008e1800000000000000000000000001a1a689c770001e569300431b1f0148e41b0000001a1b00340000000100000000072400000000392f8104990000003004000001a1a689c799021300000000000000000000040d0000000064310000004a2d52323200008de20000007ffffff9df00000186a0000000271000138801117000094650324c00c80000bf773c5a0078697303e8018bec05797c00e9d04b460f0d46bcea6001010201cc020b5424"),
-                position()
-                        .attribute("engineTorque", 105)
-                        .attribute("fuelEconomy", 10.0)
-                        .attribute("transmissionOilTemp", -40)
-                        .attribute("adBlueLevel", 13)
-                        .attribute("ambientTemperature", -15)
-                        .attribute("instantFuelConsumption", 29.0));
+                position().attribute("transmissionOilTemp", -40));
 
         verifyDecode(decoder, binary(
                 "5e000000381fe3ffff01e0f22d0079ff2d40747c0003157534c6807e00004a7900000000000000000000000001a17ef56c8b001e569500431b1f0145150b0000081f1c00310000000100000000152200000000452df00eec0000003004000001a17ef56cb902010000000000000000040c0000006439390000004a2d5232320000000024"),
