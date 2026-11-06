@@ -1,0 +1,93 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  # Permet de relancer un déploiement à la main (onglet Actions > Run workflow)
+  workflow_dispatch:
+
+# Un seul déploiement à la fois ; un second attend la fin du premier au lieu de l'interrompre.
+concurrency:
+  group: traccar-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy Traccar to Debian Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Build server (tracker-server.jar + lib)
+        run: ./gradlew assemble --no-daemon --stacktrace
+
+      # L'interface web vient du dépôt officiel traccar/traccar-web, au commit référencé par le sous-module « traccar-web ».
+      - name: Checkout web interface
+        run: |
+          WEB_SHA="$(git ls-tree HEAD traccar-web | awk '{print $3}')"
+          git clone --quiet https://github.com/traccar/traccar-web.git web-src
+          if [ -n "$WEB_SHA" ] && git -C web-src checkout --quiet "$WEB_SHA"; then
+            echo "traccar-web au commit $WEB_SHA"
+          else
+            echo "::warning::commit $WEB_SHA introuvable dans traccar/traccar-web, branche par défaut utilisée"
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build web interface
+        working-directory: web-src
+        run: npm ci --no-audit --no-fund && npm run build
+
+      - name: Package
+        run: |
+          set -e
+          mkdir -p out/lib out/schema out/templates/translations out/web
+          cp target/tracker-server.jar out/
+          cp target/lib/* out/lib/
+          cp schema/* out/schema/
+          cp -r templates/* out/templates/
+          cp -r web-src/build/* out/web/
+          cp -r web-src/src/resources/l10n/* out/templates/translations/
+          cp setup/traccar.service out/
+          # JRE minimal embarqué : le serveur n'a pas besoin d'avoir Java installé.
+          jlink --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.net,jdk.unsupported \
+            --strip-debug --no-header-files --no-man-pages --compress=2 --output out/jre
+          tar -czf traccar-package.tar.gz -C out .
+          ls -lh traccar-package.tar.gz
+
+      - name: Upload and install on server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_SERVER_KEY: ${{ secrets.SSH_SERVER_KEY }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_SERVER_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          PORT="${SERVER_PORT:-22}"
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30"
+          REMOTE_DIR="/tmp/traccar-deploy-${GITHUB_RUN_ID}"
+
+          ssh $SSH_OPTS -p "$PORT" "$SERVER_USER@$SERVER_IP" "mkdir -p $REMOTE_DIR"
+          scp $SSH_OPTS -P "$PORT" traccar-package.tar.gz deploy/install.sh "$SERVER_USER@$SERVER_IP:$REMOTE_DIR/"
+          ssh $SSH_OPTS -p "$PORT" "$SERVER_USER@$SERVER_IP" \
+            "sudo bash $REMOTE_DIR/install.sh $REMOTE_DIR/traccar-package.tar.gz; status=\$?; rm -rf $REMOTE_DIR; exit \$status"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
