@@ -35,6 +35,7 @@ import org.traccar.model.LinkedDevice;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.ObjectOperation;
+import org.traccar.model.Order;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Schedulable;
@@ -64,7 +65,8 @@ public class CacheManager implements BroadcastInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
 
     private static final Set<Class<? extends BaseModel>> GROUPED_CLASSES =
-            Set.of(Attribute.class, Device.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
+            Set.of(Attribute.class, Device.class, Driver.class, Geofence.class, Maintenance.class,
+                    Notification.class, Order.class);
 
     private final Config config;
     private final Storage storage;
