@@ -310,12 +310,16 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             position.set("autonomy", Double.parseDouble(values[index++]));
         }
 
+        String consumptionUnit = null;
         if (BitUtil.check(mask, 11)) {
-            index += 1;
+            consumptionUnit = values[index++];
         }
 
         if (BitUtil.check(mask, 12)) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index++]));
+            boolean distance = "K".equals(consumptionUnit);
+            position.set(
+                    distance ? "instantFuelConsumption" : Position.KEY_FUEL_CONSUMPTION,
+                    Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 13)) {
@@ -323,7 +327,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 14)) {
-            position.set("oilTemperature", Double.parseDouble(values[index++]));
+            position.set(Position.KEY_COOLANT_TEMP, Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 15)) {
@@ -694,12 +698,16 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             position.set("autonomy", buf.readUnsignedMedium() / 100.0);
         }
 
+        int consumptionUnit = 0;
         if (BitUtil.check(mask, 11)) {
-            buf.readUnsignedByte(); // consumption unit
+            consumptionUnit = buf.readUnsignedByte();
         }
 
         if (BitUtil.check(mask, 12)) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 100.0);
+            boolean distance = consumptionUnit == 'K';
+            position.set(
+                    distance ? "instantFuelConsumption" : Position.KEY_FUEL_CONSUMPTION,
+                    buf.readUnsignedShort() / 100.0);
         }
 
         if (BitUtil.check(mask, 13)) {
@@ -708,7 +716,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 14)) {
-            position.set("oilTemperature", buf.readUnsignedByte() - 40);
+            position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
         }
 
         if (BitUtil.check(mask, 15)) {
