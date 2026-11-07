@@ -518,7 +518,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> EVENT_STATUS_ENABLE = new BooleanConfigKey(
             "event.status.enable",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             false);
 
     /**

@@ -25,6 +25,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceLookupService;
 import org.traccar.database.NotificationManager;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -60,7 +61,6 @@ public class ConnectionManager implements BroadcastInterface {
 
     private final long deviceTimeout;
     private final boolean showUnknownDevices;
-    private final boolean statusEventsEnabled;
 
     private record UnknownEntry(String uniqueId, long timestamp) {}
 
@@ -93,7 +93,6 @@ public class ConnectionManager implements BroadcastInterface {
         this.deviceLookupService = deviceLookupService;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT);
         showUnknownDevices = config.getBoolean(Keys.WEB_SHOW_UNKNOWN_DEVICES);
-        statusEventsEnabled = config.getBoolean(Keys.EVENT_STATUS_ENABLE);
         broadcastService.registerListener(this);
     }
 
@@ -264,7 +263,7 @@ public class ConnectionManager implements BroadcastInterface {
             lastSeenByDeviceId.remove(deviceId);
         }
 
-        if (!status.equals(oldStatus) && statusEventsEnabled) {
+        if (!status.equals(oldStatus) && isStatusEventEnabled(deviceId)) {
             String eventType = switch (status) {
                 case Device.STATUS_ONLINE -> Event.TYPE_DEVICE_ONLINE;
                 case Device.STATUS_UNKNOWN -> Event.TYPE_DEVICE_UNKNOWN;
@@ -286,6 +285,18 @@ public class ConnectionManager implements BroadcastInterface {
         }
 
         updateDevice(true, device);
+    }
+
+    private boolean isStatusEventEnabled(long deviceId) {
+        var key = new Object();
+        try {
+            cacheManager.addDevice(deviceId, key);
+            return AttributeUtil.lookup(cacheManager, Keys.EVENT_STATUS_ENABLE, deviceId);
+        } catch (Exception e) {
+            return false;
+        } finally {
+            cacheManager.removeDevice(deviceId, key);
+        }
     }
 
     public synchronized void sendKeepalive() {
