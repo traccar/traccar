@@ -288,14 +288,11 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     private boolean isStatusEventEnabled(long deviceId) {
-        var key = new Object();
         try {
-            cacheManager.addDevice(deviceId, key);
-            return AttributeUtil.lookup(cacheManager, Keys.EVENT_STATUS_ENABLE, deviceId);
+            return cacheManager.withDevice(deviceId,
+                    () -> AttributeUtil.lookup(cacheManager, Keys.EVENT_STATUS_ENABLE, deviceId));
         } catch (Exception e) {
             return false;
-        } finally {
-            cacheManager.removeDevice(deviceId, key);
         }
     }
 

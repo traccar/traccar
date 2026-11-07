@@ -171,14 +171,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     new Columns.Include("positionId"),
                     new Condition.Equals("id", device.getId())));
 
-            var key = new Object();
-            try {
-                cacheManager.addDevice(position.getDeviceId(), key);
+            cacheManager.withDevice(position.getDeviceId(), () -> {
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(true, position);
-            } finally {
-                cacheManager.removeDevice(position.getDeviceId(), key);
-            }
+                return null;
+            });
         } else {
             throw new IllegalArgumentException();
         }

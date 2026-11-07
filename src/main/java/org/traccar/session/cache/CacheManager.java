@@ -53,6 +53,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
@@ -130,6 +131,16 @@ public class CacheManager implements BroadcastInterface {
         return graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class, User.class), true)
                 .filter(notification -> notification.getAlways() || direct.contains(notification.getId()))
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public <T> T withDevice(long deviceId, Callable<T> action) throws Exception {
+        var key = new Object();
+        try {
+            addDevice(deviceId, key);
+            return action.call();
+        } finally {
+            removeDevice(deviceId, key);
+        }
     }
 
     public synchronized void addDevice(long deviceId, Object key) throws Exception {

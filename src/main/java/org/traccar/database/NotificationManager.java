@@ -176,14 +176,13 @@ public class NotificationManager {
         for (Entry<Event, Position> entry : events.entrySet()) {
             Event event = entry.getKey();
             Position position = entry.getValue();
-            var key = new Object();
             try {
-                cacheManager.addDevice(event.getDeviceId(), key);
-                updateEvent(event, position);
+                cacheManager.withDevice(event.getDeviceId(), () -> {
+                    updateEvent(event, position);
+                    return null;
+                });
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally {
-                cacheManager.removeDevice(event.getDeviceId(), key);
             }
         }
     }
