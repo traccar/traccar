@@ -12,6 +12,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTFRI,423037,135790246811220,,0,0,0,2,82,20261107163116,0325$"),
+                position(Checks.ATTRIBUTES).outdated(true).attribute(Position.KEY_BATTERY_LEVEL, 82));
+
+        verifyDecode(decoder, buffer(
                 "+BUFF:GTDAT,F50A01,000000000000000,gl300m,,20260227064529,209D$"),
                 position(Checks.ATTRIBUTES).attribute("data", null));
 
@@ -284,6 +288,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 position());
 
         decoder.setModelOverride("ATWG7");
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTFRI,423037,135790246811220,,0,0,0,0,1,0,3.6,349,46.2,121.354335,31.222073,20261106201001,234,15,008b,73E6,20,,82,20261107163116,0325$"),
+                position().attribute(Position.KEY_BATTERY_LEVEL, 82));
 
         verifyDecode(decoder, buffer(
                 "+RESP:GTFRI,423031,866873025895726,,0,1,1,0,1,16,0.0,351,51.6,121.391063,31.164633,20181212072535,460,00,1877,DAE,00,3,85,20181212072535,002C$"),
