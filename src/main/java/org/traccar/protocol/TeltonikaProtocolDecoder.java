@@ -543,20 +543,24 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     int index = 1;
                     while (data.isReadable()) {
                         int flags = data.readUnsignedByte();
-                        if (BitUtil.from(flags, 4) > 0) {
-                            position.set("beacon" + index + "Uuid", ByteBufUtil.hexDump(data.readSlice(16)));
-                            position.set("beacon" + index + "Major", data.readUnsignedShort());
-                            position.set("beacon" + index + "Minor", data.readUnsignedShort());
-                        } else {
-                            position.set("beacon" + index + "Namespace", ByteBufUtil.hexDump(data.readSlice(10)));
-                            position.set("beacon" + index + "Instance", ByteBufUtil.hexDump(data.readSlice(6)));
-                        }
-                        position.set("beacon" + index + "Rssi", (int) data.readByte());
-                        if (BitUtil.check(flags, 1)) {
-                            position.set("beacon" + index + "Battery", data.readUnsignedShort() / 100.0);
-                        }
-                        if (BitUtil.check(flags, 2)) {
-                            position.set("beacon" + index + "Temp", data.readUnsignedShort());
+                        int beaconLength = (BitUtil.from(flags, 4) > 0 ? 20 : 16) + 1
+                                + (BitUtil.check(flags, 1) ? 2 : 0) + (BitUtil.check(flags, 2) ? 2 : 0);
+                        if (data.isReadable(beaconLength)) {
+                            if (BitUtil.from(flags, 4) > 0) {
+                                position.set("beacon" + index + "Uuid", ByteBufUtil.hexDump(data.readSlice(16)));
+                                position.set("beacon" + index + "Major", data.readUnsignedShort());
+                                position.set("beacon" + index + "Minor", data.readUnsignedShort());
+                            } else {
+                                position.set("beacon" + index + "Namespace", ByteBufUtil.hexDump(data.readSlice(10)));
+                                position.set("beacon" + index + "Instance", ByteBufUtil.hexDump(data.readSlice(6)));
+                            }
+                            position.set("beacon" + index + "Rssi", (int) data.readByte());
+                            if (BitUtil.check(flags, 1)) {
+                                position.set("beacon" + index + "Battery", data.readUnsignedShort() / 100.0);
+                            }
+                            if (BitUtil.check(flags, 2)) {
+                                position.set("beacon" + index + "Temp", data.readUnsignedShort());
+                            }
                         }
                         index += 1;
                     }
