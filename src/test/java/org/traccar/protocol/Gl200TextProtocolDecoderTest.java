@@ -16,6 +16,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 position(Checks.ATTRIBUTES).outdated(true).attribute(Position.KEY_BATTERY_LEVEL, 82));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTERI,4F1206,123456789012345,,00000004,12935,10,1,1,0.0,126,968.1,4.000000,36.000000,20260731180607,,,,,00,362251.1,,,,100,110000,,0,203EFFFF,AAAAAAAAAAAAAAAAA,0,H3621460,1325.34,,,,,,,,447.02,388.73,58.29,39.69,,0080,,80,8.64,0.55,11FFFFFF,,,,,,,,,369785,763036,3747,446.48,0.00,2.74,72933,,,,,,0000,318,2,,,0,20260731180830,DB1E$"),
+                position().attribute("rapidAccelerations", 2));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTCAN,4F1206,123456789012345,,0,0,203EFFFF,AAAAAAAAAAAAAAAAA,0,H3621460,1325.34,,,,,,,,447.02,388.73,58.29,39.69,,0080,,80,8.64,0.55,11FFFFFF,,,,,,,,,369785,763036,3747,446.48,0.00,2.74,72933,,,,,,0000,318,2,,,0,,,20260731180316,DB1B$"),
+                position(Checks.ATTRIBUTES).attribute("brakeCount", 72933));
+
+        verifyDecode(decoder, buffer(
                 "+BUFF:GTDAT,F50A01,000000000000000,gl300m,,20260227064529,209D$"),
                 position(Checks.ATTRIBUTES).attribute("data", null));
 
