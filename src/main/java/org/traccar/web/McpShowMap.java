@@ -103,10 +103,7 @@ public final class McpShowMap {
                                                 "items", Map.of("type", "number"),
                                                 "description", "[longitude, latitude]"),
                                         "label", Map.of("type", "string"),
-                                        "color", Map.of("type", "string"),
-                                        "style", Map.of("type", "string",
-                                                "enum", List.of("pin", "text"),
-                                                "description", "pin (default) or text, which shows the label"))))));
+                                        "color", Map.of("type", "string"))))));
         return schema;
     }
 }
