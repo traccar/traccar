@@ -38,6 +38,7 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -754,11 +755,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!model.matches("GV35.CEU") && BitUtil.check(reportMaskExt, 27)) {
             index += 1; // tachograph driver2 working time mask
         }
-        if (BitUtil.check(reportMaskExt, 28) && !v[index++].isEmpty()) {
-            int count = Integer.parseInt(v[index - 1]);
-            position.set("dtcCount", count);
-            if (model.matches("GV35.CEU")) {
-                index += count; // dtc codes
+        if (BitUtil.check(reportMaskExt, 28)) {
+            if (model.matches("GV35.CEU") && !v[index].isEmpty()) {
+                int count = Integer.parseInt(v[index++]);
+                if (count > 0) {
+                    position.set(Position.KEY_DTCS, String.join(" ", Arrays.copyOfRange(v, index, index + count)));
+                }
+                index += count;
+            } else {
+                index += 1; // dtc codes
             }
         }
         if (BitUtil.check(reportMaskExt, 29)) {
