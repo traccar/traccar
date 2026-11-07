@@ -921,16 +921,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         int count = Integer.parseInt(v[index++]);
         LinkedList<Position> positions = new LinkedList<>();
-        for (int i = 0; i < count; i++) {
+        do {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             position.set(Position.KEY_VIN, vin);
-            if (model.equals("GT501")) {
-                position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
+            if (count > 0) {
+                if (model.equals("GT501")) {
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));
+                }
+                index = decodeLocation(position, model, v, index);
+            } else {
+                getLastLocation(position, null);
             }
-            index = decodeLocation(position, model, v, index);
             positions.add(position);
-        }
+        } while (positions.size() < count);
 
         Position position = positions.getLast();
         if (!v[v.length - 2].isEmpty()) {

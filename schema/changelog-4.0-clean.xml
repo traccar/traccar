@@ -14,6 +14,8 @@
       </not>
     </preConditions>
 
+    <sql dbms="mysql,mariadb">ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+
     <createTable tableName="tc_attributes">
       <column autoIncrement="true" name="id" type="INT">
         <constraints primaryKey="true" />
