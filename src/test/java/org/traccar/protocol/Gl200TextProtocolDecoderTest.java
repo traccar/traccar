@@ -12,6 +12,69 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTERI,4F1206,123456789012345,,00000004,12935,10,1,1,0.0,126,968.1,4.000000,36.000000,20260731180607,,,,,00,362251.1,,,,100,110000,,0,203EFFFF,AAAAAAAAAAAAAAAAA,0,H3621460,1325.34,,,,,,,,447.02,388.73,58.29,39.69,,0080,,80,8.64,0.55,11FFFFFF,,,,,,,,,369785,763036,3747,446.48,0.00,2.74,72933,,,,,,0000,318,2,,,0,20260731180830,DB1E$"),
+                position().location("2026-07-31T18:06:07Z", true, 36.0, 4.0)
+                        .deviceTime("2026-07-31T18:08:30Z")
+                        .attribute(Position.KEY_VIN, "AAAAAAAAAAAAAAAAA")
+                        .attribute(Position.KEY_IGNITION, false)
+                        .attribute(Position.KEY_OBD_ODOMETER, 362146000L)
+                        .attribute(Position.KEY_FUEL_USED, 1325.34)
+                        .attribute(Position.KEY_HOURS, 1609272000L)
+                        .attribute(Position.KEY_DRIVING_TIME, 388.73)
+                        .attribute("idleHours", 58.29)
+                        .attribute("idleFuelConsumption", 39.69)
+                        .attribute("indicators", 128)
+                        .attribute("doors", 128)
+                        .attribute("vehicleOverspeed", 8.64)
+                        .attribute("engineOverspeed", 0.55)
+                        .attribute("pedalBrakingFactor", 369785)
+                        .attribute("engineBrakingFactor", 763036)
+                        .attribute("acceleratorKickDowns", 3747)
+                        .attribute("effectiveEngineSpeedTime", 446.48)
+                        .attribute("cruiseControlTime", 0.0)
+                        .attribute("acceleratorKickDownTime", 2.74)
+                        .attribute("brakeApplications", 72933)
+                        .attribute("canExpansionInfo", 0)
+                        .attribute("rapidBrakings", 318)
+                        .attribute("rapidAccelerations", 2)
+                        .attribute("dtcCount", 0)
+                        .attribute(Position.KEY_RPM, null)
+                        .attribute(Position.KEY_COOLANT_TEMP, null)
+                        .attribute("engineTorque", null)
+                        .attribute("serviceDistance", null));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTCAN,4F1206,123456789012345,,0,0,203EFFFF,AAAAAAAAAAAAAAAAA,0,H3621460,1325.34,,,,,,,,447.02,388.73,58.29,39.69,,0080,,80,8.64,0.55,11FFFFFF,,,,,,,,,369785,763036,3747,446.48,0.00,2.74,72933,,,,,,0000,318,2,,,0,,,20260731180316,DB1B$"),
+                position(Checks.ATTRIBUTES).deviceTime("2026-07-31T18:03:16Z")
+                        .attribute(Position.KEY_VIN, "AAAAAAAAAAAAAAAAA")
+                        .attribute(Position.KEY_IGNITION, false)
+                        .attribute(Position.KEY_OBD_ODOMETER, 362146000L)
+                        .attribute(Position.KEY_FUEL_USED, 1325.34)
+                        .attribute(Position.KEY_HOURS, 1609272000L)
+                        .attribute(Position.KEY_DRIVING_TIME, 388.73)
+                        .attribute("idleHours", 58.29)
+                        .attribute("idleFuelConsumption", 39.69)
+                        .attribute("indicators", 128)
+                        .attribute("doors", 128)
+                        .attribute("vehicleOverspeed", 8.64)
+                        .attribute("engineOverspeed", 0.55)
+                        .attribute("pedalBrakingFactor", 369785)
+                        .attribute("engineBrakingFactor", 763036)
+                        .attribute("acceleratorKickDowns", 3747)
+                        .attribute("effectiveEngineSpeedTime", 446.48)
+                        .attribute("cruiseControlTime", 0.0)
+                        .attribute("acceleratorKickDownTime", 2.74)
+                        .attribute("brakeApplications", 72933)
+                        .attribute("canExpansionInfo", 0)
+                        .attribute("rapidBrakings", 318)
+                        .attribute("rapidAccelerations", 2)
+                        .attribute("dtcCount", 0)
+                        .attribute(Position.KEY_RPM, null)
+                        .attribute(Position.KEY_COOLANT_TEMP, null)
+                        .attribute("engineTorque", null)
+                        .attribute("serviceDistance", null));
+
+        verifyDecode(decoder, buffer(
                 "+BUFF:GTDAT,F50A01,000000000000000,gl300m,,20260227064529,209D$"),
                 position(Checks.ATTRIBUTES).attribute("data", null));
 
