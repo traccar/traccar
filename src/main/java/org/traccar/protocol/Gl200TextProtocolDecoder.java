@@ -695,25 +695,25 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 1, Integer.parseInt(v[index - 1]) / 1000.0);
         }
         if (BitUtil.check(reportMaskExt, 8) && !v[index++].isEmpty()) {
-            position.set("pedalBrakingFactor", Integer.parseInt(v[index - 1]));
+            position.set("pedalBraking", Integer.parseInt(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 9) && !v[index++].isEmpty()) {
-            position.set("engineBrakingFactor", Integer.parseInt(v[index - 1]));
+            position.set("engineBraking", Integer.parseInt(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 10) && !v[index++].isEmpty()) {
-            position.set("acceleratorKickDowns", Integer.parseInt(v[index - 1]));
+            position.set("kickDowns", Integer.parseInt(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 11) && !v[index++].isEmpty()) {
-            position.set("effectiveEngineSpeedTime", Double.parseDouble(v[index - 1]));
+            position.set("engineSpeedTime", Double.parseDouble(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 12) && !v[index++].isEmpty()) {
-            position.set("cruiseControlTime", Double.parseDouble(v[index - 1]));
+            position.set("cruiseTime", Double.parseDouble(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 13) && !v[index++].isEmpty()) {
-            position.set("acceleratorKickDownTime", Double.parseDouble(v[index - 1]));
+            position.set("kickDownTime", Double.parseDouble(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 14) && !v[index++].isEmpty()) {
-            position.set("brakeApplications", Integer.parseInt(v[index - 1]));
+            position.set("brakeCount", Integer.parseInt(v[index - 1]));
         }
         if (BitUtil.check(reportMaskExt, 15) && !v[index++].isEmpty()) {
             position.set("driver1Card", v[index - 1]);
@@ -731,7 +731,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set("registration", v[index - 1]);
         }
         if (BitUtil.check(reportMaskExt, 20) && !v[index++].isEmpty()) {
-            position.set("canExpansionInfo", Integer.parseInt(v[index - 1], 16));
+            position.set("expansionInfo", Integer.parseInt(v[index - 1], 16));
         }
         if (BitUtil.check(reportMaskExt, 21) && !v[index++].isEmpty()) {
             position.set("rapidBrakings", Integer.parseInt(v[index - 1]));
