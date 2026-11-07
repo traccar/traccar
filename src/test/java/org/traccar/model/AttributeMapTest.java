@@ -1,6 +1,9 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.NoSuchElementException;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AttributeMapTest {
@@ -213,6 +217,42 @@ public class AttributeMapTest {
         device.set("battery", 12.5);
         device.setAttributes(null);
         assertTrue(device.getAttributes().isEmpty());
+    }
+
+    @Test
+    public void testNextThrowsWhenCursorIsGreaterThanSize() {
+        AttributeMap attributeMap = new AttributeMap();
+        attributeMap.put("test-key", "test-value");
+        attributeMap.put("test-key2", "test-value2");
+
+        Iterator<Map.Entry<String, Object>> iterator = attributeMap.entrySet().iterator();
+        iterator.next();
+        iterator.next();
+
+        attributeMap.clear();
+
+        assertThrowsExactly(NoSuchElementException.class, iterator::next);
+    }
+
+    @Test
+    public void testNextThrowsWhenCursorIsEqualsToSize() {
+        AttributeMap attributeMap = new AttributeMap();
+        attributeMap.put("test-key", "test-value");
+        attributeMap.put("test-key2", "test-value2");
+
+        Iterator<Map.Entry<String, Object>> iterator = attributeMap.entrySet().iterator();
+        iterator.next();
+        iterator.next();
+
+        assertThrowsExactly(NoSuchElementException.class, iterator::next);
+    }
+
+    @Test
+    public void testRemoveThrowsWhenLastReturnedIsLessThanZero() {
+        AttributeMap attributeMap = new AttributeMap();
+        Iterator<Map.Entry<String, Object>> iterator = attributeMap.entrySet().iterator();
+
+        assertThrowsExactly(IllegalStateException.class, iterator::remove);
     }
 
 }
