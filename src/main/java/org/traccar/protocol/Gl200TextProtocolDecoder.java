@@ -756,8 +756,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // tachograph driver2 working time mask
         }
         if (BitUtil.check(reportMaskExt, 28)) {
-            int count = model.matches("GV35.CEU") && !v[index].isEmpty() ? Integer.parseInt(v[index]) : 0;
-            index += 1;
+            int count = !v[index++].isEmpty() && model.matches("GV35.CEU") ? Integer.parseInt(v[index - 1]) : 0;
             if (count > 0) {
                 position.set(Position.KEY_DTCS, String.join(" ", Arrays.copyOfRange(v, index, index + count)));
             }
