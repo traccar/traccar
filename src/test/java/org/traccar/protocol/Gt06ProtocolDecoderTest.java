@@ -18,6 +18,9 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyDecode(decoder, binary(
+                "78782417025b1ea412004f312b32313335363337363334323200000000000000000002002ec1490d0a"));
+
+        verifyDecode(decoder, binary(
                 "79790011941501282c533a12230ed309f63c8408720d0a"),
                 position(Checks.ATTRIBUTES).attribute(Position.PREFIX_TEMP + 1, 25.5));
 
