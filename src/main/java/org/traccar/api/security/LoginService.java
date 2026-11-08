@@ -129,8 +129,8 @@ public class LoginService {
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
-                        new Condition.Equals("LOWER(email)", email),
-                        new Condition.Equals("LOWER(login)", email))));
+                        new Condition.Equals("email", email),
+                        new Condition.Equals("login", email))));
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
@@ -153,7 +153,7 @@ public class LoginService {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
+                new Condition.Equals("email", email.toLowerCase(Locale.ROOT))));
 
         if (user == null) {
 

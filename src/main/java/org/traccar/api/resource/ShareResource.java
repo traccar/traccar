@@ -81,7 +81,7 @@ public class ShareResource extends BaseResource {
         }
 
         User share = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", shareEmail)));
+                new Columns.All(), new Condition.Equals("email", shareEmail.toLowerCase(Locale.ROOT))));
 
         if (share == null) {
             share = new User();
