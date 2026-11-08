@@ -12,6 +12,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTFRI,423037,351564056291420,,0,1,1,0,1,0,3.6,349,46.2,-0.273040,51.502892,20261106201001,234,15,008b,6E02,21,,82,20261107170840,032C$"),
+                position().location("2026-11-06T20:10:01Z", true, 51.502892, -0.273040));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTFRI,423037,135790246811220,,0,0,0,2,82,20261107163116,0325$"),
                 position(Checks.ATTRIBUTES).outdated(true).attribute(Position.KEY_BATTERY_LEVEL, 82));
 

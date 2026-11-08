@@ -914,6 +914,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) / 1000.0;
         Integer reportType = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]);
 
+        if (model.equals("GT501") && v.length > index + 9 && v[index + 9].matches("\\d{14}")) {
+            model = "ATWG7";
+        }
+
         if (model.equals("ATWG7")) {
             index += 1; // motion state
             index += 1; // wms working mode
