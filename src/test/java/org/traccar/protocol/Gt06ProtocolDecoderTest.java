@@ -18,6 +18,14 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyDecode(decoder, binary(
+                "787825181a0b07032616026c0200167b1d0f2b3c092b3905524c03000000000000000000018f02350d0a"),
+                position(Checks.NONE).network(network()
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(31517))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(11068))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(11065))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(21068))));
+
+        verifyDecode(decoder, binary(
                 "787837341a0b070339080000d600030282820000048600a08c0642420a00000000000000000000000000000000000000000000000000000f312b0d0a"),
                 position(Checks.NONE).network(network()
                         .cell(cell().mcc(214).mnc(3).lac(33410).cid(1158))

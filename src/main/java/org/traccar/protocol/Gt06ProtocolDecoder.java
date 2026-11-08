@@ -740,14 +740,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             Network network = new Network();
 
             boolean cell4g = type == MSG_WIFI_ALARM && buf.readUnsignedByte() > 0;
+            boolean sharedLac = type == MSG_LBS_EXTEND && length == 0x25;
+            int lac = sharedLac ? buf.readUnsignedShort() : 0;
 
             int cellCount = variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM
                     || (variant == Variant.SL4X && type == MSG_LBS_3)
                     ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
-                int lac;
                 int cid;
-                if (type == MSG_LBS_2 || type == MSG_WIFI_3 || cell4g) {
+                if (sharedLac) {
+                    cid = buf.readUnsignedShort();
+                } else if (type == MSG_LBS_2 || type == MSG_WIFI_3 || cell4g) {
                     lac = buf.readInt();
                     cid = (int) buf.readLong();
                 } else if (type == MSG_WIFI_5 || type == MSG_LBS_3) {
@@ -758,16 +761,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     cid = buf.readUnsignedMedium();
                 }
                 int rssi = -buf.readUnsignedByte();
-                if (lac > 0) {
+                if (cid > 0) {
                     network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid, rssi));
                 }
             }
 
-            if (variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
+            if (!sharedLac && variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
                 buf.readUnsignedByte(); // ta
             }
 
-            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
+            if (!sharedLac && type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
                     && type != MSG_LBS_2 && type != MSG_LBS_3) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
