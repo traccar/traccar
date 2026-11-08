@@ -1756,7 +1756,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (position.hasAttribute(Position.KEY_HDOP) && v[index - 1].matches("\\d{1,3}")) {
-                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
+                if (model.equals("GV56") && type.equals("STT") && v[index - 2].matches("0*1")) {
+                    position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
+                } else {
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
+                }
             }
         }
 
