@@ -36,7 +36,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Locale;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
@@ -124,6 +123,8 @@ public final class Log {
 
     public static class LogFormatter extends Formatter {
 
+        private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
         private static final Pattern TOKEN_PATTERN = Pattern.compile("([?&]token=)[^\\s&#]+", Pattern.CASE_INSENSITIVE);
 
         private final boolean fullStackTraces;
@@ -164,10 +165,16 @@ public final class Log {
                 }
             }
 
-            return String.format("%1$tF %1$tT %2$5s: %3$s%n",
-                    new Date(record.getMillis()), formatLevel(record.getLevel()),
-                    record.getLevel().intValue() >= Level.WARNING.intValue()
-                            ? TOKEN_PATTERN.matcher(message).replaceAll("$1[REDACTED]") : message);
+            String level = formatLevel(record.getLevel());
+            return new StringBuilder()
+                    .append(DATE_FORMAT.format(record.getInstant()))
+                    .append(level.length() < 5 ? "  " : " ")
+                    .append(level)
+                    .append(": ")
+                    .append(record.getLevel().intValue() >= Level.WARNING.intValue()
+                            ? TOKEN_PATTERN.matcher(message).replaceAll("$1[REDACTED]") : message)
+                    .append(System.lineSeparator())
+                    .toString();
         }
 
     }
