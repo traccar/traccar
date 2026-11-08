@@ -33,15 +33,10 @@ import java.util.regex.Pattern;
 
 public class AccentProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final String ATTRIBUTE_FMS = "useFms";
-    private static final String ATTRIBUTE_J1708 = "useJ1708";
-    private static final String ATTRIBUTE_FUEL_SOURCE = "accent.fuelSrc";
-    private static final String KEY_IMEI = "imei";
     private static final String TYPE_INF = "INF";
     private static final String TYPE_PNA = "PNA";
 
     private String imei;
-    private Boolean useFms;
 
     public AccentProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -52,6 +47,16 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]*), ICC:")        // firmware version
             .expression("([^,]*), IMEI:")       // iccid
             .number("(d+)")                     // imei
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_CONNECT = new PatternBuilder()
+            .text("AA00")
+            .groupBegin()
+            .any()
+            .text("ICC:").expression("([^,]*)") // iccid
+            .text(", IMEI:").expression("([^,]*)") // imei
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -90,24 +95,17 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private void sendAck(Channel channel, SocketAddress remoteAddress) {
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage("AA06\r\n", remoteAddress));
-        }
-    }
-
-    private static double coordinate(long raw, boolean positive) {
-        double value = raw / 10000.0;
+    private static double decodeCoordinate(Parser parser) {
+        double value = Long.parseLong(parser.next(), 16) / 10000.0;
         int degrees = (int) value / 100;
-        double result = degrees + (value - degrees * 100) / 60;
-        return positive ? result : -result;
+        return degrees + (value - degrees * 100) / 60;
     }
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = ((String) msg).trim();
+        String sentence = (String) msg;
         if (sentence.isEmpty()) {
             return null;
         }
@@ -120,12 +118,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (sentence.equals("AAAA")) {
-            sendAck(channel, remoteAddress);
-            return null;
-        }
-
-        if (sentence.startsWith("AA01MF2")) {
-            useFms = !sentence.startsWith("AA01MF2_XS");
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage("AA06\r\n", remoteAddress));
+            }
             return null;
         }
 
@@ -140,22 +135,25 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 imei = null;
                 return null;
             }
-            Position position = createPosition(deviceSession, TYPE_PNA);
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_TYPE, TYPE_PNA);
+            getLastLocation(position, null);
             if (!firmware.isEmpty()) {
                 position.set(Position.KEY_VERSION_FW, firmware);
             }
             if (!iccid.isEmpty()) {
                 position.set(Position.KEY_ICCID, iccid);
             }
-            position.set(KEY_IMEI, imei);
             return position;
         }
 
-        if (sentence.startsWith("AA00")) {
-            String iccid = field(sentence, "ICC:");
-            String modem = field(sentence, "IMEI:");
-            if (modem != null) {
-                imei = modem;
+        Parser connect = new Parser(PATTERN_CONNECT, sentence);
+        if (connect.matches()) {
+            String iccid = null;
+            if (connect.hasNext(2)) {
+                iccid = connect.next();
+                imei = connect.next();
             }
             String id = uniqueId != null ? uniqueId : imei;
             if (id == null) {
@@ -166,12 +164,12 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 imei = null;
                 return null;
             }
-            Position position = createPosition(deviceSession, TYPE_INF);
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_TYPE, TYPE_INF);
+            getLastLocation(position, null);
             if (iccid != null) {
                 position.set(Position.KEY_ICCID, iccid);
-            }
-            if (imei != null) {
-                position.set(KEY_IMEI, imei);
             }
             return position;
         }
@@ -193,15 +191,15 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         int seconds = parser.nextHexInt();
-        long latitude = Long.parseLong(parser.next(), 16);
-        long longitude = Long.parseLong(parser.next(), 16);
+        double latitude = decodeCoordinate(parser);
+        double longitude = decodeCoordinate(parser);
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 10.0));
         position.setCourse(parser.nextHexInt());
         int power = parser.nextHexInt();
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        position.set("x", (int) (byte) parser.nextHexInt(0));
-        position.set("y", (int) (byte) parser.nextHexInt(0));
-        position.set("z", (int) (byte) parser.nextHexInt(0));
+        position.set(Position.PREFIX_ADC + 0, parser.nextHexInt());
+        position.set("acc_max_x", (byte) parser.nextHexInt(0));
+        position.set("acc_max_y", (byte) parser.nextHexInt(0));
+        position.set("acc_max_z", (byte) parser.nextHexInt(0));
         int flags = parser.nextHexInt();
         int temperature = parser.nextHexInt();
         position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
@@ -214,8 +212,8 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(seconds / 3600, seconds % 3600 / 60, seconds % 60)
                 .getDate());
         position.setValid(BitUtil.check(flags, 6));
-        position.setLatitude(coordinate(latitude, BitUtil.check(flags, 0)));
-        position.setLongitude(coordinate(longitude, BitUtil.check(flags, 1)));
+        position.setLatitude(BitUtil.check(flags, 0) ? latitude : -latitude);
+        position.setLongitude(BitUtil.check(flags, 1) ? longitude : -longitude);
 
         position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
         position.set(Position.KEY_CHARGE, !BitUtil.check(power, 7));
@@ -238,85 +236,34 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static String field(String sentence, String label) {
-        int index = sentence.indexOf(label);
-        if (index < 0) {
-            return null;
-        }
-        int start = index + label.length();
-        int end = sentence.indexOf(',', start);
-        String value = (end < 0 ? sentence.substring(start) : sentence.substring(start, end)).trim();
-        return value.isEmpty() ? null : value;
-    }
-
-    private Position createPosition(DeviceSession deviceSession, String type) {
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.set(Position.KEY_TYPE, type);
-        getLastLocation(position, null);
-        return position;
-    }
-
     private void decodeCan(Position position, Parser parser) {
         Device device = getCacheManager() != null
                 ? getCacheManager().getObject(Device.class, position.getDeviceId()) : null;
-        boolean configured = device != null
-                && (device.hasAttribute(ATTRIBUTE_FMS) || device.hasAttribute(ATTRIBUTE_J1708));
-        boolean fms;
-        boolean j1708;
-        if (device == null) {
-            fms = false;
-            j1708 = false;
-        } else if (configured) {
-            fms = device.getBoolean(ATTRIBUTE_FMS);
-            j1708 = device.getBoolean(ATTRIBUTE_J1708);
-        } else if (useFms != null) {
-            fms = useFms;
-            j1708 = false;
-        } else {
-            fms = true;
-            j1708 = false;
-        }
+        boolean useImperialUs = device != null && device.getBoolean("useImperial_us");
 
-        if ((fms || j1708) && device.getInteger(ATTRIBUTE_FUEL_SOURCE) % 16 != 1) {
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        } else {
-            parser.skip(1);
-        }
-        if (fms) {
-            position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
-        } else if (j1708) {
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        if (useImperialUs) {
             position.set(Position.KEY_COOLANT_TEMP, (parser.nextHexInt() - 32) * 5 / 9);
+            position.set(Position.KEY_ODOMETER, Math.round(
+                    Long.parseLong(parser.next(), 16) * 1.609344 / 10 * 1000));
         } else {
-            parser.skip(1);
-        }
-        if (fms) {
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
             position.set(Position.KEY_ODOMETER, Math.round(Long.parseLong(parser.next(), 16) * 1000));
-        } else if (j1708) {
-            position.set(Position.KEY_ODOMETER, Math.round(Long.parseLong(parser.next(), 16) * 1.609344 / 10 * 1000));
-        } else {
-            parser.skip(1);
         }
-        if (fms || j1708) {
-            position.set(Position.KEY_RPM, parser.nextHexInt());
-        } else {
-            parser.skip(1);
-        }
+        position.set(Position.KEY_RPM, parser.nextHexInt());
         int consumption = parser.nextHexInt();
-        if (fms && consumption != 0) {
+        if (!useImperialUs && consumption != 0) {
             position.set(Position.KEY_FUEL_CONSUMPTION, 51200 / consumption);
         }
-        if (fms) {
-            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
-        } else if (j1708) {
+        if (useImperialUs) {
             position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 8.0 * 3.78541178);
         } else {
-            parser.skip(1);
+            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
         }
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
         int rssi = parser.nextHexInt();
         position.set(Position.KEY_RSSI, rssi);
-        if (parser.hasNext() && fms) {
+        if (parser.hasNext() && !useImperialUs) {
             parser.next();
             position.set("brakeCount", rssi);
         }
