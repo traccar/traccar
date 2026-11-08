@@ -24,6 +24,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceLookupService;
+import org.traccar.database.DeviceUpdateManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.BaseModel;
@@ -72,6 +73,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
+    private final DeviceUpdateManager deviceUpdateManager;
     private final NotificationManager notificationManager;
     private final BroadcastService broadcastService;
     private final DeviceLookupService deviceLookupService;
@@ -84,10 +86,11 @@ public class ConnectionManager implements BroadcastInterface {
     public ConnectionManager(
             Config config, CacheManager cacheManager, Storage storage,
             NotificationManager notificationManager, BroadcastService broadcastService,
-            DeviceLookupService deviceLookupService) {
+            DeviceLookupService deviceLookupService, DeviceUpdateManager deviceUpdateManager) {
         this.config = config;
         this.cacheManager = cacheManager;
         this.storage = storage;
+        this.deviceUpdateManager = deviceUpdateManager;
         this.notificationManager = notificationManager;
         this.broadcastService = broadcastService;
         this.deviceLookupService = deviceLookupService;
@@ -277,9 +280,10 @@ public class ConnectionManager implements BroadcastInterface {
         }
 
         try {
-            storage.updateObject(device, new Request(
-                    new Columns.Include("status", "lastUpdate"),
-                    new Condition.Equals("id", deviceId)));
+            var values = new HashMap<String, Object>();
+            values.put("status", status);
+            values.put("lastUpdate", device.getLastUpdate());
+            deviceUpdateManager.update(deviceId, values);
         } catch (StorageException e) {
             LOGGER.warn("Update device status error", e);
         }

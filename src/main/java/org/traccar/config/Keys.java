@@ -691,6 +691,15 @@ public final class Keys {
             100);
 
     /**
+     * Delay processing updates to device status and latest position by this many milliseconds, merging updates
+     * per device. Zero disables buffering. Pending device state can be lost on a crash.
+     */
+    public static final ConfigKey<Long> DATABASE_DEVICE_UPDATE_INTERVAL = new LongConfigKey(
+            "database.deviceUpdateInterval",
+            List.of(KeyType.CONFIG),
+            0L);
+
+    /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
      */
     public static final ConfigKey<Integer> USERS_DEFAULT_DEVICE_LIMIT = new IntegerConfigKey(
