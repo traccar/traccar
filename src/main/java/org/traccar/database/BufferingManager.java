@@ -73,7 +73,8 @@ public class BufferingManager {
         }
     }
 
-    private final Timer timer = new HashedWheelTimer();
+    private final Timer timer = new HashedWheelTimer(
+            Thread.ofPlatform().daemon().name("BufferingManager").factory());
     private final Callback callback;
     private final long threshold;
 
