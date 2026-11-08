@@ -12,8 +12,24 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTSTT,4F1206,123456789012345,,21,0,0.0,270,923.3,4.000000,36.000000,20261108091735,,,,,00,20261108091735,978C$"),
+                position().attribute(Position.KEY_SATELLITES, null).attribute(Position.KEY_BATTERY_LEVEL, null));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTSTT,4F1206,123456789012345,,21,0,0.0,270,923.3,4.000000,36.000000,20261108091735,,,,,01,14,20261108091735,978C$"),
-                position().attribute(Position.KEY_SATELLITES, 14));
+                position().attribute(Position.KEY_SATELLITES, 14).attribute(Position.KEY_BATTERY_LEVEL, null));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTSTT,4F1206,123456789012345,,21,0,0.0,270,923.3,4.000000,36.000000,20261108091735,,,,,0080,20261108091735,978C$"),
+                position().attribute(Position.KEY_SATELLITES, null).attribute(Position.KEY_BATTERY_LEVEL, null));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTSTT,4F1206,123456789012345,,21,0,0.0,270,923.3,4.000000,36.000000,20261108091735,,,,,0081,14,20261108091735,978C$"),
+                position().attribute(Position.KEY_SATELLITES, 14).attribute(Position.KEY_BATTERY_LEVEL, null));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTSTT,740B05,123456789012345,GV350CEU,21,0,0.0,270,923.3,4.000000,36.000000,20261108091735,0636,0001,2BEB,01B9F304,11,12,0,20261108091735,978C$"),
+                position().attribute(Position.KEY_SATELLITES, 12).attribute(Position.KEY_BATTERY_LEVEL, null));
 
         verifyDecode(decoder, buffer(
                 "+RESP:GTFRI,423037,351564056291420,,0,1,1,0,1,0,3.6,349,46.2,-0.273040,51.502892,20261106201001,234,15,008b,6E02,21,,82,20261107170840,032C$"),

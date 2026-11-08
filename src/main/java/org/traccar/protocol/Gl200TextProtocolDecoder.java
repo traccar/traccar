@@ -464,7 +464,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
             }
-        } else if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS") && !v[index++].isEmpty()) {
+        } else if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS")) {
+            index = decodePositionAppend(position, v, index);
+        }
+
+        return index;
+    }
+
+    private int decodePositionAppend(Position position, String[] v, int index) {
+        if (!v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
                 position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
@@ -481,7 +489,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
-
         return index;
     }
 
@@ -1714,6 +1721,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        int locationEnd = -1;
         while (index + 2 < v.length) {
             if (v[index].matches("-?\\d{1,3}\\.\\d{6}") && v[index + 1].matches("-?\\d{1,3}\\.\\d{6}")) {
                 index = index - 4;
@@ -1725,6 +1733,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(Double.parseDouble(v[index++]));
                 position.setLatitude(Double.parseDouble(v[index++]));
                 position.setTime(DateUtil.parse(DATE_FORMAT, v[index++]));
+                locationEnd = index;
                 break;
             }
             index += 1;
@@ -1755,12 +1764,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(DateUtil.parse(DATE_FORMAT, v[index]));
             }
 
-            if (position.hasAttribute(Position.KEY_HDOP) && v[index - 1].matches("\\d{1,3}")) {
-                if (model.equals("GV56") && type.equals("STT") && v[index - 2].matches("0*1")) {
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
-                } else {
-                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
-                }
+            if (type.equals("STT") && locationEnd >= 0 && locationEnd + 4 < index) {
+                decodePositionAppend(position, v, locationEnd + 4);
+            } else if (position.hasAttribute(Position.KEY_HDOP) && v[index - 1].matches("\\d{1,3}")) {
+                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
             }
         }
 
