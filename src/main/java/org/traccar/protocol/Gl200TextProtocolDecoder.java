@@ -464,11 +464,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
             }
-        } else if (!model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS")) {
+        } else if (hasPositionAppendMask(model)) {
             index = decodePositionAppend(position, v, index);
         }
 
         return index;
+    }
+
+    private static boolean hasPositionAppendMask(String model) {
+        return !model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS");
     }
 
     private int decodePositionAppend(Position position, String[] v, int index) {
@@ -1764,7 +1768,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(DateUtil.parse(DATE_FORMAT, v[index]));
             }
 
-            if (type.equals("STT") && locationEnd >= 0 && locationEnd + 4 < index) {
+            if (type.equals("STT") && hasPositionAppendMask(model)
+                    && locationEnd >= 0 && locationEnd + 4 < index) {
                 decodePositionAppend(position, v, locationEnd + 4);
             } else if (position.hasAttribute(Position.KEY_HDOP) && v[index - 1].matches("\\d{1,3}")) {
                 position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
