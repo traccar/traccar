@@ -249,6 +249,10 @@ public class CacheManager implements BroadcastInterface {
         synchronized (this) {
             if (operation == ObjectOperation.DELETE) {
                 if (clazz.equals(Device.class)) {
+                    var references = deviceReferences.get(id);
+                    if (references != null && !references.isEmpty()) {
+                        return;
+                    }
                     removeLinkedDevices(id);
                 }
                 graph.removeObject(clazz, id);
