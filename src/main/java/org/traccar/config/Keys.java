@@ -1944,6 +1944,22 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Maximum number of parsed computed attribute expressions to cache. Zero disables caching.
+     */
+    public static final ConfigKey<Integer> PROCESSING_COMPUTED_ATTRIBUTES_CACHE_SIZE = new IntegerConfigKey(
+            "processing.computedAttributes.cacheSize",
+            List.of(KeyType.CONFIG),
+            128);
+
+    /**
+     * Cache computed attribute expressions shorter than this number of characters.
+     */
+    public static final ConfigKey<Integer> PROCESSING_COMPUTED_ATTRIBUTES_CACHE_THRESHOLD = new IntegerConfigKey(
+            "processing.computedAttributes.cacheThreshold",
+            List.of(KeyType.CONFIG),
+            1024);
+
+    /**
      * Enable local variables declaration.
      */
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES = new BooleanConfigKey(
