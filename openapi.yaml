@@ -1450,7 +1450,38 @@ paths:
         '401':
           description: Unauthorized
           content: {}
+  /server/file:
+    get:
+      operationId: getServerFiles
+      summary: List server files (administrator only)
+      tags:
+        - Server
+      responses:
+        '200':
+          description: Files sorted by name, excluding directories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
   /server/file/{path}:
+    delete:
+      operationId: deleteServerFilePath
+      summary: Delete a server file (administrator only)
+      tags:
+        - Server
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: File deleted
+        '400':
+          description: Invalid file path
     post:
       operationId: postServerFilePath
       summary: Upload a server file
