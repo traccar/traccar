@@ -741,11 +741,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             boolean cell4g = type == MSG_WIFI_ALARM && buf.readUnsignedByte() > 0;
             boolean sharedLac = type == MSG_LBS_EXTEND && length == 0x25;
+            boolean shortCellId = type == MSG_LBS_MULTIPLE_1 && buf.readableBytes() == 36;
             int lac = sharedLac ? buf.readUnsignedShort() : 0;
 
             int cellCount = variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM
                     || (variant == Variant.SL4X && type == MSG_LBS_3)
-                    ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
+                    ? buf.readUnsignedByte() : type == MSG_WIFI_5 || shortCellId ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int cid;
                 if (sharedLac) {
@@ -758,7 +759,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     cid = (int) buf.readUnsignedInt();
                 } else {
                     lac = buf.readUnsignedShort();
-                    cid = buf.readUnsignedMedium();
+                    cid = shortCellId ? buf.readUnsignedShort() : buf.readUnsignedMedium();
                 }
                 int rssi = -buf.readUnsignedByte();
                 if (cid > 0) {
@@ -766,7 +767,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (!sharedLac && variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
+            if (!sharedLac && !shortCellId && variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
                 buf.readUnsignedByte(); // ta
             }
 
