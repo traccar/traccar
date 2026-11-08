@@ -36,6 +36,7 @@ import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
+import org.traccar.model.CompactPosition;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -341,7 +342,7 @@ public class ReportUtils {
             double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
             long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
             long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
-            Deque<Position> motionPositions = new ArrayDeque<>();
+            Deque<CompactPosition> motionPositions = new ArrayDeque<>();
             NewMotionState motionState = new NewMotionState();
             motionState.setPositions(motionPositions);
 
@@ -370,13 +371,13 @@ public class ReportUtils {
                         }
                         maxSpeed = 0;
                     }
-                    motionPositions.add(position);
+                    motionPositions.add(new CompactPosition(position));
                     while (motionPositions.size() > 1) {
                         var motionIterator = motionPositions.iterator();
                         motionIterator.next();
-                        Position second = motionIterator.next();
-                        Position last = motionPositions.peekLast();
-                        if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
+                        CompactPosition second = motionIterator.next();
+                        CompactPosition last = motionPositions.peekLast();
+                        if (last.fixTime().getTime() - second.fixTime().getTime() >= minDuration) {
                             motionPositions.poll();
                         } else {
                             break;
