@@ -13,6 +13,8 @@
       <column name="login" valueComputed="LOWER(login)" />
     </update>
 
+    <dropIndex indexName="idx_devices_uniqueid" tableName="tc_devices" />
+
   </changeSet>
 
 </databaseChangeLog>
