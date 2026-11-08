@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyDecode(decoder, binary(
+                "79790010940a8996802200258125183f0005882f0d0a"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_ICCID, "8996802200258125183"));
+
+        verifyDecode(decoder, binary(
                 "787822281a0b06173b2602e00227db9c553127db9c561a27db9c571627db9ddc0f27dbf5ec0e000000000000020dc80d0a"),
                 position(Checks.NONE));
 
