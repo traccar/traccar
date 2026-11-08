@@ -742,6 +742,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             boolean cell4g = type == MSG_WIFI_ALARM && buf.readUnsignedByte() > 0;
 
             int cellCount = variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM
+                    || (variant == Variant.SL4X && type == MSG_LBS_3)
                     ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int lac;
