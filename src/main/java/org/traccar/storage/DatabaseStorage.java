@@ -470,6 +470,7 @@ public class DatabaseStorage extends Storage {
             result.append(conditionKey);
             result.append(" = ?");
 
+            return "SELECT * FROM (" + result + ") AS permissions";
         }
 
         return result.toString();
