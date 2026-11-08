@@ -10,6 +10,13 @@ public class Gt06FrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new Gt06FrameDecoder()));
 
+        verifyDecode(channel, binary("787801080d0a787801080d0a"),
+                binary("787801080d0a"),
+                binary("787801080d0a"));
+
+        verifyDecode(channel, binary("787803181604130318491475905bd30e25001e10bbf7635d14759006e626560401cc00000028660090df425f000028660090df576c00002866009487566700002866009ca15667000d0a"),
+                binary("787803181604130318491475905bd30e25001e10bbf7635d14759006e626560401cc00000028660090df425f000028660090df576c00002866009487566700002866009ca15667000d0a"));
+
         verifyDecode(channel, binary("787822221a0b07020d0a"));
 
         verifyDecode(channel, binary("c902e5662f06fadf1900180002d2220454002ca2000000000a852d0d0a"),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class TopinProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new Gt06FrameDecoder());
                 pipeline.addLast(new TopinProtocolEncoder(TopinProtocol.this));
                 pipeline.addLast(new TopinProtocolDecoder(TopinProtocol.this));
             }
