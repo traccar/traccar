@@ -32,6 +32,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 position().attribute(Position.KEY_SATELLITES, 12).attribute(Position.KEY_BATTERY_LEVEL, null));
 
         verifyDecode(decoder, buffer(
+                "+RESP:GTSTT,500100,135790246811220,,16,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,01,00,20090214093254,11F0$"),
+                position().attribute(Position.KEY_SATELLITES, null).attribute(Position.KEY_BATTERY_LEVEL, null));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTSTT,423037,135790246811220,,21,0,3.6,349,46.2,121.354335,31.222073,20261106201001,234,15,008B,6E02,,0,100,20261107163116,0325$"),
                 position().attribute(Position.KEY_BATTERY_LEVEL, 100));
 
