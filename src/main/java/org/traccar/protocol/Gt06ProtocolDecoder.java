@@ -371,10 +371,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        boolean shortLbs = type == MSG_GPS_LBS_6 && buf.readableBytes() == 14;
         int cellType = type == MSG_GPS_LBS_8 || type == MSG_ALARM_MODULE ? buf.readUnsignedByte() : 0;
         int mcc = buf.readUnsignedShort();
         int mnc;
-        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 || variant == Variant.SL4X) {
+        if (BitUtil.check(mcc, 15) || (type == MSG_GPS_LBS_6 && !shortLbs) || variant == Variant.SL4X) {
             mnc = buf.readUnsignedShort();
         } else {
             mnc = buf.readUnsignedByte();
@@ -389,7 +390,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X
                 || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6 || type == MSG_IBUTTON || type == MSG_GPS_LBS_DRIVER
+        } else if ((type == MSG_GPS_LBS_6 && !shortLbs) || type == MSG_IBUTTON || type == MSG_GPS_LBS_DRIVER
                 || variant == Variant.SEEWORLD || (variant == Variant.TRX16I && type == MSG_LOCATION_RFID)) {
             cid = buf.readUnsignedInt();
         } else {
@@ -919,7 +920,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(decodeDate(buf, deviceSession));
             }
 
-            if (hasGps(type)) {
+            if (type == MSG_GPS_LBS_6 && length == 0x13) {
+                getLastLocation(position, decodeDate(buf, deviceSession));
+            } else if (hasGps(type)) {
                 decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
                 getLastLocation(position, null);
