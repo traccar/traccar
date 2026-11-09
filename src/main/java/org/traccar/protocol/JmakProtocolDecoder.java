@@ -169,22 +169,19 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         int eventStatus;
         if (BitUtil.check(mask, 19)) {
             eventStatus = Integer.parseInt(values[index++]);
-            position.set("eventStatus", eventStatus);
+            position.set(Position.KEY_STATUS, eventStatus);
             position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
         } else {
             eventStatus = 0;
         }
 
-        String eventName;
         if (BitUtil.check(mask, 20)) {
-            eventName = values[index++];
-            position.set("eventName", eventName);
-        } else {
-            eventName = null;
-        }
-
-        if (eventId == 126 && (eventStatus == 1 || eventStatus == 8) && eventName != null) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, eventName);
+            long eventData = Long.parseUnsignedLong(values[index++]);
+            if (eventId == 126 && (eventStatus == 1 || eventStatus == 8)) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
+            } else {
+                position.set("eventData", eventData);
+            }
         }
 
         if (BitUtil.check(mask, 21)) {
@@ -212,7 +209,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 27)) {
-            position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
+            position.set(Position.PREFIX_IO, Integer.parseInt(values[index++]));
         }
 
         if (BitUtil.check(mask, 28)) {
@@ -559,22 +556,19 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         int eventStatus;
         if (BitUtil.check(mask, 19)) {
             eventStatus = buf.readUnsignedByte();
-            position.set("eventStatus", eventStatus);
+            position.set(Position.KEY_STATUS, eventStatus);
             position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
         } else {
             eventStatus = 0;
         }
 
-        String eventName;
         if (BitUtil.check(mask, 20)) {
-            eventName = Long.toUnsignedString(buf.readLong());
-            position.set("eventName", eventName);
-        } else {
-            eventName = null;
-        }
-
-        if (eventId == 126 && (eventStatus == 1 || eventStatus == 8) && eventName != null) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, eventName);
+            long eventData = buf.readLong();
+            if (eventId == 126 && (eventStatus == 1 || eventStatus == 8)) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
+            } else {
+                position.set("eventData", eventData);
+            }
         }
 
         if (BitUtil.check(mask, 21)) {
@@ -602,7 +596,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 27)) {
-            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+            position.set(Position.PREFIX_IO, buf.readUnsignedByte());
         }
 
         if (BitUtil.check(mask, 28)) {
@@ -614,7 +608,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         int messageLength = BitUtil.check(mask, 29) ? buf.readUnsignedByte() : 0;
 
-        if (BitUtil.check(mask, 30)) {
+        if (BitUtil.check(mask, 30) && messageLength > 0) {
             position.set("message", ByteBufUtil.hexDump(buf.readSlice(messageLength)));
         }
 
