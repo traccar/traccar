@@ -52,6 +52,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
+    private static final String MODELS_WITHOUT_POSITION_APPEND_MASK = "GL320M|GT500MA|GT501|ATWG7|ATPLUS";
+
     private static final Map<String, String> PROTOCOL_MODELS = Map.ofEntries(
             Map.entry("02", "GL200"),
             Map.entry("04", "GV200"),
@@ -464,18 +466,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (!v[index++].isEmpty()) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index - 1]));
             }
-        } else if (hasPositionAppendMask(model)) {
-            index = decodePositionAppend(position, v, index);
+        } else if (!model.matches(MODELS_WITHOUT_POSITION_APPEND_MASK)) {
+            index = decodePositionAppendMask(position, v, index);
         }
 
         return index;
     }
 
-    private static boolean hasPositionAppendMask(String model) {
-        return !model.matches("GL320M|GT500MA|GT501|ATWG7|ATPLUS");
-    }
-
-    private int decodePositionAppend(Position position, String[] v, int index) {
+    private int decodePositionAppendMask(Position position, String[] v, int index) {
         if (!v[index++].isEmpty()) {
             String value = v[index - 1];
             if (value.contains(".")) {
@@ -1772,8 +1770,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("STT") && locationEnd >= 0 && locationEnd + 4 < index) {
                 if (model.equals("GV55W")) {
                     decodeBattery = false; // event info mask
-                } else if (hasPositionAppendMask(model)) {
-                    decodePositionAppend(position, v, locationEnd + 4);
+                } else if (!model.matches(MODELS_WITHOUT_POSITION_APPEND_MASK)) {
+                    decodePositionAppendMask(position, v, locationEnd + 4);
                     decodeBattery = false;
                 }
             }
