@@ -51,9 +51,11 @@ public class McpServerHolder implements AutoCloseable {
 
         this.apiInvoker = apiInvoker;
 
+        var jsonMapper = new JacksonMcpJsonMapper(objectMapper);
+
         transport = HttpServletStreamableServerTransportProvider.builder()
                 .mcpEndpoint(PATH)
-                .jsonMapper(new JacksonMcpJsonMapper(objectMapper))
+                .jsonMapper(jsonMapper)
                 .contextExtractor(this::extractTransportContext)
                 .build();
 
@@ -67,7 +69,7 @@ public class McpServerHolder implements AutoCloseable {
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
                 .tools(toolRegistry.getTools().stream().map(this::createApiTool).toList())
-                .tools(McpShowMap.tool())
+                .tools(McpShowMap.tool(jsonMapper))
                 .resources(McpShowMap.resource(config))
                 .build();
     }
