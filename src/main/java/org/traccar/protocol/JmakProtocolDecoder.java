@@ -166,18 +166,18 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             eventId = 0;
         }
 
-        int eventStatus;
+        int status;
         if (BitUtil.check(mask, 19)) {
-            eventStatus = Integer.parseInt(values[index++]);
-            position.set(Position.KEY_STATUS, eventStatus);
-            position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
+            status = Integer.parseInt(values[index++]);
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, status));
         } else {
-            eventStatus = 0;
+            status = 0;
         }
 
         if (BitUtil.check(mask, 20)) {
             long eventData = Long.parseUnsignedLong(values[index++]);
-            if (eventId == 126 && (eventStatus == 1 || eventStatus == 8)) {
+            if (eventId == 126 && (status == 1 || status == 8)) {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
             } else {
                 position.set("eventData", eventData);
@@ -553,18 +553,18 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             eventId = 0;
         }
 
-        int eventStatus;
+        int status;
         if (BitUtil.check(mask, 19)) {
-            eventStatus = buf.readUnsignedByte();
-            position.set(Position.KEY_STATUS, eventStatus);
-            position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
+            status = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, status));
         } else {
-            eventStatus = 0;
+            status = 0;
         }
 
         if (BitUtil.check(mask, 20)) {
             long eventData = buf.readLong();
-            if (eventId == 126 && (eventStatus == 1 || eventStatus == 8)) {
+            if (eventId == 126 && (status == 1 || status == 8)) {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
             } else {
                 position.set("eventData", eventData);
