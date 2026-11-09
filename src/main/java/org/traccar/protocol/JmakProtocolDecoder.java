@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -41,14 +42,16 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-        if (sentence.startsWith("{") || sentence.startsWith("^")) {
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(
-                        Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
-            }
+        ByteBuf buf = (ByteBuf) msg;
+        byte type = buf.getByte(buf.readerIndex());
+        if (type == '^') {
+            return decodeBinary(channel, remoteAddress, buf);
+        } else if (type == '{') {
+            sendResponse(channel, remoteAddress);
             return null;
         }
+
+        String sentence = buf.toString(StandardCharsets.US_ASCII);
 
         if (!sentence.startsWith("~") || !sentence.endsWith("$")) {
             return null;
@@ -72,10 +75,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             decodeCan(position, parts[1].split(";"));
         }
 
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(
-                    Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
-        }
+        sendResponse(channel, remoteAddress);
 
         return position;
     }
@@ -166,25 +166,22 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             eventId = 0;
         }
 
-        int eventStatus;
+        int status;
         if (BitUtil.check(mask, 19)) {
-            eventStatus = Integer.parseInt(values[index++]);
-            position.set("eventStatus", eventStatus);
-            position.set(Position.KEY_ALARM, decodeAlarm(eventId, eventStatus));
+            status = Integer.parseInt(values[index++]);
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, status));
         } else {
-            eventStatus = 0;
+            status = 0;
         }
 
-        String eventName;
         if (BitUtil.check(mask, 20)) {
-            eventName = values[index++];
-            position.set("eventName", eventName);
-        } else {
-            eventName = null;
-        }
-
-        if (eventId == 126 && (eventStatus == 1 || eventStatus == 8) && eventName != null) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, eventName);
+            long eventData = Long.parseUnsignedLong(values[index++]);
+            if (eventId == 126 && (status == 1 || status == 8)) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
+            } else {
+                position.set("eventData", eventData);
+            }
         }
 
         if (BitUtil.check(mask, 21)) {
@@ -212,7 +209,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 27)) {
-            position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
+            position.set(Position.PREFIX_IO, Integer.parseInt(values[index++]));
         }
 
         if (BitUtil.check(mask, 28)) {
@@ -310,12 +307,16 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             position.set("autonomy", Double.parseDouble(values[index++]));
         }
 
+        String consumptionUnit = null;
         if (BitUtil.check(mask, 11)) {
-            index += 1;
+            consumptionUnit = values[index++];
         }
 
         if (BitUtil.check(mask, 12)) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index++]));
+            boolean distance = "K".equals(consumptionUnit);
+            position.set(
+                    distance ? "instantFuelConsumption" : Position.KEY_FUEL_CONSUMPTION,
+                    Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 13)) {
@@ -323,7 +324,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 14)) {
-            position.set("oilTemperature", Double.parseDouble(values[index++]));
+            position.set(Position.KEY_COOLANT_TEMP, Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 15)) {
@@ -443,6 +444,370 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
         String build = buf.readCharSequence(4, StandardCharsets.US_ASCII).toString().trim();
         return build.isEmpty() ? version : version + "-" + build;
+    }
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress) {
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
+        }
+    }
+
+    private Object decodeBinary(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        buf.readUnsignedByte(); // header
+        long mask = buf.readLong();
+
+        if (BitUtil.check(mask, 0)) {
+            buf.skipBytes(11); // serial number
+        }
+
+        DeviceSession session = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readLong()));
+        if (session == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(session.getDeviceId());
+
+        if (BitUtil.check(mask, 2)) {
+            position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+        }
+
+        if (BitUtil.check(mask, 3)) {
+            position.set("nickname", buf.readCharSequence(10, StandardCharsets.US_ASCII).toString().trim());
+        }
+
+        if (BitUtil.check(mask, 4)) {
+            position.setTime(new Date(buf.readLong()));
+        }
+
+        if (BitUtil.check(mask, 5)) {
+            position.setLatitude(buf.readUnsignedInt() / 100000.0);
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            position.setLongitude(buf.readUnsignedInt() / 100000.0);
+        }
+
+        if (BitUtil.check(mask, 7)) {
+            position.setAltitude(buf.readUnsignedMedium() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            int flags = buf.readUnsignedByte();
+            if (BitUtil.check(flags, 0)) {
+                position.setLatitude(-position.getLatitude());
+            }
+            if (BitUtil.check(flags, 1)) {
+                position.setLongitude(-position.getLongitude());
+            }
+            if (BitUtil.check(flags, 2)) {
+                position.setAltitude(-position.getAltitude());
+            }
+        }
+
+        if (BitUtil.check(mask, 9)) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedMedium() / 100.0));
+        }
+
+        if (BitUtil.check(mask, 10)) {
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 11)) {
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 12)) {
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 13)) {
+            position.setCourse(buf.readUnsignedMedium() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 14)) {
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            long hours = (long) buf.readUnsignedByte() << 32 | buf.readUnsignedInt();
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(hours / 100.0));
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            long odometer = (long) buf.readUnsignedByte() << 32 | buf.readUnsignedInt();
+            position.set(Position.KEY_ODOMETER, odometer * 10);
+        }
+
+        int eventId;
+        if (BitUtil.check(mask, 18)) {
+            eventId = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, eventId);
+        } else {
+            eventId = 0;
+        }
+
+        int status;
+        if (BitUtil.check(mask, 19)) {
+            status = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, status));
+        } else {
+            status = 0;
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            long eventData = buf.readLong();
+            if (eventId == 126 && (status == 1 || status == 8)) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
+            } else {
+                position.set("eventData", eventData);
+            }
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            position.set(Position.KEY_OPERATOR, buf.readCharSequence(4, StandardCharsets.US_ASCII).toString().trim());
+        }
+
+        if (BitUtil.check(mask, 24)) {
+            buf.readUnsignedByte(); // cellular technology
+        }
+
+        if (BitUtil.check(mask, 25)) {
+            position.setDeviceTime(new Date(buf.readLong()));
+        }
+
+        if (BitUtil.check(mask, 26)) {
+            position.setValid(buf.readUnsignedByte() >= 1);
+        }
+
+        if (BitUtil.check(mask, 27)) {
+            position.set(Position.PREFIX_IO, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 28)) {
+            long tag = buf.readLong();
+            if (tag != 0) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(tag));
+            }
+        }
+
+        int messageLength = BitUtil.check(mask, 29) ? buf.readUnsignedByte() : 0;
+
+        if (BitUtil.check(mask, 30) && messageLength > 0) {
+            position.set("message", ByteBufUtil.hexDump(buf.readSlice(messageLength)));
+        }
+
+        if (BitUtil.check(mask, 31)) {
+            buf.readLong(); // custom event id
+        }
+
+        if (BitUtil.check(mask, 32)) {
+            buf.readLong(); // custom event start
+        }
+
+        if (BitUtil.check(mask, 33)) {
+            buf.readLong(); // custom event end
+        }
+
+        if (BitUtil.check(mask, 34)) {
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 35)) {
+            position.set(Position.KEY_VERSION_FW, decodeVersion(buf));
+        }
+
+        if (BitUtil.check(mask, 36)) {
+            position.set("model", buf.readCharSequence(8, StandardCharsets.US_ASCII).toString().trim());
+        }
+
+        if (BitUtil.check(mask, 37)) {
+            position.set("tripId", buf.readUnsignedInt());
+        }
+
+        if (buf.readableBytes() > 1) {
+            decodeCan(position, buf);
+        }
+
+        sendResponse(channel, remoteAddress);
+
+        return position;
+    }
+
+    private void decodeCan(Position position, ByteBuf buf) {
+        long mask = buf.readLong();
+
+        if (BitUtil.check(mask, 0)) {
+            long odometer = (long) buf.readUnsignedByte() << 32 | buf.readUnsignedInt();
+            position.set(Position.KEY_OBD_ODOMETER, odometer * 10.0);
+        }
+
+        if (BitUtil.check(mask, 1)) {
+            long hours = (long) buf.readUnsignedByte() << 32 | buf.readUnsignedInt();
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(hours / 100.0));
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            position.set(Position.KEY_OBD_SPEED, buf.readUnsignedMedium() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 3)) {
+            position.set(Position.KEY_RPM, buf.readUnsignedMedium() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 4)) {
+            position.set("canStatus", buf.readUnsignedShort());
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+        }
+
+        int fuelUnit = 0;
+        if (BitUtil.check(mask, 7)) {
+            fuelUnit = buf.readUnsignedByte();
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            boolean liters = fuelUnit == 0 || fuelUnit == 'L';
+            position.set(liters ? Position.KEY_FUEL : Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 10)) {
+            position.set("autonomy", buf.readUnsignedMedium() / 100.0);
+        }
+
+        int consumptionUnit = 0;
+        if (BitUtil.check(mask, 11)) {
+            consumptionUnit = buf.readUnsignedByte();
+        }
+
+        if (BitUtil.check(mask, 12)) {
+            boolean distance = consumptionUnit == 'K';
+            position.set(
+                    distance ? "instantFuelConsumption" : Position.KEY_FUEL_CONSUMPTION,
+                    buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 13)) {
+            long fuelUsed = (long) buf.readUnsignedByte() << 32 | buf.readUnsignedInt();
+            position.set(Position.KEY_FUEL_USED, fuelUsed / 100.0);
+        }
+
+        if (BitUtil.check(mask, 14)) {
+            position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set("tripFuelUsed", buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            position.set("engineTorque", buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            position.set("fuelEconomy", buf.readUnsignedShort() / 100.0);
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            position.set("oilPressure", buf.readUnsignedByte() * 4);
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            position.set("brakePressure1", buf.readUnsignedByte() * 4);
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            position.set("brakePressure2", buf.readUnsignedByte() * 4);
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            position.set("pto", buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            position.set("gear", buf.readUnsignedByte() - 125);
+        }
+
+        if (BitUtil.check(mask, 24)) {
+            position.set("engineBrake", buf.readUnsignedByte() - 125);
+        }
+
+        if (BitUtil.check(mask, 25)) {
+            position.set("transmissionOilTemp", buf.readUnsignedShort() - 273);
+        }
+
+        if (BitUtil.check(mask, 26)) {
+            position.set("transmissionOilPressure", buf.readUnsignedByte() * 16);
+        }
+
+        if (BitUtil.check(mask, 27)) {
+            position.set("boostPressure", buf.readUnsignedByte() * 2);
+        }
+
+        if (BitUtil.check(mask, 28)) {
+            position.set("intakeTemp", buf.readUnsignedByte() - 40);
+        }
+
+        if (BitUtil.check(mask, 29)) {
+            position.set("fuelTemp", buf.readUnsignedByte() - 40);
+        }
+
+        if (BitUtil.check(mask, 30)) {
+            position.set("adBlueLevel", buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 31)) {
+            position.set("adBlueTemp", buf.readUnsignedByte() - 40);
+        }
+
+        if (BitUtil.check(mask, 32)) {
+            position.set("scrPressure", buf.readUnsignedByte() * 8);
+        }
+
+        if (BitUtil.check(mask, 33)) {
+            position.set("dpfPressure", buf.readUnsignedShort() / 10.0);
+        }
+
+        if (BitUtil.check(mask, 34)) {
+            position.set("dpfRegeneration", buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 35)) {
+            position.set("ambientTemperature", buf.readUnsignedShort() - 273);
+        }
+
+        if (BitUtil.check(mask, 36)) {
+            position.set("batteryVoltage", buf.readUnsignedShort() / 20.0);
+        }
+
+        if (BitUtil.check(mask, 37)) {
+            position.set("wiper", buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(mask, 38)) {
+            position.set("instantFuelConsumption", buf.readUnsignedShort() / 100.0);
+        }
     }
 
 }
