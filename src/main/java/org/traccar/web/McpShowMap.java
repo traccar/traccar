@@ -92,7 +92,7 @@ public final class McpShowMap {
                 .build();
         return new McpServerFeatures.AsyncResourceSpecification(resource, (exchange, request) ->
                 Mono.fromCallable(() -> McpSchema.TextResourceContents.builder(RESOURCE_URI,
-                                        Files.readString(Path.of(config.getString(Keys.WEB_MCP_MAP_PATH))))
+                                        Files.readString(Path.of(config.getString(Keys.WEB_PATH), "mcp.html")))
                         .mimeType("text/html;profile=mcp-app")
                         .meta(Map.of("ui", Map.of("csp", csp())))
                         .build())

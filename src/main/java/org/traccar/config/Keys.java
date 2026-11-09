@@ -2251,14 +2251,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * MCP map resource page path.
-     */
-    public static final ConfigKey<String> WEB_MCP_MAP_PATH = new StringConfigKey(
-            "web.mcp.mapPath",
-            List.of(KeyType.CONFIG),
-            "./traccar-web/simple/mcp.html");
-
-    /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new BooleanConfigKey(
