@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.TimeZone;
@@ -266,6 +267,124 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
         assertEquals(departure.getFixTime(), state.getEvents().get(0).getEventTime());
+    }
+
+    private static Position positionAt(long time, double latitude, double longitude) {
+        Position position = new Position();
+        position.setTime(new Date(time));
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+        position.setDeviceId(1);
+        return position;
+    }
+
+    @Test
+    public void testStopBacktrackIgnoresSimultaneousRecords() throws ParseException {
+        double latitude = 0.0;
+        double stop = DistanceCalculator.getLongitudeDelta(1000, latitude);
+        double jitter = DistanceCalculator.getLongitudeDelta(1003, latitude);
+
+        Position arrival = position("2017-01-01 00:01:00", latitude, stop);
+        Position periodic = position("2017-01-01 00:36:00", latitude, stop);
+        Deque<CompactPosition> positions = new ArrayDeque<>();
+        positions.add(new CompactPosition(arrival));
+        positions.add(new CompactPosition(periodic));
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setMotionStreak(true);
+        state.setEventPosition(position("2016-12-31 23:50:00", latitude, 0.0));
+
+        Position current = positionAt(periodic.getFixTime().getTime() + 10, latitude, jitter);
+        NewMotionProcessor.updateState(state, current, 200, 180000, Long.MAX_VALUE, false);
+
+        assertFalse(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
+        assertEquals(arrival.getFixTime(), state.getEvents().get(0).getEventTime());
+    }
+
+    @Test
+    public void testStopBacktrackWithSubSecondReporting() throws ParseException {
+        double latitude = 0.0;
+        long start = position("2017-01-01 00:00:00", latitude, 0.0).getFixTime().getTime();
+        long arrival = start + 10000;
+        long now = arrival + 180000;
+        double stop = DistanceCalculator.getLongitudeDelta(1000, latitude);
+
+        Deque<CompactPosition> positions = new ArrayDeque<>();
+        for (long time = start; time < now; time += 500) {
+            double meters = time < arrival ? 15 * (arrival - time) / 1000.0 : 0;
+            positions.add(new CompactPosition(positionAt(time, latitude,
+                    stop - DistanceCalculator.getLongitudeDelta(meters, latitude))));
+        }
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setMotionStreak(true);
+        state.setEventPosition(position("2016-12-31 23:50:00", latitude, 0.0));
+
+        NewMotionProcessor.updateState(state, positionAt(now, latitude, stop), 200, 180000, Long.MAX_VALUE, false);
+
+        assertFalse(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
+        assertTrue(Math.abs(state.getEvents().get(0).getEventTime().getTime() - arrival) <= 1000);
+    }
+
+    @Test
+    public void testStartBacktrackWithSubSecondReporting() throws ParseException {
+        double latitude = 0.0;
+        Position stop = position("2017-01-01 00:00:00", latitude, 0.0);
+        long departure = stop.getFixTime().getTime() + 60000;
+        long now = departure + 20000;
+
+        Deque<CompactPosition> positions = new ArrayDeque<>();
+        for (long time = stop.getFixTime().getTime() + 500; time < now; time += 500) {
+            double meters = time > departure ? 15 * (time - departure) / 1000.0 : 0;
+            positions.add(new CompactPosition(positionAt(time, latitude,
+                    DistanceCalculator.getLongitudeDelta(meters, latitude))));
+        }
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setEventPosition(stop);
+
+        NewMotionProcessor.updateState(state, positionAt(now, latitude,
+                DistanceCalculator.getLongitudeDelta(300, latitude)), 200, 180000, Long.MAX_VALUE, false);
+
+        assertTrue(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
+        assertTrue(Math.abs(state.getEvents().get(0).getEventTime().getTime() - departure) <= 1000);
+    }
+
+    @Test
+    public void testStartBacktrackDoesNotBridgeGapAfterSubSecondLeg() throws ParseException {
+        double latitude = 0.0;
+        Position stop = position("2017-01-01 00:00:00", latitude, 0.0);
+        Position periodic = position("2017-01-01 01:00:00", latitude, 0.0);
+        Position beforeThreshold = position("2017-01-01 02:00:00", latitude,
+                DistanceCalculator.getLongitudeDelta(199, latitude));
+        Position current = positionAt(beforeThreshold.getFixTime().getTime() + 10, latitude,
+                DistanceCalculator.getLongitudeDelta(201, latitude));
+
+        Deque<CompactPosition> positions = new ArrayDeque<>();
+        positions.add(new CompactPosition(periodic));
+        positions.add(new CompactPosition(beforeThreshold));
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setEventPosition(stop);
+
+        NewMotionProcessor.updateState(state, current, 200, 180000, Long.MAX_VALUE, false);
+
+        assertTrue(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        Event event = state.getEvents().get(0);
+        assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
+        assertFalse(event.getEventTime().before(beforeThreshold.getFixTime()));
+        assertFalse(event.getEventTime().after(current.getFixTime()));
     }
 
     @Test

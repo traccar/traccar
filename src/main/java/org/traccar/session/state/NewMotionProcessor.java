@@ -26,6 +26,8 @@ import java.util.List;
 
 public final class NewMotionProcessor {
 
+    private static final long MIN_LEG_DURATION = 1000;
+
     private NewMotionProcessor() {}
 
     public static void updateState(
@@ -100,10 +102,14 @@ public final class NewMotionProcessor {
                 break;
             }
 
-            double legDistance = DistanceCalculator.distance(candidate, next);
             long legDuration = next.fixTime().getTime() - candidate.fixTime().getTime();
-            boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
-            boolean firstStartLeg = moving && next == current;
+            if (legDuration < MIN_LEG_DURATION) {
+                continue;
+            }
+
+            double legDistance = DistanceCalculator.distance(candidate, next);
+            boolean legMoving = legDistance / legDuration > minAverageSpeed;
+            boolean firstStartLeg = moving && candidate == positions.peekLast();
             if (!firstStartLeg && legMoving != moving) {
                 break;
             }
