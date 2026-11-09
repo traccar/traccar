@@ -28,6 +28,12 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -47,8 +53,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         if (type == '^') {
             return decodeBinary(channel, remoteAddress, buf);
         } else if (type == '{') {
-            sendResponse(channel, remoteAddress);
-            return null;
+            return decodeJson(channel, remoteAddress, buf);
         }
 
         String sentence = buf.toString(StandardCharsets.US_ASCII);
@@ -807,6 +812,140 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(mask, 38)) {
             position.set("instantFuelConsumption", buf.readUnsignedShort() / 100.0);
+        }
+    }
+
+    private Object decodeJson(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        JsonObject root = Json.createReader(new StringReader(buf.toString(StandardCharsets.UTF_8))).readObject();
+
+        DeviceSession session = getDeviceSession(channel, remoteAddress, root.getJsonNumber("imei").toString());
+        if (session == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(session.getDeviceId());
+
+        position.set(Position.KEY_INDEX, root.getJsonNumber("cnt").longValue());
+        position.set("nickname", root.getString("name", null));
+
+        position.setValid(root.getInt("fix") >= 1);
+        position.setTime(new Date(root.getJsonNumber("ts").longValue()));
+        position.setDeviceTime(new Date(root.getJsonNumber("ts_n").longValue()));
+
+        JsonArray coordinates = root.getJsonArray("gps");
+        position.setLatitude(coordinates.getJsonNumber(0).doubleValue());
+        position.setLongitude(coordinates.getJsonNumber(1).doubleValue());
+        position.setAltitude(root.getJsonNumber("alt").doubleValue());
+        position.setSpeed(UnitsConverter.knotsFromKph(root.getJsonNumber("speed").doubleValue()));
+        position.setCourse(root.getJsonNumber("azi").doubleValue());
+
+        position.set(Position.KEY_SATELLITES, root.getInt("nsat"));
+        position.set(Position.KEY_RSSI, root.getInt("rssi"));
+        position.set(Position.KEY_HDOP, root.getJsonNumber("hdop").doubleValue());
+        position.set(Position.KEY_IGNITION, root.getInt("ive") == 1);
+        position.set(Position.KEY_ARCHIVE, root.getInt("bckup") == 1);
+        position.set(Position.KEY_HOURS, root.getJsonNumber("hourmt").doubleValue() * 3600000);
+        position.set(Position.KEY_ODOMETER, root.getJsonNumber("odomt").doubleValue() * 1000);
+        position.set(Position.KEY_POWER, root.getInt("vin") / 1000.0);
+        position.set(Position.KEY_BATTERY, root.getInt("bat") / 1000.0);
+        position.set(Position.KEY_OPERATOR, root.getString("ope"));
+        position.set(Position.PREFIX_IO, root.getInt("ios"));
+
+        long tag = root.getJsonNumber("tag").longValue();
+        if (tag != 0) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(tag));
+        }
+
+        JsonObject event = root.getJsonObject("evt");
+        if (event.containsKey("id")) {
+            int eventId = event.getInt("id");
+            int status = event.getInt("st");
+            position.set(Position.KEY_EVENT, eventId);
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_ALARM, decodeAlarm(eventId, status));
+            if (event.containsKey("name")) {
+                long eventData = Long.parseUnsignedLong(event.getString("name"));
+                if (eventId == 126 && (status == 1 || status == 8)) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(eventData));
+                } else {
+                    position.set("eventData", eventData);
+                }
+            }
+        }
+
+        if (root.containsKey("anin")) {
+            position.set(Position.PREFIX_ADC + 1, root.getJsonNumber("anin").doubleValue());
+        }
+
+        position.set("message", root.getString("trp", null));
+
+        position.set(Position.KEY_VERSION_FW, decodeVersion(
+                Unpooled.wrappedBuffer(DataConverter.parseHex(root.getString("ver")))));
+        position.set("model", root.getString("mod"));
+        position.set("tripId", root.getJsonNumber("trp_id").longValue());
+
+        if (root.containsKey("can")) {
+            decodeCan(position, root.getJsonObject("can"));
+        }
+
+        sendResponse(channel, remoteAddress);
+
+        return position;
+    }
+
+    private void decodeCan(Position position, JsonObject can) {
+        for (String key : can.keySet()) {
+            JsonValue json = can.get(key);
+            String value = json instanceof JsonString string ? string.getString() : json.toString();
+            char unit = 0;
+            if (!Character.isDigit(value.charAt(0)) && value.charAt(0) != '-') {
+                unit = value.charAt(0);
+                value = value.substring(1);
+            }
+            double number = Double.parseDouble(value);
+            switch (Integer.parseInt(key)) {
+                case 1 -> position.set(Position.KEY_OBD_SPEED, number);
+                case 2 -> position.set(Position.KEY_RPM, number);
+                case 3 -> position.set(Position.KEY_OBD_ODOMETER, number * 1000);
+                case 4 -> position.set(
+                        unit == 0 || unit == 'L' ? Position.KEY_FUEL : Position.KEY_FUEL_LEVEL, number);
+                case 5 -> position.set(Position.KEY_COOLANT_TEMP, number);
+                case 6 -> position.set(Position.KEY_THROTTLE, number);
+                case 7 -> position.set("canStatus", (int) number);
+                case 9 -> position.set("autonomy", number);
+                case 10 -> position.set(
+                        unit == 'K' ? "instantFuelConsumption" : Position.KEY_FUEL_CONSUMPTION, number);
+                case 11 -> position.set(Position.KEY_HOURS, number * 3600000);
+                case 14 -> position.set(Position.KEY_FUEL_USED, number);
+                case 16 -> position.set("tripFuelUsed", number);
+                case 17 -> position.set("engineTorque", number);
+                case 18 -> position.set(Position.KEY_ENGINE_LOAD, number);
+                case 19 -> position.set("fuelEconomy", number);
+                case 20 -> position.set("oilPressure", number);
+                case 21 -> position.set("brakePressure1", number);
+                case 22 -> position.set("brakePressure2", number);
+                case 23 -> position.set("pto", (int) number);
+                case 24 -> position.set("gear", (int) number);
+                case 25 -> position.set("engineBrake", number);
+                case 26 -> position.set("transmissionOilTemp", number);
+                case 27 -> position.set("transmissionOilPressure", number);
+                case 28 -> position.set("boostPressure", number);
+                case 29 -> position.set("intakeTemp", number);
+                case 30 -> position.set("fuelTemp", number);
+                case 31 -> position.set("adBlueLevel", number);
+                case 32 -> position.set("adBlueTemp", number);
+                case 33 -> position.set("scrPressure", number);
+                case 34 -> position.set("dpfPressure", number);
+                case 35 -> position.set("dpfRegeneration", (int) number);
+                case 36 -> position.set("ambientTemperature", number);
+                case 37 -> position.set("batteryVoltage", number);
+                case 38 -> position.set("wiper", (int) number);
+                case 40 -> position.set("instantFuelConsumption", number);
+                default -> {
+                }
+            }
         }
     }
 
