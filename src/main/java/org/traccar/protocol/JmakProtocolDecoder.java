@@ -853,11 +853,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_OPERATOR, root.getString("ope"));
         position.set(Position.PREFIX_IO, root.getInt("ios"));
 
-        long tag = root.getJsonNumber("tag").longValue();
-        if (tag != 0) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(tag));
-        }
-
         JsonObject event = root.getJsonObject("evt");
         if (event.containsKey("id")) {
             int eventId = event.getInt("id");
@@ -872,6 +867,13 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 } else {
                     position.set("eventData", eventData);
                 }
+            }
+        }
+
+        if (root.containsKey("tag")) {
+            long tag = root.getJsonNumber("tag").longValue();
+            if (tag != 0) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, Long.toUnsignedString(tag));
             }
         }
 
