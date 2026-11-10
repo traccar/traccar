@@ -54,6 +54,10 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             return decodeBinary(channel, remoteAddress, buf);
         } else if (type == '{') {
             return decodeJson(channel, remoteAddress, buf);
+        } else if (type == '*') {
+            return decodeSummary(channel, remoteAddress, buf);
+        } else if (type == '$') {
+            return decodeResult(channel, remoteAddress, buf);
         }
 
         String sentence = buf.toString(StandardCharsets.US_ASCII);
@@ -949,6 +953,135 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
+    }
+
+    private Object decodeSummary(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        String sentence = buf.toString(StandardCharsets.US_ASCII);
+        String[] values = sentence.substring(1, sentence.length() - 1).split(";");
+
+        DeviceSession session = getDeviceSession(channel, remoteAddress, values[1]);
+        if (session == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(session.getDeviceId());
+        position.setValid(true);
+
+        int index = 0;
+        long mask = Long.parseLong(values[index++], 16);
+
+        if (BitUtil.check(mask, 0)) {
+            index += 1; // imei
+        }
+
+        if (BitUtil.check(mask, 1)) {
+            index += 1; // serial number
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            position.set("tripId", Long.parseLong(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 3)) {
+            position.set(Position.KEY_ARCHIVE, values[index++].equals("1"));
+        }
+
+        if (BitUtil.check(mask, 4)) {
+            String driver = values[index++];
+            if (!driver.equals("0")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, driver);
+            }
+        }
+
+        if (BitUtil.check(mask, 5)) {
+            index += 1; // start time
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            position.setTime(new Date(Long.parseLong(values[index++])));
+        }
+
+        if (BitUtil.check(mask, 7)) {
+            index += 1; // start latitude
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            position.setLatitude(Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 9)) {
+            index += 1; // start longitude
+        }
+
+        if (BitUtil.check(mask, 10)) {
+            position.setLongitude(Double.parseDouble(values[index++]));
+        }
+
+        if (BitUtil.check(mask, 11)) {
+            index += 1; // coordinate signs
+        }
+
+        double odometerStart = 0;
+        if (BitUtil.check(mask, 12)) {
+            odometerStart = Double.parseDouble(values[index++]);
+        }
+
+        if (BitUtil.check(mask, 13)) {
+            double odometer = Double.parseDouble(values[index++]);
+            position.set(Position.KEY_ODOMETER, odometer * 1000);
+            position.set(Position.KEY_ODOMETER_TRIP, (odometer - odometerStart) * 1000);
+        }
+
+        if (BitUtil.check(mask, 14)) {
+            index += 1; // start hours
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]) * 3600000);
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            index += 1; // start fuel used
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            index += 1; // end fuel used
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            index += 1; // custom event count
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            index += 1; // custom events
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            position.set("tripFuelUsed", Double.parseDouble(values[index++]));
+        }
+
+        sendResponse(channel, remoteAddress);
+
+        return position;
+    }
+
+    private Object decodeResult(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        DeviceSession session = getDeviceSession(channel, remoteAddress);
+        if (session == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(session.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
+
+        return position;
     }
 
 }

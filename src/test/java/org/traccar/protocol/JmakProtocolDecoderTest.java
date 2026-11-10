@@ -12,6 +12,14 @@ public class JmakProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new JmakProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "*000000000003FFFF;868018070913275;202605-00000-0000701;99601;0;0;1786449067726;1786451352195;-19.92171;-19.88237;-44.02885;-43.97903;1111;4389.30;4400.96;581.05;581.68;1;101:0;$"),
+                position().attribute("tripId", 99601L));
+
+        verifyDecode(decoder, buffer(
+                "$860693086800738;err;656;#"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_RESULT, "$860693086800738;err;656;#"));
+
+        verifyDecode(decoder, buffer(
                 "{\"cnt\":69,\"s_num\":\"777777-77777-7777555\",\"ts\":1793126468426,\"gps\":[-19.88246,-43.97855],\"alt\":839.95,\"speed\":0.00,\"nsat\":34,\"hdop\":0.45,\"azi\":274.95,\"ive\":0,\"rssi\":26,\"evt\":{\"id\":113,\"st\":0,\"name\":\"0\"},\"bckup\":0,\"hourmt\":10.85,\"odomt\":0.59,\"tup\":1,\"fix\":2,\"ope\":\"TIMB\",\"tec\":4,\"bat\":0,\"vin\":11834,\"ios\":0,\"name\":\"\",\"imei\":860693086800738,\"tag\":0,\"ver\":\"040C000000643939\",\"mod\":\"J-R07\",\"trp_id\":0,\"ts_n\":1793126468466}"),
                 position().attribute(Position.KEY_POWER, 11.834));
 
