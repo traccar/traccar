@@ -1,10 +1,56 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
 import org.junit.jupiter.api.Test;
+import org.traccar.NetworkMessage;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class EelinkProtocolDecoderTest extends ProtocolTest {
+
+    @Test
+    public void testItr120LoginResponse() throws Exception {
+        var decoder = inject(new EelinkProtocolDecoder(null));
+        var channel = channel();
+        var login = binary("282801000a00010869137082327123");
+        decoder.decode(channel, null, login);
+        NetworkMessage response = channel.readOutbound();
+        ByteBuf buf = (ByteBuf) response.getMessage();
+        try {
+            assertEquals(0x2828, buf.readUnsignedShort());
+            assertEquals(1, buf.readUnsignedByte());
+            assertEquals(9, buf.readUnsignedShort());
+            assertEquals(1, buf.readUnsignedShort());
+            assertEquals(Boolean.TRUE, channel.attr(EelinkProtocolEncoder.ITR120).get());
+        } finally {
+            buf.release();
+        }
+    }
+
+    @Test
+    public void testItr120() throws Exception {
+        var decoder = inject(new EelinkProtocolDecoder(null));
+        verifyDecode(decoder, binary("282801000a00010869137082327123"));
+        verifyDecode(decoder, binary("282803000400010007"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, true));
+        verifyDecode(decoder, binary(
+                "282815003200406af517fb03fd47cdb2fab8958c03d60000007b0d02d4000527390000515721"
+                        + "02066b000000240000ec67104504aa0000"),
+                position(Checks.ATTRIBUTES)
+                        .attribute(Position.KEY_IGNITION, false)
+                        .attribute(Position.KEY_ODOMETER, 36L)
+                        .attribute(Position.KEY_HOURS, 60519000L));
+        verifyDecode(decoder, binary(
+                "282812004700416af517fb03fd47cdb2fab8958c03d60000007b0d02d4000527390000515721"
+                        + "066b104504aa000000000024082e082d000000000000000000000000000000000000ec670000"),
+                position(Checks.ATTRIBUTES)
+                        .attribute(Position.KEY_IGNITION, false)
+                        .attribute(Position.KEY_HOURS, 60519000L));
+        verifyDecode(decoder, binary("28283b000900026af517fb000003"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, false));
+    }
 
     @Test
     public void testDecode() throws Exception {

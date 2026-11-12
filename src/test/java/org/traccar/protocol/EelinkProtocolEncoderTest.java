@@ -21,6 +21,17 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testEncodeItr120() throws Exception {
+        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
+        channel.attr(EelinkProtocolEncoder.ITR120).set(true);
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_ENGINE_STOP);
+        verifyEncode(channel, command,
+                binary("282880000f0000010000000052454c41592c3123"));
+    }
+
+    @Test
     public void testEncodeUdp() throws Exception {
 
         var channel = channel(inject(new EelinkProtocolEncoder(null, true)));
