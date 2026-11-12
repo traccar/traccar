@@ -518,7 +518,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> EVENT_STATUS_ENABLE = new BooleanConfigKey(
             "event.status.enable",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             false);
 
     /**
@@ -689,6 +689,15 @@ public final class Keys {
             "database.positionBatchSize",
             List.of(KeyType.CONFIG),
             100);
+
+    /**
+     * Delay processing updates to device status and latest position by this many milliseconds, merging updates
+     * per device. Zero disables buffering. Pending device state can be lost on a crash.
+     */
+    public static final ConfigKey<Long> DATABASE_DEVICE_UPDATE_INTERVAL = new LongConfigKey(
+            "database.deviceUpdateInterval",
+            List.of(KeyType.CONFIG),
+            0L);
 
     /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
@@ -1802,7 +1811,16 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Throttling interval if the limit is exceeded. The value is in seconds.
+     * Throttle positions if the daily stored position limit is reached across all devices on this server.
+     * Uses filter.dailyLimitInterval for the throttling interval for each device.
+     * A zero or negative value disables the limit. The count resets daily and on server restart.
+     */
+    public static final ConfigKey<Integer> FILTER_GLOBAL_DAILY_LIMIT = new IntegerConfigKey(
+            "filter.globalDailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Throttling interval if the device or global daily limit is exceeded. The value is in seconds.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
             "filter.dailyLimitInterval",
@@ -1868,6 +1886,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Replace coordinates of invalid (valid field is set to false) positions with the last known coordinates.
+     * Requires 'coordinates.filter' to be enabled. Disabled by default.
+     */
+    public static final ConfigKey<Boolean> COORDINATES_FILTER_INVALID = new BooleanConfigKey(
+            "coordinates.filterInvalid",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Distance in meters. Distances below this value get handled as explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MIN_ERROR = new IntegerConfigKey(
@@ -1924,6 +1951,22 @@ public final class Keys {
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LAST_ATTRIBUTES = new BooleanConfigKey(
             "processing.computedAttributes.lastAttributes",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Maximum number of parsed computed attribute expressions to cache. Zero disables caching.
+     */
+    public static final ConfigKey<Integer> PROCESSING_COMPUTED_ATTRIBUTES_CACHE_SIZE = new IntegerConfigKey(
+            "processing.computedAttributes.cacheSize",
+            List.of(KeyType.CONFIG),
+            128);
+
+    /**
+     * Cache computed attribute expressions shorter than this number of characters.
+     */
+    public static final ConfigKey<Integer> PROCESSING_COMPUTED_ATTRIBUTES_CACHE_THRESHOLD = new IntegerConfigKey(
+            "processing.computedAttributes.cacheThreshold",
+            List.of(KeyType.CONFIG),
+            1024);
 
     /**
      * Enable local variables declaration.

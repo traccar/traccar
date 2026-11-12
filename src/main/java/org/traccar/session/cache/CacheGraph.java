@@ -15,7 +15,7 @@
  */
 package org.traccar.session.cache;
 
-import org.traccar.helper.ConcurrentWeakValueMap;
+import com.google.common.collect.MapMaker;
 import org.traccar.model.BaseModel;
 
 import java.util.HashSet;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class CacheGraph {
 
     private final Map<CacheKey, CacheNode> roots = new ConcurrentHashMap<>();
-    private final ConcurrentWeakValueMap<CacheKey, CacheNode> nodes = new ConcurrentWeakValueMap<>();
+    private final Map<CacheKey, CacheNode> nodes = new MapMaker().weakValues().makeMap();
 
     void addObject(BaseModel value) {
         CacheKey key = new CacheKey(value);

@@ -18,6 +18,10 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new WatchProtocolDecoder(null));
 
         verifyDecode(decoder, buffer(
+                "[SG*9139008196*0009*LK,0,92,0]"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_BATTERY_LEVEL, 92));
+
+        verifyDecode(decoder, buffer(
                 "[3G*6907919734*003e*AL_LTE,170525,214118,V,0,N,0,E,0,0,0,0,0,22,0,0,00010000,0,0,0]"),
                 position().attribute(Position.KEY_ALARM, Position.ALARM_SOS));
 
@@ -163,7 +167,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, buffer(
                 "[3G*4700186508*000B*LK,0,10,100]"),
-                position(Checks.ATTRIBUTES));
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_BATTERY_LEVEL, 100));
 
         verifyDecode(decoder, buffer(
                 "[SG*8800000015*0087*UD,220414,134652,A,22.571707,N,113.8613968,E,0.1,0.0,100,7,60,90,1000,50,0000,4,1,460,0,9360,4082,131,9360,4092,148,9360,4091,143,9360,4153,141]"),

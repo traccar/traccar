@@ -18,6 +18,13 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
                 "78780d0103593390754169634d0d0a"));
 
         verifyDecode(decoder, binary(
+                "7878041a2611071034381c7f2c32dad0491c599ba9778c52b43ae2b7116b52b43ae2b711685203025a0200007a27000080bb4600007a270000f04e5000007a270000bc3b50000d0a"),
+                position(Checks.NONE).network(network()
+                        .cell(cell().mcc(602).mnc(2).lac(31271).cid(32955))
+                        .cell(cell().mcc(602).mnc(2).lac(31271).cid(61518))
+                        .cell(cell().mcc(602).mnc(2).lac(31271).cid(48187))));
+
+        verifyDecode(decoder, binary(
                 "787803181604130318491475905bd30e25001e10bbf7635d14759006e626560401cc00000028660090df425f000028660090df576c00002866009487566700002866009ca15667000d0a"),
                 position(Checks.NONE));
 

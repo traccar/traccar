@@ -15,6 +15,7 @@
  */
 package org.traccar.session.state;
 
+import org.traccar.model.CompactPosition;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -44,13 +45,13 @@ public class NewMotionState {
         this.motionStreak = motionStreak;
     }
 
-    private Deque<Position> positions;
+    private Deque<CompactPosition> positions;
 
-    public Deque<Position> getPositions() {
+    public Deque<CompactPosition> getPositions() {
         return positions;
     }
 
-    public void setPositions(Deque<Position> positions) {
+    public void setPositions(Deque<CompactPosition> positions) {
         this.positions = positions;
     }
 
@@ -92,6 +93,13 @@ public class NewMotionState {
         eventTime = position.getFixTime();
         eventLatitude = position.getLatitude();
         eventLongitude = position.getLongitude();
+        changed = true;
+    }
+
+    public void setEventPosition(CompactPosition position) {
+        eventTime = position.fixTime();
+        eventLatitude = position.latitude();
+        eventLongitude = position.longitude();
         changed = true;
     }
 

@@ -17,6 +17,7 @@ package org.traccar.media;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.TooLongFrameException;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -28,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VideoStreamManager {
 
     private static final int MAX_SEGMENTS = 5;
+    private static final int MAX_SEGMENT_SIZE = 5 * 1024 * 1024;
 
     private final Map<String, DeviceStream> streams = new ConcurrentHashMap<>();
 
@@ -78,14 +80,19 @@ public class VideoStreamManager {
             }
 
             if (currentSegment == null) {
-                currentSegment = Unpooled.buffer();
+                currentSegment = Unpooled.buffer(1024, MAX_SEGMENT_SIZE);
                 segmentTimestamp = timestamp;
                 if (segmentIndex == 0) {
                     firstTimestamp = timestamp;
                 }
             }
 
-            writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame, payloadType);
+            try {
+                writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame, payloadType);
+            } catch (IndexOutOfBoundsException e) {
+                release();
+                throw new TooLongFrameException(e);
+            }
         }
 
         private void finalizeSegment(long timestamp) {

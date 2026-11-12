@@ -277,13 +277,12 @@ public class DatabaseStorage extends Storage {
             case Condition.LatestPositions condition -> {
                 if (condition.getDeviceId() > 0) {
                     results.add(condition.getDeviceId());
-                    results.add(condition.getDeviceId());
-                } else {
-                    long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-                    if (period > 0) {
-                        results.add(new Date(System.currentTimeMillis() - period * 1000));
-                    }
                 }
+                long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
+                if (condition.getCondition() instanceof Condition.Permission && period > 0) {
+                    results.add(new Date(System.currentTimeMillis() - period * 1000));
+                }
+                results.addAll(getConditionVariables(condition.getCondition()));
             }
             default -> {}
         }
@@ -348,18 +347,15 @@ public class DatabaseStorage extends Storage {
 
                 if (condition.getDeviceId() > 0) {
                     result.append("deviceId = ? AND ");
-                } else {
-                    long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-                    if (period > 0) {
-                        result.append("fixTime > ? AND ");
-                    }
+                }
+                long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
+                if (condition.getCondition() instanceof Condition.Permission && period > 0) {
+                    result.append("fixTime > ? AND ");
                 }
                 result.append("id IN (");
                 result.append("SELECT positionId FROM ");
                 result.append(getStorageName(Device.class));
-                if (condition.getDeviceId() > 0) {
-                    result.append(" WHERE id = ?");
-                }
+                result.append(formatCondition(condition.getCondition()));
                 result.append(")");
 
             }
@@ -474,6 +470,7 @@ public class DatabaseStorage extends Storage {
             result.append(conditionKey);
             result.append(" = ?");
 
+            return "SELECT * FROM (" + result + ") AS permissions";
         }
 
         return result.toString();

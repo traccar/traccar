@@ -18,17 +18,16 @@ package org.traccar.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
+import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.SessionHelper;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -58,20 +57,18 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
     public void configure(JettyWebSocketServletFactory factory) {
         factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
-            Long userId = null;
-            List<String> tokens = req.getParameterMap().get("token");
-            if (tokens != null && !tokens.isEmpty()) {
-                String token = tokens.iterator().next();
-                try {
-                    userId = loginService.login(token).getUser().getId();
-                } catch (StorageException | GeneralSecurityException | IOException e) {
-                    throw new RuntimeException(e);
+            try {
+                List<String> tokens = req.getParameterMap().get("token");
+                LoginResult loginResult = tokens != null && !tokens.isEmpty()
+                        ? loginService.login(tokens.iterator().next())
+                        : loginService.login(req.getHttpServletRequest());
+                if (loginResult != null && loginResult.getUser() != null) {
+                    return new AsyncSocket(objectMapper, connectionManager, storage, loginResult.getUser().getId());
                 }
-            } else if (SessionHelper.isSessionOriginValid(req.getHttpServletRequest())) {
-                userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionHelper.USER_ID_KEY);
-            }
-            if (userId != null) {
-                return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+            } catch (SecurityException e) {
+                return null;
+            } catch (StorageException | GeneralSecurityException | IOException e) {
+                throw new RuntimeException(e);
             }
             return null;
         });

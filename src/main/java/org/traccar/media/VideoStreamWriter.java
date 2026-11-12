@@ -40,8 +40,11 @@ public class VideoStreamWriter {
 
         long pts90k = pts * 90;
         ByteBuf pesPacket = createPes(nalData, pts90k, isH265);
-        writePesPackets(output, pesPacket, isKeyFrame, pts90k);
-        pesPacket.release();
+        try {
+            writePesPackets(output, pesPacket, isKeyFrame, pts90k);
+        } finally {
+            pesPacket.release();
+        }
     }
 
     private void writePat(ByteBuf output) {

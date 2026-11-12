@@ -58,7 +58,7 @@ public class CorsResponseFilter implements ContainerResponseFilter {
             String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
             if (origin == null) {
                 response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), ORIGIN_ALL);
-            } else if (allowed != null && (allowed.equals(ORIGIN_ALL) || allowed.contains(origin))) {
+            } else if (allowed != null && (allowed.equals(ORIGIN_ALL) || allowed.equals(origin))) {
                 response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), origin);
             }
         }

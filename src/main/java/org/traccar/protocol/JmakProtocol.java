@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
@@ -48,7 +47,6 @@ public class JmakProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new JmakFrameDecoder());
-                pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new JmakProtocolEncoder(JmakProtocol.this, false));
                 pipeline.addLast(new JmakProtocolDecoder(JmakProtocol.this));

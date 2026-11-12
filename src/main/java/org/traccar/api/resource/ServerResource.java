@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -58,6 +59,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Stream;
 
 @Path("server")
 @Produces(MediaType.APPLICATION_JSON)
@@ -138,14 +140,27 @@ public class ServerResource extends BaseResource {
         return List.of(TimeZone.getAvailableIDs());
     }
 
+    private java.nio.file.Path getFileRoot() {
+        return Paths.get(config.getString(Keys.WEB_OVERRIDE, config.getString(Keys.WEB_PATH))).normalize();
+    }
+
+    @Path("file")
+    @GET
+    public List<String> getFiles() throws IOException, StorageException {
+        permissionsService.checkAdmin(getUserId());
+        var root = getFileRoot();
+        try (var files = Files.exists(root) ? Files.list(root) : Stream.<java.nio.file.Path>empty()) {
+            return files.filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString()).sorted().toList();
+        }
+    }
+
     @Path("file/{path}")
     @POST
     @Consumes("*/*")
     public Response uploadFile(@PathParam("path") String path, File inputFile) throws IOException, StorageException {
         permissionsService.checkAdmin(getUserId());
-        String root = config.getString(Keys.WEB_OVERRIDE, config.getString(Keys.WEB_PATH));
-
-        var rootPath = Paths.get(root).normalize();
+        var rootPath = getFileRoot();
         var outputPath = rootPath.resolve(path).normalize();
         if (!outputPath.startsWith(rootPath)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -160,6 +175,19 @@ public class ServerResource extends BaseResource {
             input.transferTo(output);
         }
         return Response.ok().build();
+    }
+
+    @Path("file/{path}")
+    @DELETE
+    public Response deleteFile(@PathParam("path") String path) throws IOException, StorageException {
+        permissionsService.checkAdmin(getUserId());
+        var root = getFileRoot();
+        var file = root.resolve(path).normalize();
+        if (!file.startsWith(root) || !Files.isRegularFile(file)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        Files.delete(file);
+        return Response.noContent().build();
     }
 
     @Path("gc")

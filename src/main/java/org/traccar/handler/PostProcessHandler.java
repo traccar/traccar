@@ -17,30 +17,28 @@ package org.traccar.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.model.Device;
+import org.traccar.database.DeviceUpdateManager;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+import java.util.Map;
 
 public class PostProcessHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostProcessHandler.class);
 
     private final CacheManager cacheManager;
-    private final Storage storage;
+    private final DeviceUpdateManager deviceUpdateManager;
     private final ConnectionManager connectionManager;
 
     @Inject
-    public PostProcessHandler(CacheManager cacheManager, Storage storage, ConnectionManager connectionManager) {
+    public PostProcessHandler(
+            CacheManager cacheManager, DeviceUpdateManager deviceUpdateManager, ConnectionManager connectionManager) {
         this.cacheManager = cacheManager;
-        this.storage = storage;
+        this.deviceUpdateManager = deviceUpdateManager;
         this.connectionManager = connectionManager;
     }
 
@@ -49,12 +47,7 @@ public class PostProcessHandler extends BasePositionHandler {
         try {
             Position lastPosition = cacheManager.getPosition(position.getDeviceId());
             if (lastPosition == null || !position.getFixTime().before(lastPosition.getFixTime())) {
-                Device updatedDevice = new Device();
-                updatedDevice.setId(position.getDeviceId());
-                updatedDevice.setPositionId(position.getId());
-                storage.updateObject(updatedDevice, new Request(
-                        new Columns.Include("positionId"),
-                        new Condition.Equals("id", updatedDevice.getId())));
+                deviceUpdateManager.update(position.getDeviceId(), Map.of("positionId", position.getId()));
 
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(true, position);

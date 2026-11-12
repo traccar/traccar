@@ -60,7 +60,7 @@ public class PasswordResource extends BaseResource {
             throws StorageException, ExecutionException, InterruptedException, GeneralSecurityException, IOException {
 
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("LOWER(email)", email.toLowerCase(Locale.ROOT))));
+                new Columns.All(), new Condition.Equals("email", email.toLowerCase(Locale.ROOT))));
         if (user != null) {
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
             var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", false);

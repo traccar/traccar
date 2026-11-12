@@ -66,6 +66,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_STATUS_1 = 0x16;
     public static final int MSG_WIFI = 0x17;
     public static final int MSG_GPS_LBS_RFID = 0x17;
+    public static final int MSG_LBS_ADDRESS_REQUEST = 0x17;
     public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
     public static final int MSG_LBS_MULTIPLE_1 = 0x28;
@@ -370,10 +371,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        boolean shortLbs = type == MSG_GPS_LBS_6 && buf.readableBytes() == 14;
         int cellType = type == MSG_GPS_LBS_8 || type == MSG_ALARM_MODULE ? buf.readUnsignedByte() : 0;
         int mcc = buf.readUnsignedShort();
         int mnc;
-        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 || variant == Variant.SL4X) {
+        if (BitUtil.check(mcc, 15) || (type == MSG_GPS_LBS_6 && !shortLbs) || variant == Variant.SL4X) {
             mnc = buf.readUnsignedShort();
         } else {
             mnc = buf.readUnsignedByte();
@@ -388,7 +390,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X
                 || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6 || type == MSG_IBUTTON || type == MSG_GPS_LBS_DRIVER
+        } else if ((type == MSG_GPS_LBS_6 && !shortLbs) || type == MSG_IBUTTON || type == MSG_GPS_LBS_DRIVER
                 || variant == Variant.SEEWORLD || (variant == Variant.TRX16I && type == MSG_LOCATION_RFID)) {
             cid = buf.readUnsignedInt();
         } else {
@@ -564,7 +566,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_ADDRESS_REQUEST) {
+        } else if (type == MSG_ADDRESS_REQUEST || (type == MSG_LBS_ADDRESS_REQUEST
+                && length == buf.readableBytes() - 1
+                && length == (BitUtil.check(buf.getUnsignedShort(buf.readerIndex()), 15) ? 0x25 : 0x24))) {
 
             String response = "NA&&NA&&0##";
             ByteBuf content = Unpooled.buffer();
@@ -737,13 +741,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             Network network = new Network();
 
             boolean cell4g = type == MSG_WIFI_ALARM && buf.readUnsignedByte() > 0;
+            boolean sharedLac = type == MSG_LBS_EXTEND && length == 0x25;
+            boolean shortCellId = type == MSG_LBS_MULTIPLE_1 && buf.readableBytes() == 36;
+            int lac = sharedLac ? buf.readUnsignedShort() : 0;
 
             int cellCount = variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM
-                    ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
+                    || (variant == Variant.SL4X && type == MSG_LBS_3)
+                    ? buf.readUnsignedByte() : type == MSG_WIFI_5 || shortCellId ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
-                int lac;
                 int cid;
-                if (type == MSG_LBS_2 || type == MSG_WIFI_3 || cell4g) {
+                if (sharedLac) {
+                    cid = buf.readUnsignedShort();
+                } else if (type == MSG_LBS_2 || type == MSG_WIFI_3 || cell4g) {
                     lac = buf.readInt();
                     cid = (int) buf.readLong();
                 } else if (type == MSG_WIFI_5 || type == MSG_LBS_3) {
@@ -751,19 +760,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     cid = (int) buf.readUnsignedInt();
                 } else {
                     lac = buf.readUnsignedShort();
-                    cid = buf.readUnsignedMedium();
+                    cid = shortCellId ? buf.readUnsignedShort() : buf.readUnsignedMedium();
                 }
                 int rssi = -buf.readUnsignedByte();
-                if (lac > 0) {
+                if (cid > 0) {
                     network.addCellTower(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid, rssi));
                 }
             }
 
-            if (variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
+            if (!sharedLac && !shortCellId && variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
                 buf.readUnsignedByte(); // ta
             }
 
-            if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
+            if (!sharedLac && type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
                     && type != MSG_LBS_2 && type != MSG_LBS_3) {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
@@ -911,7 +920,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(decodeDate(buf, deviceSession));
             }
 
-            if (hasGps(type)) {
+            if (type == MSG_GPS_LBS_6 && length == 0x13) {
+                getLastLocation(position, decodeDate(buf, deviceSession));
+            } else if (hasGps(type)) {
                 decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
                 getLastLocation(position, null);
@@ -1272,8 +1283,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (subType == 0x0a) {
 
-                buf.skipBytes(8); // imei
-                buf.skipBytes(8); // imsi
+                if (buf.readableBytes() > 16) {
+                    buf.skipBytes(8); // imei
+                    buf.skipBytes(8); // imsi
+                }
                 position.set(Position.KEY_ICCID, StringUtil.stripTrailing(
                         'f', ByteBufUtil.hexDump(buf.readSlice(10))));
                 return position;

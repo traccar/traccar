@@ -16,6 +16,7 @@
 package org.traccar.session.state;
 
 import org.traccar.helper.DistanceCalculator;
+import org.traccar.model.CompactPosition;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,6 +32,7 @@ public final class NewMotionProcessor {
             NewMotionState state, Position position,
             double minDistance, long minDuration, long stopGap, boolean useIgnition) {
 
+        CompactPosition current = new CompactPosition(position);
         List<Event> events = new ArrayList<>();
         state.setEvents(events);
 
@@ -38,21 +40,21 @@ public final class NewMotionProcessor {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
             if (state.getMotionStreak() != ignition) {
                 state.setMotionStreak(ignition);
-                addEvent(state, events, ignition ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED, position);
+                addEvent(state, events, ignition ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED, current);
             }
             return;
         }
 
-        Deque<Position> positions = state.getPositions();
+        Deque<CompactPosition> positions = state.getPositions();
         if (positions.isEmpty()) {
             return;
         }
 
         double minAverageSpeed = minDistance / minDuration;
 
-        Position last = positions.peekLast();
+        CompactPosition last = positions.peekLast();
         if (last != null) {
-            long gap = position.getFixTime().getTime() - last.getFixTime().getTime();
+            long gap = position.getFixTime().getTime() - last.fixTime().getTime();
             double gapDistance = position.getDouble(Position.KEY_DISTANCE);
             double gapAverageSpeed = gap > 0 ? gapDistance / gap : Double.NaN;
             if (gap > stopGap && gapDistance >= minDistance && gapAverageSpeed > minAverageSpeed) {
@@ -60,7 +62,7 @@ public final class NewMotionProcessor {
                     addEvent(state, events, Event.TYPE_DEVICE_STOPPED, last);
                 }
                 addEvent(state, events, Event.TYPE_DEVICE_MOVING, last);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, current);
                 state.setMotionStreak(false);
                 return;
             }
@@ -68,48 +70,56 @@ public final class NewMotionProcessor {
 
         if (state.getMotionStreak()) {
             for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
-                Position candidate = iterator.next();
-                double distance = DistanceCalculator.distance(candidate, position);
+                CompactPosition candidate = iterator.next();
+                double distance = DistanceCalculator.distance(candidate, current);
                 if (distance >= minDistance) {
                     return;
                 }
             }
 
-            Position oldest = positions.peekFirst();
-            long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
-            if (duration >= minDuration) {
-                state.setMotionStreak(false);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+            CompactPosition oldest = positions.peekFirst();
+            long duration = position.getFixTime().getTime() - oldest.fixTime().getTime();
+            if (duration < minDuration) {
+                return;
             }
         } else {
             double distance = DistanceCalculator.distance(
                     state.getEventLatitude(), state.getEventLongitude(),
                     position.getLatitude(), position.getLongitude());
-            if (distance >= minDistance) {
-                state.setMotionStreak(true);
-                Position startPosition = position;
-                Position next = position;
-                for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
-                    Position candidate = iterator.next();
-                    boolean beforeStop = !candidate.getFixTime().after(state.getEventTime());
-                    double legDistance = DistanceCalculator.distance(candidate, next);
-                    long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
-                    boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
-                    if (beforeStop || next != position && !legMoving) {
-                        break;
-                    }
-                    startPosition = candidate;
-                    next = candidate;
-                }
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, startPosition);
+            if (distance < minDistance) {
+                return;
             }
         }
+
+        boolean moving = !state.getMotionStreak();
+        CompactPosition eventPosition = current;
+        CompactPosition next = current;
+        for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+            CompactPosition candidate = iterator.next();
+            if (!candidate.fixTime().after(state.getEventTime())) {
+                break;
+            }
+
+            double legDistance = DistanceCalculator.distance(candidate, next);
+            long legDuration = next.fixTime().getTime() - candidate.fixTime().getTime();
+            boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
+            boolean firstStartLeg = moving && next == current;
+            if (!firstStartLeg && legMoving != moving) {
+                break;
+            }
+
+            eventPosition = candidate;
+            next = candidate;
+        }
+
+        state.setMotionStreak(moving);
+        addEvent(state, events, moving ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED, eventPosition);
     }
 
-    private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {
-        Event event = new Event(type, position.getDeviceId());
-        event.setPositionId(position.getId());
-        event.setEventTime(position.getFixTime());
+    private static void addEvent(NewMotionState state, List<Event> events, String type, CompactPosition position) {
+        Event event = new Event(type, position.deviceId());
+        event.setPositionId(position.id());
+        event.setEventTime(position.fixTime());
         events.add(event);
         state.setEventPosition(position);
     }

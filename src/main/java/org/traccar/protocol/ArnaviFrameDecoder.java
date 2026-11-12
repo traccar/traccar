@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Ivan Muratov (binakot@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,7 @@ public class ArnaviFrameDecoder extends BaseFrameDecoder {
                             && buf.getByte(index) != PACKAGE_END_SIGN) {
                         index += PACKET_WRAPPER_LENGTH + buf.getUnsignedShortLE(index + 1);
                     }
-                    if (buf.getByte(index) != PACKAGE_END_SIGN) {
+                    if (index >= buf.readableBytes() || buf.getByte(index) != PACKAGE_END_SIGN) {
                         return null;
                     }
                     length = index + 1;

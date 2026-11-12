@@ -18,6 +18,36 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyDecode(decoder, binary(
+                "787813111a0b070d1a310281f7007a0099e015165e3f0d0a"),
+                position(Checks.NONE).network(network()
+                        .cell(cell().mcc(641).mnc(247).lac(122).cid(39392))));
+
+        verifyDecode(decoder, binary(
+                "79790010940a8996802200258125183f0005882f0d0a"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_ICCID, "8996802200258125183"));
+
+        verifyDecode(decoder, binary(
+                "787822281a0b06173b2602e00227db9c553127db9c561a27db9c571627db9ddc0f27dbf5ec0e000000000000020dc80d0a"),
+                position(Checks.NONE));
+
+        verifyDecode(decoder, binary(
+                "787825181a0b07032616026c0200167b1d0f2b3c092b3905524c03000000000000000000018f02350d0a"),
+                position(Checks.NONE).network(network()
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(31517))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(11068))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(11065))
+                        .cell(cell().mcc(620).mnc(2).lac(22).cid(21068))));
+
+        verifyDecode(decoder, binary(
+                "787837341a0b070339080000d600030282820000048600a08c0642420a00000000000000000000000000000000000000000000000000000f312b0d0a"),
+                position(Checks.NONE).network(network()
+                        .cell(cell().mcc(214).mnc(3).lac(33410).cid(1158))
+                        .cell(cell().mcc(214).mnc(3).lac(41100).cid(105005578))));
+
+        verifyDecode(decoder, binary(
+                "78782417025b1ea412004f312b32313335363337363334323200000000000000000002002ec1490d0a"));
+
+        verifyDecode(decoder, binary(
                 "79790011941501282c533a12230ed309f63c8408720d0a"),
                 position(Checks.ATTRIBUTES).attribute(Position.PREFIX_TEMP + 1, 25.5));
 

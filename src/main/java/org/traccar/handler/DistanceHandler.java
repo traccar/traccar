@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Amila Silva
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ public class DistanceHandler extends BasePositionHandler {
     private final CacheManager cacheManager;
 
     private final boolean filter;
+    private final boolean filterInvalid;
     private final int minError;
     private final int maxError;
 
@@ -36,6 +37,7 @@ public class DistanceHandler extends BasePositionHandler {
     public DistanceHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
         this.filter = config.getBoolean(Keys.COORDINATES_FILTER);
+        this.filterInvalid = config.getBoolean(Keys.COORDINATES_FILTER_INVALID);
         this.minError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
         this.maxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
     }
@@ -57,7 +59,7 @@ public class DistanceHandler extends BasePositionHandler {
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = minError == 0 || distance > minError;
                 boolean satisfiesMax = maxError == 0 || distance < maxError;
-                if (!satisfiesMin || !satisfiesMax) {
+                if (filterInvalid && !position.getValid() || !satisfiesMin || !satisfiesMax) {
                     position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());
                     position.setLongitude(last.getLongitude());

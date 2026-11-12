@@ -20,6 +20,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+          check-latest: true
           cache: gradle
       - run: ./gradlew assemble
       - name: Stage server payload
@@ -72,6 +73,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+          check-latest: true
       - run: sudo apt-get install -y makeself
       - uses: actions/download-artifact@v8
         with:
@@ -107,6 +109,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+          check-latest: true
       - run: sudo apt-get install -y makeself
       - uses: actions/download-artifact@v8
         with:
@@ -142,6 +145,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+          check-latest: true
       - uses: actions/download-artifact@v8
         with:
           name: staged-server

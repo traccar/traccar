@@ -37,11 +37,13 @@ public class FilterHandler extends BasePositionHandler {
 
     private final CacheManager cacheManager;
     private final StatisticsManager statisticsManager;
+    private final int globalDailyLimit;
 
     @Inject
     public FilterHandler(CacheManager cacheManager, StatisticsManager statisticsManager) {
         this.cacheManager = cacheManager;
         this.statisticsManager = statisticsManager;
+        globalDailyLimit = cacheManager.getConfig().getInteger(Keys.FILTER_GLOBAL_DAILY_LIMIT);
     }
 
     private boolean filterInvalid(Position position) {
@@ -131,8 +133,9 @@ public class FilterHandler extends BasePositionHandler {
     private boolean filterDailyLimit(Position position, Position last) {
         long deviceId = position.getDeviceId();
         Integer filterDailyLimit = AttributeUtil.lookup(cacheManager, Keys.FILTER_DAILY_LIMIT, deviceId);
-        if (filterDailyLimit != null && filterDailyLimit > 0
-                && statisticsManager.messageStoredCount(deviceId) >= filterDailyLimit) {
+        if ((filterDailyLimit != null && filterDailyLimit > 0
+                && statisticsManager.messageStoredCount(deviceId) >= filterDailyLimit)
+                || (globalDailyLimit > 0 && statisticsManager.messageStoredCount() >= globalDailyLimit)) {
             Integer filterDailyLimitInterval = AttributeUtil.lookup(
                     cacheManager, Keys.FILTER_DAILY_LIMIT_INTERVAL, deviceId);
             long lastTime = last != null ? last.getFixTime().getTime() : 0;

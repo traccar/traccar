@@ -247,12 +247,13 @@ public final class QueryBuilder implements AutoCloseable {
         try {
             logQuery();
 
-            connection.setAutoCommit(false);
-            streamingTransaction = true;
-            statement.setFetchSize(switch (databaseType) {
-                case "MySQL" -> Integer.MIN_VALUE;
-                default -> config.getInteger(Keys.DATABASE_STREAM_FETCH_SIZE);
-            });
+            if (databaseType.equals("MySQL")) {
+                statement.setFetchSize(Integer.MIN_VALUE);
+            } else {
+                connection.setAutoCommit(false);
+                streamingTransaction = true;
+                statement.setFetchSize(config.getInteger(Keys.DATABASE_STREAM_FETCH_SIZE));
+            }
 
             resultSet = statement.executeQuery();
             ResultSetMetaData resultMetaData = resultSet.getMetaData();

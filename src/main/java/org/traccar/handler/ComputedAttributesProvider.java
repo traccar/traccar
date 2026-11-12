@@ -71,6 +71,8 @@ public class ComputedAttributesProvider {
                 .structuredLiteral(true);
         engine = new JexlBuilder()
                 .strict(true)
+                .cache(config.getInteger(Keys.PROCESSING_COMPUTED_ATTRIBUTES_CACHE_SIZE))
+                .cacheThreshold(config.getInteger(Keys.PROCESSING_COMPUTED_ATTRIBUTES_CACHE_THRESHOLD))
                 .namespaces(Map.of("math", Math.class))
                 .sandbox(sandbox)
                 .create();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 package org.traccar.sms;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import org.apache.commons.text.StringEscapeUtils;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
@@ -73,6 +74,9 @@ public class HttpSmsClient implements SmsManager {
         }
         if (mediaType == MediaType.APPLICATION_JSON_TYPE) {
             return new String(JsonStringEncoder.getInstance().quoteAsString(value));
+        }
+        if (mediaType == MediaType.APPLICATION_XML_TYPE) {
+            return StringEscapeUtils.escapeXml10(value);
         }
         return value;
     }

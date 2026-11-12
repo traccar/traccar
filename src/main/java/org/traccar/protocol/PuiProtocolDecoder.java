@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import org.apache.kafka.common.utils.ByteBufferInputStream;
 import org.traccar.BaseMqttProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
@@ -42,7 +42,7 @@ public class PuiProtocolDecoder extends BaseMqttProtocolDecoder {
     protected Object decode(DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
         JsonObject json;
-        try (ByteBufferInputStream inputStream = new ByteBufferInputStream(message.payload().nioBuffer())) {
+        try (var inputStream = new ByteBufferBackedInputStream(message.payload().nioBuffer())) {
             json = Json.createReader(inputStream).readObject();
         }
 

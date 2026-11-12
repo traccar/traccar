@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseObjectResource;
+import org.traccar.database.DeviceUpdateManager;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Path("devices")
@@ -67,6 +69,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private ConnectionManager connectionManager;
+
+    @Inject
+    private DeviceUpdateManager deviceUpdateManager;
 
     @Inject
     private MediaManager mediaManager;
@@ -164,21 +169,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
             position.setServerTime(new Date());
             position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
 
-            Device device = new Device();
-            device.setId(position.getDeviceId());
-            device.setPositionId(position.getId());
-            storage.updateObject(device, new Request(
-                    new Columns.Include("positionId"),
-                    new Condition.Equals("id", device.getId())));
+            deviceUpdateManager.update(position.getDeviceId(), Map.of("positionId", position.getId()));
 
-            var key = new Object();
-            try {
-                cacheManager.addDevice(position.getDeviceId(), key);
+            cacheManager.withDevice(position.getDeviceId(), () -> {
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(true, position);
-            } finally {
-                cacheManager.removeDevice(position.getDeviceId(), key);
-            }
+                return null;
+            });
         } else {
             throw new IllegalArgumentException();
         }

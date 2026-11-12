@@ -22,6 +22,7 @@ import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.CsvExportProvider;
 import org.traccar.reports.GpxExportProvider;
@@ -91,7 +92,9 @@ public class PositionResource extends BaseResource {
                 permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
 
                 Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", geofenceId)));
+                        new Columns.All(), new Condition.And(
+                                new Condition.Equals("id", geofenceId),
+                                new Condition.Permission(User.class, getUserId(), Geofence.class))));
 
                 return PositionUtil.getPositionsStream(
                         storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
@@ -150,11 +153,11 @@ public class PositionResource extends BaseResource {
                 if (extension.equals("kmz")) {
                     try (ZipOutputStream zipStream = new ZipOutputStream(output)) {
                         zipStream.putNextEntry(new ZipEntry("doc.kml"));
-                        kmlExportProvider.generate(zipStream, deviceId, geofenceId, from, to);
+                        kmlExportProvider.generate(zipStream, getUserId(), deviceId, geofenceId, from, to);
                         zipStream.closeEntry();
                     }
                 } else {
-                    kmlExportProvider.generate(output, deviceId, geofenceId, from, to);
+                    kmlExportProvider.generate(output, getUserId(), deviceId, geofenceId, from, to);
                 }
             } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
@@ -196,7 +199,7 @@ public class PositionResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         StreamingOutput stream = output -> {
             try {
-                gpxExportProvider.generate(output, deviceId, geofenceId, from, to);
+                gpxExportProvider.generate(output, getUserId(), deviceId, geofenceId, from, to);
             } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
             }

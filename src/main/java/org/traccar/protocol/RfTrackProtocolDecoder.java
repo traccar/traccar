@@ -155,7 +155,7 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
             response = command.getString(Command.KEY_DATA);
         }
         sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));
-        return position;
+        return position.getDeviceId() != 0 ? position : null;
     }
 
 }

@@ -12,6 +12,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gps103ProtocolDecoder(null));
 
         verifyDecode(decoder, text(
+                ""));
+
+        verifyDecode(decoder, text(
                 "imei:865456055519122,sensor alarm,2208011920,,L,;"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_ALARM, Position.ALARM_VIBRATION));
 

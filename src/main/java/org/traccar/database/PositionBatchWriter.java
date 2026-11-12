@@ -51,11 +51,8 @@ public class PositionBatchWriter {
         long interval = config.getLong(Keys.DATABASE_POSITION_BATCH_INTERVAL);
         if (interval > 0) {
             queue = new ConcurrentLinkedQueue<>();
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
-                Thread thread = new Thread(runnable, "PositionBatchWriter");
-                thread.setDaemon(true);
-                return thread;
-            });
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(
+                    Thread.ofPlatform().daemon().name("PositionBatchWriter").factory());
             scheduler.scheduleWithFixedDelay(this::flush, interval, interval, TimeUnit.MILLISECONDS);
         } else {
             queue = null;

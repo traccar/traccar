@@ -24,7 +24,9 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceLookupService;
+import org.traccar.database.DeviceUpdateManager;
 import org.traccar.database.NotificationManager;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -51,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -60,7 +63,6 @@ public class ConnectionManager implements BroadcastInterface {
 
     private final long deviceTimeout;
     private final boolean showUnknownDevices;
-    private final boolean statusEventsEnabled;
 
     private record UnknownEntry(String uniqueId, long timestamp) {}
 
@@ -72,6 +74,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
+    private final DeviceUpdateManager deviceUpdateManager;
     private final NotificationManager notificationManager;
     private final BroadcastService broadcastService;
     private final DeviceLookupService deviceLookupService;
@@ -84,16 +87,16 @@ public class ConnectionManager implements BroadcastInterface {
     public ConnectionManager(
             Config config, CacheManager cacheManager, Storage storage,
             NotificationManager notificationManager, BroadcastService broadcastService,
-            DeviceLookupService deviceLookupService) {
+            DeviceLookupService deviceLookupService, DeviceUpdateManager deviceUpdateManager) {
         this.config = config;
         this.cacheManager = cacheManager;
         this.storage = storage;
+        this.deviceUpdateManager = deviceUpdateManager;
         this.notificationManager = notificationManager;
         this.broadcastService = broadcastService;
         this.deviceLookupService = deviceLookupService;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT);
         showUnknownDevices = config.getBoolean(Keys.WEB_SHOW_UNKNOWN_DEVICES);
-        statusEventsEnabled = config.getBoolean(Keys.EVENT_STATUS_ENABLE);
         broadcastService.registerListener(this);
     }
 
@@ -264,7 +267,7 @@ public class ConnectionManager implements BroadcastInterface {
             lastSeenByDeviceId.remove(deviceId);
         }
 
-        if (!status.equals(oldStatus) && statusEventsEnabled) {
+        if (!status.equals(oldStatus) && isStatusEventEnabled(deviceId)) {
             String eventType = switch (status) {
                 case Device.STATUS_ONLINE -> Event.TYPE_DEVICE_ONLINE;
                 case Device.STATUS_UNKNOWN -> Event.TYPE_DEVICE_UNKNOWN;
@@ -278,9 +281,10 @@ public class ConnectionManager implements BroadcastInterface {
         }
 
         try {
-            storage.updateObject(device, new Request(
-                    new Columns.Include("status", "lastUpdate"),
-                    new Condition.Equals("id", deviceId)));
+            var values = new HashMap<String, Object>();
+            values.put("status", status);
+            values.put("lastUpdate", device.getLastUpdate());
+            deviceUpdateManager.update(deviceId, values);
         } catch (StorageException e) {
             LOGGER.warn("Update device status error", e);
         }
@@ -288,10 +292,34 @@ public class ConnectionManager implements BroadcastInterface {
         updateDevice(true, device);
     }
 
+    private boolean isStatusEventEnabled(long deviceId) {
+        try {
+            return cacheManager.withDevice(deviceId,
+                    () -> AttributeUtil.lookup(cacheManager, Keys.EVENT_STATUS_ENABLE, deviceId));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public synchronized void sendKeepalive() {
-        for (Set<UpdateListener> userListeners : listeners.values()) {
-            for (UpdateListener listener : userListeners) {
-                listener.onKeepalive();
+        var iterator = listeners.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            var userListeners = entry.getValue();
+            if (userListeners.isEmpty()) {
+                long userId = entry.getKey();
+                iterator.remove();
+                var devices = userDevices.remove(userId);
+                if (devices != null) {
+                    devices.forEach(deviceId -> deviceUsers.computeIfPresent(deviceId, (id, userIds) -> {
+                        userIds.remove(userId);
+                        return userIds.isEmpty() ? null : userIds;
+                    }));
+                }
+            } else {
+                for (UpdateListener listener : userListeners) {
+                    listener.onKeepalive();
+                }
             }
         }
     }
@@ -395,7 +423,7 @@ public class ConnectionManager implements BroadcastInterface {
     public synchronized void addListener(long userId, UpdateListener listener) throws StorageException {
         var set = listeners.get(userId);
         if (set == null) {
-            set = new HashSet<>();
+            set = new CopyOnWriteArraySet<>();
             listeners.put(userId, set);
 
             var devices = storage.getObjects(Device.class, new Request(
@@ -408,14 +436,8 @@ public class ConnectionManager implements BroadcastInterface {
 
     public synchronized void removeListener(long userId, UpdateListener listener) {
         var set = listeners.get(userId);
-        set.remove(listener);
-        if (set.isEmpty()) {
-            listeners.remove(userId);
-
-            userDevices.remove(userId).forEach(deviceId -> deviceUsers.computeIfPresent(deviceId, (x, userIds) -> {
-                userIds.remove(userId);
-                return userIds.isEmpty() ? null : userIds;
-            }));
+        if (set != null) {
+            set.remove(listener);
         }
     }
 

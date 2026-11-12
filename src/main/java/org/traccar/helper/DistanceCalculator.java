@@ -16,6 +16,7 @@
  */
 package org.traccar.helper;
 
+import org.traccar.model.CompactPosition;
 import org.traccar.model.Position;
 
 public final class DistanceCalculator {
@@ -27,6 +28,10 @@ public final class DistanceCalculator {
 
     public static double distance(Position p1, Position p2) {
         return distance(p1.getLatitude(), p1.getLongitude(), p2.getLatitude(), p2.getLongitude());
+    }
+
+    public static double distance(CompactPosition p1, CompactPosition p2) {
+        return distance(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
     }
 
     public static double distance(double lat1, double lon1, double lat2, double lon2) {

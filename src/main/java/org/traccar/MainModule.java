@@ -130,7 +130,8 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
-        bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
+        bind(Timer.class).toProvider(() -> new HashedWheelTimer(
+                Thread.ofPlatform().daemon().name("Timer").factory())).in(Scopes.SINGLETON);
     }
 
     @Singleton

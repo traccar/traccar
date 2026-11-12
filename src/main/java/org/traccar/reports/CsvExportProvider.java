@@ -23,6 +23,7 @@ import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -77,7 +78,9 @@ public class CsvExportProvider {
         DateTimeFormatter dateFormat = DATE_FORMAT.withZone(UserUtil.getTimezone(server, user).toZoneId());
 
         Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
-                new Columns.All(), new Condition.Equals("id", geofenceId)));
+                new Columns.All(), new Condition.And(
+                        new Condition.Equals("id", geofenceId),
+                        new Condition.Permission(User.class, userId, Geofence.class))));
 
         List<Position> positions;
         try (var stream = PositionUtil.getPositionsStream(

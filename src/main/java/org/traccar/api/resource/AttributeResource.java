@@ -64,9 +64,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
                 new Columns.All(),
                 new Condition.LatestPositions(deviceId)));
 
-        var key = new Object();
-        try {
-            cacheManager.addDevice(position.getDeviceId(), key);
+        return cacheManager.withDevice(position.getDeviceId(), () -> {
             Object result = computedAttributesProvider.compute(entity, position);
             if (result != null) {
                 return switch (entity.getType()) {
@@ -76,9 +74,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
             } else {
                 return Response.noContent().build();
             }
-        } finally {
-            cacheManager.removeDevice(position.getDeviceId(), key);
-        }
+        });
     }
 
     @POST

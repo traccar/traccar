@@ -47,7 +47,7 @@ public class WrapperInboundHandler implements ChannelInboundHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        handler.channelInactive(ctx);
+        handler.channelInactive(new WrapperContext(ctx, ctx.channel().remoteAddress()));
     }
 
     @Override

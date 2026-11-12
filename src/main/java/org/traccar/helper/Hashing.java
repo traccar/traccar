@@ -15,9 +15,15 @@
  */
 package org.traccar.helper;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
@@ -75,6 +81,11 @@ public final class Hashing {
     }
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final HashFunction CACHE_HASH = com.google.common.hash.Hashing.hmacSha256(RANDOM.generateSeed(32));
+    private static final Cache<HashCode, Boolean> PASSWORD_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(128)
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build();
 
     public static HashingResult createHash(String password) {
         byte[] salt = new byte[SALT_SIZE];
@@ -85,6 +96,15 @@ public final class Hashing {
     }
 
     public static boolean validatePassword(String password, String hashedPasswordField, String saltHex) {
+        HashCode cacheKey = CACHE_HASH.newHasher()
+                .putInt(password.length()).putUnencodedChars(password)
+                .putInt(hashedPasswordField.length()).putUnencodedChars(hashedPasswordField)
+                .putUnencodedChars(saltHex)
+                .hash();
+        if (PASSWORD_CACHE.getIfPresent(cacheKey) != null) {
+            return true;
+        }
+
         byte[] salt = DataConverter.parseHex(saltHex);
 
         SecretKeyFactory factory;
@@ -102,7 +122,11 @@ public final class Hashing {
         }
 
         byte[] hash = DataConverter.parseHex(hashHex);
-        return slowEquals(hash, function(factory, password.toCharArray(), salt, iterations));
+        boolean valid = slowEquals(hash, function(factory, password.toCharArray(), salt, iterations));
+        if (valid) {
+            PASSWORD_CACHE.put(cacheKey, true);
+        }
+        return valid;
     }
 
     /**
