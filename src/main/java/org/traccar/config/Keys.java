@@ -1886,6 +1886,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Replace coordinates of invalid (valid field is set to false) positions with the last known coordinates.
+     * Requires 'coordinates.filter' to be enabled. Disabled by default.
+     */
+    public static final ConfigKey<Boolean> COORDINATES_FILTER_INVALID = new BooleanConfigKey(
+            "coordinates.filterInvalid",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Distance in meters. Distances below this value get handled as explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MIN_ERROR = new IntegerConfigKey(
