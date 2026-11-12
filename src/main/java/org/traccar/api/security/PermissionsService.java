@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,8 @@ public class PermissionsService {
     public void checkUserUpdate(long userId, User before, User after) throws StorageException, SecurityException {
         if (before.getAdministrator() != after.getAdministrator()
                 || before.getDeviceLimit() != after.getDeviceLimit()
-                || before.getUserLimit() != after.getUserLimit()) {
+                || before.getUserLimit() != after.getUserLimit()
+                || !Objects.equals(before.getLogin(), after.getLogin())) {
             checkAdmin(userId);
         }
         User user = userId > 0 ? getUser(userId) : null;
