@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -85,6 +86,18 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
         return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+    }
+
+    @Override
+    protected Object encodeCommand(Channel channel, Command command) {
+        ByteBuf result = (ByteBuf) encodeCommand(command);
+        if (result != null && channel != null && !connectionless) {
+            EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
+            if (decoder != null && decoder.isItr120()) {
+                result.setShort(0, 0x2828);
+            }
+        }
+        return result;
     }
 
     @Override

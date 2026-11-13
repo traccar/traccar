@@ -42,6 +42,12 @@ import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean itr120;
+
+    public boolean isItr120() {
+        return itr120;
+    }
+
     public EelinkProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -157,7 +163,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ByteBuf buf, int type, int index) {
+    private Position decodeNew(DeviceSession deviceSession, ByteBuf buf, int type, int index, boolean itr120) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -246,17 +252,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(network);
         }
 
+        int report = -1;
         if (type == MSG_WARNING) {
 
             position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_REPORT) {
 
-            buf.readUnsignedByte(); // report type
+            report = buf.readUnsignedByte(); // report type
 
         }
 
-        if (type == MSG_NORMAL || type == MSG_WARNING || type == MSG_REPORT) {
+        if (type == MSG_NORMAL || type == MSG_WARNING || type == MSG_REPORT || itr120 && type == 0x3b) {
 
             int status = buf.readUnsignedShort();
             position.setValid(BitUtil.check(status, 0));
@@ -276,6 +283,44 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_GPS, BitUtil.check(status, 10));
             position.set(Position.KEY_STATUS, status);
 
+        }
+
+        if (itr120) {
+            if (type == MSG_REPORT) {
+                if (report == 1 || report == 2) {
+                    position.set(Position.KEY_IGNITION, report == 1);
+                }
+                position.set(Position.KEY_EVENT, report);
+            }
+            if (type == MSG_WARNING || type == MSG_REPORT) {
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                }
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 1000L);
+                }
+            }
+            if (buf.readableBytes() >= 2) {
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
+            }
+            if (buf.readableBytes() >= 4) {
+                position.set("adc1", buf.readUnsignedShort() / 100.0);
+                position.set("adc2", buf.readUnsignedShort() / 100.0);
+            }
+            if (type == MSG_NORMAL) {
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                }
+                if (buf.readableBytes() >= 20) {
+                    buf.skipBytes(20); // GSM/GPS counters and reserved fields
+                }
+                if (buf.readableBytes() >= 4) {
+                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 1000L);
+                }
+            } else if (type == 0x3b && buf.readableBytes() >= 2) {
+                position.set("idleTime", buf.readUnsignedShort());
+            }
+            return position;
         }
 
         if (type == MSG_NORMAL) {
@@ -443,7 +488,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, ByteBuf buf,
             String uniqueId, DeviceSession deviceSession) throws Exception {
 
-        buf.skipBytes(2); // header
+        boolean itr120 = buf.readUnsignedShort() == 0x2828;
+        if (!(channel instanceof DatagramChannel)) {
+            this.itr120 = itr120;
+        }
         int type = buf.readUnsignedByte();
         buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
@@ -458,8 +506,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
                     channel instanceof DatagramChannel, uniqueId, type, index, content);
             content.release();
+            if (itr120) {
+                response.setShort(0, 0x2828);
+            }
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            } else {
+                response.release();
             }
         }
 
@@ -479,9 +532,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
                 return decodeOld(deviceSession, buf, type, index);
 
-            } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
+            } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE || itr120 && type == 0x3b) {
 
-                return decodeNew(deviceSession, buf, type, index);
+                return decodeNew(deviceSession, buf, type, index, itr120);
 
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2
                     || type == MSG_OBD && buf.readableBytes() == 4) {
