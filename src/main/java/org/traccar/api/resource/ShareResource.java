@@ -22,8 +22,10 @@ import org.traccar.config.Keys;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -31,10 +33,12 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
@@ -56,11 +60,14 @@ public class ShareResource extends BaseResource {
     @Inject
     private TokenManager tokenManager;
 
+    @Inject
+    private CacheManager cacheManager;
+
     public record ShareLink(String token, Date expiration) {
     }
 
-    private ShareLink share(User user, Class<? extends BaseModel> clazz, long id, Date expiration, boolean create)
-            throws StorageException, GeneralSecurityException, IOException {
+    private User share(User user, Class<? extends BaseModel> clazz, long id, Date expiration, boolean create)
+            throws StorageException {
 
         if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
             throw new SecurityException("Sharing is disabled");
@@ -108,6 +115,10 @@ public class ShareResource extends BaseResource {
             throw new WebApplicationException(Response.Status.CONFLICT);
         }
 
+        return share;
+    }
+
+    private ShareLink createLink(User share) throws StorageException, GeneralSecurityException, IOException {
         return new ShareLink(
                 tokenManager.generateToken(share.getId(), share.getExpirationTime()), share.getExpirationTime());
     }
@@ -116,14 +127,14 @@ public class ShareResource extends BaseResource {
     @GET
     public ShareLink getDeviceShare(@QueryParam("deviceId") long deviceId)
             throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Device.class, deviceId, null, false);
+        return createLink(share(permissionsService.getUser(getUserId()), Device.class, deviceId, null, false));
     }
 
     @Path("group")
     @GET
     public ShareLink getGroupShare(@QueryParam("groupId") long groupId)
             throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Group.class, groupId, null, false);
+        return createLink(share(permissionsService.getUser(getUserId()), Group.class, groupId, null, false));
     }
 
     @Path("device")
@@ -132,7 +143,7 @@ public class ShareResource extends BaseResource {
     public ShareLink shareDevice(
             @FormParam("deviceId") long deviceId,
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Device.class, deviceId, expiration, true);
+        return createLink(share(permissionsService.getUser(getUserId()), Device.class, deviceId, expiration, true));
     }
 
     @Path("group")
@@ -141,7 +152,26 @@ public class ShareResource extends BaseResource {
     public ShareLink shareGroup(
             @FormParam("groupId") long groupId,
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Group.class, groupId, expiration, true);
+        return createLink(share(permissionsService.getUser(getUserId()), Group.class, groupId, expiration, true));
+    }
+
+    private Response removeShare(Class<? extends BaseModel> clazz, long id) throws Exception {
+        User share = share(permissionsService.getUser(getUserId()), clazz, id, null, false);
+        storage.removeObject(User.class, new Request(new Condition.Equals("id", share.getId())));
+        cacheManager.invalidateObject(true, User.class, share.getId(), ObjectOperation.DELETE);
+        return Response.noContent().build();
+    }
+
+    @Path("device/{id}")
+    @DELETE
+    public Response removeDeviceShare(@PathParam("id") long deviceId) throws Exception {
+        return removeShare(Device.class, deviceId);
+    }
+
+    @Path("group/{id}")
+    @DELETE
+    public Response removeGroupShare(@PathParam("id") long groupId) throws Exception {
+        return removeShare(Group.class, groupId);
     }
 
 }

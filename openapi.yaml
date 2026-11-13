@@ -885,6 +885,50 @@ paths:
         '403':
           description: Sharing is disabled or temporary user
           content: {}
+  /share/device/{id}:
+    delete:
+      operationId: deleteShareDevice
+      summary: Delete an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+  /share/group/{id}:
+    delete:
+      operationId: deleteShareGroup
+      summary: Delete an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
   /groups:
     get:
       operationId: getGroups
