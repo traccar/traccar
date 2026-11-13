@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -28,8 +27,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
-
-    static final AttributeKey<Boolean> ITR120 = AttributeKey.valueOf("eelink.itr120");
 
     private boolean connectionless;
 
@@ -94,8 +91,11 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
         ByteBuf result = (ByteBuf) encodeCommand(command);
-        if (result != null && channel != null && Boolean.TRUE.equals(channel.attr(ITR120).get())) {
-            result.setShort(0, 0x2828);
+        if (result != null && channel != null && !connectionless) {
+            EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
+            if (decoder != null && decoder.isItr120()) {
+                result.setShort(0, 0x2828);
+            }
         }
         return result;
     }

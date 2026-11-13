@@ -9,7 +9,10 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTcp() throws Exception {
 
-        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
+        var decoder = inject(new EelinkProtocolDecoder(null));
+        var channel = channel(inject(new EelinkProtocolEncoder(null, false)), decoder);
+
+        verifyDecode(decoder, binary("676701000a00010869137082327123"));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -22,13 +25,19 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncodeItr120() throws Exception {
-        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
-        channel.attr(EelinkProtocolEncoder.ITR120).set(true);
+
+        var decoder = inject(new EelinkProtocolDecoder(null));
+        var channel = channel(inject(new EelinkProtocolEncoder(null, false)), decoder);
+
+        verifyDecode(decoder, binary("282801000a00010869137082327123"));
+
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
+
         verifyEncode(channel, command,
                 binary("282880000f0000010000000052454c41592c3123"));
+
     }
 
     @Test

@@ -42,6 +42,12 @@ import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean itr120;
+
+    public boolean isItr120() {
+        return itr120;
+    }
+
     public EelinkProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -483,8 +489,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             String uniqueId, DeviceSession deviceSession) throws Exception {
 
         boolean itr120 = buf.readUnsignedShort() == 0x2828;
-        if (channel != null && !(channel instanceof DatagramChannel)) {
-            channel.attr(EelinkProtocolEncoder.ITR120).set(itr120);
+        if (!(channel instanceof DatagramChannel)) {
+            this.itr120 = itr120;
         }
         int type = buf.readUnsignedByte();
         buf = buf.readSlice(buf.readUnsignedShort());
