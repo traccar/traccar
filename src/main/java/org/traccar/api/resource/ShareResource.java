@@ -32,9 +32,11 @@ import org.traccar.storage.query.Request;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -54,7 +56,10 @@ public class ShareResource extends BaseResource {
     @Inject
     private TokenManager tokenManager;
 
-    private String share(User user, Class<? extends BaseModel> clazz, long id, Date expiration)
+    public record ShareLink(String token, Date expiration) {
+    }
+
+    private ShareLink share(User user, Class<? extends BaseModel> clazz, long id, Date expiration, boolean create)
             throws StorageException, GeneralSecurityException, IOException {
 
         if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
@@ -62,9 +67,6 @@ public class ShareResource extends BaseResource {
         }
         if (user.getTemporary()) {
             throw new SecurityException("Temporary user");
-        }
-        if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
-            expiration = user.getExpirationTime();
         }
 
         BaseModel object = storage.getObject(clazz, new Request(
@@ -84,6 +86,12 @@ public class ShareResource extends BaseResource {
                 new Columns.All(), new Condition.Equals("email", shareEmail.toLowerCase(Locale.ROOT))));
 
         if (share == null) {
+            if (!create) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+            if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
+                expiration = user.getExpirationTime();
+            }
             share = new User();
             share.setName(clazz == Device.class ? ((Device) object).getName() : ((Group) object).getName());
             share.setEmail(shareEmail);
@@ -96,29 +104,44 @@ public class ShareResource extends BaseResource {
             share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
 
             storage.addPermission(new Permission(User.class, share.getId(), clazz, id));
-        } else {
+        } else if (create) {
             throw new WebApplicationException(Response.Status.CONFLICT);
         }
 
-        return tokenManager.generateToken(share.getId(), expiration);
+        return new ShareLink(
+                tokenManager.generateToken(share.getId(), share.getExpirationTime()), share.getExpirationTime());
+    }
+
+    @Path("device")
+    @GET
+    public ShareLink getDeviceShare(@QueryParam("deviceId") long deviceId)
+            throws StorageException, GeneralSecurityException, IOException {
+        return share(permissionsService.getUser(getUserId()), Device.class, deviceId, null, false);
+    }
+
+    @Path("group")
+    @GET
+    public ShareLink getGroupShare(@QueryParam("groupId") long groupId)
+            throws StorageException, GeneralSecurityException, IOException {
+        return share(permissionsService.getUser(getUserId()), Group.class, groupId, null, false);
     }
 
     @Path("device")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @POST
-    public String shareDevice(
+    public ShareLink shareDevice(
             @FormParam("deviceId") long deviceId,
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Device.class, deviceId, expiration);
+        return share(permissionsService.getUser(getUserId()), Device.class, deviceId, expiration, true);
     }
 
     @Path("group")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @POST
-    public String shareGroup(
+    public ShareLink shareGroup(
             @FormParam("groupId") long groupId,
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        return share(permissionsService.getUser(getUserId()), Group.class, groupId, expiration);
+        return share(permissionsService.getUser(getUserId()), Group.class, groupId, expiration, true);
     }
 
 }

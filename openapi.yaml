@@ -776,6 +776,30 @@ paths:
           description: Device not found
           content: {}
   /share/device:
+    get:
+      operationId: getShareDevice
+      summary: Fetch a link for an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
     post:
       operationId: postShareDevice
       summary: Share device location
@@ -800,14 +824,37 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: eyJhbGciOi...
+                $ref: '#/components/schemas/ShareLink'
         '403':
           description: Sharing is disabled or temporary user
           content: {}
   /share/group:
+    get:
+      operationId: getShareGroup
+      summary: Fetch a link for an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
     post:
       operationId: postShareGroup
       summary: Share group devices
@@ -832,10 +879,9 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: eyJhbGciOi...
+                $ref: '#/components/schemas/ShareLink'
         '403':
           description: Sharing is disabled or temporary user
           content: {}
@@ -3853,6 +3899,14 @@ paths:
           content: {}
 components:
   schemas:
+    ShareLink:
+      type: object
+      properties:
+        token:
+          type: string
+        expiration:
+          type: string
+          format: date-time
     Position:
       type: object
       properties:
