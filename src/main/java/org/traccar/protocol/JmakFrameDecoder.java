@@ -45,8 +45,15 @@ public class JmakFrameDecoder extends JsonFrameDecoder {
             return decodeBinary(buf);
         }
 
-        if (first == '~') {
+        if (first == '~' || first == '*') {
             int delimiterIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '$');
+            if (delimiterIndex > 0) {
+                return buf.readRetainedSlice(delimiterIndex - buf.readerIndex() + 1);
+            }
+        }
+
+        if (first == '$') {
+            int delimiterIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
             if (delimiterIndex > 0) {
                 return buf.readRetainedSlice(delimiterIndex - buf.readerIndex() + 1);
             }
