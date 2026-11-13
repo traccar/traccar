@@ -445,6 +445,12 @@ public class ProtocolTest extends BaseTest {
 
         private final List<CellTowerExpectation> towers = new ArrayList<>();
         private final List<WifiAccessPointExpectation> accessPoints = new ArrayList<>();
+        private String radioType;
+
+        public NetworkExpectation radioType(String expected) {
+            radioType = expected;
+            return this;
+        }
 
         public NetworkExpectation cell(CellTowerExpectation expected) {
             towers.add(expected);
@@ -458,6 +464,9 @@ public class ProtocolTest extends BaseTest {
 
         void verify(Network actual, String path) {
             assertNotNull(actual, path);
+            if (radioType != null) {
+                assertEquals(radioType, actual.getRadioType(), path + ".radioType");
+            }
             if (!towers.isEmpty()) {
                 assertNotNull(actual.getCellTowers(), path + ".cellTowers");
                 assertEquals(towers.size(), actual.getCellTowers().size(), path + ".cellTowers.count");
