@@ -22,9 +22,6 @@
         <constraints nullable="false" />
       </column>
     </createTable>
-  </changeSet>
-
-  <changeSet author="author" id="changelog-6.17.0-cleanup-device-links">
 
     <delete tableName="tc_device_device">
       <where>
@@ -35,7 +32,7 @@
         )
       </where>
     </delete>
-    
+
   </changeSet>
 
 </databaseChangeLog>
