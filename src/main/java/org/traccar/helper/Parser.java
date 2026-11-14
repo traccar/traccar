@@ -15,6 +15,7 @@
  */
 package org.traccar.helper;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -360,6 +361,19 @@ public class Parser {
 
     public Date nextDateTime() {
         return nextDateTime(DateTimeFormat.YMD_HMS, null);
+    }
+
+    public static ChronoUnit parseDateInterval(String reportInterval) {
+        if (reportInterval == null) {
+            return null;
+        }
+        return switch (reportInterval) {
+            case "daily" -> ChronoUnit.DAYS;
+            case "weekly" -> ChronoUnit.WEEKS;
+            case "monthly" -> ChronoUnit.MONTHS;
+            case "yearly" -> ChronoUnit.YEARS;
+            default -> null;
+        };
     }
 
 }

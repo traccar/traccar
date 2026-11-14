@@ -15,9 +15,12 @@
  */
 package org.traccar.helper;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -78,6 +81,22 @@ public final class DateUtil {
         } else {
             return LOCAL_DATE_TIME.format(date.toInstant());
         }
+    }
+
+    public static ZonedDateTime startOfZDTDay(ZonedDateTime date) {
+        return date.truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTWeek(ZonedDateTime date) {
+        return date.with(DayOfWeek.MONDAY).truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTMonth(ZonedDateTime date) {
+        return date.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);
+    }
+
+    public static ZonedDateTime startOfZDTYear(ZonedDateTime date) {
+        return date.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS);
     }
 
 }
