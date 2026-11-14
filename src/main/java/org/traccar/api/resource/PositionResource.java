@@ -74,7 +74,8 @@ public class PositionResource extends BaseResource {
     @GET
     public Stream<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
-            @QueryParam("geofenceId") long geofenceId, @QueryParam("from") Date from, @QueryParam("to") Date to)
+            @QueryParam("geofenceId") long geofenceId, @QueryParam("from") Date from, @QueryParam("to") Date to,
+            @QueryParam("limit") int limit)
             throws StorageException {
         if (!positionIds.isEmpty()) {
             permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
@@ -96,8 +97,9 @@ public class PositionResource extends BaseResource {
                                 new Condition.Equals("id", geofenceId),
                                 new Condition.Permission(User.class, getUserId(), Geofence.class))));
 
+                int maxPositions = config.getInteger(Keys.REPORT_MAX_POSITIONS);
                 return PositionUtil.getPositionsStream(
-                        storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
+                        storage, deviceId, from, to, limit > 0 ? Math.min(limit, maxPositions) : maxPositions)
                         .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
                 return storage.getObjectsStream(Position.class, new Request(

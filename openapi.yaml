@@ -1264,6 +1264,11 @@ paths:
             `id=31&id=42`
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Maximum number of positions to return.
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
