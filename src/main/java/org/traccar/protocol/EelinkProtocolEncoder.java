@@ -76,7 +76,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private ByteBuf encodeContent(long deviceId, String content, boolean itr120) {
+    private ByteBuf encodeContent(Channel channel, long deviceId, String content) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -84,21 +84,21 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
+        EelinkProtocolDecoder decoder = channel != null && !connectionless
+                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
+        boolean itr120 = decoder != null && decoder.isItr120();
+
         return encodeContent(connectionless, itr120, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
-        EelinkProtocolDecoder decoder = channel != null && !connectionless
-                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
-        boolean itr120 = decoder != null && decoder.isItr120();
-
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA), itr120);
-            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), "WHERE#", itr120);
-            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), "RELAY,1#", itr120);
-            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), "RELAY,0#", itr120);
-            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), "RESET#", itr120);
+            case Command.TYPE_CUSTOM -> encodeContent(channel, command.getDeviceId(), command.getString(Command.KEY_DATA));
+            case Command.TYPE_POSITION_SINGLE -> encodeContent(channel, command.getDeviceId(), "WHERE#");
+            case Command.TYPE_ENGINE_STOP -> encodeContent(channel, command.getDeviceId(), "RELAY,1#");
+            case Command.TYPE_ENGINE_RESUME -> encodeContent(channel, command.getDeviceId(), "RELAY,0#");
+            case Command.TYPE_REBOOT_DEVICE -> encodeContent(channel, command.getDeviceId(), "RESET#");
             default -> null;
         };
     }
