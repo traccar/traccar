@@ -24,7 +24,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -216,13 +215,19 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(BitUtil.check(flags, 1) ? longitude : -longitude);
 
         position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
-        position.set(Position.KEY_CHARGE, !BitUtil.check(power, 7));
+        if (!BitUtil.check(power, 7)) {
+            position.set(Position.KEY_CHARGE, true);
+        }
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 3));
         position.set(Position.PREFIX_IN + 3, BitUtil.check(flags, 4));
-        position.set(Position.PREFIX_OUT + 1, BitUtil.check(flags, 5));
-        position.set(Position.KEY_ARCHIVE, !BitUtil.check(flags, 7));
+        if (BitUtil.check(flags, 5)) {
+            position.set(Position.PREFIX_OUT + 1, true);
+        }
+        if (!BitUtil.check(flags, 7)) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
         if ((temperature & 0xFF00) == 0x8000) {
             position.set(Position.PREFIX_ADC + 1, temperature & 0xFF);
         } else {
@@ -236,34 +241,17 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private void decodeCan(Position position, Parser parser) {
-        Device device = getCacheManager() != null
-                ? getCacheManager().getObject(Device.class, position.getDeviceId()) : null;
-        boolean useImperialUs = device != null && device.getBoolean("useImperial_us");
-
+    private static void decodeCan(Position position, Parser parser) {
         position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        if (useImperialUs) {
-            position.set(Position.KEY_COOLANT_TEMP, (parser.nextHexInt() - 32) * 5 / 9);
-            position.set(Position.KEY_ODOMETER, Math.round(
-                    Long.parseLong(parser.next(), 16) * 1.609344 / 10 * 1000));
-        } else {
-            position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
-            position.set(Position.KEY_ODOMETER, Math.round(Long.parseLong(parser.next(), 16) * 1000));
-        }
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt());
+        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16));
         position.set(Position.KEY_RPM, parser.nextHexInt());
-        int consumption = parser.nextHexInt();
-        if (!useImperialUs && consumption != 0) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, 51200 / consumption);
-        }
-        if (useImperialUs) {
-            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 8.0 * 3.78541178);
-        } else {
-            position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
-        }
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextHexInt());
+        position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16));
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
         int rssi = parser.nextHexInt();
         position.set(Position.KEY_RSSI, rssi);
-        if (parser.hasNext() && !useImperialUs) {
+        if (parser.hasNext()) {
             parser.next();
             position.set("brakeCount", rssi);
         }

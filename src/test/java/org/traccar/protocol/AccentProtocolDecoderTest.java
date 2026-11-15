@@ -35,11 +35,13 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
                         .attribute(Position.KEY_BATTERY, 4.2));
 
         verifyDecode(decoder, text(
-                "861001002935274 AA1300ADCA01F0CE94009CB42D0000212A00FD01FEE3801300000000071739875B1B8C"
-                        + "0000000000000000000000000000000C1A"),
+                "861001002935274 AA2101171A022D833D009A2BAA0000A0000000006380FC000000000400000000001458"),
+                position().location("2014-01-01T19:50:50.000Z", false, -36.89525, -10.17287)
+                        .attribute(Position.KEY_ODOMETER, 4000L));
+
+        verifyDecode(decoder, text(
+                "861001002935274 AA1300ADCA01F0CE94009CB42D0000212A00FD01FEE3801300000000071739875B1B8C0000000000000000000000000000000C1A"),
                 position().location("2018-12-16T12:21:30.000Z", true, 32.93123, 10.44957)
-                        .attribute(Position.KEY_RPM, 0)
-                        .attribute(Position.KEY_COOLANT_TEMP, -40)
                         .attribute(Position.KEY_SATELLITES, 12));
 
     }
