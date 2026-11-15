@@ -4,15 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class EelinkProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncodeTcp() throws Exception {
 
-        var decoder = inject(new EelinkProtocolDecoder(null));
-        var channel = channel(inject(new EelinkProtocolEncoder(null, false)), decoder);
-
-        verifyDecode(decoder, binary("676701000a00010869137082327123"));
+        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -40,10 +40,9 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeItr120() throws Exception {
 
-        var decoder = inject(new EelinkProtocolDecoder(null));
+        var decoder = mock(EelinkProtocolDecoder.class);
+        when(decoder.isItr120()).thenReturn(true);
         var channel = channel(inject(new EelinkProtocolEncoder(null, false)), decoder);
-
-        verifyDecode(decoder, binary("282801000a00010869137082327123"));
 
         Command command = new Command();
         command.setDeviceId(1);

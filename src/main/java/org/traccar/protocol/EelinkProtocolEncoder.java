@@ -44,7 +44,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     }
 
     public static ByteBuf encodeContent(
-            boolean connectionless, String uniqueId, int type, int index, ByteBuf content) {
+            boolean connectionless, boolean itr120, String uniqueId, int type, int index, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -52,8 +52,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        buf.writeByte(0x67);
-        buf.writeByte(0x67);
+        buf.writeShort(itr120 ? 0x2828 : 0x6767);
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(index);
@@ -77,7 +76,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private ByteBuf encodeContent(long deviceId, String content) {
+    private ByteBuf encodeContent(long deviceId, String content, boolean itr120) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -85,30 +84,21 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
-        return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+        return encodeContent(connectionless, itr120, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
-        ByteBuf result = (ByteBuf) encodeCommand(command);
-        if (result != null && channel != null && !connectionless) {
-            EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
-            if (decoder != null && decoder.isItr120()) {
-                result.setShort(0, 0x2828);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    protected Object encodeCommand(Command command) {
+        EelinkProtocolDecoder decoder = channel != null && !connectionless
+                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
+        boolean itr120 = decoder != null && decoder.isItr120();
 
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), "WHERE#");
-            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), "RELAY,1#");
-            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), "RELAY,0#");
-            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), "RESET#");
+            case Command.TYPE_CUSTOM -> encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA), itr120);
+            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), "WHERE#", itr120);
+            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), "RELAY,1#", itr120);
+            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), "RELAY,0#", itr120);
+            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), "RESET#", itr120);
             default -> null;
         };
     }

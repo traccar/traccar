@@ -71,6 +71,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_CODE = 0x19;
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
+    public static final int MSG_IDLE_TIME = 0x3B;
 
     private String decodeAlarm(Short value) {
         return switch (value) {
@@ -163,7 +164,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ByteBuf buf, int type, int index, boolean itr120) {
+    private Position decodeNew(DeviceSession deviceSession, ByteBuf buf, int type, int index) {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -263,7 +264,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (type == MSG_NORMAL || type == MSG_WARNING || type == MSG_REPORT || itr120 && type == 0x3b) {
+        if (type == MSG_NORMAL || type == MSG_WARNING || type == MSG_REPORT || itr120 && type == MSG_IDLE_TIME) {
 
             int status = buf.readUnsignedShort();
             position.setValid(BitUtil.check(status, 0));
@@ -317,7 +318,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 if (buf.readableBytes() >= 4) {
                     position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 1000L);
                 }
-            } else if (type == 0x3b && buf.readableBytes() >= 2) {
+            } else if (type == MSG_IDLE_TIME && buf.readableBytes() >= 2) {
                 position.set("idleTime", buf.readUnsignedShort());
             }
             return position;
@@ -488,10 +489,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, ByteBuf buf,
             String uniqueId, DeviceSession deviceSession) throws Exception {
 
-        boolean itr120 = buf.readUnsignedShort() == 0x2828;
-        if (!(channel instanceof DatagramChannel)) {
-            this.itr120 = itr120;
-        }
+        itr120 = buf.readUnsignedShort() == 0x2828;
         int type = buf.readUnsignedByte();
         buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
@@ -504,11 +502,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 content.writeByte(0); // action mask
             }
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
-                    channel instanceof DatagramChannel, uniqueId, type, index, content);
+                    channel instanceof DatagramChannel, itr120, uniqueId, type, index, content);
             content.release();
-            if (itr120) {
-                response.setShort(0, 0x2828);
-            }
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {
@@ -532,9 +527,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
                 return decodeOld(deviceSession, buf, type, index);
 
-            } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE || itr120 && type == 0x3b) {
+            } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE || itr120 && type == MSG_IDLE_TIME) {
 
-                return decodeNew(deviceSession, buf, type, index, itr120);
+                return decodeNew(deviceSession, buf, type, index);
 
             } else if (type == MSG_HEARTBEAT && buf.readableBytes() >= 2
                     || type == MSG_OBD && buf.readableBytes() == 4) {
