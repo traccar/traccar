@@ -60,12 +60,17 @@ public final class PositionUtil {
 
     public static Stream<Position> getPositionsStream(
             Storage storage, long deviceId, Date from, Date to, int limit) throws StorageException {
+        return getPositionsStream(storage, deviceId, from, to, limit, 0);
+    }
+
+    public static Stream<Position> getPositionsStream(
+            Storage storage, long deviceId, Date from, Date to, int limit, int offset) throws StorageException {
         return storage.getObjectsStream(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", from, to)),
-                new Order("fixTime", false, limit)));
+                new Order("fixTime", false, limit, offset)));
     }
 
     public static Position getEdgePosition(
