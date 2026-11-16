@@ -97,11 +97,9 @@ public class PositionResource extends BaseResource {
                                 new Condition.Equals("id", geofenceId),
                                 new Condition.Permission(User.class, getUserId(), Geofence.class))));
 
-                int maxPositions = config.getInteger(Keys.REPORT_MAX_POSITIONS);
-                int effectiveLimit = limit > 0 && maxPositions > 0
-                        ? Math.min(limit, maxPositions) : Math.max(limit, maxPositions);
                 return PositionUtil.getPositionsStream(
-                        storage, deviceId, from, to, effectiveLimit, Math.max(0, offset))
+                        storage, deviceId, from, to,
+                        limit > 0 ? limit : config.getInteger(Keys.REPORT_MAX_POSITIONS), offset)
                         .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
                 return storage.getObjectsStream(Position.class, new Request(
