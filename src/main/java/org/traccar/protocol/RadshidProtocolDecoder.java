@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -35,41 +36,19 @@ import java.util.List;
 
 public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final int CRC_POLYNOMIAL = 0xA001;
-
-    private static final int EVENT_PREFIX_LENGTH = 44;
-
-    private static final int EXTRA_V7_TEMPERATURE = 27;
-    private static final int EXTRA_V8_STATIC_LOCATION = 36;
-    private static final int EXTRA_V10_CCID = 37;
-    private static final int EXTRA_V11_CELL = 45;
-    private static final int CELL_INFO_LENGTH = 28;
+    private static final Checksum.Algorithm CRC16 = new Checksum.Algorithm(16, 0xA001, 0x0000, false, false, 0x0000);
 
     public RadshidProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    static int crc16(ByteBuf buf, int index, int length) {
-        int crc = 0;
-        for (int n = 0; n < length; n++) {
-            crc ^= buf.getUnsignedByte(index + n) << 8;
-            for (int i = 0; i < 8; i++) {
-                crc <<= 1;
-                if ((crc & 0x10000) != 0) {
-                    crc = (crc ^ CRC_POLYNOMIAL) & 0xFFFF;
-                }
-            }
-        }
-        return crc & 0xFFFF;
-    }
-
-    private void sendResponse(Channel channel, SocketAddress remoteAddress, int packetTag, int requestLength) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int packetTag, int length) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
             response.writeIntLE(0x07);
             response.writeByte(0x82);
             response.writeByte(packetTag);
-            response.writeInt(requestLength);
+            response.writeInt(length);
             response.writeByte(0x01);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
@@ -77,127 +56,90 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(int event) {
         return switch (event) {
-            case 0xD6, 0xD7 -> Position.ALARM_JAMMING;
-            case 0xDB -> Position.ALARM_REMOVING;
-            case 0xDC -> Position.ALARM_GEOFENCE_ENTER;
-            case 0xDD -> Position.ALARM_GEOFENCE_EXIT;
+            case 0xD7, 0xF9 -> Position.ALARM_JAMMING;
             case 0xE2 -> Position.ALARM_POWER_CUT;
             case 0xE3 -> Position.ALARM_POWER_RESTORED;
-            case 0xE5 -> Position.ALARM_ACCELERATION;
-            case 0xE6 -> Position.ALARM_CORNERING;
+            case 0xE4, 0xF2 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0xE5 -> Position.ALARM_VIBRATION;
+            case 0xE7 -> Position.ALARM_FATIGUE_DRIVING;
             case 0xEB -> Position.ALARM_SOS;
-            case 0xEE -> Position.ALARM_OVERSPEED;
+            case 0xEE, 0xEF -> Position.ALARM_OVERSPEED;
             case 0xF0 -> Position.ALARM_LOW_BATTERY;
             default -> null;
         };
     }
 
-    private void decodeGpsStatus(Position position, int gpsStatus) {
-        position.set(Position.KEY_GPS, gpsStatus);
-        switch (gpsStatus) {
-            case 0x00, 0x02 -> position.setValid(true);
-            case 0x03 -> {
-                position.setValid(true);
-                position.set(Position.KEY_APPROXIMATE, true);
+    private boolean decodeExtra(Position position, ByteBuf buf, int length) {
+
+        int version = buf.readUnsignedByte();
+        boolean supported = switch (version) {
+            case 2 -> length == 29;
+            case 7 -> length == 36 || length == 37;
+            case 8 -> length == 37;
+            case 10 -> length == 45;
+            case 11, 13 -> length == 73;
+            default -> false;
+        };
+        if (!supported) {
+            return false;
+        }
+
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
+        position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
+        position.set("uptime", buf.readUnsignedIntLE());
+        position.set("bootCount", buf.readUnsignedShortLE());
+        position.set("flashBacklog", buf.readUnsignedShortLE());
+        position.set("simCredit", (int) buf.readShortLE());
+        buf.readUnsignedShortLE(); // reserved
+        position.set("accOffDuration", buf.readUnsignedShortLE());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        if (BitUtil.check(buf.readUnsignedByte(), 6)) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
+        if (version == 2) {
+            buf.readUnsignedByte(); // internal temperature
+        }
+        position.set(Position.KEY_POWER, buf.readUnsignedByte() / 10.0);
+        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+        buf.readUnsignedByte(); // reserved
+        position.set("startupType", buf.readUnsignedByte());
+
+        if (version == 2) {
+            return false;
+        }
+
+        float temperature = buf.readFloatLE();
+        if (temperature > -55 && temperature < 125) {
+            position.set(Position.PREFIX_TEMP + 1, (double) temperature);
+        }
+        float humidity = buf.readFloatLE();
+        if (humidity >= 0 && humidity <= 100) {
+            position.set(Position.KEY_HUMIDITY, (double) humidity);
+        }
+        buf.readUnsignedByte(); // reserved
+
+        boolean lastKnownPosition = false;
+        if (length >= 37) {
+            lastKnownPosition = buf.readUnsignedByte() != 0;
+            position.set("lastKnownPosition", lastKnownPosition);
+        }
+        if (length >= 45) {
+            position.set("partialIccid", Long.toUnsignedString(buf.readLongLE()));
+        }
+        if (length >= 73) {
+            int mcc = buf.readIntLE();
+            int mnc = buf.readIntLE();
+            long lac = buf.readUnsignedIntLE();
+            long cid = buf.readUnsignedIntLE();
+            buf.readIntLE(); // bcch
+            buf.readIntLE(); // bsic
+            int rssi = buf.readIntLE();
+            if (mcc > 0 && lac > 0 && lac <= 0xFFFF) {
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, (int) lac, cid, rssi)));
             }
-            default -> position.setValid(false);
         }
-    }
 
-    private static boolean fits(int extraLength, int offset, int size) {
-        return extraLength >= offset + size;
-    }
-
-    private void decodeExtra(ByteBuf buf, Position position, int extraStart, int extraLength) {
-        if (extraLength < 1) {
-            return;
-        }
-        int version = buf.getUnsignedByte(extraStart);
-        if (version == 7 || version == 8 || version == 10 || version == 11 || version == 13) {
-            decodeDebugExtra(buf, position, extraStart, extraLength, version);
-        }
-    }
-
-    private void decodeDebugExtra(ByteBuf buf, Position position, int start, int length, int version) {
-        if (fits(length, 1, 2)) {
-            position.set(Position.KEY_VERSION_FW, buf.getUnsignedShortLE(start + 1));
-        }
-        if (fits(length, 3, 4)) {
-            position.set(Position.KEY_INDEX, buf.getUnsignedIntLE(start + 3));
-        }
-        if (fits(length, 7, 4)) {
-            position.set("uptime", buf.getUnsignedIntLE(start + 7));
-        }
-        if (fits(length, 11, 2)) {
-            position.set("resetCount", buf.getUnsignedShortLE(start + 11));
-        }
-        if (fits(length, 13, 2)) {
-            position.set("storedPoints", buf.getUnsignedShortLE(start + 13));
-        }
-        if (fits(length, 15, 2)) {
-            position.set("simCharge", (int) buf.getShortLE(start + 15));
-        }
-        if (fits(length, 17, 2)) {
-            position.set("pauseTime", buf.getUnsignedShortLE(start + 17));
-        }
-        if (fits(length, 19, 2)) {
-            position.set("offTime", buf.getUnsignedShortLE(start + 19));
-        }
-        if (fits(length, 21, 1)) {
-            position.set(Position.KEY_RSSI, (int) buf.getUnsignedByte(start + 21));
-        }
-        if (fits(length, 22, 1)) {
-            int deviceStatus = buf.getUnsignedByte(start + 22);
-            position.set("deviceStatus", deviceStatus);
-            if (BitUtil.check(deviceStatus, 6)) {
-                position.set(Position.KEY_ARCHIVE, true);
-            }
-        }
-        if (fits(length, 23, 1)) {
-            position.set(Position.KEY_POWER, buf.getUnsignedByte(start + 23) / 10.0);
-        }
-        if (fits(length, 24, 1)) {
-            position.set(Position.KEY_BATTERY_LEVEL, (int) buf.getUnsignedByte(start + 24));
-        }
-        if (fits(length, 25, 1)) {
-            position.set("savedPicture", buf.getUnsignedByte(start + 25) != 0);
-        }
-        if (fits(length, 26, 1)) {
-            position.set("resetSource", (int) buf.getUnsignedByte(start + 26));
-        }
-        if (fits(length, EXTRA_V7_TEMPERATURE, 4)) {
-            position.set(Position.PREFIX_TEMP + 1, (double) buf.getFloatLE(start + EXTRA_V7_TEMPERATURE));
-        }
-        if (fits(length, 31, 4)) {
-            position.set(Position.KEY_HUMIDITY, (double) buf.getFloatLE(start + 31));
-        }
-        if (fits(length, 35, 1)) {
-            position.set("crc8", (int) buf.getUnsignedByte(start + 35));
-        }
-        if (version >= 8 && fits(length, EXTRA_V8_STATIC_LOCATION, 1)) {
-            position.set("staticLocation", buf.getUnsignedByte(start + EXTRA_V8_STATIC_LOCATION) != 0);
-        }
-        if (version >= 10 && fits(length, EXTRA_V10_CCID, 8)) {
-            position.set(Position.KEY_ICCID, Long.toUnsignedString(buf.getLongLE(start + EXTRA_V10_CCID)));
-        }
-        if (version >= 11 && fits(length, EXTRA_V11_CELL, CELL_INFO_LENGTH)) {
-            decodeCell(buf, position, start + EXTRA_V11_CELL);
-        }
-    }
-
-    private void decodeCell(ByteBuf buf, Position position, int offset) {
-        int mcc = buf.getIntLE(offset);
-        int mnc = buf.getIntLE(offset + 4);
-        long lac = buf.getUnsignedIntLE(offset + 8);
-        long cid = buf.getUnsignedIntLE(offset + 12);
-        position.set("bcch", buf.getIntLE(offset + 16));
-        position.set("bsic", buf.getIntLE(offset + 20));
-        int dbm = buf.getIntLE(offset + 24);
-        if (lac <= Integer.MAX_VALUE) {
-            Network network = new Network();
-            network.addCellTower(CellTower.from(mcc, mnc, (int) lac, cid, dbm));
-            position.setNetwork(network);
-        }
+        return lastKnownPosition;
     }
 
     @Override
@@ -205,16 +147,10 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
-        long rawLength = buf.readUnsignedIntLE();
-        if (rawLength < 8 || rawLength > buf.readableBytes()) {
-            return null;
-        }
-        int payloadLength = (int) rawLength;
-        int payloadStart = buf.readerIndex();
-        int eventLimit = payloadStart + payloadLength - 2;
+        int payloadLength = (int) buf.readUnsignedIntLE();
 
-        int actualCrc = buf.getUnsignedShortLE(eventLimit);
-        if (crc16(buf, payloadStart, payloadLength - 2) != actualCrc) {
+        int checksum = Checksum.crc16(CRC16, buf.nioBuffer(buf.readerIndex(), payloadLength - 2));
+        if (checksum != buf.getUnsignedShortLE(buf.readerIndex() + payloadLength - 2)) {
             return null;
         }
 
@@ -230,11 +166,12 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, remoteAddress, packetTag, payloadLength);
 
         List<Position> positions = new LinkedList<>();
-        while (positions.size() < eventCount && eventLimit - buf.readerIndex() >= EVENT_PREFIX_LENGTH) {
+        for (int i = 0; i < eventCount; i++) {
+
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            buf.readUnsignedByte();
+            buf.readUnsignedByte(); // event version
 
             int eventCode = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, eventCode);
@@ -246,35 +183,54 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.set(Position.KEY_HOURS, buf.readUnsignedShort() * 60_000L);
-            position.setTime(new Date(buf.readUnsignedInt() * 1000L));
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            Date time = new Date(buf.readUnsignedInt() * 1000L);
+            int speed = buf.readUnsignedByte();
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
-            buf.readUnsignedByte();
-            buf.readUnsignedByte();
+            buf.readUnsignedByte(); // max gps speed
+            buf.readUnsignedByte(); // max sensor speed
+            position.set(Position.KEY_RPM, buf.readUnsignedShort());
 
-            position.set("geofenceId", buf.readUnsignedShort());
-            position.set(Position.KEY_DISTANCE, buf.readUnsignedInt() & 0x7FFFFFFFL);
-            buf.readUnsignedInt();
+            long distance = buf.readUnsignedInt();
+            if (BitUtil.check(distance, 31)) {
+                position.set(Position.KEY_DISTANCE, BitUtil.to(distance, 31));
+            } else {
+                position.set(Position.KEY_ODOMETER, distance);
+            }
+            buf.readUnsignedInt(); // sensor odometer
 
             int ioStatus = buf.readUnsignedByte();
-            position.set("externalPower", BitUtil.check(ioStatus, 7));
+            position.set(Position.KEY_CHARGE, BitUtil.check(ioStatus, 7));
             position.set(Position.KEY_IGNITION, BitUtil.check(ioStatus, 6));
-            position.set("sos", BitUtil.check(ioStatus, 5));
+            position.set(Position.KEY_INPUT, BitUtil.to(ioStatus, 4));
 
-            decodeGpsStatus(position, buf.readUnsignedByte());
-            position.setLatitude(buf.readInt() / 10000000.0);
-            position.setLongitude(buf.readInt() / 10000000.0);
-            position.setAltitude(buf.readShort());
-            position.setCourse(buf.readUnsignedShort());
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_PDOP, buf.readUnsignedByte() / 10.0);
+            int gpsStatus = buf.readUnsignedByte();
+            double latitude = buf.readInt() / 10000000.0;
+            double longitude = buf.readInt() / 10000000.0;
+            int altitude = buf.readShort();
+            int course = buf.readUnsignedShort();
+            int satellites = buf.readUnsignedByte();
+            double pdop = buf.readUnsignedByte() / 10.0;
 
             int extraLength = buf.readUnsignedByte();
-            if (extraLength > eventLimit - buf.readerIndex()) {
-                break;
+            int extraEnd = buf.readerIndex() + extraLength;
+            boolean lastKnownPosition = extraLength > 0 && decodeExtra(position, buf, extraLength);
+            buf.readerIndex(extraEnd);
+
+            if (gpsStatus == 0x00 || gpsStatus == 0x02) {
+                position.setValid(!lastKnownPosition);
+                position.setTime(time);
+                position.setLatitude(latitude);
+                position.setLongitude(longitude);
+                if (gpsStatus == 0x00 && !lastKnownPosition) {
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed));
+                    position.setCourse(course);
+                    position.setAltitude(altitude);
+                    position.set(Position.KEY_SATELLITES, satellites);
+                    position.set(Position.KEY_PDOP, pdop);
+                }
+            } else {
+                getLastLocation(position, time);
             }
-            decodeExtra(buf, position, buf.readerIndex(), extraLength);
-            buf.skipBytes(extraLength);
 
             positions.add(position);
         }
