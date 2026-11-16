@@ -1306,6 +1306,12 @@ paths:
             configuration limit applies.
           schema:
             type: integer
+        - name: offset
+          in: query
+          description: >-
+            Offset for pagination. Only applies to date-range queries. Default is 0.
+          schema:
+            type: integer
       responses:
         '200':
           description: OK

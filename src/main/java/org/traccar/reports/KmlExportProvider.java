@@ -91,7 +91,7 @@ public class KmlExportProvider {
         writer.writeEndElement();
         writer.writeStartElement("coordinates");
         try (Stream<Position> positions = PositionUtil.getPositionsStream(
-                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS), 0)
                 .filter(position -> geofence == null || geofence.containsPosition(position))) {
             String separator = "";
             for (var iterator = positions.iterator(); iterator.hasNext();) {
