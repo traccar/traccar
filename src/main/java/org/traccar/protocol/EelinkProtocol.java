@@ -38,14 +38,14 @@ public class EelinkProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 3, 2));
-                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, false));
+                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, true));
+                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });

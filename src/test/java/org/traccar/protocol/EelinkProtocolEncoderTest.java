@@ -1,9 +1,14 @@
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.DatagramChannel;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,10 +18,10 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     public void testEncodeTcp() throws Exception {
 
         var decoder = mock(EelinkProtocolDecoder.class);
-        var encoder = inject(new EelinkProtocolEncoder(null, false));
+        var encoder = inject(new EelinkProtocolEncoder(null));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.DEFAULT_HEADER);
+        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -35,14 +40,26 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeUdp() throws Exception {
 
-        var channel = channel(inject(new EelinkProtocolEncoder(null, true)));
+        var encoder = inject(new EelinkProtocolEncoder(null));
+        var channel = mock(DatagramChannel.class);
+        var pipeline = mock(ChannelPipeline.class);
+        var decoder = mock(EelinkProtocolDecoder.class);
+
+        when(channel.pipeline()).thenReturn(pipeline);
+        when(pipeline.get(EelinkProtocolDecoder.class)).thenReturn(decoder);
+        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
 
         Command command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyEncode(channel, command,
-                binary("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123"));
+        ByteBuf encoded = (ByteBuf) encoder.encodeCommand(channel, command);
+        try {
+            assertEquals("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123",
+                    ByteBufUtil.hexDump(encoded));
+        } finally {
+            encoded.release();
+        }
 
     }
 

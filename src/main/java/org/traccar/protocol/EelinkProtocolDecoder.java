@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -42,10 +41,10 @@ import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
-    public static final int DEFAULT_HEADER = 0x6767;
+    public static final int HEADER_EELINK = 0x6767;
     public static final int HEADER_ITR120 = 0x2828;
 
-    private int header = DEFAULT_HEADER;
+    private int header;
 
     public int getHeader() {
         return header;
@@ -256,14 +255,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(network);
         }
 
-        int report = -1;
+        int reportType = -1;
         if (type == MSG_WARNING) {
 
             position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_REPORT) {
 
-            report = buf.readUnsignedByte(); // report type
+            reportType = buf.readUnsignedByte();
 
         }
 
@@ -291,10 +290,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (header == HEADER_ITR120) {
             if (type == MSG_REPORT) {
-                if (report == 1 || report == 2) {
-                    position.set(Position.KEY_IGNITION, report == 1);
+                if (reportType == 1 || reportType == 2) {
+                    position.set(Position.KEY_IGNITION, reportType == 1);
                 }
-                position.set(Position.KEY_EVENT, report);
+                position.set(Position.KEY_EVENT, reportType);
             }
             if (type == MSG_WARNING || type == MSG_REPORT) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
@@ -491,7 +490,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 content.writeByte(0); // action mask
             }
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
-                    channel, channel instanceof DatagramChannel, uniqueId, type, index, content);
+                    channel, uniqueId, type, index, content);
             content.release();
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }

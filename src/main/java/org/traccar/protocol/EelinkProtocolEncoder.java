@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -28,11 +29,8 @@ import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
-    private boolean connectionless;
-
-    public EelinkProtocolEncoder(Protocol protocol, boolean connectionless) {
+    public EelinkProtocolEncoder(Protocol protocol) {
         super(protocol);
-        this.connectionless = connectionless;
     }
 
     public static int checksum(ByteBuffer buf) {
@@ -44,17 +42,17 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     }
 
     public static ByteBuf encodeContent(
-            Channel channel, boolean connectionless, String uniqueId, int type, int index, ByteBuf content) {
+            Channel channel, String uniqueId, int type, int index, ByteBuf content) {
 
+        boolean connectionless = channel instanceof DatagramChannel;
         ByteBuf buf = Unpooled.buffer();
 
         if (connectionless) {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        EelinkProtocolDecoder decoder = channel != null && !connectionless
-                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
-        buf.writeShort(decoder != null ? decoder.getHeader() : EelinkProtocolDecoder.DEFAULT_HEADER);
+        EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
+        buf.writeShort(decoder.getHeader());
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(index);
@@ -87,7 +85,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
         return encodeContent(
-                channel, connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+                channel, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override
