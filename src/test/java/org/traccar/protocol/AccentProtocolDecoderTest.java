@@ -15,7 +15,7 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
                 "AA011.0.103R10, ICC:8921602050440128136F, IMEI:861001002935274"),
                 position(Checks.ATTRIBUTES)
                         .outdated(true)
-                        .attribute(Position.KEY_TYPE, "PNA")
+                        .attribute(Position.KEY_ALARM, Position.ALARM_POWER_ON)
                         .attribute(Position.KEY_VERSION_FW, "1.0.103R10")
                         .attribute(Position.KEY_ICCID, "8921602050440128136F"));
 
@@ -23,7 +23,6 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
                 "861001002935274 AA00124427@14/01/27,12:44:20+00 ,ICC:8921602050440128136F, IMEI:861001002935274"),
                 position(Checks.ATTRIBUTES)
                         .outdated(true)
-                        .attribute(Position.KEY_TYPE, "INF")
                         .attribute(Position.KEY_ICCID, "8921602050440128136F"));
 
         verifyDecode(decoder, text(

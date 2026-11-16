@@ -32,9 +32,6 @@ import java.util.regex.Pattern;
 
 public class AccentProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final String TYPE_INF = "INF";
-    private static final String TYPE_PNA = "PNA";
-
     private String imei;
 
     public AccentProtocolDecoder(Protocol protocol) {
@@ -136,8 +133,8 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             }
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.set(Position.KEY_TYPE, TYPE_PNA);
             getLastLocation(position, null);
+            position.addAlarm(Position.ALARM_POWER_ON);
             if (!firmware.isEmpty()) {
                 position.set(Position.KEY_VERSION_FW, firmware);
             }
@@ -165,7 +162,6 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             }
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
-            position.set(Position.KEY_TYPE, TYPE_INF);
             getLastLocation(position, null);
             if (iccid != null) {
                 position.set(Position.KEY_ICCID, iccid);
