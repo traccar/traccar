@@ -1,0 +1,48 @@
+# Traccar (built from this fork) + PostgreSQL.
+# DB_PASSWORD comes from the .env file next to this file on the server (created by deploy.sh).
+
+services:
+
+  database:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: traccar
+      POSTGRES_USER: traccar
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
+    volumes:
+      - /opt/traccar/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traccar -d traccar"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  traccar:
+    build: .
+    image: traccar-custom:latest
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
+      DATABASE_DRIVER: org.postgresql.Driver
+      DATABASE_URL: jdbc:postgresql://database:5432/traccar
+      DATABASE_USER: traccar
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      # Acknowledge every H02 message (ST-901 sends V8, which is not acked by default);
+      # without it the tracker resends each position and replays old ones.
+      H02_ACK: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8082/api/health"]
+      interval: 2m
+      timeout: 5s
+      start_period: 5m
+      retries: 3
+    ports:
+      - "8082:8082"       # web UI + REST API
+      - "5013:5013/tcp"   # H02 protocol (SinoTrack ST-901)
+      - "5013:5013/udp"
+    volumes:
+      - /opt/traccar/logs:/opt/traccar/logs
