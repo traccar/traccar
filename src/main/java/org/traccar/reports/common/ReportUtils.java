@@ -346,7 +346,7 @@ public class ReportUtils {
             NewMotionState motionState = new NewMotionState();
             motionState.setPositions(motionPositions);
 
-            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0, 0)) {
                 for (var iterator = stream.iterator(); iterator.hasNext();) {
                     Position position = iterator.next();
                     if (lastPosition == null) {
@@ -389,7 +389,7 @@ public class ReportUtils {
         } else {
             MotionState motionState = new MotionState();
 
-            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0)) {
+            try (var stream = PositionUtil.getPositionsStream(storage, device.getId(), from, to, 0, 0)) {
                 for (var iterator = stream.iterator(); iterator.hasNext();) {
                     Position position = iterator.next();
                     if (lastPosition == null) {

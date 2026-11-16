@@ -54,13 +54,8 @@ public final class PositionUtil {
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Compare("fixTime", "<", from)),
                 new Order("fixTime", true, 1)));
-        Stream<Position> positions = getPositionsStream(storage, deviceId, from, to, 0);
+        Stream<Position> positions = getPositionsStream(storage, deviceId, from, to, 0, 0);
         return Stream.concat(extraStream, positions);
-    }
-
-    public static Stream<Position> getPositionsStream(
-            Storage storage, long deviceId, Date from, Date to, int limit) throws StorageException {
-        return getPositionsStream(storage, deviceId, from, to, limit, 0);
     }
 
     public static Stream<Position> getPositionsStream(

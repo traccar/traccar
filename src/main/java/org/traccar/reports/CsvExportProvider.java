@@ -84,7 +84,7 @@ public class CsvExportProvider {
 
         List<Position> positions;
         try (var stream = PositionUtil.getPositionsStream(
-                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS))) {
+                storage, deviceId, from, to, config.getInteger(Keys.REPORT_MAX_POSITIONS), 0)) {
             positions = stream
                     .filter(position -> geofence == null || geofence.containsPosition(position))
                     .toList();
