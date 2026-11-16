@@ -12,7 +12,11 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTcp() throws Exception {
 
-        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
+        var decoder = mock(EelinkProtocolDecoder.class);
+        var encoder = inject(new EelinkProtocolEncoder(null, false));
+        var channel = channel(decoder, encoder);
+
+        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.DEFAULT_HEADER);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -20,6 +24,11 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
 
         verifyEncode(channel, command,
                 binary("676780000f0000010000000052454c41592c3123"));
+
+        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_ITR120);
+
+        verifyEncode(channel, command,
+                binary("282880000f0000010000000052454c41592c3123"));
 
     }
 
@@ -34,22 +43,6 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
 
         verifyEncode(channel, command,
                 binary("454c001eb41a0123456789012345676780000f0000010000000052454c41592c3123"));
-
-    }
-
-    @Test
-    public void testEncodeItr120() throws Exception {
-
-        var decoder = mock(EelinkProtocolDecoder.class);
-        when(decoder.isItr120()).thenReturn(true);
-        var channel = channel(inject(new EelinkProtocolEncoder(null, false)), decoder);
-
-        Command command = new Command();
-        command.setDeviceId(1);
-        command.setType(Command.TYPE_ENGINE_STOP);
-
-        verifyEncode(channel, command,
-                binary("282880000f0000010000000052454c41592c3123"));
 
     }
 

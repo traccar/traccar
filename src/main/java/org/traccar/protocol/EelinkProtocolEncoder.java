@@ -44,7 +44,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     }
 
     public static ByteBuf encodeContent(
-            boolean connectionless, boolean itr120, String uniqueId, int type, int index, ByteBuf content) {
+            Channel channel, boolean connectionless, String uniqueId, int type, int index, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -52,7 +52,9 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        buf.writeShort(itr120 ? 0x2828 : 0x6767);
+        EelinkProtocolDecoder decoder = channel != null && !connectionless
+                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
+        buf.writeShort(decoder != null ? decoder.getHeader() : EelinkProtocolDecoder.DEFAULT_HEADER);
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(index);
@@ -84,17 +86,15 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         buf.writeInt(0); // server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
-        EelinkProtocolDecoder decoder = channel != null && !connectionless
-                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
-        boolean itr120 = decoder != null && decoder.isItr120();
-
-        return encodeContent(connectionless, itr120, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+        return encodeContent(
+                channel, connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
     }
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> encodeContent(channel, command.getDeviceId(), command.getString(Command.KEY_DATA));
+            case Command.TYPE_CUSTOM ->
+                    encodeContent(channel, command.getDeviceId(), command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE -> encodeContent(channel, command.getDeviceId(), "WHERE#");
             case Command.TYPE_ENGINE_STOP -> encodeContent(channel, command.getDeviceId(), "RELAY,1#");
             case Command.TYPE_ENGINE_RESUME -> encodeContent(channel, command.getDeviceId(), "RELAY,0#");
