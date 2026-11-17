@@ -284,14 +284,12 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
                 } else if (type == MSG_ABS_DIG_SENS_DATA) {
 
-                    int value = buf.readUnsignedByte();
-                    int sensorIndex = (buf.readUnsignedByte() << 4) | BitUtil.from(value, 4);
-                    position.set(Position.PREFIX_IN + sensorIndex, BitUtil.to(value, 4));
+                    int value = buf.readUnsignedShortLE();
+                    position.set(Position.PREFIX_IN + BitUtil.from(value, 4), BitUtil.to(value, 4));
 
                 } else if (type == MSG_ABS_AN_SENS_DATA) {
 
-                    int sensorIndex = buf.readUnsignedByte();
-                    position.set(Position.PREFIX_ADC + sensorIndex, buf.readUnsignedMediumLE());
+                    position.set(Position.PREFIX_ADC + buf.readUnsignedByte(), buf.readUnsignedMediumLE());
 
                 } else if (type == MSG_LIQUID_LEVEL_SENSOR) {
 
