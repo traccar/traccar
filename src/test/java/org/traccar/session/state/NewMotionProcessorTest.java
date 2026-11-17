@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.TimeZone;
@@ -266,6 +267,31 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
         assertEquals(departure.getFixTime(), state.getEvents().get(0).getEventTime());
+    }
+
+    @Test
+    public void testStopBacktrackIgnoresSubSecondLeg() throws ParseException {
+        double stop = DistanceCalculator.getLongitudeDelta(1000, 0.0);
+
+        Position arrival = position("2017-01-01 00:01:00", 0.0, stop);
+        Position periodic = position("2017-01-01 00:36:00", 0.0, stop);
+        Position current = position("2017-01-01 00:36:00", 0.0, DistanceCalculator.getLongitudeDelta(1003, 0.0));
+        current.setTime(new Date(periodic.getFixTime().getTime() + 10));
+
+        Deque<CompactPosition> positions = new ArrayDeque<>();
+        positions.add(new CompactPosition(arrival));
+        positions.add(new CompactPosition(periodic));
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setMotionStreak(true);
+        state.setEventPosition(position("2016-12-31 23:50:00", 0.0, 0.0));
+
+        NewMotionProcessor.updateState(state, current, 200, 180000, Long.MAX_VALUE, false);
+
+        assertFalse(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(arrival.getFixTime(), state.getEvents().get(0).getEventTime());
     }
 
     @Test
