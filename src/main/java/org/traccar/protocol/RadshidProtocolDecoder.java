@@ -131,7 +131,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
             int extraLength = buf.readUnsignedByte();
             int extraEnd = buf.readerIndex() + extraLength;
-            if (extraLength >= 36 && buf.readUnsignedByte() >= 0x07) {
+            if (extraLength > 0 && buf.readUnsignedByte() >= 0x07) {
                 position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
                 buf.readUnsignedIntLE(); // point counter
                 buf.readUnsignedIntLE(); // system live time
