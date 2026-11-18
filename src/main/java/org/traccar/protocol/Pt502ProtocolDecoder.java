@@ -132,7 +132,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             ByteBuf photo = getMediaBuffer();
             int offset = photo.writerIndex();
-            int size = Math.min(photo.writableBytes(), MAX_CHUNK_SIZE);
+            int size = Math.min(photo.maxWritableBytes(), MAX_CHUNK_SIZE);
             channel.writeAndFlush(new NetworkMessage("#PHD" + offset + "," + size + "\r\n", channel.remoteAddress()));
         }
     }
@@ -156,7 +156,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
                 photo.writeBytes(buf);
 
-                if (photo.writableBytes() > 0) {
+                if (photo.maxWritableBytes() > 0) {
 
                     requestPhotoFragment(channel);
 

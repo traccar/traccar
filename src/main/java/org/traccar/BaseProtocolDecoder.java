@@ -111,12 +111,18 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public ByteBuf newMediaBuffer() {
-        return newMediaBuffer(0);
+        releaseMediaBuffer();
+        mediaBuffer = Unpooled.buffer(0, getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE));
+        return mediaBuffer;
     }
 
     public ByteBuf newMediaBuffer(int size) {
         releaseMediaBuffer();
-        mediaBuffer = Unpooled.buffer(size, getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE));
+        int maximumSize = getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE);
+        if (size < 0 || size > maximumSize) {
+            throw new IllegalArgumentException("Media size exceeds limit");
+        }
+        mediaBuffer = Unpooled.buffer(0, size);
         return mediaBuffer;
     }
 

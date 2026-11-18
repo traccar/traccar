@@ -151,7 +151,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
     private void requestPhoto(Channel channel, SocketAddress remoteAddress, String imei, String file) {
         ByteBuf photo = getMediaBuffer();
-        String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
+        String content = "1,D06," + file + "," + photo.writerIndex() + ","
+                + Math.min(1024, photo.maxWritableBytes());
         sendResponse(channel, remoteAddress, imei, content);
     }
 
@@ -374,8 +375,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 parser.nextInt(); // offset
                 parser.nextInt(); // size
                 buf.readerIndex(dataIndex);
-                buf.readBytes(photo, buf.readableBytes() - 3); // ignore checksum
-                if (photo.isWritable()) {
+                photo.writeBytes(buf, buf.readableBytes() - 3); // ignore checksum
+                if (photo.maxWritableBytes() > 0) {
                     requestPhoto(channel, remoteAddress, imei, photoId);
                 } else {
                     Position position = new Position(getProtocolName());

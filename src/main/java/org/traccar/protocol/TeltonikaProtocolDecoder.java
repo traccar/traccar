@@ -129,7 +129,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf photo = newMediaBuffer(buf.readInt());
                 sendImageRequest(
                         channel, remoteAddress, photoId,
-                        0, Math.min(IMAGE_PACKET_MAX, photo.capacity()));
+                        0, Math.min(IMAGE_PACKET_MAX, photo.maxCapacity()));
 
             } else if (subtype == 0x02) {
 
@@ -137,10 +137,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 buf.readInt(); // offset
                 ByteBuf photo = getMediaBuffer();
                 photo.writeBytes(buf, buf.readUnsignedShort());
-                if (photo.writableBytes() > 0) {
+                if (photo.maxWritableBytes() > 0) {
                     sendImageRequest(
                             channel, remoteAddress, photoId,
-                            photo.writerIndex(), Math.min(IMAGE_PACKET_MAX, photo.writableBytes()));
+                            photo.writerIndex(), Math.min(IMAGE_PACKET_MAX, photo.maxWritableBytes()));
                 } else {
                     position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
                 }

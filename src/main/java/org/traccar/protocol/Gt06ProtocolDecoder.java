@@ -291,7 +291,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf content = Unpooled.buffer();
         content.writeInt(pictureId);
         content.writeInt(photo.writerIndex());
-        content.writeShort(Math.min(photo.writableBytes(), 1024));
+        content.writeShort(Math.min(photo.maxWritableBytes(), 1024));
         sendResponse(channel, false, MSG_X1_PHOTO_DATA, 0, content);
     }
 
@@ -1359,9 +1359,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf photo = getMediaBuffer();
 
             buf.readUnsignedInt(); // offset
-            buf.readBytes(photo, buf.readUnsignedShort());
+            photo.writeBytes(buf, buf.readUnsignedShort());
 
-            if (photo.writableBytes() > 0) {
+            if (photo.maxWritableBytes() > 0) {
                 sendPhotoRequest(channel, pictureId);
             } else {
                 position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
@@ -1544,8 +1544,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (photo != null) {
-                    buf.readBytes(photo, buf.readableBytes() - 3 * 2);
-                    if (!photo.isWritable()) {
+                    photo.writeBytes(buf, buf.readableBytes() - 3 * 2);
+                    if (photo.maxWritableBytes() == 0) {
                         getLastLocation(position, new Date(timestamp));
                         position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), "jpg"));
                     }
