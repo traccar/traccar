@@ -1068,6 +1068,15 @@ public final class Keys {
             5000);
 
     /**
+     * List of protocols to forward raw data for. If not specified, raw data is forwarded for all protocols.
+     * The value is a comma-separated list of protocol names.
+     * Example value: teltonika,osmand
+     */
+    public static final ConfigKey<String> SERVER_FORWARD_PROTOCOLS = new StringConfigKey(
+            "server.forward.protocols",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing
      * HTTP requests. Defaults to 5000.
      */
