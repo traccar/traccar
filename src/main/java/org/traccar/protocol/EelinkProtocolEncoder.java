@@ -29,8 +29,12 @@ import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
-    public EelinkProtocolEncoder(Protocol protocol) {
+    private final boolean connectionless;
+    private int commandId;
+
+    public EelinkProtocolEncoder(Protocol protocol, boolean connectionless) {
         super(protocol);
+        this.connectionless = connectionless;
     }
 
     public static int checksum(ByteBuffer buf) {
@@ -44,15 +48,21 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     public static ByteBuf encodeContent(
             Channel channel, String uniqueId, int type, int index, ByteBuf content) {
 
-        boolean connectionless = channel instanceof DatagramChannel;
+        EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
+        return encodeContent(
+                channel instanceof DatagramChannel, decoder.getHeader(), uniqueId, type, index, content);
+    }
+
+    private static ByteBuf encodeContent(
+            boolean connectionless, int header, String uniqueId, int type, int index, ByteBuf content) {
+
         ByteBuf buf = Unpooled.buffer();
 
         if (connectionless) {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
-        buf.writeShort(decoder.getHeader());
+        buf.writeShort(header);
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(index);
@@ -76,27 +86,35 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private ByteBuf encodeContent(Channel channel, long deviceId, String content) {
+    private ByteBuf encodeContent(long deviceId, int header, String content) {
 
         ByteBuf buf = Unpooled.buffer();
 
+        boolean itr120 = header == EelinkProtocolDecoder.HEADER_ITR120;
         buf.writeByte(0x01); // command
-        buf.writeInt(0); // server id
-        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+        buf.writeInt(itr120 ? ++commandId : 0); // command id or server id
+        buf.writeBytes(content.getBytes(itr120 ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8));
 
         return encodeContent(
-                channel, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+                connectionless, header, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, itr120 ? 1 : 0, buf);
     }
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
+        EelinkProtocolDecoder decoder = channel != null && !connectionless
+                ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
+        int header = decoder != null ? decoder.getHeader() : EelinkProtocolDecoder.HEADER_EELINK;
+
         return switch (command.getType()) {
             case Command.TYPE_CUSTOM ->
-                    encodeContent(channel, command.getDeviceId(), command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE -> encodeContent(channel, command.getDeviceId(), "WHERE#");
-            case Command.TYPE_ENGINE_STOP -> encodeContent(channel, command.getDeviceId(), "RELAY,1#");
-            case Command.TYPE_ENGINE_RESUME -> encodeContent(channel, command.getDeviceId(), "RELAY,0#");
-            case Command.TYPE_REBOOT_DEVICE -> encodeContent(channel, command.getDeviceId(), "RESET#");
+                    encodeContent(command.getDeviceId(), header, command.getString(Command.KEY_DATA));
+            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), header,
+                    header == EelinkProtocolDecoder.HEADER_ITR120 ? "PAGING#" : "WHERE#");
+            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), header, "RELAY,1#");
+            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), header, "RELAY,0#");
+            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), header, "RESET#");
+            case Command.TYPE_GET_VERSION -> encodeContent(command.getDeviceId(), header, "VERSION?");
+            case Command.TYPE_CONFIGURATION -> encodeContent(command.getDeviceId(), header, "PARAM?");
             default -> null;
         };
     }

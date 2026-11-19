@@ -278,7 +278,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
             }
             if (BitUtil.check(status, 5)) {
-                position.set(Position.KEY_BLOCKED, BitUtil.check(status, 6));
+                position.set(Position.KEY_BLOCKED,
+                        header == HEADER_ITR120 ? !BitUtil.check(status, 6) : BitUtil.check(status, 6));
             }
             if (BitUtil.check(status, 7)) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
@@ -392,10 +393,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_INDEX, index);
-
         buf.readUnsignedByte(); // type
-        buf.readUnsignedInt(); // uid
+        long uid = buf.readUnsignedInt();
+        position.set(Position.KEY_INDEX, header == HEADER_ITR120 ? uid : index);
 
         String sentence = buf.toString(StandardCharsets.UTF_8);
 

@@ -33,19 +33,21 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_REBOOT_DEVICE);
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_CONFIGURATION);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 3, 2));
-                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this));
+                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, false));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this));
+                pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, true));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }
         });
