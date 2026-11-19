@@ -48,14 +48,13 @@ public final class PositionUtil {
 
     public static Stream<Position> getPositionsStreamWithExtra(
             Storage storage, long deviceId, Date from, Date to) throws StorageException {
-        Stream<Position> extraStream = storage.getObjectsStream(Position.class, new Request(
-                new Columns.All(),
+        Position extra = storage.getObject(Position.class, new Request(
+                new Columns.Include("fixTime"),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Compare("fixTime", "<", from)),
                 new Order("fixTime", true, 1)));
-        Stream<Position> positions = getPositionsStream(storage, deviceId, from, to, 0, 0);
-        return Stream.concat(extraStream, positions);
+        return getPositionsStream(storage, deviceId, extra != null ? extra.getFixTime() : from, to, 0, 0);
     }
 
     public static Stream<Position> getPositionsStream(
