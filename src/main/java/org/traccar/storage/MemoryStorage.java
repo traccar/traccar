@@ -18,6 +18,7 @@ package org.traccar.storage;
 import org.traccar.helper.ReflectionCache;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Pair;
@@ -123,6 +124,10 @@ public class MemoryStorage extends Storage {
                     return value != null && value.toString().toLowerCase(Locale.ROOT).contains(needle);
                 });
             }
+            case Condition.EventPositions condition -> objects.getOrDefault(Event.class, Map.of()).values().stream()
+                    .map(Event.class::cast)
+                    .anyMatch(event -> event.getPositionId() == ((Position) object).getId()
+                            && checkCondition(condition.events(), event));
             case Condition.LatestPositions condition -> {
                 long positionId = (Long) retrieveValue(object, "id");
                 if (condition.getDeviceId() > 0

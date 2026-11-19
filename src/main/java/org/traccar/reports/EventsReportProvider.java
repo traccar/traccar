@@ -20,6 +20,7 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.DeviceUtil;
+import org.traccar.helper.model.StopGeofences;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -47,6 +48,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EventsReportProvider {
@@ -71,6 +74,17 @@ public class EventsReportProvider {
                 new Order("eventTime")));
     }
 
+    Map<Long, Position> getStopPositions(long deviceId, Date from, Date to) throws StorageException {
+        Condition events = Condition.merge(List.of(
+                new Condition.Equals("deviceId", deviceId),
+                new Condition.Between("eventTime", from, to),
+                new Condition.Equals("type", Event.TYPE_DEVICE_STOPPED)));
+        return storage.getObjects(Position.class, new Request(
+                new Columns.Include("id", "deviceId", "geofenceIds"),
+                new Condition.And(new Condition.Equals("deviceId", deviceId), new Condition.EventPositions(events))))
+                .stream().collect(Collectors.toMap(Position::getId, position -> position));
+    }
+
     private boolean filterType(Collection<String> types, Collection<String> alarms, Event event) {
         if (!types.contains(event.getType())) {
             return false;
@@ -85,26 +99,31 @@ public class EventsReportProvider {
         reportUtils.checkPeriodLimit(from, to);
         boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
 
+        boolean includeStops = all || types.contains(Event.TYPE_DEVICE_STOPPED);
+        var stopGeofences = includeStops ? StopGeofences.forUser(storage, userId) : null;
         return DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds).stream()
                 .flatMap(device -> {
                     try {
-                        return getEvents(device.getId(), from, to);
+                        Map<Long, Position> positions = includeStops
+                                ? getStopPositions(device.getId(), from, to) : Map.of();
+                        return getEvents(device.getId(), from, to)
+                                .filter(event -> all || filterType(types, alarms, event))
+                                .filter(event -> visibleEvent(userId, event))
+                                .map(event -> includeStops
+                                        ? stopGeofences.forEvent(event, positions.get(event.getPositionId())) : event);
                     } catch (StorageException e) {
                         throw new RuntimeException(e);
                     }
-                })
-                .filter(event -> all || filterType(types, alarms, event))
-                .filter(event -> {
-                    long geofenceId = event.getGeofenceId();
-                    if (geofenceId > 0 && reportUtils.getObject(userId, Geofence.class, geofenceId) == null) {
-                        return false;
-                    }
-                    long maintenanceId = event.getMaintenanceId();
-                    if (maintenanceId > 0 && reportUtils.getObject(userId, Maintenance.class, maintenanceId) == null) {
-                        return false;
-                    }
-                    return true;
                 });
+    }
+
+    private boolean visibleEvent(long userId, Event event) {
+        long geofenceId = event.getGeofenceId();
+        if (geofenceId > 0 && reportUtils.getObject(userId, Geofence.class, geofenceId) == null) {
+            return false;
+        }
+        long maintenanceId = event.getMaintenanceId();
+        return maintenanceId <= 0 || reportUtils.getObject(userId, Maintenance.class, maintenanceId) != null;
     }
 
     public void getExcel(
@@ -118,6 +137,7 @@ public class EventsReportProvider {
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
         HashMap<Long, Position> positions = new HashMap<>();
+        var stopGeofences = StopGeofences.forUser(storage, userId);
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             List<Event> events = new ArrayList<>();
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
@@ -167,7 +187,9 @@ public class EventsReportProvider {
                     deviceEvents.setGroupName(group.getName());
                 }
             }
-            deviceEvents.setObjects(events);
+            deviceEvents.setObjects(events.stream()
+                    .map(event -> stopGeofences.forEvent(event, positions.get(event.getPositionId())))
+                    .toList());
             devicesEvents.add(deviceEvents);
         }
 

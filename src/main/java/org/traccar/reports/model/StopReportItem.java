@@ -16,7 +16,29 @@
  */
 package org.traccar.reports.model;
 
+import java.util.List;
+
 public class StopReportItem extends BaseReportItem {
+
+    private List<Long> geofenceIds = List.of();
+
+    public List<Long> getGeofenceIds() {
+        return geofenceIds;
+    }
+
+    public void setGeofenceIds(List<Long> geofenceIds) {
+        this.geofenceIds = geofenceIds != null ? geofenceIds : List.of();
+    }
+
+    private String geofenceNames = "";
+
+    public String getGeofenceNames() {
+        return geofenceNames;
+    }
+
+    public void setGeofenceNames(String geofenceNames) {
+        this.geofenceNames = geofenceNames;
+    }
 
     private long positionId;
 

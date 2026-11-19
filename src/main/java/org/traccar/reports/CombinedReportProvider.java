@@ -17,6 +17,7 @@ package org.traccar.reports;
 
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
+import org.traccar.helper.model.StopGeofences;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -56,6 +57,7 @@ public class CombinedReportProvider {
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
+        var stopGeofences = StopGeofences.forUser(storage, userId);
         ArrayList<CombinedReportItem> result = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             CombinedReportItem item = new CombinedReportItem();
@@ -66,9 +68,6 @@ public class CombinedReportProvider {
                             new Condition.Equals("deviceId", device.getId()),
                             new Condition.Between("eventTime", from, to)),
                     new Order("eventTime")));
-            item.setEvents(events.stream()
-                    .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))
-                    .toList());
             var eventPositionIds = events.stream()
                     .map(Event::getPositionId)
                     .collect(Collectors.toSet());
@@ -85,6 +84,11 @@ public class CombinedReportProvider {
                 });
             }
             item.setRoute(route);
+            var positionsById = matchedPositions.stream().collect(Collectors.toMap(Position::getId, p -> p));
+            item.setEvents(events.stream()
+                    .filter(event -> event.getPositionId() > 0 && !EXCLUDE_TYPES.contains(event.getType()))
+                    .map(event -> stopGeofences.forEvent(event, positionsById.get(event.getPositionId())))
+                    .toList());
             item.setPositions(matchedPositions);
 
             result.add(item);

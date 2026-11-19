@@ -35,6 +35,17 @@ public class Event extends Message {
         eventTime = new Date();
     }
 
+    public Event(Event source) {
+        setId(source.getId());
+        setType(source.getType());
+        setDeviceId(source.getDeviceId());
+        setEventTime(source.getEventTime());
+        setPositionId(source.getPositionId());
+        setGeofenceId(source.getGeofenceId());
+        setMaintenanceId(source.getMaintenanceId());
+        getAttributes().putAll(source.getAttributes());
+    }
+
     public Event() {}
 
     public static final String ALL_EVENTS = "allEvents";

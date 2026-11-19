@@ -43,15 +43,7 @@ public final class NotificatorWeb extends Notificator {
     @Override
     public CompletableFuture<Void> sendAsync(Notification notification, User user, Event event, Position position) {
         try {
-            Event copy = new Event();
-            copy.setId(event.getId());
-            copy.setDeviceId(event.getDeviceId());
-            copy.setType(event.getType());
-            copy.setEventTime(event.getEventTime());
-            copy.setPositionId(event.getPositionId());
-            copy.setGeofenceId(event.getGeofenceId());
-            copy.setMaintenanceId(event.getMaintenanceId());
-            copy.getAttributes().putAll(event.getAttributes());
+            Event copy = new Event(event);
 
             var message = notificationFormatter.formatMessage(notification, user, event, position);
             copy.set("message", message.digest());

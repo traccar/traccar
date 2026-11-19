@@ -16,8 +16,10 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.helper.model.StopGeofences;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Position;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -46,6 +48,13 @@ public class EventResource extends BaseResource {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
         }
         permissionsService.checkPermission(Device.class, getUserId(), event.getDeviceId());
+        if (Event.TYPE_DEVICE_STOPPED.equals(event.getType()) && event.getPositionId() != 0) {
+            Position position = storage.getObject(Position.class, new Request(
+                    new Columns.Include("id", "deviceId", "geofenceIds"),
+                    new Condition.And(new Condition.Equals("deviceId", event.getDeviceId()),
+                            new Condition.Equals("id", event.getPositionId()))));
+            return StopGeofences.forUser(storage, getUserId()).forEvent(event, position);
+        }
         return event;
     }
 

@@ -209,13 +209,17 @@ public class ReportUtilsTest extends BaseTest {
 
     @Test
     public void testDetectStopsSimple() throws Exception {
+        Position driveBy = position(4, "2016-01-01 00:03:00.000", 10, 1000);
+        driveBy.setGeofenceIds(List.of(11L));
+        Position arrival = position(6, "2016-01-01 00:05:00.000", 0, 3000);
+        arrival.setGeofenceIds(List.of(22L, 33L));
         Stream<Position> data = Stream.of(
                 position(1, "2016-01-01 00:00:00.000", 0, 0),
                 position(2, "2016-01-01 00:01:00.000", 0, 0),
                 position(3, "2016-01-01 00:02:00.000", 10, 0),
-                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                driveBy,
                 position(5, "2016-01-01 00:04:00.000", 10, 2000),
-                position(6, "2016-01-01 00:05:00.000", 0, 3000),
+                arrival,
                 position(7, "2016-01-01 00:15:00.000", 0, 3000),
                 position(8, "2016-01-01 00:25:00.000", 0, 3000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
@@ -235,10 +239,12 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getEndTime());
         assertEquals(120000, itemStop.getDuration());
+        assertEquals(List.of(), itemStop.getGeofenceIds());
 
         itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getStartTime());
+        assertEquals(List.of(22L, 33L), itemStop.getGeofenceIds());
         assertEquals(date("2016-01-01 00:25:00.000"), itemStop.getEndTime());
         assertEquals(1200000, itemStop.getDuration());
 

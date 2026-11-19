@@ -265,6 +265,7 @@ public class ReportUtils {
         stop.setDeviceName(device.getName());
 
         stop.setPositionId(startStop.getId());
+        stop.setGeofenceIds(startStop.getGeofenceIds());
         stop.setLatitude(startStop.getLatitude());
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());

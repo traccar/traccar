@@ -20,6 +20,7 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.DeviceUtil;
+import org.traccar.helper.model.StopGeofences;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
@@ -60,9 +61,12 @@ public class StopsReportProvider {
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
+        var geofences = StopGeofences.forUser(storage, userId);
         ArrayList<StopReportItem> result = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            result.addAll(reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class));
+            var stops = reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class);
+            stops.forEach(geofences::applyToStop);
+            result.addAll(stops);
         }
         return result;
     }
@@ -72,6 +76,7 @@ public class StopsReportProvider {
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
+        var geofences = StopGeofences.forUser(storage, userId);
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
@@ -86,6 +91,7 @@ public class StopsReportProvider {
                     deviceStops.setGroupName(group.getName());
                 }
             }
+            stops.forEach(geofences::applyToStop);
             deviceStops.setObjects(stops);
             devicesStops.add(deviceStops);
         }

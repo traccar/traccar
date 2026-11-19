@@ -4476,7 +4476,9 @@ components:
         attributes:
           type: object
           properties: {}
-          description: Additional event-specific attributes
+          description: >
+            Additional event-specific attributes. Returned stopped events can include geofenceIds (an array)
+            and geofenceNames (display text) from their recorded position, limited to geofences visible to the user.
     CombinedReportItem:
       type: object
       properties:
@@ -4626,6 +4628,15 @@ components:
         address:
           type: string
           description: Address where the stop occurred
+        geofenceIds:
+          type: array
+          description: Accessible geofences recorded at the start of the stop
+          items:
+            type: integer
+            format: int64
+        geofenceNames:
+          type: string
+          description: Comma-separated display names of those geofences
         lat:
           type: number
           description: Stop latitude in decimal degrees

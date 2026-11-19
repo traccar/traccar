@@ -192,6 +192,8 @@ public interface Condition {
         }
     }
 
+    record EventPositions(Condition events) implements Condition {}
+
     class LatestPositions implements Condition {
         private final Condition condition;
         private final long deviceId;

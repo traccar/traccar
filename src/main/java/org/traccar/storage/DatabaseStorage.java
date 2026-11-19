@@ -20,6 +20,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Permission;
@@ -274,6 +275,7 @@ public class DatabaseStorage extends Storage {
                     results.add(conditionId);
                 }
             }
+            case Condition.EventPositions condition -> results.addAll(getConditionVariables(condition.events()));
             case Condition.LatestPositions condition -> {
                 if (condition.getDeviceId() > 0) {
                     results.add(condition.getDeviceId());
@@ -342,6 +344,13 @@ public class DatabaseStorage extends Storage {
                         .map(column -> "LOWER(" + column + ") LIKE ?")
                         .collect(Collectors.joining(" OR ")));
                 result.append(')');
+
+            } else if (genericCondition instanceof Condition.EventPositions condition) {
+
+                result.append("id IN (SELECT positionId FROM ");
+                result.append(getStorageName(Event.class));
+                result.append(formatCondition(condition.events()));
+                result.append(")");
 
             } else if (genericCondition instanceof Condition.LatestPositions condition) {
 
