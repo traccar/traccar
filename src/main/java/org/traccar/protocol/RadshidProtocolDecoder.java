@@ -51,7 +51,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(int event) {
+    private String decodeAlarm(int event, int firmware) {
         return switch (event) {
             case 0xD7, 0xF9 -> Position.ALARM_JAMMING;
             case 0xE2 -> Position.ALARM_POWER_CUT;
@@ -59,9 +59,11 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             case 0xE4, 0xF2 -> Position.ALARM_GPS_ANTENNA_CUT;
             case 0xE5 -> Position.ALARM_VIBRATION;
             case 0xE7 -> Position.ALARM_FATIGUE_DRIVING;
-            case 0xEB -> Position.ALARM_SOS;
+            case 0xEB -> firmware >= 81 ? Position.ALARM_SOS : null;
             case 0xEE, 0xEF -> Position.ALARM_OVERSPEED;
             case 0xF0 -> Position.ALARM_LOW_BATTERY;
+            case 0xF1 -> firmware < 81 ? Position.ALARM_GPS_ANTENNA_CUT : null;
+            case 0xF7 -> firmware < 81 ? Position.ALARM_FATIGUE_DRIVING : null;
             default -> null;
         };
     }
@@ -94,7 +96,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
             int eventCode = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, eventCode);
-            position.addAlarm(decodeAlarm(eventCode));
 
             long driverId = buf.readUnsignedInt() << 8 | buf.readUnsignedByte();
             if (driverId != 0) {
@@ -131,7 +132,15 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
             int extraLength = buf.readUnsignedByte();
             int extraEnd = buf.readerIndex() + extraLength;
-            if (extraLength > 0 && buf.readUnsignedByte() >= 0x07) {
+            int extraVersion = extraLength > 0 ? buf.readUnsignedByte() : 0;
+            boolean extraSupported = switch (extraVersion) {
+                case 7 -> extraLength == 36 || extraLength == 37;
+                case 8 -> extraLength == 37;
+                case 10 -> extraLength == 45;
+                case 11, 13 -> extraLength == 73;
+                default -> false;
+            };
+            if (extraSupported) {
                 position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
                 buf.readUnsignedIntLE(); // point counter
                 buf.readUnsignedIntLE(); // system live time
@@ -156,21 +165,20 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
                 if (humidity >= 0) {
                     position.set(Position.KEY_HUMIDITY, humidity);
                 }
-                if (extraLength >= 73) {
+                if (extraLength == 73) {
                     buf.skipBytes(10); // reserved, last known flag, iccid
-                    int mcc = buf.readIntLE();
-                    int mnc = buf.readIntLE();
-                    int lac = buf.readIntLE();
-                    long cid = buf.readUnsignedIntLE();
-                    buf.readIntLE(); // bcch
-                    buf.readIntLE(); // bsic
-                    int rssi = buf.readIntLE();
-                    if (mcc > 0) {
-                        position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
+                    CellTower cellTower = CellTower.from(
+                            buf.readIntLE(), buf.readIntLE(), buf.readIntLE(), buf.readUnsignedIntLE());
+                    buf.skipBytes(8); // bcch, bsic
+                    cellTower.setSignalStrength(buf.readIntLE());
+                    if (cellTower.getMobileCountryCode() > 0) {
+                        position.setNetwork(new Network(cellTower));
                     }
                 }
             }
             buf.readerIndex(extraEnd);
+
+            position.addAlarm(decodeAlarm(eventCode, position.getInteger(Position.KEY_VERSION_FW)));
 
             positions.add(position);
         }
