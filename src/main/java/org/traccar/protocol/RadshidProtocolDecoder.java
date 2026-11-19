@@ -140,8 +140,10 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
                 case 11, 13 -> extraLength == 73;
                 default -> false;
             };
+            int version = 0;
             if (extraSupported) {
-                position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
+                version = buf.readUnsignedShortLE();
+                position.set(Position.KEY_VERSION_FW, version);
                 buf.readUnsignedIntLE(); // point counter
                 buf.readUnsignedIntLE(); // system live time
                 buf.readUnsignedShortLE(); // reset number
@@ -178,7 +180,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             }
             buf.readerIndex(extraEnd);
 
-            position.addAlarm(decodeAlarm(eventCode, position.getInteger(Position.KEY_VERSION_FW)));
+            position.addAlarm(decodeAlarm(eventCode, version));
 
             positions.add(position);
         }
