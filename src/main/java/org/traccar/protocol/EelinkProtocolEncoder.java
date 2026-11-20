@@ -90,31 +90,38 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf buf = Unpooled.buffer();
 
-        boolean itr120 = header == EelinkProtocolDecoder.HEADER_ITR120;
+        boolean iter = header == EelinkProtocolDecoder.HEADER_ITER;
         buf.writeByte(0x01); // command
-        buf.writeInt(itr120 ? ++commandId : 0); // command id or server id
-        buf.writeBytes(content.getBytes(itr120 ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8));
+        buf.writeInt(iter ? ++commandId : 0); // command id or server id
+        buf.writeBytes(content.getBytes(iter ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8));
 
         return encodeContent(
-                connectionless, header, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, itr120 ? 1 : 0, buf);
+                connectionless, header, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, iter ? 1 : 0, buf);
     }
 
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
-        EelinkProtocolDecoder decoder = channel != null && !connectionless
+
+        EelinkProtocolDecoder decoder = channel != null
                 ? channel.pipeline().get(EelinkProtocolDecoder.class) : null;
-        int header = decoder != null ? decoder.getHeader() : EelinkProtocolDecoder.HEADER_EELINK;
+        int header = EelinkProtocolDecoder.HEADER_EELINK;
+        if (decoder != null) {
+            header = connectionless ? decoder.getUdpHeader(command.getDeviceId()) : decoder.getHeader();
+        }
 
         return switch (command.getType()) {
             case Command.TYPE_CUSTOM ->
                     encodeContent(command.getDeviceId(), header, command.getString(Command.KEY_DATA));
+            case Command.TYPE_CONFIGURATION ->
+                    encodeContent(command.getDeviceId(), header, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), header,
-                    header == EelinkProtocolDecoder.HEADER_ITR120 ? "PAGING#" : "WHERE#");
+                    header == EelinkProtocolDecoder.HEADER_ITER ? "PAGING#" : "WHERE#");
             case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), header, "RELAY,1#");
             case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), header, "RELAY,0#");
             case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), header, "RESET#");
             case Command.TYPE_GET_VERSION -> encodeContent(command.getDeviceId(), header, "VERSION?");
-            case Command.TYPE_CONFIGURATION -> encodeContent(command.getDeviceId(), header, "PARAM?");
+            case Command.TYPE_GET_DEVICE_STATUS -> encodeContent(command.getDeviceId(), header, "STATUS?");
+            case Command.TYPE_IDENTIFICATION -> encodeContent(command.getDeviceId(), header, "PARAM?");
             default -> null;
         };
     }

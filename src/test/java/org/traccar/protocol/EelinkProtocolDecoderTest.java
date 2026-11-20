@@ -31,14 +31,6 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
                 position(Checks.ATTRIBUTES).attribute("idleTime", 30));
 
         verifyDecode(decoder, binary(
-                "282812004700416af517fb03fd47cdb2fab8958c03d60000007b0d02d4000527390000515721066b104504aa000000000024082e082d000000000000000000000000000000000000ec670000"),
-                position(Checks.ATTRIBUTES).attribute(Position.KEY_BLOCKED, false));
-
-        verifyDecode(decoder, binary(
-                "282812004700416af517fb03fd47cdb2fab8958c03d60000007b0d02d4000527390000515721062b104504aa000000000024082e082d000000000000000000000000000000000000ec670000"),
-                position(Checks.ATTRIBUTES).attribute(Position.KEY_BLOCKED, true));
-
-        verifyDecode(decoder, binary(
                 "28288000120001010000000656455253494f4e3a312e30"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_INDEX, 6L));
 

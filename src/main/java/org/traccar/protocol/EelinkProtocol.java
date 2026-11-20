@@ -35,6 +35,8 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_GET_VERSION,
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_IDENTIFICATION,
                 Command.TYPE_CONFIGURATION);
         addServer(new TrackerServer(config, getName(), false) {
             @Override

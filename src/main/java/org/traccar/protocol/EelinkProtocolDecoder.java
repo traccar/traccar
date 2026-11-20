@@ -35,19 +35,26 @@ import org.traccar.session.DeviceSession;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int HEADER_EELINK = 0x6767;
-    public static final int HEADER_ITR120 = 0x2828;
+    public static final int HEADER_ITER = 0x2828;
 
     private int header;
+    private final Map<Long, Integer> udpHeaders = new HashMap<>();
 
     public int getHeader() {
         return header;
+    }
+
+    public int getUdpHeader(long deviceId) {
+        return udpHeaders.getOrDefault(deviceId, HEADER_EELINK);
     }
 
     public EelinkProtocolDecoder(Protocol protocol) {
@@ -279,7 +286,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
             if (BitUtil.check(status, 5)) {
                 position.set(Position.KEY_BLOCKED,
-                        header == HEADER_ITR120 ? !BitUtil.check(status, 6) : BitUtil.check(status, 6));
+                        header == HEADER_ITER ? !BitUtil.check(status, 6) : BitUtil.check(status, 6));
             }
             if (BitUtil.check(status, 7)) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
@@ -289,7 +296,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (header == HEADER_ITR120) {
+        if (header == HEADER_ITER) {
             if (type == MSG_REPORT) {
                 if (reportType == 1 || reportType == 2) {
                     position.set(Position.KEY_IGNITION, reportType == 1);
@@ -395,7 +402,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // type
         long uid = buf.readUnsignedInt();
-        position.set(Position.KEY_INDEX, header == HEADER_ITR120 ? uid : index);
+        position.set(Position.KEY_INDEX, header == HEADER_ITER ? uid : index);
 
         String sentence = buf.toString(StandardCharsets.UTF_8);
 
@@ -481,6 +488,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
+
+        if (uniqueId != null && deviceSession != null && (header == HEADER_EELINK || header == HEADER_ITER)) {
+            udpHeaders.put(deviceSession.getDeviceId(), header);
+        }
 
         if (channel != null && type != MSG_GPS && type != MSG_DATA) {
             ByteBuf content = Unpooled.buffer();
