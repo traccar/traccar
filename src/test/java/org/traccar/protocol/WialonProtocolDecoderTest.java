@@ -14,6 +14,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new WialonProtocolDecoder(null));
 
         verifyDecode(decoder, text(
+                "#B#201126;132042;5614.0746;N;04352.4052;E;0;266;83;18;0.6;NA;0;0.000;NA;pwr_ext:2:12.2,aux:3:107030D1,Gsim:1:1,Grssi:1:31,Gregst:1:1,Gcipst:1:3,Gsrvst:1:3,Gupdst:1:0,Accel:2:0.96,StAccel:1:3,Ign:1:0,F1:1:0|DB10"),
+                position().attribute("adc1", 0.0));
+
+        verifyDecode(decoder, text(
                 "#L#2.0;42001300083;;CE45"));
 
         verifyDecode(decoder, text(
@@ -71,7 +75,7 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, text(
                 "#D#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4;0.0;0;0;14.77,0.02,3.6;NA;count1:1:564,fuel:2:45.8,hw:3:V4.5"),
-                position());
+                position().attribute("adc1", 14.77));
 
         verifyDecode(decoder, text(
                 "#D#190114;051312;4459.6956;N;04105.9930;E;35;306;204.000000;12;NA;452986639;NA;106.000000;NA;sats_gps:1:9,sats_glonass:1:3,balance:2:12123.000000,stay_balance:1:0"),

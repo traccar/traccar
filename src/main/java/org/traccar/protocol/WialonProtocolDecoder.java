@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
             for (int i = 0; i < values.length; i++) {
-                position.set(Position.PREFIX_ADC + (i + 1), values[i]);
+                position.set(Position.PREFIX_ADC + (i + 1), Double.parseDouble(values[i]));
             }
         }
 
