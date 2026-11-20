@@ -66,10 +66,13 @@ public class CombinedReportProvider {
                             new Condition.Equals("deviceId", device.getId()),
                             new Condition.Between("eventTime", from, to)),
                     new Order("eventTime")));
-            item.setEvents(events.stream()
+            var accessibleEvents = events.stream()
                     .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))
-                    .toList());
-            var eventPositionIds = events.stream()
+                    .filter(e -> e.getOrderId() == 0
+                            || reportUtils.getObject(userId, org.traccar.model.Order.class, e.getOrderId()) != null)
+                    .toList();
+            item.setEvents(accessibleEvents);
+            var eventPositionIds = accessibleEvents.stream()
                     .map(Event::getPositionId)
                     .collect(Collectors.toSet());
 

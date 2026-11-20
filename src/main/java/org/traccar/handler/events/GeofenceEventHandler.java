@@ -20,6 +20,7 @@ import org.traccar.config.Keys;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
+import org.traccar.model.Order;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
@@ -45,6 +46,17 @@ public class GeofenceEventHandler extends BasePositionEventHandler {
                 Event event = new Event(type, position);
                 event.setGeofenceId(geofence.getId());
                 callback.eventDetected(event);
+
+                if (Event.TYPE_GEOFENCE_ENTER.equals(type) || Event.TYPE_GEOFENCE_CROSSED.equals(type)) {
+                    for (Order order : cacheManager.getDeviceObjects(position.getDeviceId(), Order.class)) {
+                        if (order.getGeofenceId() == geofence.getId()) {
+                            Event visitEvent = new Event(Event.TYPE_ORDER_VISIT, position);
+                            visitEvent.setGeofenceId(geofence.getId());
+                            visitEvent.setOrderId(order.getId());
+                            callback.eventDetected(visitEvent);
+                        }
+                    }
+                }
             }
         }
     }
