@@ -55,7 +55,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public int getUdpHeader(long deviceId) {
-        return udpHeaders.getOrDefault(deviceId, HEADER_EELINK);
+        return udpHeaders.get(deviceId);
     }
 
     public EelinkProtocolDecoder(Protocol protocol) {
