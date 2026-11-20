@@ -95,6 +95,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
     public static final int MSG_VIDEO_REQUEST = 0x9101;
     public static final int MSG_VIDEO_CONTROL = 0x9102;
+    public static final int MSG_VIDEO_FILE_UPLOAD = 0x9206;
+    public static final int MSG_VIDEO_FILE_UPLOAD_RESULT = 0x1206;
     public static final int MSG_PARAMETER_QUERY_RESPONSE = 0x0104;
     public static final int MSG_PARAMETER_QUERY_ALL = 0x8104;
     public static final int MSG_LOCATION_QUERY = 0x8201;
@@ -392,6 +394,32 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
+
+        } else if (type == MSG_VIDEO_FILE_UPLOAD_RESULT || type == MSG_TERMINAL_GENERAL_RESPONSE) {
+
+            int expectedLength = type == MSG_VIDEO_FILE_UPLOAD_RESULT ? 3 : 5;
+            if (BitUtil.check(attribute, 13) || bodyLength != expectedLength
+                    || buf.readableBytes() != expectedLength + 2) {
+                return null;
+            }
+            int requestSequence = buf.readUnsignedShort();
+            if (type == MSG_TERMINAL_GENERAL_RESPONSE && buf.readUnsignedShort() != MSG_VIDEO_FILE_UPLOAD) {
+                return null;
+            }
+            int result = buf.readUnsignedByte();
+            if (type == MSG_TERMINAL_GENERAL_RESPONSE && result == RESULT_SUCCESS) {
+                return null;
+            }
+            if (type == MSG_VIDEO_FILE_UPLOAD_RESULT) {
+                sendGeneralResponse(channel, remoteAddress, id, type, index);
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.set(Position.KEY_RESULT, String.format("videoFileDownload: serial=%d, stage=%s, result=%d",
+                    requestSequence, type == MSG_VIDEO_FILE_UPLOAD_RESULT ? "completion" : "rejected", result));
+            return position;
 
         } else if (type == MSG_REPORT_TEXT_MESSAGE) {
 

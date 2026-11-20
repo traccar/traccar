@@ -48,6 +48,7 @@ public class Jt808Protocol extends BaseProtocol {
                 Command.TYPE_SET_SPEED_LIMIT,
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_VIDEO_START,
+                Command.TYPE_VIDEO_FILE_DOWNLOAD,
                 Command.TYPE_VIDEO_STOP);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
