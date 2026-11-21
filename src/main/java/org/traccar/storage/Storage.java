@@ -45,13 +45,17 @@ public abstract class Storage {
 
     public abstract void removeObject(Class<?> clazz, Request request) throws StorageException;
 
-    public abstract List<Permission> getPermissions(
-            Class<? extends BaseModel> ownerClass, long ownerId,
-            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException;
+    public abstract List<Permission> getPermissions(List<Permission> filters) throws StorageException;
 
     public abstract void addPermission(Permission permission) throws StorageException;
 
     public abstract void removePermission(Permission permission) throws StorageException;
+
+    public List<Permission> getPermissions(
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException {
+        return getPermissions(List.of(new Permission(ownerClass, ownerId, propertyClass, propertyId)));
+    }
 
     public List<Permission> getPermissions(
             Class<? extends BaseModel> ownerClass,

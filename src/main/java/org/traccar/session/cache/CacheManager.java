@@ -50,6 +50,7 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
@@ -399,20 +400,18 @@ public class CacheManager implements BroadcastInterface {
                     invalidatePermission(object.getClass(), object.getId(), Group.class, groupId, true);
                 }
 
-                for (Permission permission : storage.getPermissions(User.class, 0, object.getClass(), object.getId())) {
-                    invalidatePermission(
-                            object.getClass(), object.getId(), User.class, permission.getOwnerId(), true);
-                }
-
-                for (Class<? extends BaseModel> clazz : GROUPED_CLASSES) {
-                    if (!clazz.equals(Device.class) || object.getClass().equals(Device.class)) {
-                        for (Permission permission : storage.getPermissions(
-                                object.getClass(), object.getId(), clazz, 0)) {
-                            invalidatePermission(
-                                    object.getClass(), object.getId(),
-                                    clazz, permission.getPropertyId(), true);
-                        }
+                var filters = new ArrayList<Permission>();
+                filters.add(new Permission(User.class, 0, object.getClass(), object.getId()));
+                for (var clazz : GROUPED_CLASSES) {
+                    if (!clazz.equals(Device.class)) {
+                        filters.add(new Permission(object.getClass(), object.getId(), clazz, 0));
+                    } else if (object instanceof Device) {
+                        filters.add(new Permission(Device.class, object.getId(), LinkedDevice.class, 0));
                     }
+                }
+                for (var permission : storage.getPermissions(filters)) {
+                    invalidatePermission(false, permission.getOwnerClass(), permission.getOwnerId(),
+                            permission.getPropertyClass(), permission.getPropertyId(), true);
                 }
             }
 

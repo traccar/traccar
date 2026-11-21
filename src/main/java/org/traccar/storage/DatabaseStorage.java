@@ -18,7 +18,6 @@ package org.traccar.storage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
@@ -36,6 +35,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -183,26 +183,28 @@ public class DatabaseStorage extends Storage {
     }
 
     @Override
-    public List<Permission> getPermissions(
-            Class<? extends BaseModel> ownerClass, long ownerId,
-            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException {
-        StringBuilder query = new StringBuilder("SELECT * FROM ");
-        query.append(Permission.getStorageName(ownerClass, propertyClass));
-        var conditions = new LinkedList<Condition>();
-        if (ownerId > 0) {
-            conditions.add(new Condition.Equals(Permission.getKey(ownerClass), ownerId));
+    public List<Permission> getPermissions(List<Permission> filters) throws StorageException {
+        var query = new StringJoiner(" UNION ALL ");
+        var values = new ArrayList<>();
+        for (int i = 0; i < filters.size(); i++) {
+            var filter = filters.get(i);
+            var conditions = new LinkedList<Condition>();
+            if (filter.getOwnerId() > 0) {
+                conditions.add(new Condition.Equals(Permission.getKey(filter.getOwnerClass()), filter.getOwnerId()));
+            }
+            if (filter.getPropertyId() > 0) {
+                conditions.add(new Condition.Equals(
+                        Permission.getKey(filter.getPropertyClass()), filter.getPropertyId()));
+            }
+            var condition = Condition.merge(conditions);
+            query.add("SELECT " + i + ", p.* FROM " + filter.getStorageName() + " p" + formatCondition(condition));
+            values.addAll(getConditionVariables(condition));
         }
-        if (propertyId > 0) {
-            conditions.add(new Condition.Equals(Permission.getKey(propertyClass), propertyId));
-        }
-        Condition combinedCondition = Condition.merge(conditions);
-        query.append(formatCondition(combinedCondition));
         try (QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString())) {
-            List<Object> values = getConditionVariables(combinedCondition);
             for (int index = 0; index < values.size(); index++) {
                 builder.setValue(index, values.get(index));
             }
-            return builder.executePermissionsQuery();
+            return builder.executePermissionsQuery(filters);
         } catch (SQLException e) {
             throw new StorageException(e);
         }
