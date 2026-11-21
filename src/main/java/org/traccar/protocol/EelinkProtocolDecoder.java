@@ -496,7 +496,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         if (type == MSG_LOGIN && deviceSession == null) {
-            deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
+            deviceSession = getDeviceSession(
+                    channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
         }
 
         if (deviceSession != null) {
