@@ -75,6 +75,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_DATA = 0x17;
     public static final int MSG_OBD_BODY = 0x18;
     public static final int MSG_OBD_CODE = 0x19;
+    public static final int MSG_PARAM_SET = 0x1B;
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
     public static final int MSG_IDLE_TIME = 0x3B;
@@ -508,6 +509,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 content.writeInt((int) (System.currentTimeMillis() / 1000));
                 content.writeShort(1); // protocol version
                 content.writeByte(0); // action mask
+            } else if (header == HEADER_ITER && type == MSG_PARAM_SET) {
+                content.writeByte(0); // next
             }
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
                     channel instanceof DatagramChannel, header, uniqueId, type, index, content);
