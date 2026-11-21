@@ -614,13 +614,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Throttle unknown device database queries when it sends repeated requests.
-     */
-    public static final ConfigKey<Boolean> DATABASE_THROTTLE_UNKNOWN = new BooleanConfigKey(
-            "database.throttleUnknown",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Automatically register unknown devices in the database.
      */
     public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new BooleanConfigKey(

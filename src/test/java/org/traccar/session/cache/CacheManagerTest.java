@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
+import org.traccar.database.DeviceLookupService;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
@@ -36,7 +37,8 @@ public class CacheManagerTest {
         when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
         doNothing().when(broadcastService).registerListener(any());
 
-        CacheManager cacheManager = new CacheManager(new Config(), storage, broadcastService);
+        CacheManager cacheManager = new CacheManager(
+                new Config(), storage, broadcastService, mock(DeviceLookupService.class));
 
         long deviceId = 1;
         Object key = new Object();
@@ -66,7 +68,8 @@ public class CacheManagerTest {
         device.setId(1);
         when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
 
-        var cache = new CacheManager(new Config(), storage, mock(BroadcastService.class));
+        var cache = new CacheManager(
+                new Config(), storage, mock(BroadcastService.class), mock(DeviceLookupService.class));
         cache.addDevice(device.getId(), new Object());
 
         ArgumentCaptor<List<Permission>> batch = ArgumentCaptor.captor();

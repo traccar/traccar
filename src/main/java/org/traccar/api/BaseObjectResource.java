@@ -19,6 +19,7 @@ package org.traccar.api;
 import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
@@ -86,6 +87,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         }
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
+        if (entity instanceof Device) {
+            cacheManager.invalidateObject(true, Device.class, entity.getId(), ObjectOperation.ADD);
+        }
         actionLogger.create(request, getUserId(), entity);
 
         if (getUserId() != ServiceAccountUser.ID) {

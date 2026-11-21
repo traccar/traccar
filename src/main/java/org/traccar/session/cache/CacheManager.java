@@ -22,6 +22,7 @@ import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.DeviceLookupService;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Attribute;
@@ -77,6 +78,7 @@ public class CacheManager implements BroadcastInterface {
     private final Config config;
     private final Storage storage;
     private final BroadcastService broadcastService;
+    private final DeviceLookupService deviceLookupService;
 
     private final CacheGraph graph = new CacheGraph();
 
@@ -90,10 +92,13 @@ public class CacheManager implements BroadcastInterface {
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
-    public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
+    public CacheManager(
+            Config config, Storage storage, BroadcastService broadcastService,
+            DeviceLookupService deviceLookupService) throws StorageException {
         this.config = config;
         this.storage = storage;
         this.broadcastService = broadcastService;
+        this.deviceLookupService = deviceLookupService;
         server = storage.getObject(Server.class, new Request(new Columns.All()));
         broadcastService.registerListener(this);
     }
@@ -269,6 +274,9 @@ public class CacheManager implements BroadcastInterface {
     @Override
     public <T extends BaseModel> void invalidateObject(
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
+        if (clazz.equals(Device.class) && (operation == ObjectOperation.ADD || operation == ObjectOperation.UPDATE)) {
+            deviceLookupService.reset();
+        }
         if (local) {
             broadcastService.invalidateObject(true, clazz, id, operation);
         }
