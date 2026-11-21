@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -27,7 +28,8 @@ import java.nio.charset.StandardCharsets;
 
 public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
-    private boolean connectionless;
+    private final boolean connectionless;
+    private int commandId;
 
     public EelinkProtocolEncoder(Protocol protocol, boolean connectionless) {
         super(protocol);
@@ -43,7 +45,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     }
 
     public static ByteBuf encodeContent(
-            boolean connectionless, String uniqueId, int type, int index, ByteBuf content) {
+            boolean connectionless, int header, String uniqueId, int type, int index, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -51,8 +53,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
             buf.writeBytes(DataConverter.parseHex('0' + uniqueId));
         }
 
-        buf.writeByte(0x67);
-        buf.writeByte(0x67);
+        buf.writeShort(header);
         buf.writeByte(type);
         buf.writeShort(2 + (content != null ? content.readableBytes() : 0)); // length
         buf.writeShort(index);
@@ -76,26 +77,37 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private ByteBuf encodeContent(long deviceId, String content) {
+    private ByteBuf encodeContent(Channel channel, Command command, String content) {
+
+        EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
+        int header = decoder.getHeader(command.getDeviceId());
+        boolean iter = header == EelinkProtocolDecoder.HEADER_ITER;
 
         ByteBuf buf = Unpooled.buffer();
-
         buf.writeByte(0x01); // command
-        buf.writeInt(0); // server id
+        buf.writeInt(iter ? ++commandId : 0); // command id or server id
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
-        return encodeContent(connectionless, getUniqueId(deviceId), EelinkProtocolDecoder.MSG_DOWNLINK, 0, buf);
+        return encodeContent(
+                connectionless, header, getUniqueId(command.getDeviceId()),
+                EelinkProtocolDecoder.MSG_DOWNLINK, iter ? 1 : 0, buf);
     }
 
     @Override
-    protected Object encodeCommand(Command command) {
+    protected Object encodeCommand(Channel channel, Command command) {
 
         return switch (command.getType()) {
-            case Command.TYPE_CUSTOM -> encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE -> encodeContent(command.getDeviceId(), "WHERE#");
-            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), "RELAY,1#");
-            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), "RELAY,0#");
-            case Command.TYPE_REBOOT_DEVICE -> encodeContent(command.getDeviceId(), "RESET#");
+            case Command.TYPE_CUSTOM ->
+                    encodeContent(channel, command, command.getString(Command.KEY_DATA));
+            case Command.TYPE_CONFIGURATION ->
+                    encodeContent(channel, command, command.getString(Command.KEY_DATA));
+            case Command.TYPE_POSITION_SINGLE -> encodeContent(channel, command, "WHERE#");
+            case Command.TYPE_ENGINE_STOP -> encodeContent(channel, command, "RELAY,1#");
+            case Command.TYPE_ENGINE_RESUME -> encodeContent(channel, command, "RELAY,0#");
+            case Command.TYPE_REBOOT_DEVICE -> encodeContent(channel, command, "RESET#");
+            case Command.TYPE_GET_VERSION -> encodeContent(channel, command, "VERSION?");
+            case Command.TYPE_GET_DEVICE_STATUS -> encodeContent(channel, command, "STATUS?");
+            case Command.TYPE_IDENTIFICATION -> encodeContent(channel, command, "PARAM?");
             default -> null;
         };
     }

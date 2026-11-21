@@ -33,7 +33,11 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_REBOOT_DEVICE);
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_GET_VERSION,
+                Command.TYPE_GET_DEVICE_STATUS,
+                Command.TYPE_IDENTIFICATION,
+                Command.TYPE_CONFIGURATION);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
