@@ -69,6 +69,9 @@ public class CacheManager implements BroadcastInterface {
     private static final Set<Class<? extends BaseModel>> GROUPED_CLASSES =
             Set.of(Attribute.class, Device.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
+    private static final Set<Class<? extends BaseModel>> LAZY_CLASSES =
+            Set.of(Attribute.class, Driver.class, Maintenance.class, Calendar.class);
+
     private final Config config;
     private final Storage storage;
     private final BroadcastService broadcastService;
@@ -292,32 +295,34 @@ public class CacheManager implements BroadcastInterface {
             if (after == null) {
                 return;
             }
-            var before = getObject(after.getClass(), after.getId());
-            if (before == null) {
-                return;
-            }
+            if (after instanceof GroupedModel || after instanceof Schedulable) {
+                var before = getObject(after.getClass(), after.getId());
+                if (before == null) {
+                    return;
+                }
 
-            if (after instanceof GroupedModel afterGrouped) {
-                long beforeGroupId = ((GroupedModel) before).getGroupId();
-                long afterGroupId = afterGrouped.getGroupId();
-                if (beforeGroupId != afterGroupId) {
-                    if (beforeGroupId > 0) {
-                        invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
-                    }
-                    if (afterGroupId > 0) {
-                        invalidatePermission(clazz, id, Group.class, afterGroupId, true);
+                if (after instanceof GroupedModel afterGrouped) {
+                    long beforeGroupId = ((GroupedModel) before).getGroupId();
+                    long afterGroupId = afterGrouped.getGroupId();
+                    if (beforeGroupId != afterGroupId) {
+                        if (beforeGroupId > 0) {
+                            invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                        }
+                        if (afterGroupId > 0) {
+                            invalidatePermission(clazz, id, Group.class, afterGroupId, true);
+                        }
                     }
                 }
-            }
-            if (after instanceof Schedulable afterSchedulable) {
-                long beforeCalendarId = ((Schedulable) before).getCalendarId();
-                long afterCalendarId = afterSchedulable.getCalendarId();
-                if (beforeCalendarId != afterCalendarId) {
-                    if (beforeCalendarId > 0) {
-                        invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
-                    }
-                    if (afterCalendarId > 0) {
-                        invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+                if (after instanceof Schedulable afterSchedulable) {
+                    long beforeCalendarId = ((Schedulable) before).getCalendarId();
+                    long afterCalendarId = afterSchedulable.getCalendarId();
+                    if (beforeCalendarId != afterCalendarId) {
+                        if (beforeCalendarId > 0) {
+                            invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                        }
+                        if (afterCalendarId > 0) {
+                            invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+                        }
                     }
                 }
             }
@@ -367,8 +372,10 @@ public class CacheManager implements BroadcastInterface {
             if (cachedDeviceLink) {
                 addDevice(toId, fromId);
             }
-            if (!graph.addLink(fromClass, fromId, toClass, toId, createObjectSupplier(toClass, toId))) {
-                initializeCache(graph.getObject(toClass, toId));
+            var loaded = graph.addLink(fromClass, fromId, toClass, toId,
+                    createObjectSupplier(toClass, toId), LAZY_CLASSES.contains(toClass));
+            if (loaded != null) {
+                initializeCache(loaded);
             }
         } else {
             graph.removeLink(fromClass, fromId, toClass, toId);

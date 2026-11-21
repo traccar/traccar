@@ -15,11 +15,13 @@
  */
 package org.traccar.session.cache;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.MapMaker;
 import org.traccar.model.BaseModel;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -32,7 +34,7 @@ public class CacheGraph {
 
     void addObject(BaseModel value) {
         CacheKey key = new CacheKey(value);
-        CacheNode node = new CacheNode(value);
+        CacheNode node = new CacheNode(() -> value);
         roots.put(key, node);
         nodes.put(key, node);
     }
@@ -75,7 +77,7 @@ public class CacheGraph {
         }
 
         var directSteam = rootNode.linkStream(clazz, forward)
-                .map(node -> (T) node.getValue());
+                .map(node -> (T) node.getValue()).filter(Objects::nonNull);
 
         var proxyStream = proxies.stream()
                 .flatMap(proxyClass -> rootNode.linkStream(proxyClass, forward)
@@ -91,24 +93,26 @@ public class CacheGraph {
         }
     }
 
-    boolean addLink(
+    BaseModel addLink(
             Class<? extends BaseModel> fromClazz, long fromId,
             Class<? extends BaseModel> toClazz, long toId,
-            Supplier<? extends BaseModel> objectSupplier) {
-        boolean stop = true;
+            Supplier<? extends BaseModel> objectSupplier, boolean lazy) {
+        BaseModel loaded = null;
         CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
         if (fromNode != null) {
             CacheKey toKey = new CacheKey(toClazz, toId);
             CacheNode toNode = nodes.get(toKey);
             if (toNode == null) {
-                stop = false;
-                toNode = new CacheNode(objectSupplier.get());
+                toNode = new CacheNode(Suppliers.memoize(objectSupplier::get));
+                if (!lazy) {
+                    loaded = toNode.getValue();
+                }
                 nodes.put(toKey, toNode);
             }
             fromNode.addLink(toClazz, true, toNode);
             toNode.addLink(fromClazz, false, fromNode);
         }
-        return stop;
+        return loaded;
     }
 
     void removeLink(
@@ -137,12 +141,15 @@ public class CacheGraph {
         if (!visited.add(node)) {
             return;
         }
-        stringBuilder
-                .append('\n')
-                .append(indentation)
-                .append(node.getValue().getClass().getSimpleName())
-                .append('(').append(node.getValue().getId()).append(')');
-        node.getAllLinks(true).forEach(child -> printNode(stringBuilder, child, indentation + "  ", visited));
+        var value = node.getValue();
+        if (value != null) {
+            stringBuilder
+                    .append('\n')
+                    .append(indentation)
+                    .append(value.getClass().getSimpleName())
+                    .append('(').append(value.getId()).append(')');
+            node.getAllLinks(true).forEach(child -> printNode(stringBuilder, child, indentation + "  ", visited));
+        }
     }
 
 }

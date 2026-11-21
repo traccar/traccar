@@ -20,25 +20,26 @@ import org.traccar.model.BaseModel;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CacheNode {
 
-    private volatile BaseModel value;
+    private volatile Supplier<? extends BaseModel> value;
 
     private final Map<Class<? extends BaseModel>, Set<CacheNode>> links = new ConcurrentHashMap<>();
     private final Map<Class<? extends BaseModel>, Set<CacheNode>> backlinks = new ConcurrentHashMap<>();
 
-    public CacheNode(BaseModel value) {
+    CacheNode(Supplier<? extends BaseModel> value) {
         this.value = value;
     }
 
     public BaseModel getValue() {
-        return value;
+        return value.get();
     }
 
     public void setValue(BaseModel value) {
-        this.value = value;
+        this.value = () -> value;
     }
 
     public Stream<CacheNode> linkStream(Class<? extends BaseModel> clazz, boolean forward) {
