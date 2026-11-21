@@ -48,14 +48,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int HEADER_ITER = 0x2828;
 
     private int header;
-    private final Map<Long, Integer> udpHeaders = new HashMap<>();
+    private final Map<Long, Integer> headers = new HashMap<>();
 
-    public int getHeader() {
-        return header;
-    }
-
-    public int getUdpHeader(long deviceId) {
-        return udpHeaders.get(deviceId);
+    public int getHeader(long deviceId) {
+        return headers.get(deviceId);
     }
 
     public EelinkProtocolDecoder(Protocol protocol) {
@@ -498,8 +494,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
 
-        if (uniqueId != null && deviceSession != null && (header == HEADER_EELINK || header == HEADER_ITER)) {
-            udpHeaders.put(deviceSession.getDeviceId(), header);
+        if (type == MSG_LOGIN && deviceSession == null) {
+            deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
+        }
+
+        if (deviceSession != null && (header == HEADER_EELINK || header == HEADER_ITER)) {
+            headers.put(deviceSession.getDeviceId(), header);
         }
 
         if (channel != null && type != MSG_GPS && type != MSG_DATA) {
@@ -515,13 +515,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
-        if (type == MSG_LOGIN) {
-
-            if (deviceSession == null) {
-                getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
-            }
-
-        } else {
+        if (type != MSG_LOGIN) {
 
             if (deviceSession == null) {
                 return null;

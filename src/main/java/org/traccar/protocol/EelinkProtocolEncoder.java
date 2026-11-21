@@ -80,11 +80,8 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf encodeContent(Channel channel, Command command, String content) {
 
         EelinkProtocolDecoder decoder = channel.pipeline().get(EelinkProtocolDecoder.class);
-        int header = connectionless ? decoder.getUdpHeader(command.getDeviceId()) : decoder.getHeader();
+        int header = decoder.getHeader(command.getDeviceId());
         boolean iter = header == EelinkProtocolDecoder.HEADER_ITER;
-        if (iter && command.getType().equals(Command.TYPE_POSITION_SINGLE)) {
-            content = "PAGING#";
-        }
 
         ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0x01); // command

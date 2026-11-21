@@ -16,7 +16,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, false));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
+        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -34,7 +34,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, true));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getUdpHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
+        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -52,7 +52,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, false));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
+        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -70,7 +70,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, true));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getUdpHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
+        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
 
         Command command = new Command();
         command.setDeviceId(1);
