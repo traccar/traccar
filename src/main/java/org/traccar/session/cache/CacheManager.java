@@ -15,6 +15,7 @@
  */
 package org.traccar.session.cache;
 
+import com.google.common.base.Suppliers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
@@ -80,7 +81,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     private volatile Server server;
-    private final Map<Long, PositionHistory> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, Supplier<PositionHistory>> devicePositions = new ConcurrentHashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
@@ -112,11 +113,12 @@ public class CacheManager implements BroadcastInterface {
 
     public Position getPosition(long deviceId) {
         var history = devicePositions.get(deviceId);
-        return history != null ? history.latest : null;
+        return history != null ? history.get().latest : null;
     }
 
     public Deque<CompactPosition> getPositions(long deviceId) {
-        return devicePositions.computeIfAbsent(deviceId, k -> new PositionHistory()).positions;
+        var history = devicePositions.get(deviceId);
+        return history != null ? history.get().positions : new ConcurrentLinkedDeque<>();
     }
 
     public Server getServer() {
@@ -156,30 +158,38 @@ public class CacheManager implements BroadcastInterface {
                     new Columns.All(), new Condition.Equals("id", deviceId)));
             graph.addObject(device);
             initializeCache(device);
-            if (device.getPositionId() > 0) {
+            long positionId = device.getPositionId();
+            Long duration = positionId > 0 && config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)
+                    ? AttributeUtil.lookup(this, Keys.REPORT_TRIP_MIN_DURATION, deviceId) * 1000L : null;
+            devicePositions.put(deviceId, Suppliers.memoize(() -> loadPositions(deviceId, positionId, duration)));
+        }
+        references.add(key);
+        LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
+    }
+
+    private PositionHistory loadPositions(long deviceId, long positionId, Long duration) {
+        var history = new PositionHistory();
+        if (positionId > 0) {
+            try {
                 Position position = storage.getObject(Position.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("deviceId", deviceId),
-                                new Condition.Equals("id", device.getPositionId()))));
+                        new Columns.All(), new Condition.And(
+                                new Condition.Equals("deviceId", deviceId), new Condition.Equals("id", positionId))));
                 if (position != null) {
-                    var history = devicePositions.computeIfAbsent(deviceId, k -> new PositionHistory());
-                    if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
-                        long minDuration = AttributeUtil.lookup(this, Keys.REPORT_TRIP_MIN_DURATION, deviceId) * 1000;
-                        var from = new Date(position.getFixTime().getTime() - minDuration);
+                    if (duration != null) {
                         var to = position.getFixTime();
-                        try (var positionsStream =
-                                PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
-                            positionsStream.forEach(loaded -> appendPosition(history, loaded));
+                        var from = new Date(to.getTime() - duration);
+                        try (var stream = PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
+                            stream.forEach(loaded -> appendPosition(history, loaded));
                         }
                     } else {
                         appendPosition(history, position);
                     }
                 }
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
             }
         }
-        references.add(key);
-        LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
+        return history;
     }
 
     public synchronized void removeDevice(long deviceId, Object key) {
@@ -219,32 +229,35 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public void updatePosition(Position position) {
-        deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
-            var history = devicePositions.computeIfAbsent(key, k -> new PositionHistory());
-            if (!appendPosition(history, position)) {
-                return oldValue;
+        long deviceId = position.getDeviceId();
+        var loader = devicePositions.get(deviceId);
+        if (loader != null) {
+            var history = loader.get();
+            synchronized (history) {
+                if (!appendPosition(history, position)) {
+                    return;
+                }
+                var positions = history.positions;
+                if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
+                    long minDuration = AttributeUtil.lookup(
+                            this, Keys.REPORT_TRIP_MIN_DURATION, deviceId) * 1000;
+                    long lastTime = position.getFixTime().getTime();
+                    var iterator = positions.iterator();
+                    iterator.next();
+                    int toPrune = 0;
+                    while (iterator.hasNext() && lastTime - iterator.next().fixTime().getTime() >= minDuration) {
+                        toPrune += 1;
+                    }
+                    while (toPrune-- > 0) {
+                        positions.poll();
+                    }
+                } else {
+                    while (positions.size() > 1) {
+                        positions.poll();
+                    }
+                }
             }
-            var positions = history.positions;
-            if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
-                long minDuration = AttributeUtil.lookup(
-                        this, Keys.REPORT_TRIP_MIN_DURATION, key) * 1000;
-                long lastTime = position.getFixTime().getTime();
-                var iterator = positions.iterator();
-                iterator.next();
-                int toPrune = 0;
-                while (iterator.hasNext() && lastTime - iterator.next().fixTime().getTime() >= minDuration) {
-                    toPrune += 1;
-                }
-                while (toPrune-- > 0) {
-                    positions.poll();
-                }
-            } else {
-                while (positions.size() > 1) {
-                    positions.poll();
-                }
-            }
-            return oldValue;
-        });
+        }
     }
 
     @Override
