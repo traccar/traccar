@@ -154,18 +154,20 @@ public class CacheManager implements BroadcastInterface {
     public <T> T withDevice(long deviceId, Callable<T> action) throws Exception {
         var key = new Object();
         try {
-            addDevice(deviceId, key);
+            addDevice(deviceId, null, key);
             return action.call();
         } finally {
             removeDevice(deviceId, key);
         }
     }
 
-    public synchronized void addDevice(long deviceId, Object key) throws Exception {
+    public synchronized void addDevice(long deviceId, Device device, Object key) throws Exception {
         var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
         if (references.isEmpty()) {
-            Device device = storage.getObject(Device.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", deviceId)));
+            if (device == null) {
+                device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", deviceId)));
+            }
             graph.addObject(device);
             initializeCache(device);
             long positionId = device.getPositionId();
@@ -381,7 +383,7 @@ public class CacheManager implements BroadcastInterface {
                 && graph.getObject(fromClass, fromId) != null;
         if (link) {
             if (cachedDeviceLink) {
-                addDevice(toId, fromId);
+                addDevice(toId, null, fromId);
             }
             var loaded = graph.addLink(fromClass, fromId, toClass, toId,
                     createObjectSupplier(toClass, toId), LAZY_CLASSES.contains(toClass));

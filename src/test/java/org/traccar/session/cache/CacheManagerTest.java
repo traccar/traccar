@@ -42,7 +42,7 @@ public class CacheManagerTest {
 
         long deviceId = 1;
         Object key = new Object();
-        cacheManager.addDevice(deviceId, key);
+        cacheManager.addDevice(deviceId, null, key);
 
         long fixTime = System.currentTimeMillis();
 
@@ -66,11 +66,10 @@ public class CacheManagerTest {
         Storage storage = mock(Storage.class);
         Device device = new Device();
         device.setId(1);
-        when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
 
         var cache = new CacheManager(
                 new Config(), storage, mock(BroadcastService.class), mock(DeviceLookupService.class));
-        cache.addDevice(device.getId(), new Object());
+        cache.addDevice(device.getId(), device, new Object());
 
         ArgumentCaptor<List<Permission>> batch = ArgumentCaptor.captor();
         verify(storage).getPermissions(batch.capture());

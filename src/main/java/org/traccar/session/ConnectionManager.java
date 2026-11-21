@@ -177,7 +177,7 @@ public class ConnectionManager implements BroadcastInterface {
                     .put(device.getUniqueId(), deviceSession);
             sessionsByDeviceId.put(device.getId(), deviceSession);
 
-            cacheManager.addDevice(device.getId(), connectionKey);
+            cacheManager.addDevice(device.getId(), device, connectionKey);
             if (oldSession != null) {
                 cacheManager.removeDevice(device.getId(), oldSession.getConnectionKey());
             }
