@@ -11,11 +11,9 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new EelinkProtocolDecoder(null));
 
-        // Device capture: 2026-11-11 22:15:21.
         verifyDecode(decoder, binary(
                 "28280100180002035532209441038701f402101213000109b0008833b5"));
 
-        // Device capture: 2026-11-11 22:50:23.
         verifyDecode(decoder, binary(
                 "2828030004005f046b"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, false));
@@ -28,12 +26,10 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
                 "282812004700416af517fb03fd47cdb2fab8958c03d60000007b0d02d4000527390000515721066b104504aa000000000024082e082d000000000000000000000000000000000000ec670000"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, false));
 
-        // Idle-time example from iTER Protocol iTR120 V7.0.2.
         verifyDecode(decoder, binary(
                 "28283B002B001D63E5387003FD09FF75FAC8A87C0000000000360502D4000604180000CFC83E047F11A205080000001E"),
                 position(Checks.ATTRIBUTES).attribute("idleTime", 30));
 
-        // Device capture: 2026-11-20 00:23:06 (SLEEP? response).
         verifyDecode(decoder, binary(
                 "282880001400010100000006534c4545503a302c302c313830"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_INDEX, 6L));

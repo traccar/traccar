@@ -498,7 +498,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
         }
 
-        if (deviceSession != null && (header == HEADER_EELINK || header == HEADER_ITER)) {
+        if (deviceSession != null) {
             headers.put(deviceSession.getDeviceId(), header);
         }
 
