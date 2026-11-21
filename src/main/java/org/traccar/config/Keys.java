@@ -664,14 +664,12 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * If not zero, enable batching of position inserts. The value is the flush interval in milliseconds; positions
-     * accumulated during this window are written as a single JDBC batch. Trades up to this much latency for
-     * higher throughput on busy servers.
+     * Flush interval for position inserts in milliseconds. Set to 0 to write each position immediately.
      */
     public static final ConfigKey<Long> DATABASE_POSITION_BATCH_INTERVAL = new LongConfigKey(
             "database.positionBatchInterval",
             List.of(KeyType.CONFIG),
-            0L);
+            100L);
 
     /**
      * Maximum number of positions written in a single batch. Default value is 100, which is safe across all supported
