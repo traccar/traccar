@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -388,7 +389,8 @@ public class CacheManager implements BroadcastInterface {
 
     private void initializeCache(BaseModel object) throws Exception {
         if (object instanceof User) {
-            for (Permission permission : storage.getPermissions(User.class, object.getId(), Notification.class, 0)) {
+            for (Permission permission : storage.getPermissions(List.of(
+                    new Permission(User.class, object.getId(), Notification.class, 0)))) {
                 invalidatePermission(
                         permission.getOwnerClass(), permission.getOwnerId(),
                         permission.getPropertyClass(), permission.getPropertyId(), true);
