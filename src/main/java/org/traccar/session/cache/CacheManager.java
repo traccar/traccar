@@ -177,7 +177,8 @@ public class CacheManager implements BroadcastInterface {
         if (positionId > 0) {
             try {
                 Position position = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.And(
+                        duration != null ? new Columns.Include("fixTime") : new Columns.All(),
+                        new Condition.And(
                                 new Condition.Equals("deviceId", deviceId), new Condition.Equals("id", positionId))));
                 if (position != null) {
                     if (duration != null) {
