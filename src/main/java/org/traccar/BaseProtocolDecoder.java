@@ -44,6 +44,7 @@ import java.util.TimeZone;
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private static final String PROTOCOL_UNKNOWN = "unknown";
+    private static final String KEY_QUEUE_CHECKED = "queueChecked";
 
     private final Protocol protocol;
 
@@ -229,8 +230,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
-        for (Command command : commandsManager.readQueuedCommands(deviceId)) {
-            protocol.sendDataCommand(channel, remoteAddress, command);
+        DeviceSession session = connectionManager.getDeviceSession(deviceId);
+        boolean live = session != null && session.getChannel() == channel && session.supportsLiveCommands();
+        if (!live || !session.contains(KEY_QUEUE_CHECKED)) {
+            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+                protocol.sendDataCommand(channel, remoteAddress, command);
+            }
+            if (live) {
+                session.set(KEY_QUEUE_CHECKED, true);
+            }
         }
     }
 
