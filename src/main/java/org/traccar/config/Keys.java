@@ -682,6 +682,14 @@ public final class Keys {
             100);
 
     /**
+     * Maximum number of concurrent position batch writers.
+     */
+    public static final ConfigKey<Integer> DATABASE_POSITION_BATCH_THREADS = new IntegerConfigKey(
+            "database.positionBatchThreads",
+            List.of(KeyType.CONFIG),
+            4);
+
+    /**
      * Delay processing updates to device status and latest position by this many milliseconds, merging updates
      * per device. Zero disables buffering. Pending device state can be lost on a crash.
      */
