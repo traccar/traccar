@@ -16,6 +16,7 @@
 package org.traccar.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -57,11 +58,12 @@ public final class QueryBuilder implements AutoCloseable {
     private final PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
+    private final int[] parameterTypes;
 
     private boolean streamingTransaction;
 
     private QueryBuilder(
-            Config config, DataSource dataSource, ObjectMapper objectMapper,
+            Config config, DataSource dataSource, ObjectMapper objectMapper, Cache<String, int[]> typeCache,
             String query, boolean returnGeneratedKeys) throws SQLException {
         this.config = config;
         this.objectMapper = objectMapper;
@@ -74,6 +76,24 @@ public final class QueryBuilder implements AutoCloseable {
             } else {
                 statement = connection.prepareStatement(query);
             }
+            if (typeCache == null) {
+                parameterTypes = null;
+            } else {
+                int[] types = typeCache.getIfPresent(query);
+                if (types == null) {
+                    try {
+                        var metadata = statement.getParameterMetaData();
+                        types = new int[metadata != null ? metadata.getParameterCount() : 0];
+                        for (int index = 0; index < types.length; index++) {
+                            types[index] = metadata.getParameterType(index + 1);
+                        }
+                    } catch (SQLException error) {
+                        types = new int[0];
+                    }
+                    typeCache.put(query, types);
+                }
+                parameterTypes = types.length > 0 ? types : null;
+            }
         } catch (SQLException error) {
             connection.close();
             throw error;
@@ -81,14 +101,9 @@ public final class QueryBuilder implements AutoCloseable {
     }
 
     public static QueryBuilder create(
-            Config config, DataSource dataSource, ObjectMapper objectMapper, String query) throws SQLException {
-        return new QueryBuilder(config, dataSource, objectMapper, query, false);
-    }
-
-    public static QueryBuilder create(
-            Config config, DataSource dataSource, ObjectMapper objectMapper, String query,
-            boolean returnGeneratedKeys) throws SQLException {
-        return new QueryBuilder(config, dataSource, objectMapper, query, returnGeneratedKeys);
+            Config config, DataSource dataSource, ObjectMapper objectMapper, Cache<String, int[]> typeCache,
+            String query, boolean returnGeneratedKeys) throws SQLException {
+        return new QueryBuilder(config, dataSource, objectMapper, typeCache, query, returnGeneratedKeys);
     }
 
     public void setBoolean(int index, boolean value) throws SQLException {
@@ -104,8 +119,11 @@ public final class QueryBuilder implements AutoCloseable {
     }
 
     public void setLong(int index, long value, boolean nullIfZero) throws SQLException {
+        int type = parameterTypes != null && parameterTypes[index] == Types.INTEGER ? Types.INTEGER : Types.BIGINT;
         if (value == 0 && nullIfZero) {
-            statement.setNull(index + 1, Types.BIGINT);
+            statement.setNull(index + 1, type);
+        } else if (type == Types.INTEGER) {
+            statement.setInt(index + 1, Math.toIntExact(value));
         } else {
             statement.setLong(index + 1, value);
         }

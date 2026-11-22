@@ -127,7 +127,8 @@ public class QueryBuilderTest {
         Date now = new Date(1700000000000L);
         byte[] payload = {1, 2, 3, 4, 5};
 
-        try (QueryBuilder insert = QueryBuilder.create(config, dataSource, objectMapper,
+        try (QueryBuilder insert = QueryBuilder.create(
+                config, dataSource, objectMapper, null,
                 "INSERT INTO test_entity(active, count, deviceId, speed, name, fixTime, data) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)", true)) {
             insert.setBoolean(0, true);
@@ -141,8 +142,8 @@ public class QueryBuilderTest {
             assertTrue(id > 0);
         }
 
-        try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
-                "SELECT * FROM test_entity");
+        try (QueryBuilder query = QueryBuilder.create(
+                config, dataSource, objectMapper, null, "SELECT * FROM test_entity", false);
                 Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
@@ -170,15 +171,16 @@ public class QueryBuilderTest {
         entity.setData(new byte[] {9, 8, 7});
 
         List<String> columns = List.of("active", "count", "deviceId", "speed", "name", "fixTime", "data");
-        try (QueryBuilder insert = QueryBuilder.create(config, dataSource, objectMapper,
+        try (QueryBuilder insert = QueryBuilder.create(
+                config, dataSource, objectMapper, null,
                 "INSERT INTO test_entity(active, count, deviceId, speed, name, fixTime, data) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)", true)) {
             insert.setObject(entity, columns);
             insert.executeUpdate();
         }
 
-        try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
-                "SELECT * FROM test_entity");
+        try (QueryBuilder query = QueryBuilder.create(
+                config, dataSource, objectMapper, null, "SELECT * FROM test_entity", false);
                 Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(1, results.size());
@@ -195,8 +197,8 @@ public class QueryBuilderTest {
 
     @Test
     public void executeBatchInsertsMultipleRows() throws Exception {
-        try (QueryBuilder insert = QueryBuilder.create(config, dataSource, objectMapper,
-                "INSERT INTO test_entity(name, count) VALUES (?, ?)", true)) {
+        try (QueryBuilder insert = QueryBuilder.create(
+                config, dataSource, objectMapper, null, "INSERT INTO test_entity(name, count) VALUES (?, ?)", true)) {
             for (int i = 0; i < 3; i++) {
                 insert.setString(0, "row" + i);
                 insert.setInteger(1, i);
@@ -206,8 +208,8 @@ public class QueryBuilderTest {
             assertEquals(3, ids.size());
         }
 
-        try (QueryBuilder query = QueryBuilder.create(config, dataSource, objectMapper,
-                "SELECT * FROM test_entity ORDER BY count");
+        try (QueryBuilder query = QueryBuilder.create(
+                config, dataSource, objectMapper, null, "SELECT * FROM test_entity ORDER BY count", false);
                 Stream<TestEntity> stream = query.executeQueryStreamed(TestEntity.class, "H2")) {
             List<TestEntity> results = stream.toList();
             assertEquals(3, results.size());
