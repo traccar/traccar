@@ -26,6 +26,7 @@ import java.util.Set;
 public class Gl200FrameDecoder extends BaseFrameDecoder {
 
     private static final int MINIMUM_LENGTH = 11;
+    private static final int HEADER_LENGTH = 4;
 
     private static final Set<String> BINARY_HEADERS = Set.of(
             "+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN");
@@ -63,6 +64,11 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
                     case "+CRD", "+BRD", "+LGN" -> buf.getUnsignedShort(buf.readerIndex() + 6);
                     default -> buf.getUnsignedShort(buf.readerIndex() + 9);
                 };
+            }
+
+            if (length < HEADER_LENGTH) {
+                buf.skipBytes(buf.readableBytes());
+                return null;
             }
 
             if (buf.readableBytes() >= length) {
