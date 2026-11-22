@@ -26,6 +26,7 @@ services:
         &allowPublicKeyRetrieval=true
         &useSSL=false
         &allowMultiQueries=true
+        &rewriteBatchedStatements=true
         &autoReconnect=true
         &useUnicode=yes
         &characterEncoding=UTF-8

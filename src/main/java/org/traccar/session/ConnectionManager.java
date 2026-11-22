@@ -31,6 +31,7 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.LogRecord;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
@@ -149,6 +150,9 @@ public class ConnectionManager implements BroadcastInterface {
         if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
             if (firstUniqueId.matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
                 device = addUnknownDevice(firstUniqueId);
+                if (device != null) {
+                    cacheManager.invalidateObject(true, Device.class, device.getId(), ObjectOperation.ADD);
+                }
             }
         }
 
@@ -173,7 +177,7 @@ public class ConnectionManager implements BroadcastInterface {
                     .put(device.getUniqueId(), deviceSession);
             sessionsByDeviceId.put(device.getId(), deviceSession);
 
-            cacheManager.addDevice(device.getId(), connectionKey);
+            cacheManager.addDevice(device.getId(), device, connectionKey);
             if (oldSession != null) {
                 cacheManager.removeDevice(device.getId(), oldSession.getConnectionKey());
             }

@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Singleton
 public final class DeviceUpdateManager {
@@ -58,39 +60,40 @@ public final class DeviceUpdateManager {
 
     public void update(long deviceId, Map<String, Object> values) throws StorageException {
         if (!buffered) {
-            write(deviceId, values);
+            storage.updateObject(createDevice(deviceId, values), new Request(
+                    new Columns.Include(values.keySet().toArray(String[]::new)), new Condition.Equals("id", deviceId)));
             return;
         }
         pending.compute(deviceId, (id, previous) -> {
-            var update = previous != null ? previous : new HashMap<String, Object>();
+            var update = previous != null ? new HashMap<>(previous) : new HashMap<String, Object>();
             values.forEach((column, value) -> update.put(column,
                     value instanceof Date date ? new Date(date.getTime()) : value));
             return update;
         });
     }
 
-    private void write(long id, Map<String, Object> values) throws StorageException {
+    private static Device createDevice(long id, Map<String, Object> values) {
         Device device = new Device();
         device.setId(id);
         device.setStatus((String) values.get("status"));
         device.setLastUpdate((Date) values.get("lastUpdate"));
         device.setPositionId((Long) values.getOrDefault("positionId", 0L));
-        storage.updateObject(device, new Request(
-                new Columns.Include(values.keySet().toArray(String[]::new)),
-                new Condition.Equals("id", id)));
+        return device;
     }
 
     void flush() {
-        for (long id : pending.keySet()) {
-            pending.computeIfPresent(id, (key, update) -> {
+        var groups = pending.entrySet().stream().collect(Collectors.groupingBy(entry -> entry.getValue().keySet()));
+        for (var group : groups.entrySet()) {
+            var columns = new Columns.Include(group.getKey().toArray(String[]::new));
+            for (var batch : Lists.partition(group.getValue(), 100)) {
                 try {
-                    write(id, update);
-                    return null;
+                    var devices = batch.stream().map(entry -> createDevice(entry.getKey(), entry.getValue())).toList();
+                    storage.updateObjects(devices, columns);
+                    batch.forEach(entry -> pending.remove(entry.getKey(), entry.getValue()));
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to flush device update", e);
-                    return update;
+                    LOGGER.warn("Failed to flush device updates", e);
                 }
-            });
+            }
         }
     }
 
