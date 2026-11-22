@@ -295,9 +295,6 @@ public class DatabaseStorage extends Storage {
                 }
             }
             case Condition.LatestPositions condition -> {
-                if (condition.getDeviceId() > 0) {
-                    results.add(condition.getDeviceId());
-                }
                 long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
                 if (period > 0) {
                     results.add(new Date(System.currentTimeMillis() - period * 1000));
@@ -365,9 +362,6 @@ public class DatabaseStorage extends Storage {
 
             } else if (genericCondition instanceof Condition.LatestPositions condition) {
 
-                if (condition.getDeviceId() > 0) {
-                    result.append("deviceId = ? AND ");
-                }
                 long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
                 if (period > 0) {
                     result.append("fixTime > ? AND ");
