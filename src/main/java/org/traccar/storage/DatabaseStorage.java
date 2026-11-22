@@ -18,6 +18,7 @@ package org.traccar.storage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
@@ -149,12 +150,8 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> void updateObject(T entity, Request request) throws StorageException {
         List<String> columns = request.getColumns().getColumns(entity.getClass(), "get");
-        StringBuilder query = new StringBuilder("UPDATE ");
-        query.append(getStorageName(entity.getClass()));
-        query.append(" SET ");
-        query.append(formatColumns(columns, c -> c + " = ?"));
-        query.append(formatCondition(request.getCondition()));
-        try (QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString())) {
+        String query = formatUpdate(entity.getClass(), columns) + formatCondition(request.getCondition());
+        try (QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query)) {
             builder.setObject(entity, columns);
             List<Object> values = getConditionVariables(request.getCondition());
             for (int index = 0; index < values.size(); index++) {
@@ -164,6 +161,27 @@ public class DatabaseStorage extends Storage {
         } catch (SQLException e) {
             throw new StorageException(e);
         }
+    }
+
+    @Override
+    public <T extends BaseModel> void updateObjects(List<T> entities, Columns columns) throws StorageException {
+        var clazz = entities.getFirst().getClass();
+        var names = columns.getColumns(clazz, "get");
+        String query = formatUpdate(clazz, names) + " WHERE id = ?";
+        try (QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query)) {
+            for (T entity : entities) {
+                builder.setObject(entity, names);
+                builder.setLong(names.size(), entity.getId());
+                builder.addBatch();
+            }
+            builder.executeUpdateBatch();
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    private String formatUpdate(Class<?> clazz, List<String> columns) throws StorageException {
+        return "UPDATE " + getStorageName(clazz) + " SET " + formatColumns(columns, column -> column + " = ?");
     }
 
     @Override

@@ -15,7 +15,10 @@
  */
 package org.traccar.storage;
 
+import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import java.util.ArrayList;
@@ -41,6 +44,12 @@ public abstract class Storage {
     }
 
     public abstract <T> void updateObject(T entity, Request request) throws StorageException;
+
+    public <T extends BaseModel> void updateObjects(List<T> entities, Columns columns) throws StorageException {
+        for (T entity : entities) {
+            updateObject(entity, new Request(columns, new Condition.Equals("id", entity.getId())));
+        }
+    }
 
     public abstract void removeObject(Class<?> clazz, Request request) throws StorageException;
 

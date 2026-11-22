@@ -179,7 +179,7 @@ public final class QueryBuilder implements AutoCloseable {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.warn("Set object error", e);
+            throw new SQLException("Failed to bind " + object.getClass().getSimpleName(), e);
         }
     }
 
@@ -353,6 +353,18 @@ public final class QueryBuilder implements AutoCloseable {
 
     public void addBatch() throws SQLException {
         statement.addBatch();
+    }
+
+    void executeUpdateBatch() throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            logQuery();
+            statement.executeBatch();
+            connection.commit();
+        } catch (SQLException error) {
+            connection.rollback();
+            throw error;
+        }
     }
 
     public List<Long> executeBatch() throws SQLException {
