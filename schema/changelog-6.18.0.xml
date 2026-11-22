@@ -18,4 +18,27 @@
 
   </changeSet>
 
+  <changeSet author="author" id="changelog-6.18.0-timescale">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="postgresql" />
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_extension WHERE extname = 'timescaledb';
+      </sqlCheck>
+    </preConditions>
+
+    <sql splitStatements="false">
+      DO $$
+      BEGIN
+        EXECUTE format('ALTER DATABASE %I SET timescaledb.enable_chunk_skipping = on', current_database());
+        SET LOCAL timescaledb.enable_chunk_skipping = on;
+        PERFORM enable_chunk_skipping('tc_positions', 'id', true);
+        PERFORM enable_chunk_skipping('tc_events', 'id', true);
+        PERFORM enable_chunk_skipping('tc_actions', 'id', true);
+      END
+      $$;
+    </sql>
+
+  </changeSet>
+
 </databaseChangeLog>
