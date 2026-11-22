@@ -188,9 +188,6 @@ public class CacheManager implements BroadcastInterface {
                 var conditions = new ArrayList<Condition>();
                 conditions.add(new Condition.Equals("deviceId", deviceId));
                 conditions.add(new Condition.Equals("id", positionId));
-                if (minTime != null) {
-                    conditions.add(new Condition.Compare("fixTime", ">", minTime));
-                }
                 Position position = storage.getObject(Position.class, new Request(
                         duration != null ? new Columns.Include("fixTime") : new Columns.All(),
                         Condition.merge(conditions)));

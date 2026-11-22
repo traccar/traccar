@@ -19,6 +19,7 @@ import org.traccar.api.BaseObjectResource;
 import org.traccar.database.DeviceUpdateManager;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.LinkedDevice;
@@ -157,8 +158,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
         permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
         permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
-        Position position = storage.getObject(Position.class, new Request(
-                new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
+        Position position = PositionUtil.getLatestPosition(storage, entity.getDeviceId());
         if (position != null) {
             if (entity.getTotalDistance() != null) {
                 position.getAttributes().put(Position.KEY_TOTAL_DISTANCE, entity.getTotalDistance());

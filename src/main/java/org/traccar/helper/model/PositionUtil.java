@@ -85,6 +85,18 @@ public final class PositionUtil {
                 new Order("fixTime", end, 1)));
     }
 
+    public static Position getLatestPosition(Storage storage, long deviceId) throws StorageException {
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.Include("positionId"), new Condition.Equals("id", deviceId)));
+        if (device == null || device.getPositionId() == 0) {
+            return null;
+        }
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Equals("id", device.getPositionId()))));
+    }
+
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {
         return storage.getObjects(Position.class, new Request(
                 new Columns.All(),
