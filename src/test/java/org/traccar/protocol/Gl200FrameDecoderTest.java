@@ -1,7 +1,13 @@
 package org.traccar.protocol;
 
+import io.netty.handler.codec.DecoderException;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+
+import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Gl200FrameDecoderTest extends ProtocolTest {
 
@@ -9,8 +15,6 @@ public class Gl200FrameDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var channel = channel(inject(new Gl200FrameDecoder()));
-
-        verifyDecode(channel, binary("3a0000000000000000000000d40700000000000061646d696e2e24636d64000000000001000000130000001069734d6173746572000100000000"));
 
         verifyDecode(channel, binary("2b000038000865134050947226820300030000216a3ed6f101895000521629fa8b28f402ac1a8e6a3ed6f100001600000010f505010ff824"),
                 binary("2b000038000865134050947226820300030000216a3ed6f101895000521629fa8b28f402ac1a8e6a3ed6f100001600000010f505010ff824"));
@@ -23,6 +27,17 @@ public class Gl200FrameDecoderTest extends ProtocolTest {
 
         verifyDecode(channel, binary("2b524553503a47545354522c3430303330302c3836323336353033303134323238392c474c3530302c302c302c302c33392e342c39332c312c302e332c31372c3130352e382c32352e3934343234302c34342e3430333733362c32303137303532393134303533302c303232362c303030312c353643322c373038342c2c2c2c32303137303532393136303533302c3032444124"),
                 binary("2b524553503a47545354522c3430303330302c3836323336353033303134323238392c474c3530302c302c302c302c33392e342c39332c312c302e332c31372c3130352e382c32352e3934343234302c34342e3430333733362c32303137303532393134303533302c303232362c303030312c353643322c373038342c2c2c2c32303137303532393136303533302c30324441"));
+
+    }
+
+    @Test
+    public void testDecodeInvalidLength() throws Exception {
+
+        var channel = channel(inject(new Gl200FrameDecoder()));
+
+        var exception = assertThrows(DecoderException.class, () -> channel.writeInbound(binary(
+                "3a0000000000000000000000d40700000000000061646d696e2e24636d64000000000001000000130000001069734d6173746572000100000000")));
+        assertInstanceOf(ParseException.class, exception.getCause());
 
     }
 

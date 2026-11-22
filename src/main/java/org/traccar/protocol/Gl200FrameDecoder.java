@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Set;
 
 public class Gl200FrameDecoder extends BaseFrameDecoder {
@@ -68,7 +69,7 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
 
             if (length < HEADER_LENGTH) {
                 buf.skipBytes(buf.readableBytes());
-                return null;
+                throw new ParseException(null, 0);
             }
 
             if (buf.readableBytes() >= length) {
