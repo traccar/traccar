@@ -191,29 +191,18 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 10.0));
         position.setCourse(parser.nextHexInt());
         int power = parser.nextHexInt();
+        position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
+        if (!BitUtil.check(power, 7)) {
+            position.set(Position.KEY_CHARGE, true);
+        }
         position.set(Position.PREFIX_ADC + 0, parser.nextHexInt());
         position.set("acc_max_x", (byte) parser.nextHexInt(0));
         position.set("acc_max_y", (byte) parser.nextHexInt(0));
         position.set("acc_max_z", (byte) parser.nextHexInt(0));
         int flags = parser.nextHexInt();
-        int temperature = parser.nextHexInt();
-        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
-        position.set(Position.KEY_EVENT, parser.nextHexInt());
-        position.set("addedInfo", Long.parseLong(parser.next(), 16));
-        int packedDate = parser.nextHexInt();
-
-        position.setTime(new DateBuilder()
-                .setDate(packedDate / (31 * 12), packedDate % (31 * 12) / 31 + 1, packedDate % 31 + 1)
-                .setTime(seconds / 3600, seconds % 3600 / 60, seconds % 60)
-                .getDate());
         position.setValid(BitUtil.check(flags, 6));
         position.setLatitude(BitUtil.check(flags, 0) ? latitude : -latitude);
         position.setLongitude(BitUtil.check(flags, 1) ? longitude : -longitude);
-
-        position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
-        if (!BitUtil.check(power, 7)) {
-            position.set(Position.KEY_CHARGE, true);
-        }
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 1, BitUtil.check(flags, 2));
         position.set(Position.PREFIX_IN + 2, BitUtil.check(flags, 3));
@@ -224,11 +213,20 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         if (!BitUtil.check(flags, 7)) {
             position.set(Position.KEY_ARCHIVE, true);
         }
+        int temperature = parser.nextHexInt();
         if ((temperature & 0xFF00) == 0x8000) {
             position.set(Position.PREFIX_ADC + 1, temperature & 0xFF);
         } else {
             position.set(Position.PREFIX_TEMP + 1, (short) temperature / 16.0);
         }
+        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
+        position.set(Position.KEY_EVENT, parser.nextHexInt());
+        position.set("addedInfo", Long.parseLong(parser.next(), 16));
+        int packedDate = parser.nextHexInt();
+        position.setTime(new DateBuilder()
+                .setDate(packedDate / (31 * 12), packedDate % (31 * 12) / 31 + 1, packedDate % 31 + 1)
+                .setTime(seconds / 3600, seconds % 3600 / 60, seconds % 60)
+                .getDate());
 
         if (parser.hasNext(8)) {
             decodeCan(position, parser);
