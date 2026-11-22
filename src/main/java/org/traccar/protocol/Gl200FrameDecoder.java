@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.CorruptedFrameException;
 import org.traccar.BaseFrameDecoder;
 
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.Set;
 
 public class Gl200FrameDecoder extends BaseFrameDecoder {
@@ -69,7 +69,7 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
 
             if (length < HEADER_LENGTH) {
                 buf.skipBytes(buf.readableBytes());
-                throw new ParseException(null, 0);
+                throw new CorruptedFrameException("Invalid frame length " + length);
             }
 
             if (buf.readableBytes() >= length) {

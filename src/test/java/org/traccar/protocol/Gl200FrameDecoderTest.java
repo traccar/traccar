@@ -1,12 +1,9 @@
 package org.traccar.protocol;
 
-import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.CorruptedFrameException;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-import java.text.ParseException;
-
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Gl200FrameDecoderTest extends ProtocolTest {
@@ -35,9 +32,8 @@ public class Gl200FrameDecoderTest extends ProtocolTest {
 
         var channel = channel(inject(new Gl200FrameDecoder()));
 
-        var exception = assertThrows(DecoderException.class, () -> channel.writeInbound(binary(
+        assertThrows(CorruptedFrameException.class, () -> channel.writeInbound(binary(
                 "3a0000000000000000000000d40700000000000061646d696e2e24636d64000000000001000000130000001069734d6173746572000100000000")));
-        assertInstanceOf(ParseException.class, exception.getCause());
 
     }
 
