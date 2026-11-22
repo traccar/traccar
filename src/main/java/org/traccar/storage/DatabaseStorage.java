@@ -299,7 +299,7 @@ public class DatabaseStorage extends Storage {
                     results.add(condition.getDeviceId());
                 }
                 long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-                if (condition.getCondition() instanceof Condition.Permission && period > 0) {
+                if (period > 0) {
                     results.add(new Date(System.currentTimeMillis() - period * 1000));
                 }
                 results.addAll(getConditionVariables(condition.getCondition()));
@@ -369,7 +369,7 @@ public class DatabaseStorage extends Storage {
                     result.append("deviceId = ? AND ");
                 }
                 long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-                if (condition.getCondition() instanceof Condition.Permission && period > 0) {
+                if (period > 0) {
                     result.append("fixTime > ? AND ");
                 }
                 result.append("id IN (");
