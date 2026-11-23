@@ -985,13 +985,15 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 3)) {
-            position.set(Position.KEY_ARCHIVE, values[index++].equals("1"));
+            if (values[index++].equals("1")) {
+                position.set(Position.KEY_ARCHIVE, true);
+            }
         }
 
         if (BitUtil.check(mask, 4)) {
-            String driver = values[index++];
-            if (!driver.equals("0")) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, driver);
+            String driverId = values[index++];
+            if (!driverId.equals("0")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId);
             }
         }
 
@@ -1023,15 +1025,12 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // coordinate signs
         }
 
-        double odometerStart = 0;
         if (BitUtil.check(mask, 12)) {
-            odometerStart = Double.parseDouble(values[index++]);
+            index += 1; // start odometer
         }
 
         if (BitUtil.check(mask, 13)) {
-            double odometer = Double.parseDouble(values[index++]);
-            position.set(Position.KEY_ODOMETER, odometer * 1000);
-            position.set(Position.KEY_ODOMETER_TRIP, (odometer - odometerStart) * 1000);
+            position.set(Position.KEY_ODOMETER, Double.parseDouble(values[index++]) * 1000);
         }
 
         if (BitUtil.check(mask, 14)) {
@@ -1079,7 +1078,8 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
+        String sentence = buf.toString(StandardCharsets.US_ASCII);
+        position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf(';') + 1, sentence.lastIndexOf(';')));
 
         return position;
     }
