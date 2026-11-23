@@ -59,7 +59,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_DATA = new PatternBuilder()
             .text("AA")
             .number("d")                         // type
-            .number("x")                         // version
+            .number("(x)")                       // version
             .number("(x{6})")                    // time of day
             .number("(x{8})")                    // latitude
             .number("(x{8})")                    // longitude
@@ -80,7 +80,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .number("(xx)")                      // CAN fuel
             .number("(xx)")                      // coolant
             .number("(x{8})")                    // accumulated odometer
-            .number("xx")                        // reserved
+            .number("xx")                        // FMS speed
             .number("(xxxx)")                    // rpm
             .number("(xxxx)")                    // consumption
             .number("(x{8})")                    // fuel used
@@ -184,11 +184,13 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        int version = parser.nextHexInt();
         int seconds = parser.nextHexInt();
         double latitude = decodeCoordinate(parser);
         double longitude = decodeCoordinate(parser);
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextHexInt() / 10.0));
-        position.setCourse(parser.nextHexInt());
+        int course = parser.nextHexInt();
+        position.setCourse(version == 3 ? course * 8 : course);
         int power = parser.nextHexInt();
         position.set(Position.KEY_BATTERY, BitUtil.to(power, 7) / 10.0);
         if (!BitUtil.check(power, 7)) {
@@ -244,11 +246,14 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
 
     private static void decodeCan(Position position, Parser parser) {
         position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt());
-        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16));
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
+        position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
         position.set(Position.KEY_RPM, parser.nextHexInt());
-        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextHexInt());
-        position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16));
+        int consumption = parser.nextHexInt();
+        if (consumption != 0) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, 51200.0 / consumption);
+        }
+        position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
     }
 
 }

@@ -52,6 +52,11 @@ public class AccentProtocolDecoderTest extends ProtocolTest {
                 position().location("2026-09-24T18:22:49.000Z", true, 36.80644, 10.07367)
                         .attribute(Position.KEY_RSSI, 20));
 
+        verifyDecode(decoder, text(
+                "860141077743871 AA23010279022CB3190099432C0011122A18FFFFFFFF800000000000010000000026D70B14"),
+                position().location("2026-09-24T18:22:49.000Z", true, 36.80644, 10.07367)
+                        .course(144));
+
         // Normal frame
         verifyDecode(decoder, text(
                 "861001002935274 AA2101171A022D833D009A2BAA0000A0000000006380FC000000000400000000001458"),
