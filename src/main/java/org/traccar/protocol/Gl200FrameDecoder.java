@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.CorruptedFrameException;
 import org.traccar.BaseFrameDecoder;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ import java.util.Set;
 public class Gl200FrameDecoder extends BaseFrameDecoder {
 
     private static final int MINIMUM_LENGTH = 11;
+    private static final int HEADER_LENGTH = 4;
 
     private static final Set<String> BINARY_HEADERS = Set.of(
             "+RSP", "+BSP", "+EVT", "+BVT", "+INF", "+BNF", "+HBD", "+CRD", "+BRD", "+LGN");
@@ -63,6 +65,10 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
                     case "+CRD", "+BRD", "+LGN" -> buf.getUnsignedShort(buf.readerIndex() + 6);
                     default -> buf.getUnsignedShort(buf.readerIndex() + 9);
                 };
+            }
+
+            if (length < HEADER_LENGTH) {
+                throw new CorruptedFrameException("Invalid frame length " + length);
             }
 
             if (buf.readableBytes() >= length) {
