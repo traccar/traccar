@@ -36,7 +36,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -180,7 +179,7 @@ public final class QueryBuilder implements AutoCloseable {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.warn("Set object error", e);
+            throw new SQLException("Failed to bind " + object.getClass().getSimpleName(), e);
         }
     }
 
@@ -356,6 +355,18 @@ public final class QueryBuilder implements AutoCloseable {
         statement.addBatch();
     }
 
+    void executeUpdateBatch() throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            logQuery();
+            statement.executeBatch();
+            connection.commit();
+        } catch (SQLException error) {
+            connection.rollback();
+            throw error;
+        }
+    }
+
     public List<Long> executeBatch() throws SQLException {
         logQuery();
         statement.executeBatch();
@@ -370,18 +381,14 @@ public final class QueryBuilder implements AutoCloseable {
         return ids;
     }
 
-    public List<Permission> executePermissionsQuery() throws SQLException {
+    public List<Permission> executePermissionsQuery(List<Permission> filters) throws SQLException {
         List<Permission> result = new ArrayList<>();
         logQuery();
         try (ResultSet resultSet = statement.executeQuery()) {
-            ResultSetMetaData resultMetaData = resultSet.getMetaData();
             while (resultSet.next()) {
-                LinkedHashMap<String, Long> map = new LinkedHashMap<>();
-                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                    String label = resultMetaData.getColumnLabel(i);
-                    map.put(label, resultSet.getLong(label));
-                }
-                result.add(new Permission(map));
+                var filter = filters.get(resultSet.getInt(1));
+                result.add(new Permission(
+                        filter.getOwnerClass(), resultSet.getLong(2), filter.getPropertyClass(), resultSet.getLong(3)));
             }
         }
         return result;

@@ -25,6 +25,7 @@ import org.traccar.model.GroupedModel;
 import org.traccar.model.LinkedDevice;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
+import org.traccar.model.Permission;
 import org.traccar.model.Schedulable;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -36,6 +37,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+import java.util.List;
 import java.util.Objects;
 
 @RequestScoped
@@ -171,7 +173,8 @@ public class PermissionsService {
     public void checkUser(long userId, long managedUserId) throws StorageException, SecurityException {
         if (userId != managedUserId && !getUser(userId).getAdministrator()) {
             if (!getUser(userId).getManager()
-                    || storage.getPermissions(User.class, userId, ManagedUser.class, managedUserId).isEmpty()) {
+                    || storage.getPermissions(List.of(new Permission(
+                            User.class, userId, ManagedUser.class, managedUserId))).isEmpty()) {
                 throw new SecurityException("User access denied");
             }
         }

@@ -194,11 +194,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
         };
     }
 
-    @Path("{id}/image")
+    @Path("{id}/{type:image|icon}")
     @POST
     @Consumes("image/*")
     public Response uploadImage(
-            @PathParam("id") long deviceId, File file,
+            @PathParam("id") long deviceId, @PathParam("type") String imageType, File file,
             @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
 
         permissionsService.checkEdit(getUserId(), Device.class, false, false);
@@ -209,7 +209,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                         new Condition.Equals("id", deviceId),
                         new Condition.Permission(User.class, getUserId(), Device.class))));
         if (device != null) {
-            String name = "device";
+            String name = imageType.equals("image") ? "device" : imageType;
             String extension = imageExtension(type);
             try (var input = new FileInputStream(file);
                     var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {

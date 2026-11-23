@@ -22,6 +22,7 @@ import org.traccar.api.security.OidcSessionManager.AuthorizationCode;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
@@ -44,7 +45,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -114,7 +114,7 @@ public class OidcResource extends BaseResource {
             throws StorageException, IOException, GeneralSecurityException, JOSEException {
 
         if (authorization != null && authorization.startsWith("Basic ")) {
-            String[] credentials = new String(Base64.getDecoder().decode(
+            String[] credentials = new String(DataConverter.parseBase64(
                     authorization.substring("Basic ".length())), StandardCharsets.UTF_8).split(":");
             clientId = credentials[0];
             clientSecret = credentials[1];

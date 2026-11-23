@@ -44,6 +44,7 @@ import java.util.TimeZone;
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private static final String PROTOCOL_UNKNOWN = "unknown";
+    private static final String KEY_QUEUE_CHECKED = "queueChecked";
 
     private final Protocol protocol;
 
@@ -111,12 +112,18 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public ByteBuf newMediaBuffer() {
-        return newMediaBuffer(0);
+        releaseMediaBuffer();
+        mediaBuffer = Unpooled.buffer(0, getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE));
+        return mediaBuffer;
     }
 
     public ByteBuf newMediaBuffer(int size) {
         releaseMediaBuffer();
-        mediaBuffer = Unpooled.buffer(size, getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE));
+        int maximumSize = getConfig().getInteger(Keys.MEDIA_BUFFER_SIZE);
+        if (size < 0 || size > maximumSize) {
+            throw new IllegalArgumentException("Media size exceeds limit");
+        }
+        mediaBuffer = Unpooled.buffer(0, size);
         return mediaBuffer;
     }
 
@@ -223,8 +230,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
-        for (Command command : commandsManager.readQueuedCommands(deviceId)) {
-            protocol.sendDataCommand(channel, remoteAddress, command);
+        DeviceSession session = connectionManager.getDeviceSession(deviceId);
+        boolean live = session != null && session.getChannel() == channel && session.supportsLiveCommands();
+        if (!live || !session.contains(KEY_QUEUE_CHECKED)) {
+            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+                protocol.sendDataCommand(channel, remoteAddress, command);
+            }
+            if (live) {
+                session.set(KEY_QUEUE_CHECKED, true);
+            }
         }
     }
 

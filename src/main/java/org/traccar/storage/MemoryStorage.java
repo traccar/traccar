@@ -16,7 +16,6 @@
 package org.traccar.storage;
 
 import org.traccar.helper.ReflectionCache;
-import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
@@ -255,13 +254,13 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public List<Permission> getPermissions(
-            Class<? extends BaseModel> ownerClass, long ownerId,
-            Class<? extends BaseModel> propertyClass, long propertyId) {
-        return getPermissionsSet(ownerClass, propertyClass).stream()
-                .filter(pair -> ownerId == 0 || pair.first().equals(ownerId))
-                .filter(pair -> propertyId == 0 || pair.second().equals(propertyId))
-                .map(pair -> new Permission(ownerClass, pair.first(), propertyClass, pair.second()))
+    public List<Permission> getPermissions(List<Permission> filters) {
+        return filters.stream().flatMap(filter -> getPermissionsSet(filter.getOwnerClass(), filter.getPropertyClass())
+                .stream()
+                .filter(pair -> filter.getOwnerId() == 0 || pair.first().equals(filter.getOwnerId()))
+                .filter(pair -> filter.getPropertyId() == 0 || pair.second().equals(filter.getPropertyId()))
+                .map(pair -> new Permission(
+                        filter.getOwnerClass(), pair.first(), filter.getPropertyClass(), pair.second())))
                 .toList();
     }
 

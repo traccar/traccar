@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -47,14 +48,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int HEADER_ITER = 0x2828;
 
     private int header;
-    private final Map<Long, Integer> udpHeaders = new HashMap<>();
+    private final Map<Long, Integer> headers = new HashMap<>();
 
-    public int getHeader() {
-        return header;
-    }
-
-    public int getUdpHeader(long deviceId) {
-        return udpHeaders.getOrDefault(deviceId, HEADER_EELINK);
+    public int getHeader(long deviceId) {
+        return headers.get(deviceId);
     }
 
     public EelinkProtocolDecoder(Protocol protocol) {
@@ -78,6 +75,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_OBD_DATA = 0x17;
     public static final int MSG_OBD_BODY = 0x18;
     public static final int MSG_OBD_CODE = 0x19;
+    public static final int MSG_PARAM_SET = 0x1B;
     public static final int MSG_CAMERA_INFO = 0x1E;
     public static final int MSG_CAMERA_DATA = 0x1F;
     public static final int MSG_IDLE_TIME = 0x3B;
@@ -88,14 +86,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             case 0x02 -> Position.ALARM_SOS;
             case 0x03 -> Position.ALARM_LOW_BATTERY;
             case 0x04 -> Position.ALARM_VIBRATION;
+            case 0x05 -> Position.ALARM_MOVEMENT;
             case 0x08, 0x09 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x24 -> Position.ALARM_POWER_RESTORED;
             case 0x25 -> Position.ALARM_REMOVING;
             case 0x81 -> Position.ALARM_LOW_SPEED;
-            case 0x82 -> Position.ALARM_OVERSPEED;
+            case 0x80, 0x82 -> Position.ALARM_OVERSPEED;
             case 0x83 -> Position.ALARM_GEOFENCE_ENTER;
             case 0x84 -> Position.ALARM_GEOFENCE_EXIT;
             case 0x85 -> Position.ALARM_ACCIDENT;
             case 0x86 -> Position.ALARM_FALL_DOWN;
+            case 0x87 -> Position.ALARM_LOW_POWER;
             default -> null;
         };
     }
@@ -217,9 +218,14 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 4)) {
-            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-            network.addWifiAccessPoint(WifiAccessPoint.from(
-                    mac.substring(0, mac.length() - 1), buf.readByte()));
+            if (header == HEADER_ITER) {
+                network.addCellTower(CellTower.from(
+                        mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte()));
+            } else {
+                String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), buf.readByte()));
+            }
         }
 
         if (BitUtil.check(flags, 5)) {
@@ -489,8 +495,13 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         buf = buf.readSlice(buf.readUnsignedShort());
         int index = buf.readUnsignedShort();
 
-        if (uniqueId != null && deviceSession != null && (header == HEADER_EELINK || header == HEADER_ITER)) {
-            udpHeaders.put(deviceSession.getDeviceId(), header);
+        if (type == MSG_LOGIN && deviceSession == null) {
+            deviceSession = getDeviceSession(
+                    channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
+        }
+
+        if (deviceSession != null) {
+            headers.put(deviceSession.getDeviceId(), header);
         }
 
         if (channel != null && type != MSG_GPS && type != MSG_DATA) {
@@ -499,20 +510,16 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 content.writeInt((int) (System.currentTimeMillis() / 1000));
                 content.writeShort(1); // protocol version
                 content.writeByte(0); // action mask
+            } else if (header == HEADER_ITER && type == MSG_PARAM_SET) {
+                content.writeByte(0); // next
             }
             ByteBuf response = EelinkProtocolEncoder.encodeContent(
-                    channel, uniqueId, type, index, content);
+                    channel instanceof DatagramChannel, header, uniqueId, type, index, content);
             content.release();
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
-        if (type == MSG_LOGIN) {
-
-            if (deviceSession == null) {
-                getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(8)).substring(1));
-            }
-
-        } else {
+        if (type != MSG_LOGIN) {
 
             if (deviceSession == null) {
                 return null;

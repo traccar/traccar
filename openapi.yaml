@@ -775,7 +775,64 @@ paths:
         '404':
           description: Device not found
           content: {}
+  /devices/{id}/icon:
+    post:
+      operationId: postDevicesIdIcon
+      summary: Upload Device icon
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: icon.png
+        '400':
+          description: Invalid image type or size
+          content: {}
+        '404':
+          description: Device not found
+          content: {}
   /share/device:
+    get:
+      operationId: getShareDevice
+      summary: Fetch a link for an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
     post:
       operationId: postShareDevice
       summary: Share device location
@@ -800,14 +857,37 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: eyJhbGciOi...
+                $ref: '#/components/schemas/ShareLink'
         '403':
           description: Sharing is disabled or temporary user
           content: {}
   /share/group:
+    get:
+      operationId: getShareGroup
+      summary: Fetch a link for an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
     post:
       operationId: postShareGroup
       summary: Share group devices
@@ -832,12 +912,55 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: eyJhbGciOi...
+                $ref: '#/components/schemas/ShareLink'
         '403':
           description: Sharing is disabled or temporary user
+          content: {}
+  /share/device/{id}:
+    delete:
+      operationId: deleteShareDevice
+      summary: Delete an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+  /share/group/{id}:
+    delete:
+      operationId: deleteShareGroup
+      summary: Delete an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
           content: {}
   /groups:
     get:
@@ -1143,7 +1266,9 @@ paths:
         API](https://www.traccar.org/traccar-api/) instead of periodically
         polling positions endpoint. Without any params, it returns a list of
         last known positions for all the user's Devices. _from_ and _to_ fields
-        are not required with _id_.
+        are not required with _id_. Historical queries with _from_ and _to_ can
+        return a large number of results; use _limit_ to control the response
+        size.
       x-mcp: true
       tags:
         - Positions
@@ -1172,6 +1297,19 @@ paths:
           description: >-
             To fetch one or more positions. Multiple params can be passed like
             `id=31&id=42`
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: >-
+            Maximum number of positions to return. If not specified, the server
+            configuration limit applies.
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: >-
+            Offset for pagination. Only applies to date-range queries. Default is 0.
           schema:
             type: integer
       responses:
@@ -2394,8 +2532,10 @@ paths:
       summary: >-
         Fetch a list of Positions within the time period for the Devices or
         Groups
-      description: At least one _deviceId_ or one _groupId_ must be passed
-      x-mcp: true
+      deprecated: true
+      description: >-
+        Deprecated. Use _/positions_ with _deviceId_, _from_, _to_, and _limit_
+        instead. At least one _deviceId_ or one _groupId_ must be passed.
       tags:
         - Reports
       parameters:
@@ -3853,6 +3993,14 @@ paths:
           content: {}
 components:
   schemas:
+    ShareLink:
+      type: object
+      properties:
+        token:
+          type: string
+        expiration:
+          type: string
+          format: date-time
     Position:
       type: object
       properties:

@@ -614,13 +614,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Throttle unknown device database queries when it sends repeated requests.
-     */
-    public static final ConfigKey<Boolean> DATABASE_THROTTLE_UNKNOWN = new BooleanConfigKey(
-            "database.throttleUnknown",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Automatically register unknown devices in the database.
      */
     public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new BooleanConfigKey(
@@ -671,14 +664,12 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * If not zero, enable batching of position inserts. The value is the flush interval in milliseconds; positions
-     * accumulated during this window are written as a single JDBC batch. Trades up to this much latency for
-     * higher throughput on busy servers.
+     * Flush interval for position inserts in milliseconds. Set to 0 to write each position immediately.
      */
     public static final ConfigKey<Long> DATABASE_POSITION_BATCH_INTERVAL = new LongConfigKey(
             "database.positionBatchInterval",
             List.of(KeyType.CONFIG),
-            0L);
+            100L);
 
     /**
      * Maximum number of positions written in a single batch. Default value is 100, which is safe across all supported
@@ -1066,6 +1057,15 @@ public final class Keys {
             "server.forward.writeTimeout",
             List.of(KeyType.CONFIG),
             5000);
+
+    /**
+     * List of protocols to forward raw data for. If not specified, raw data is forwarded for all protocols.
+     * The value is a comma-separated list of protocol names.
+     * Example value: teltonika,osmand
+     */
+    public static final ConfigKey<String> SERVER_FORWARD_PROTOCOLS = new StringConfigKey(
+            "server.forward.protocols",
+            List.of(KeyType.CONFIG));
 
     /**
      * Connect timeout for the shared HTTP client in milliseconds, used for notifications and other outgoing

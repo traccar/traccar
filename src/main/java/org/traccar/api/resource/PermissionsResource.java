@@ -78,7 +78,7 @@ public class PermissionsResource extends BaseResource {
     }
 
     private void checkDeviceHierarchy(long deviceId, long linkedDeviceId) throws StorageException {
-        var links = storage.getPermissions(Device.class, LinkedDevice.class);
+        var links = storage.getPermissions(List.of(new Permission(Device.class, 0, LinkedDevice.class, 0)));
         var pending = new ArrayDeque<Long>();
         var visited = new HashSet<Long>();
         pending.add(linkedDeviceId);
@@ -104,7 +104,7 @@ public class PermissionsResource extends BaseResource {
         long ownerId = Long.parseLong(owner[1]);
         Class<? extends BaseModel> propertyClass = Permission.getKeyClass(property[0]);
         long propertyId = Long.parseLong(property[1]);
-        return storage.getPermissions(ownerClass, ownerId, propertyClass, propertyId);
+        return storage.getPermissions(List.of(new Permission(ownerClass, ownerId, propertyClass, propertyId)));
     }
 
     @Path("bulk")

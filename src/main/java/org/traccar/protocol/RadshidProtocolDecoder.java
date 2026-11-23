@@ -23,6 +23,8 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -43,22 +45,25 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             response.writeIntLE(0x07);
             response.writeByte(0x82);
             response.writeByte(packetTag);
-            response.writeIntLE(length);
+            response.writeInt(length);
             response.writeByte(0x01);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
-    private String decodeAlarm(int event) {
+    private String decodeAlarm(int event, int firmware) {
         return switch (event) {
+            case 0xD7, 0xF9 -> Position.ALARM_JAMMING;
             case 0xE2 -> Position.ALARM_POWER_CUT;
             case 0xE3 -> Position.ALARM_POWER_RESTORED;
-            case 0xE4, 0xF1, 0xF2 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0xE4, 0xF2 -> Position.ALARM_GPS_ANTENNA_CUT;
             case 0xE5 -> Position.ALARM_VIBRATION;
-            case 0xE7, 0xF7 -> Position.ALARM_FATIGUE_DRIVING;
+            case 0xE7 -> Position.ALARM_FATIGUE_DRIVING;
+            case 0xEB -> firmware >= 81 ? Position.ALARM_SOS : null;
             case 0xEE, 0xEF -> Position.ALARM_OVERSPEED;
             case 0xF0 -> Position.ALARM_LOW_BATTERY;
-            case 0xF9 -> Position.ALARM_JAMMING;
+            case 0xF1 -> firmware < 81 ? Position.ALARM_GPS_ANTENNA_CUT : null;
+            case 0xF7 -> firmware < 81 ? Position.ALARM_FATIGUE_DRIVING : null;
             default -> null;
         };
     }
@@ -91,7 +96,6 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
             int eventCode = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, eventCode);
-            position.addAlarm(decodeAlarm(eventCode));
 
             long driverId = buf.readUnsignedInt() << 8 | buf.readUnsignedByte();
             if (driverId != 0) {
@@ -105,7 +109,12 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // max gps speed
             buf.readUnsignedByte(); // max sensor speed
             position.set(Position.KEY_RPM, buf.readUnsignedShort());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            long distance = buf.readUnsignedInt();
+            if (BitUtil.check(distance, 31)) {
+                position.set(Position.KEY_DISTANCE, BitUtil.to(distance, 31));
+            } else {
+                position.set(Position.KEY_ODOMETER, distance);
+            }
             buf.readUnsignedInt(); // sensor odometer
 
             int ioStatus = buf.readUnsignedByte();
@@ -123,8 +132,18 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
 
             int extraLength = buf.readUnsignedByte();
             int extraEnd = buf.readerIndex() + extraLength;
-            if (extraLength > 0 && buf.readUnsignedByte() == 0x07) {
-                position.set(Position.KEY_VERSION_FW, buf.readUnsignedShortLE());
+            int extraVersion = extraLength > 0 ? buf.readUnsignedByte() : 0;
+            boolean extraSupported = switch (extraVersion) {
+                case 7 -> extraLength == 36 || extraLength == 37;
+                case 8 -> extraLength == 37;
+                case 10 -> extraLength == 45;
+                case 11, 13 -> extraLength == 73;
+                default -> false;
+            };
+            int version = 0;
+            if (extraSupported) {
+                version = buf.readUnsignedShortLE();
+                position.set(Position.KEY_VERSION_FW, version);
                 buf.readUnsignedIntLE(); // point counter
                 buf.readUnsignedIntLE(); // system live time
                 buf.readUnsignedShortLE(); // reset number
@@ -133,15 +152,35 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShortLE(); // pause time
                 buf.readUnsignedShortLE(); // off time
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                buf.readUnsignedByte(); // device status
+                if (BitUtil.check(buf.readUnsignedByte(), 6)) {
+                    position.set(Position.KEY_ARCHIVE, true);
+                }
                 position.set(Position.KEY_POWER, buf.readUnsignedByte() / 10.0);
                 position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // saved pictures
                 buf.readUnsignedByte(); // reset source
-                position.set(Position.PREFIX_TEMP + 1, buf.readIntLE() / 10.0);
-                position.set(Position.KEY_HUMIDITY, buf.readIntLE() / 10.0);
+                float temperature = buf.readFloatLE();
+                if (temperature != -57 && temperature != -60) {
+                    position.set(Position.PREFIX_TEMP + 1, temperature);
+                }
+                float humidity = buf.readFloatLE();
+                if (humidity >= 0) {
+                    position.set(Position.KEY_HUMIDITY, humidity);
+                }
+                if (extraLength == 73) {
+                    buf.skipBytes(10); // reserved, last known flag, iccid
+                    CellTower cellTower = CellTower.from(
+                            buf.readIntLE(), buf.readIntLE(), buf.readIntLE(), buf.readUnsignedIntLE());
+                    buf.skipBytes(8); // bcch, bsic
+                    cellTower.setSignalStrength(buf.readIntLE());
+                    if (cellTower.getMobileCountryCode() > 0) {
+                        position.setNetwork(new Network(cellTower));
+                    }
+                }
             }
             buf.readerIndex(extraEnd);
+
+            position.addAlarm(decodeAlarm(eventCode, version));
 
             positions.add(position);
         }
