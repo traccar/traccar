@@ -967,10 +967,11 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(session.getDeviceId());
-        position.setValid(true);
 
         int index = 0;
         long mask = Long.parseLong(values[index++], 16);
+
+        position.setValid(BitUtil.check(mask, 8) && BitUtil.check(mask, 10));
 
         if (BitUtil.check(mask, 0)) {
             index += 1; // imei
