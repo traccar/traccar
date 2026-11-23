@@ -48,4 +48,23 @@ public class Gt02ProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    /**
+     * A frame too short for its message is dropped instead of throwing, so the connection stays open.
+     */
+    @Test
+    public void testShortFrames() throws Exception {
+
+        var decoder = inject(new Gt02ProtocolDecoder(null));
+
+        verifyDecode(decoder, binary(
+                "68680a00000358899058952584" + "0d0a"));
+
+        verifyDecode(decoder, binary(
+                "68680f000001234567890123450001100101" + "0d0a"));
+
+        verifyDecode(decoder, binary(
+                "6868100000035889905895258400" + "8f1c074150" + "0d0a"));
+
+    }
+
 }

@@ -52,6 +52,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
+        if (buf.readableBytes() < 1 + 1 + 8 + 2 + 1) {
+            return null; // power, gsm, imei, index, type
+        }
+
         // Zero for location messages
         int power = buf.readUnsignedByte();
         int gsm = buf.readUnsignedByte();
@@ -81,6 +85,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_DATA) {
 
+            if (buf.readableBytes() < 6 + 4 + 4 + 1 + 2 + 3 + 4) {
+                return null; // time, latitude, longitude, speed, course, reserved, flags
+            }
+
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
@@ -107,6 +115,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
 
         } else if (type == MSG_RESPONSE) {
+
+            if (buf.readableBytes() < 1 || buf.readableBytes() < 1 + buf.getUnsignedByte(buf.readerIndex())) {
+                return null;
+            }
 
             getLastLocation(position, null);
 
