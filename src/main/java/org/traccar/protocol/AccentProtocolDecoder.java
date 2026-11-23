@@ -86,7 +86,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8})")                    // fuel used
             .number("(xx)")                      // satellites
             .number("(xx)")                      // rssi
-            .number("(xx)").optional()           // 106-char frame
+            .number("xx").optional()             // extra
             .groupEnd("?")
             .any()
             .compile();
@@ -243,12 +243,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextHexInt());
         position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16));
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
-        int rssi = parser.nextHexInt();
-        position.set(Position.KEY_RSSI, rssi);
-        if (parser.hasNext()) {
-            parser.next();
-            position.set("brakeCount", rssi);
-        }
+        position.set(Position.KEY_RSSI, parser.nextHexInt());
     }
 
 }
