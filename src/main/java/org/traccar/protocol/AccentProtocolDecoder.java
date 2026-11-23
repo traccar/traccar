@@ -84,10 +84,9 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)")                    // rpm
             .number("(xxxx)")                    // consumption
             .number("(x{8})")                    // fuel used
-            .number("(xx)")                      // satellites
-            .number("(xx)")                      // rssi
-            .number("xx").optional()             // extra
             .groupEnd("?")
+            .number("(xx)").optional()           // satellites
+            .number("(xx)").optional()           // rssi
             .any()
             .compile();
 
@@ -228,8 +227,16 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(seconds / 3600, seconds % 3600 / 60, seconds % 60)
                 .getDate());
 
-        if (parser.hasNext(8)) {
+        if (parser.hasNext(6)) {
             decodeCan(position, parser);
+        }
+        Integer satellites = parser.nextHexInt();
+        if (satellites != null) {
+            position.set(Position.KEY_SATELLITES, satellites);
+        }
+        Integer rssi = parser.nextHexInt();
+        if (rssi != null) {
+            position.set(Position.KEY_RSSI, rssi);
         }
 
         return position;
@@ -242,8 +249,6 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.nextHexInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextHexInt());
         position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16));
-        position.set(Position.KEY_SATELLITES, parser.nextHexInt());
-        position.set(Position.KEY_RSSI, parser.nextHexInt());
     }
 
 }
