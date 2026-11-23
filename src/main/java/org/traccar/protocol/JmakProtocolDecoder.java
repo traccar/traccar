@@ -971,8 +971,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         int index = 0;
         long mask = Long.parseLong(values[index++], 16);
 
-        position.setValid(BitUtil.check(mask, 8) && BitUtil.check(mask, 10));
-
         if (BitUtil.check(mask, 0)) {
             index += 1; // imei
         }
@@ -1020,6 +1018,12 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(mask, 10)) {
             position.setLongitude(Double.parseDouble(values[index++]));
+        }
+
+        if (position.getLatitude() != 0 && position.getLongitude() != 0) {
+            position.setValid(true);
+        } else {
+            getLastLocation(position, position.getDeviceTime());
         }
 
         if (BitUtil.check(mask, 11)) {
