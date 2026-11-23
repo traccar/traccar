@@ -68,7 +68,6 @@ public class Gl200FrameDecoder extends BaseFrameDecoder {
             }
 
             if (length < HEADER_LENGTH) {
-                buf.skipBytes(buf.readableBytes());
                 throw new CorruptedFrameException("Invalid frame length " + length);
             }
 
