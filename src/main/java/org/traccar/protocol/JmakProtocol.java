@@ -52,6 +52,14 @@ public class JmakProtocol extends BaseProtocol {
                 pipeline.addLast(new JmakProtocolDecoder(JmakProtocol.this));
             }
         });
+        addServer(new TrackerServer(config, getName(), true) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new JmakProtocolEncoder(JmakProtocol.this, false));
+                pipeline.addLast(new JmakProtocolDecoder(JmakProtocol.this));
+            }
+        });
     }
 
 }
