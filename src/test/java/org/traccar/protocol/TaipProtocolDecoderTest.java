@@ -13,6 +13,34 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new TaipProtocolDecoder(null));
 
         verifyDecode(decoder, text(
+                ">RCQ00211026183308-3148587-064241260003437F00000000000C413010800000099;#96BA;ID=123456789012345;*41<"),
+                position().attribute(Position.KEY_ODOMETER, 196L));
+
+        verifyDecode(decoder, text(
+                ">RCV00291224153045-2778467-0642565804518081011270003A98013041200011015+235005-052010;#0100;ID=974862;*5E<"),
+                position().attribute(Position.PREFIX_TEMP + 2, -5.2));
+
+        verifyDecode(decoder, text(
+                ">RHV00291224153045-2778467-0642565804518081011270003A980130412000110152100000E10C+23501E-05200A;#0100;ID=974862;*5E<"),
+                position().attribute(Position.KEY_HOURS, 57612000L));
+
+        verifyDecode(decoder, text(
+                ">RBQ00291224153045-2778467-0642565804518081011270003A98013041200011015420;#0100;ID=974862;*5E<"),
+                position().attribute(Position.KEY_BATTERY, 4.2));
+
+        verifyDecode(decoder, text(
+                ">RCT00120520143022-2778467-0642565800007799001240000000013020700011015;0100000012345678;#0100;ID=1234;*3A<"),
+                position().attribute(Position.KEY_DRIVER_UNIQUE_ID, "0100000012345678"));
+
+        verifyDecode(decoder, text(
+                ">RCU00291224153045-2778467-0642565804518081011270003A980130412000110151;01000012AB34CD56;#0100;ID=974862;*5E<"),
+                position().attribute(Position.KEY_DRIVER_UNIQUE_ID, "01000012AB34CD56"));
+
+        verifyDecode(decoder, text(
+                ">RCP00291224153045-2778467-0642565804518081011270003A98013041200011015;#0100;ID=974862;*5E<"),
+                position().attribute(Position.KEY_POWER, 12.7));
+
+        verifyDecode(decoder, text(
                 ">RAL19500+00230+00012;ID=3168;*48<"));
 
         verifyDecode(decoder, text(
