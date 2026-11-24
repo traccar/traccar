@@ -12,6 +12,31 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Jt600ProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
+                "2480006200111911003418042116225922348310113550543F12980000002D060000000020E028109228661F00010000868822040248195F000001CC0156"),
+                position().location("2021-04-18T16:22:59.000Z", true, 22.580517, 113.917572));
+
+        verifyDecode(decoder, buffer(
+                "(8000620011,P45,170720,020614,22.56035,N,114.01640,E,A,36,270,1,1,0008627839,0,0,24,5)"),
+                position().attribute(Position.KEY_DRIVER_UNIQUE_ID, "0008627839"));
+
+        verifyDecode(decoder, buffer(
+                "(8000620011,P45,280222,091744,22.58161,N,113.91524,E,A,0,0,4,1,0000000000,1,0,4,37,868822040248195,0)"),
+                position().attribute(Position.KEY_ODOMETER, 37000L));
+
+        verifyDecode(decoder, binary(
+                "28383133303633303030312C312C3131302C574C4E45542C352C322C19042111353422348344113550520F0000190421113533E0172600041201681057040040000000310029"),
+                position());
+
+        verifyDecode(decoder, buffer(
+                "(8000620011,P52,2,113271)"));
+
+        verifyDecode(decoder, buffer(
+                "(8000620011,P22,2)"));
+
+        verifyDecode(decoder, buffer(
+                "(8000620011,@JT)"));
+
+        verifyDecode(decoder, binary(
                 "28383035343230313937332c312c3136382c574c4e45542c352c322c28022508595325169288057327940900002802250859551021220618730140644701011d4300000029"),
                 position());
 

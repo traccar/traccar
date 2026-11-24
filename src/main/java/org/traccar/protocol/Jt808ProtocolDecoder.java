@@ -1528,7 +1528,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        Jt600ProtocolDecoder.decodeBinaryLocation(buf, position);
+        Jt600ProtocolDecoder.decodeBinaryLocation(buf, position, 0);
         position.setValid(type != MSG_LOCATION_REPORT_BLIND);
 
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());

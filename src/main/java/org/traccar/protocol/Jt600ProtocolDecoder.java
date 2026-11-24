@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,9 @@ import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -92,7 +95,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return buf.getUnsignedByte(buf.readerIndex() + 8) == 0;
     }
 
-    static void decodeBinaryLocation(ByteBuf buf, Position position) {
+    static void decodeBinaryLocation(ByteBuf buf, Position position, int protocolVersion) {
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDay(BcdUtil.readInteger(buf, 2))
@@ -111,7 +114,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(BitUtil.check(flags, 1) ? latitude : -latitude);
         position.setLongitude(BitUtil.check(flags, 2) ? longitude : -longitude);
 
-        position.setSpeed(BcdUtil.readInteger(buf, 2));
+        position.setSpeed(protocolVersion == 0x19 ? buf.readUnsignedByte() : BcdUtil.readInteger(buf, 2));
         position.setCourse(buf.readUnsignedByte() * 2.0);
     }
 
@@ -144,7 +147,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            decodeBinaryLocation(buf, position);
+            decodeBinaryLocation(buf, position, protocolVersion);
 
             if (longFormat) {
 
@@ -156,7 +159,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 int status = buf.readUnsignedShort();
                 position.addAlarm(BitUtil.check(status, 1) ? Position.ALARM_GEOFENCE_ENTER : null);
                 position.addAlarm(BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
-                position.addAlarm(BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
+                if (protocolVersion != 0x19 && BitUtil.check(status, 3)) {
+                    position.addAlarm(Position.ALARM_POWER_CUT);
+                }
                 position.addAlarm(BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
                 if (BitUtil.check(status, 5)) {
                     responseRequired = true;
@@ -165,6 +170,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
                 position.addAlarm(BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
                 position.set(Position.KEY_STATUS, status);
+
+                boolean tampering = false;
+                if (protocolVersion == 0x19) {
+                    responseRequired = true;
+                    position.set("lockRope", BitUtil.check(status, 6));
+                    position.set(Position.KEY_LOCK, BitUtil.check(status, 7));
+                    position.set("coverClosed", BitUtil.check(status, 13));
+                    tampering = BitUtil.check(status, 3) || BitUtil.check(status, 12);
+                }
 
                 int battery = buf.readUnsignedByte();
                 if (battery == 0xff) {
@@ -178,11 +192,39 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
 
-                if (protocolVersion == 0x17 || protocolVersion == 0x19) {
+                if (protocolVersion == 0x19 && buf.readableBytes() >= 18) {
+                    position.set("geofence", buf.readUnsignedByte());
+                    position.set("wakeup", BitUtil.to(buf.readUnsignedByte(), 4));
+
+                    int mncHigh = buf.readUnsignedByte();
+                    if (mncHigh == 0x0f) {
+                        mncHigh = 0; // reserved in older firmware
+                    }
+
+                    int extendedStatus = buf.readUnsignedByte();
+                    position.set("extendedStatus", extendedStatus);
+                    if (BitUtil.check(extendedStatus, 0)) {
+                        position.set(Position.KEY_CHARGE, true);
+                    }
+                    position.set("upperCoverClosed", BitUtil.check(extendedStatus, 3));
+                    position.set("lowerCoverClosed", BitUtil.check(extendedStatus, 5));
+                    tampering |= BitUtil.check(extendedStatus, 2) || BitUtil.check(extendedStatus, 4);
+
+                    buf.skipBytes(8); // imei
+
+                    long cidHigh = buf.readUnsignedShort();
+                    cellTower.setCellId((cidHigh << 16) | cellTower.getCellId());
+                    cellTower.setMobileCountryCode(buf.readUnsignedShort());
+                    int mncLow = buf.readUnsignedByte();
+                    cellTower.setMobileNetworkCode((mncHigh << 8) | mncLow);
+
+                    buf.skipBytes(buf.readableBytes() - 1);
+                } else if (protocolVersion == 0x17 || protocolVersion == 0x19) {
                     buf.readUnsignedByte(); // geofence id
                     buf.skipBytes(3); // reserved
                     buf.skipBytes(buf.readableBytes() - 1);
                 }
+                position.addAlarm(tampering ? Position.ALARM_TAMPERING : null);
 
             } else if (version == 1) {
 
@@ -383,10 +425,10 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("(d+),")                     // event source
-            .number("d+,")                       // unlock verification
+            .number("(d+),")                     // unlock verification
             .number("(d+),")                     // rfid
-            .number("d+,")                       // password verification
-            .number("d+,")                       // incorrect password count
+            .number("(d+),")                     // password verification
+            .number("(d+),")                     // incorrect password count
             .number("(d+)")                      // index
             .any()
             .compile();
@@ -412,17 +454,39 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setValid(parser.next().equals("A"));
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
         position.set("eventSource", parser.nextInt());
+        position.set("unlockVerification", parser.nextInt());
 
         String rfid = parser.next();
         if (!rfid.equals("0000000000")) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
         }
 
+        position.set("passwordVerification", parser.nextInt());
+        position.set("incorrectPasswords", parser.nextInt());
+
         int index = parser.nextInt();
+
+        String[] values = sentence.substring(1, sentence.length() - 1).split(",", -1);
+        int i = 17;
+        if (i < values.length && !values[i++].isEmpty()) {
+            position.set(Position.KEY_ODOMETER, Long.parseLong(values[i - 1]) * 1000);
+        }
+        i += 1; // imei
+        if (i < values.length && !values[i++].isEmpty()) {
+            position.set("geofence", Integer.parseInt(values[i - 1]));
+        }
+        if (i < values.length && !values[i++].isEmpty()) {
+            String[] cell = values[i - 1].split(":");
+            if (cell.length == 4) {
+                position.setNetwork(new Network(CellTower.from(
+                        Integer.parseInt(cell[0]), Integer.parseInt(cell[1]),
+                        Integer.parseInt(cell[2]), Long.parseLong(cell[3]))));
+            }
+        }
 
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
@@ -448,11 +512,11 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         buf.readerIndex(startIndex + 1);
 
-        decodeBinaryLocation(buf, position);
+        decodeBinaryLocation(buf, position, 0);
 
         buf.skipBytes(6); // sensor time
         buf.skipBytes(5); // sensor id
-        buf.readUnsignedByte(); // sensor index
+        int index = buf.readUnsignedByte();
         position.set("sensorBattery", buf.readUnsignedShort() / 100.0);
         position.set("sensorBatteryLevel", buf.readUnsignedByte());
         position.set("sensorRssi", -buf.readUnsignedByte());
@@ -476,6 +540,10 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
+        }
+
         return position;
     }
 
@@ -497,8 +565,19 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 return decodeW01(sentence, channel, remoteAddress);
             } else if (sentence.contains("P45")) {
                 return decodeP45(sentence, channel, remoteAddress);
-            } else {
+            } else if (sentence.matches("\\(\\d+,U\\d{2},.*")) {
                 return decodeU01(sentence, channel, remoteAddress);
+            } else {
+                String[] values = sentence.substring(1, sentence.length() - 1).split(",");
+                if (values.length >= 2 && channel != null) {
+                    if (values[1].equals("P22") && values.length == 3 && values[2].equals("2")) {
+                        String time = DateTimeFormatter.ofPattern("ddMMyyHHmmss")
+                                .withZone(ZoneOffset.UTC).format(Instant.now());
+                        channel.writeAndFlush(new NetworkMessage("(P22," + time + ")", remoteAddress));
+                    } else if (values[1].equals("P52") && values.length == 4 && values[2].equals("2")) {
+                        channel.writeAndFlush(new NetworkMessage("(P52,2," + values[3] + ")", remoteAddress));
+                    }
+                }
             }
         }
 
