@@ -281,7 +281,7 @@ public class CacheManager implements BroadcastInterface {
     @Override
     public <T extends BaseModel> void invalidateObject(
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
-        if (clazz.equals(Device.class) && (operation == ObjectOperation.ADD || operation == ObjectOperation.UPDATE)) {
+        if (clazz.equals(Device.class)) {
             deviceLookupService.reset();
         }
         if (local) {

@@ -158,7 +158,6 @@ public class ConnectionManager implements BroadcastInterface {
 
         if (device != null) {
             unknownByEndpoint.remove(connectionKey);
-            device.checkDisabled();
 
             DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
             if (oldSession != null) {

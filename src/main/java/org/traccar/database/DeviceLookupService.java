@@ -34,10 +34,11 @@ public class DeviceLookupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceLookupService.class);
 
-    private static final int MAX_UNKNOWN_IDS = 10_000;
+    private static final int MAX_REJECTED_IDS = 10_000;
 
     private final Storage storage;
-    private volatile Cache<String, Boolean> misses;
+    // False for unknown devices, true for disabled or expired devices.
+    private volatile Cache<String, Boolean> rejections;
 
     @Inject
     public DeviceLookupService(Storage storage) {
@@ -46,20 +47,30 @@ public class DeviceLookupService {
     }
 
     public void reset() {
-        misses = CacheBuilder.newBuilder().maximumSize(MAX_UNKNOWN_IDS).build();
+        rejections = CacheBuilder.newBuilder().maximumSize(MAX_REJECTED_IDS).build();
     }
 
     public Device lookup(String[] uniqueIds) {
         try {
             for (String uniqueId : uniqueIds) {
-                var cache = misses;
-                if (cache.getIfPresent(uniqueId) == null) {
+                var cache = rejections;
+                Boolean rejected = cache.getIfPresent(uniqueId);
+                if (Boolean.TRUE.equals(rejected)) {
+                    throw new SecurityException("Device is disabled or expired");
+                }
+                if (rejected == null) {
                     Device device = storage.getObject(Device.class, new Request(
                             new Columns.All(), new Condition.Equals("uniqueId", uniqueId)));
                     if (device != null) {
+                        try {
+                            device.checkDisabled();
+                        } catch (SecurityException e) {
+                            cache.put(uniqueId, true);
+                            throw e;
+                        }
                         return device;
                     }
-                    cache.put(uniqueId, true);
+                    cache.put(uniqueId, false);
                 }
             }
         } catch (StorageException e) {

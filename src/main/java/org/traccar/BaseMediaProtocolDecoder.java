@@ -45,7 +45,6 @@ public abstract class BaseMediaProtocolDecoder extends BaseProtocolDecoder {
             deviceSession = null;
             Device device = deviceLookupService.lookup(uniqueIds);
             if (device != null) {
-                device.checkDisabled();
                 deviceSession = new DeviceSession(
                         device.getId(), device.getUniqueId(), device.getModel(), protocol, channel, remoteAddress);
             }
