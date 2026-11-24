@@ -18,13 +18,11 @@ package org.traccar.api.resource;
 
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.handler.ComputedAttributesProvider;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -60,9 +58,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
         permissionsService.checkAdmin(getUserId());
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
 
-        Position position = storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.LatestPositions(deviceId)));
+        Position position = PositionUtil.getLatestPosition(storage, deviceId);
 
         return cacheManager.withDevice(position.getDeviceId(), () -> {
             Object result = computedAttributesProvider.compute(entity, position);

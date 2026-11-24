@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
@@ -51,9 +50,14 @@ public class PositionBatchWriter {
         long interval = config.getLong(Keys.DATABASE_POSITION_BATCH_INTERVAL);
         if (interval > 0) {
             queue = new ConcurrentLinkedQueue<>();
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(
-                    Thread.ofPlatform().daemon().name("PositionBatchWriter").factory());
-            scheduler.scheduleWithFixedDelay(this::flush, interval, interval, TimeUnit.MILLISECONDS);
+            int threads = config.getInteger(Keys.DATABASE_POSITION_BATCH_THREADS);
+            var scheduler = Executors.newScheduledThreadPool(threads,
+                    Thread.ofPlatform().daemon().name("PositionBatchWriter-", 1).factory());
+            scheduler.scheduleWithFixedDelay(() -> {
+                if (!queue.isEmpty()) {
+                    scheduler.execute(this::flush);
+                }
+            }, interval, interval, TimeUnit.MILLISECONDS);
         } else {
             queue = null;
         }

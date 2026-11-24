@@ -84,8 +84,7 @@ public class CommandsManager implements BroadcastInterface {
             command.set(Command.KEY_DATA, data.replace("{uniqueId}", device.getUniqueId()));
         }
         Position position = storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
+                new Columns.All(), new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Equals("id", device.getPositionId()))));
         BaseProtocol protocol = position != null ? serverManager.getProtocol(position.getProtocol()) : null;

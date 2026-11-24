@@ -25,6 +25,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -47,12 +48,19 @@ public final class PositionUtil {
     }
 
     public static Stream<Position> getPositionsStreamWithExtra(
-            Storage storage, long deviceId, Date from, Date to) throws StorageException {
+            Storage storage, long deviceId, Date from, Date to, Date minTime) throws StorageException {
+        if (minTime != null && from.before(minTime)) {
+            from = minTime;
+        }
+        var conditions = new ArrayList<Condition>();
+        conditions.add(new Condition.Equals("deviceId", deviceId));
+        conditions.add(new Condition.Compare("fixTime", "<", from));
+        if (minTime != null) {
+            conditions.add(new Condition.Compare("fixTime", ">", minTime));
+        }
         Position extra = storage.getObject(Position.class, new Request(
                 new Columns.Include("fixTime"),
-                new Condition.And(
-                        new Condition.Equals("deviceId", deviceId),
-                        new Condition.Compare("fixTime", "<", from)),
+                Condition.merge(conditions),
                 new Order("fixTime", true, 1)));
         return getPositionsStream(storage, deviceId, extra != null ? extra.getFixTime() : from, to, 0, 0);
     }
@@ -75,6 +83,18 @@ public final class PositionUtil {
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", from, to)),
                 new Order("fixTime", end, 1)));
+    }
+
+    public static Position getLatestPosition(Storage storage, long deviceId) throws StorageException {
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.Include("positionId"), new Condition.Equals("id", deviceId)));
+        if (device == null || device.getPositionId() == 0) {
+            return null;
+        }
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Equals("id", device.getPositionId()))));
     }
 
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {

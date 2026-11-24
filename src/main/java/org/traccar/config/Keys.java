@@ -642,8 +642,9 @@ public final class Keys {
             List.of(KeyType.CONFIG), "\\w{3,15}");
 
     /**
-     * Limit latest position queries to a certain time period in seconds. This is useful for TimescaleDB
-     * to avoid scanning all time chunks. Default value is 7776000 seconds (90 days). Zero value disables the limit.
+     * Limit latest position and device position cache queries to a certain time period in seconds.
+     * Useful for TimescaleDB to avoid scanning all time chunks. Default value is 7776000 seconds (90 days).
+     * Zero value disables the limit.
      */
     public static final ConfigKey<Long> DATABASE_POSITION_PERIOD = new LongConfigKey(
             "database.positionPeriod",
@@ -680,6 +681,14 @@ public final class Keys {
             "database.positionBatchSize",
             List.of(KeyType.CONFIG),
             100);
+
+    /**
+     * Maximum number of concurrent position batch writers.
+     */
+    public static final ConfigKey<Integer> DATABASE_POSITION_BATCH_THREADS = new IntegerConfigKey(
+            "database.positionBatchThreads",
+            List.of(KeyType.CONFIG),
+            4);
 
     /**
      * Delay processing updates to device status and latest position by this many milliseconds, merging updates

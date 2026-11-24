@@ -102,8 +102,7 @@ public class PositionResource extends BaseResource {
                         limit > 0 ? limit : config.getInteger(Keys.REPORT_MAX_POSITIONS), offset)
                         .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
-                return storage.getObjectsStream(Position.class, new Request(
-                        new Columns.All(), new Condition.LatestPositions(deviceId)));
+                return Stream.ofNullable(PositionUtil.getLatestPosition(storage, deviceId));
             }
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId()).stream();

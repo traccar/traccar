@@ -27,6 +27,7 @@ import org.traccar.command.CommandSenderManager;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -85,8 +86,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     }
 
     private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {
-        Position position = storage.getObject(Position.class, new Request(
-                new Columns.All(), new Condition.LatestPositions(deviceId)));
+        Position position = PositionUtil.getLatestPosition(storage, deviceId);
         if (position != null) {
             return serverManager.getProtocol(position.getProtocol());
         } else {

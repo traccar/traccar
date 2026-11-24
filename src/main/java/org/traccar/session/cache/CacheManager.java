@@ -183,15 +183,20 @@ public class CacheManager implements BroadcastInterface {
         var history = new PositionHistory();
         if (positionId > 0) {
             try {
+                long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
+                Date minTime = period > 0 ? new Date(System.currentTimeMillis() - period * 1000) : null;
+                var conditions = new ArrayList<Condition>();
+                conditions.add(new Condition.Equals("deviceId", deviceId));
+                conditions.add(new Condition.Equals("id", positionId));
                 Position position = storage.getObject(Position.class, new Request(
                         duration != null ? new Columns.Include("fixTime") : new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("deviceId", deviceId), new Condition.Equals("id", positionId))));
+                        Condition.merge(conditions)));
                 if (position != null) {
                     if (duration != null) {
                         var to = position.getFixTime();
                         var from = new Date(to.getTime() - duration);
-                        try (var stream = PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
+                        try (var stream = PositionUtil.getPositionsStreamWithExtra(
+                                storage, deviceId, from, to, minTime)) {
                             stream.forEach(loaded -> appendPosition(history, loaded));
                         }
                     } else {

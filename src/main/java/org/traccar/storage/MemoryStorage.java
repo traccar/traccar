@@ -124,10 +124,6 @@ public class MemoryStorage extends Storage {
             }
             case Condition.LatestPositions condition -> {
                 long positionId = (Long) retrieveValue(object, "id");
-                if (condition.getDeviceId() > 0
-                        && (Long) retrieveValue(object, "deviceId") != condition.getDeviceId()) {
-                    yield false;
-                }
                 yield objects.computeIfAbsent(Device.class, key -> new ConcurrentHashMap<>()).values().stream()
                         .filter(device -> checkCondition(condition.getCondition(), device))
                         .anyMatch(device -> (Long) retrieveValue(device, "positionId") == positionId);
