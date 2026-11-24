@@ -249,10 +249,7 @@ public class AccentProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_COOLANT_TEMP, parser.nextHexInt() - 40);
         position.set(Position.KEY_ODOMETER, Long.parseLong(parser.next(), 16) * 1000);
         position.set(Position.KEY_RPM, parser.nextHexInt());
-        int consumption = parser.nextHexInt();
-        if (consumption != 0) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, 51200.0 / consumption);
-        }
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextHexInt());
         position.set(Position.KEY_FUEL_USED, Long.parseLong(parser.next(), 16) / 2.0);
     }
 
