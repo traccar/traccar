@@ -1663,7 +1663,20 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == 0x40) {
+        if (type == 0x01 || type == 0x04) {
+
+            int length = buf.readableBytes() - 2;
+            if (BufferUtil.isPrintable(buf, length)) {
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                getLastLocation(position, null);
+                position.set(Position.KEY_RESULT, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+
+                return position;
+            }
+
+        } else if (type == 0x40) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());

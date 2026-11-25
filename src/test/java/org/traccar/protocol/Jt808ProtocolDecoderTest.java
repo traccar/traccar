@@ -12,6 +12,14 @@ public class Jt808ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Jt808ProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
+                "7e09000064012345678901002e04534d532c424154544552593a3734250a494e5445524e45543a535543434553530a4e45543a34472c484947480a4750533a554e4649582c300a53504545443a304b4d2f480a53454e534f523a4f4e2c4c4556454c3a310a53544154453a44495341524d9a7e"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_RESULT, "SMS,BATTERY:74%\nINTERNET:SUCCESS\nNET:4G,HIGH\nGPS:UNFIX,0\nSPEED:0KM/H\nSENSOR:ON,LEVEL:1\nSTATE:DISARM"));
+
+        verifyDecode(decoder, binary(
+                "7e0900000b012345678901002801534d532c534554204f4ba47e"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_RESULT, "SMS,SET OK"));
+
+        verifyDecode(decoder, binary(
                 "7e0704003e0184380000500084000101003900000000000c000f01d792b7034f72e600c90000009b26101319020901040000000030011f31010ad00400000000d40164d7030100beda0105e17e"),
                 position().attribute(Position.KEY_ARCHIVE, true));
 
