@@ -16,6 +16,37 @@
     <dropIndex indexName="idx_devices_uniqueid" tableName="tc_devices" />
     <dropIndex indexName="idx_users_email" tableName="tc_users" />
 
+    <createTable tableName="tc_points">
+      <column autoIncrement="true" name="id" type="BIGINT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(4000)" />
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_point">
+      <column name="userid" type="BIGINT">
+        <constraints nullable="false" />
+      </column>
+      <column name="pointid" type="BIGINT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_user_point" baseColumnNames="userid" constraintName="fk_user_point_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+    <addForeignKeyConstraint baseTableName="tc_user_point" baseColumnNames="pointid" constraintName="fk_user_point_pointid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_points" />
+
   </changeSet>
 
   <changeSet author="author" id="changelog-6.18.0-timescale">
