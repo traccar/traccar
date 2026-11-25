@@ -57,6 +57,8 @@ tags:
     description: Reports generation
   - name: Notifications
     description: User notifications management
+  - name: Points
+    description: Points of interest management
   - name: Geofences
     description: Geofence management
   - name: Commands
@@ -2290,6 +2292,149 @@ paths:
         '400':
           description: Could happen if sending has failed
           content: {}
+  /points:
+    get:
+      operationId: getPoints
+      summary: Fetch a list of points of interest
+      description: Without params, it returns a list of points of interest the user has access to
+      x-mcp: true
+      tags:
+        - Points
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postPoints
+      summary: Create a point of interest
+      tags:
+        - Points
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Point'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /points/{id}:
+    get:
+      operationId: getPointsId
+      summary: Fetch a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putPointsId
+      summary: Update a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Point'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deletePointsId
+      summary: Delete a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
   /geofences:
     get:
       operationId: getGeofences
@@ -4324,6 +4469,10 @@ components:
           description: >-
             Group id, can be first parameter or second only in combination with
             userId
+        pointId:
+          type: integer
+          format: int64
+          description: Point of interest id, can be second parameter only in combination with userId
         geofenceId:
           type: integer
           format: int64
@@ -4366,6 +4515,32 @@ components:
         type:
           type: string
           description: Command type identifier
+    Point:
+      type: object
+      description: A point of interest at a geographic location
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique point of interest identifier
+        name:
+          type: string
+          description: Point of interest display name
+        description:
+          type: string
+          description: Details about the point of interest
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees
+        attributes:
+          type: object
+          properties: {}
+          description: Custom point of interest attributes
     Geofence:
       type: object
       properties:
