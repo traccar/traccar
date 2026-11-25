@@ -2362,6 +2362,23 @@ paths:
         '400':
           description: Bad request
           content: {}
+  /points/kml:
+    get:
+      operationId: getPointsKml
+      summary: Fetch points of interest as a KML layer
+      description: Returns points linked to the current user, with names, descriptions, and coordinates. Placemark IDs use the format point-{id}.
+      tags:
+        - Points
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.google-earth.kml+xml:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content: {}
   /points/{id}:
     get:
       operationId: getPointsId

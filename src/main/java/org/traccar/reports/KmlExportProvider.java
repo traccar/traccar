@@ -20,6 +20,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
+import org.traccar.model.Point;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -104,6 +105,44 @@ public class KmlExportProvider {
         writer.writeEndElement();
         writer.writeEndElement();
         writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndDocument();
+        writer.flush();
+        writer.close();
+    }
+
+    public void generatePoints(OutputStream outputStream, long userId)
+            throws StorageException, XMLStreamException {
+        XMLStreamWriter writer = XMLOutputFactory.newFactory()
+                .createXMLStreamWriter(outputStream, StandardCharsets.UTF_8.name());
+
+        writer.writeStartDocument(StandardCharsets.UTF_8.name(), "1.0");
+        writer.writeStartElement("kml");
+        writer.writeDefaultNamespace("http://www.opengis.net/kml/2.2");
+        writer.writeStartElement("Document");
+        try (Stream<Point> points = storage.getObjectsStream(Point.class, new Request(
+                new Columns.All(), new Condition.Permission(User.class, userId, Point.class)))) {
+            for (var iterator = points.iterator(); iterator.hasNext();) {
+                Point point = iterator.next();
+                writer.writeStartElement("Placemark");
+                writer.writeAttribute("id", "point-" + point.getId());
+                writer.writeStartElement("name");
+                writer.writeCharacters(point.getName());
+                writer.writeEndElement();
+                if (point.getDescription() != null) {
+                    writer.writeStartElement("description");
+                    writer.writeCharacters(point.getDescription());
+                    writer.writeEndElement();
+                }
+                writer.writeStartElement("Point");
+                writer.writeStartElement("coordinates");
+                writer.writeCharacters(point.getLongitude() + "," + point.getLatitude());
+                writer.writeEndElement();
+                writer.writeEndElement();
+                writer.writeEndElement();
+            }
+        }
         writer.writeEndElement();
         writer.writeEndElement();
         writer.writeEndDocument();
