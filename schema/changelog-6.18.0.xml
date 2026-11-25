@@ -36,7 +36,7 @@
     </createTable>
 
     <createTable tableName="tc_user_point">
-      <column name="userid" type="BIGINT">
+      <column name="userid" type="INT">
         <constraints nullable="false" />
       </column>
       <column name="pointid" type="BIGINT">
