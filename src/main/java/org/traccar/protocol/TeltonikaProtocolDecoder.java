@@ -568,7 +568,59 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     if (!buf.isReadable(length)) {
                         break;
                     }
-                    decodeTags(position, buf.readSlice(length));
+                    ByteBuf data = buf.readSlice(length);
+                    if (!data.isReadable() || data.readUnsignedByte() != 1) {
+                        continue;
+                    }
+                    for (int i = 1; data.isReadable(); i++) {
+                        int beaconLength = data.readUnsignedByte();
+                        if (beaconLength > data.readableBytes()) {
+                            break;
+                        }
+                        ByteBuf beacon = data.readSlice(beaconLength);
+                        while (beacon.readableBytes() >= 2) {
+                            int parameterId = beacon.readUnsignedByte();
+                            int parameterLength = beacon.readUnsignedByte();
+                            if (parameterLength > beacon.readableBytes()) {
+                                break;
+                            }
+                            int expectedLength = switch (parameterId) {
+                                case 0, 7, 8, 9, 11, 13 -> 1;
+                                case 6, 10, 12, 14 -> 2;
+                                case 15 -> 6;
+                                default -> -1;
+                            };
+                            if (expectedLength >= 0 && parameterLength != expectedLength) {
+                                beacon.skipBytes(parameterLength);
+                                continue;
+                            }
+                            switch (parameterId) {
+                                case 0 -> position.set("tag" + i + "Rssi", (int) beacon.readByte());
+                                case 1 -> {
+                                    String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
+                                    position.set("tag" + i + "Id", beaconId);
+                                }
+                                case 2 -> decodeAdditionalData(
+                                        position, "tag" + i, beacon.readSlice(parameterLength));
+                                case 5 -> {
+                                    String name = beacon.readCharSequence(
+                                            parameterLength, StandardCharsets.UTF_8).toString();
+                                    position.set("tag" + i + "Name", name);
+                                }
+                                case 6 -> position.set("tag" + i + "Temp", beacon.readShort());
+                                case 7 -> position.set("tag" + i + "Humidity", beacon.readUnsignedByte());
+                                case 8 -> position.set("tag" + i + "Magnet", beacon.readUnsignedByte() > 0);
+                                case 9 -> position.set("tag" + i + "Motion", beacon.readUnsignedByte() > 0);
+                                case 10 -> position.set("tag" + i + "MotionCount", beacon.readUnsignedShort());
+                                case 11 -> position.set("tag" + i + "Pitch", (int) beacon.readByte());
+                                case 12 -> position.set("tag" + i + "AngleRoll", (int) beacon.readShort());
+                                case 13 -> position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
+                                case 14 -> position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                case 15 -> position.set("tag" + i + "Mac", ByteBufUtil.hexDump(beacon.readSlice(6)));
+                                default -> beacon.skipBytes(parameterLength);
+                            }
+                        }
+                    }
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
@@ -676,54 +728,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         // Bare EYE flags have no manufacturer identity; accept only their exact optional-field layout.
         if (!decodeEyeAdvertisement(position, prefix, data.duplicate())) {
             decodeEyeData(position, prefix, data);
-        }
-    }
-
-    private void decodeTags(Position position, ByteBuf data) {
-        if (!data.isReadable() || data.readUnsignedByte() != 1) {
-            return;
-        }
-        for (int i = 1; data.isReadable(); i++) {
-            int length = data.readUnsignedByte();
-            if (length > data.readableBytes()) {
-                break;
-            }
-            ByteBuf beacon = data.readSlice(length);
-            String prefix = "tag" + i;
-            while (beacon.readableBytes() >= 2) {
-                int parameterId = beacon.readUnsignedByte();
-                int parameterLength = beacon.readUnsignedByte();
-                if (parameterLength > beacon.readableBytes()) {
-                    break; // The next tag remains independently bounded by its outer length.
-                }
-                ByteBuf value = beacon.readSlice(parameterLength);
-                int expectedLength = switch (parameterId) {
-                    case 0, 7, 8, 9, 11, 13 -> 1;
-                    case 6, 10, 12, 14 -> 2;
-                    case 15 -> 6;
-                    default -> -1;
-                };
-                if (expectedLength >= 0 && parameterLength != expectedLength) {
-                    continue;
-                }
-                switch (parameterId) {
-                    case 0 -> position.set(prefix + "Rssi", (int) value.readByte());
-                    case 1 -> position.set(prefix + "Id", ByteBufUtil.hexDump(value));
-                    case 2 -> decodeAdditionalData(position, prefix, value);
-                    case 5 -> position.set(prefix + "Name", value.toString(StandardCharsets.UTF_8));
-                    case 6 -> position.set(prefix + "Temp", value.readShort());
-                    case 7 -> position.set(prefix + "Humidity", value.readUnsignedByte());
-                    case 8 -> position.set(prefix + "Magnet", value.readUnsignedByte() > 0);
-                    case 9 -> position.set(prefix + "Motion", value.readUnsignedByte() > 0);
-                    case 10 -> position.set(prefix + "MotionCount", value.readUnsignedShort());
-                    case 11 -> position.set(prefix + "Pitch", (int) value.readByte());
-                    case 12 -> position.set(prefix + "AngleRoll", (int) value.readShort());
-                    case 13 -> position.set(prefix + "LowBattery", value.readUnsignedByte());
-                    case 14 -> position.set(prefix + "Battery", value.readUnsignedShort());
-                    case 15 -> position.set(prefix + "Mac", ByteBufUtil.hexDump(value));
-                    default -> { }
-                }
-            }
         }
     }
 
