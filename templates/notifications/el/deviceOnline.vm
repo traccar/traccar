@@ -7,6 +7,6 @@
 Σε Σύνδεση<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+<a href="$webUrl/unsubscribe?token=$token">Απεγγραφή</a>
 </body>
 </html>

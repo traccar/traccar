@@ -13,6 +13,6 @@ Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timez
 Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$esc.html($position.address)#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 Conducteur: $esc.html($driverName)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+<a href="$webUrl/unsubscribe?token=$token">Se désabonner</a>
 </body>
 </html>

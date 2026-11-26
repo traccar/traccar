@@ -7,6 +7,6 @@ Urządzenie: $esc.html($device.name)<br>
 Ma status nieznany<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+<a href="$webUrl/unsubscribe?token=$token">Unsubscribe</a>
 </body>
 </html>

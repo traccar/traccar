@@ -13,6 +13,6 @@
 Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$esc.html($position.address)#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 Водитель: $esc.html($driverName)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Отписаться</a>
+<a href="$webUrl/unsubscribe?token=$token">Отписаться</a>
 </body>
 </html>

@@ -8,6 +8,6 @@ Sonuç: $esc.html($position.getString('result'))<br>
 Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Bildirim Aboneliğini İptal Et</a>
+<a href="$webUrl/unsubscribe?token=$token">Bildirim Aboneliğini İptal Et</a>
 </body>
 </html>

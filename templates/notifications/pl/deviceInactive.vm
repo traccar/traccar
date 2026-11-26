@@ -10,6 +10,6 @@ Jest nieaktywne<br>
 Ostatnio widziane: $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+<a href="$webUrl/unsubscribe?token=$token">Unsubscribe</a>
 </body>
 </html>

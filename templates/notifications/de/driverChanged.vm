@@ -13,6 +13,6 @@ am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $date
 Position: <a href="$webUrl/event/$event.id">#{if}($position.address)$esc.html($position.address)#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 Fahrer: $esc.html($driverName)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+<a href="$webUrl/unsubscribe?token=$token">Unsubscribe</a>
 </body>
 </html>

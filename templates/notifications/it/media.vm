@@ -9,6 +9,6 @@ File: <a href="$webUrl/api/media/$device.uniqueId/$esc.html($event.getString('fi
 Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Collegamento: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+<a href="$webUrl/unsubscribe?token=$token">Annulla iscrizione</a>
 </body>
 </html>

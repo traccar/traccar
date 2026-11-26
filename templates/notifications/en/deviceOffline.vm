@@ -7,6 +7,6 @@ Device: $esc.html($device.name)<br>
 Offline<br>
 Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+<a href="$webUrl/unsubscribe?token=$token">Unsubscribe</a>
 </body>
 </html>

@@ -7,6 +7,6 @@ Appareil: $esc.html($device.name)<br>
 Commande en attente envoyée<br>
 Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
-<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+<a href="$webUrl/unsubscribe?token=$token">Se désabonner</a>
 </body>
 </html>
