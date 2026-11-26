@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.helper.model.PositionUtil;
@@ -33,6 +34,7 @@ import org.traccar.storage.StorageException;
 
 import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,15 +52,19 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     private final ConnectionManager connectionManager;
     private final Storage storage;
     private final long userId;
+    private final long expiration;
 
     private boolean includeLogs;
     private Session session;
 
-    public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
+    public AsyncSocket(
+            ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage,
+            long userId, Date expiration) {
         this.objectMapper = objectMapper;
         this.connectionManager = connectionManager;
         this.storage = storage;
         this.userId = userId;
+        this.expiration = expiration != null ? expiration.getTime() : Long.MAX_VALUE;
     }
 
     @Override
@@ -67,8 +73,8 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
         try {
             Map<String, Collection<?>> data = new HashMap<>();
             data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
-            sendData(data);
             connectionManager.addListener(userId, this);
+            sendData(data);
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }
@@ -129,10 +135,14 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
 
     private void sendData(Map<String, Collection<?>> data) {
         if (session != null && session.isOpen()) {
-            try {
-                session.sendText(objectMapper.writeValueAsString(data), Callback.NOOP);
-            } catch (JsonProcessingException e) {
-                LOGGER.warn("Socket JSON formatting error", e);
+            if (System.currentTimeMillis() < expiration) {
+                try {
+                    session.sendText(objectMapper.writeValueAsString(data), Callback.NOOP);
+                } catch (JsonProcessingException e) {
+                    LOGGER.warn("Socket JSON formatting error", e);
+                }
+            } else {
+                session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
             }
         }
     }

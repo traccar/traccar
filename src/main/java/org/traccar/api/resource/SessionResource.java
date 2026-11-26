@@ -22,6 +22,7 @@ import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.SessionHelper;
 import org.traccar.model.RevokedToken;
@@ -151,10 +152,7 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        Date currentExpiration = getUserPrincipal().getExpiration();
-        if (currentExpiration != null && (expiration == null || currentExpiration.before(expiration))) {
-            expiration = currentExpiration;
-        }
+        expiration = DateUtil.min(expiration, getUserPrincipal().getExpiration());
         String token = tokenManager.generateToken(getUserId(), expiration);
         TokenManager.TokenData data = tokenManager.decodeToken(token);
         actionLogger.token(request, getUserId(), data.getId());

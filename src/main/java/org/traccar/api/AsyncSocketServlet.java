@@ -22,6 +22,7 @@ import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.DateUtil;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -63,7 +64,9 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                         ? loginService.login(tokens.iterator().next())
                         : loginService.login(req.getHttpServletRequest());
                 if (loginResult != null && loginResult.getUser() != null) {
-                    return new AsyncSocket(objectMapper, connectionManager, storage, loginResult.getUser().getId());
+                    return new AsyncSocket(
+                            objectMapper, connectionManager, storage, loginResult.getUser().getId(),
+                            DateUtil.min(loginResult.getExpiration(), loginResult.getUser().getExpirationTime()));
                 }
             } catch (SecurityException e) {
                 return null;

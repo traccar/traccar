@@ -19,6 +19,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -96,9 +97,7 @@ public class ShareResource extends BaseResource {
             if (!create) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
-            if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
-                expiration = user.getExpirationTime();
-            }
+            expiration = DateUtil.min(expiration, user.getExpirationTime());
             share = new User();
             share.setName(clazz == Device.class ? ((Device) object).getName() : ((Group) object).getName());
             share.setEmail(shareEmail);
