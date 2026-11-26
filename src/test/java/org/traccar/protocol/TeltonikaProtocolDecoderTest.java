@@ -8,9 +8,6 @@ import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
-    private static final String EYE_CAPTURE_PACKET =
-            "00000000000000728e010000018b23dd796300fbf7263c24f9e11a0000000000000002240001000000000000000000010224004501210001e50110cde39f7e42bb55aa788e4a29ed650055020ab70a8f264c6000ffff6b210001b00110f89b907e42bb55aaa3463b29ed650055020ab708bb2600ae0500096c01000051d4";
-
     @Test
     public void testDecode() throws Exception {
 
@@ -44,8 +41,29 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
                 "00000000000000768e010000018fdc4b27cb015b3e33ceefa529030009013f0e0000022400010000000000000000000102240049010f0001c60106babbf36300550202806d0f0001ca01063456555565690202806b0f0001d10106467975425450020280690b0001c90106fa54ba8d00550b0001cf0106cabbf36300550100005455"),
                 position().attribute("tag1Voltage", 3090));
 
-        verifyDecode(decoder, binary(EYE_CAPTURE_PACKET),
-                position());
+        verifyDecode(decoder, binary(
+                "00000000000000728e010000018b23dd796300fbf7263c24f9e11a0000000000000002240001000000000000000000010224004501210001e50110cde39f7e42bb55aa788e4a29ed650055020ab70a8f264c6000ffff6b210001b00110f89b907e42bb55aaa3463b29ed650055020ab708bb2600ae0500096c01000051d4"),
+                position()
+                        .attribute("tag1Id", "cde39f7e42bb55aa788e4a29ed650055")
+                        .attribute("tag1Rssi", -27)
+                        .attribute("tag1Temp", 2703)
+                        .attribute("tag1Humidity", 38)
+                        .attribute("tag1Motion", false)
+                        .attribute("tag1MotionCount", 19552)
+                        .attribute("tag1Pitch", 0)
+                        .attribute("tag1AngleRoll", -1)
+                        .attribute("tag1LowBattery", false)
+                        .attribute("tag1Voltage", 3070)
+                        .attribute("tag1Magnet", false)
+                        .attribute("tag1Mac", null)
+                        .attribute("tag2Id", "f89b907e42bb55aaa3463b29ed650055")
+                        .attribute("tag2Temp", 2235)
+                        .attribute("tag2Humidity", 38)
+                        .attribute("tag2Motion", false)
+                        .attribute("tag2MotionCount", 174)
+                        .attribute("tag2Pitch", 5)
+                        .attribute("tag2AngleRoll", 9)
+                        .attribute("tag2Voltage", 3080));
 
         verifyDecode(decoder, binary(
                 "000000000000004b8e010000018368952793000f0e54fc209ab05800b300b40e00002a4f0001000000000000000000012a4f001e011c0001a40110eb47706aa38255aa96f21a154e2d00550d01000e020bd6010000823f"),
@@ -313,32 +331,6 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new TeltonikaProtocolDecoder(null, false));
         verifyDecode(decoder, binary("000F313233343536373839303132333435"));
         return decoder;
-    }
-
-    @Test
-    public void testEyeCapturedSensorData() throws Exception {
-        var decoder = eyeDecoder();
-        verifyDecode(decoder, binary(EYE_CAPTURE_PACKET), position()
-                .attribute("tag1Id", "cde39f7e42bb55aa788e4a29ed650055")
-                .attribute("tag1Rssi", -27)
-                .attribute("tag1Temp", 2703)
-                .attribute("tag1Humidity", 38)
-                .attribute("tag1Motion", false)
-                .attribute("tag1MotionCount", 19552)
-                .attribute("tag1Pitch", 0)
-                .attribute("tag1AngleRoll", -1)
-                .attribute("tag1LowBattery", false)
-                .attribute("tag1Voltage", 3070)
-                .attribute("tag1Magnet", false)
-                .attribute("tag1Mac", null)
-                .attribute("tag2Id", "f89b907e42bb55aaa3463b29ed650055")
-                .attribute("tag2Temp", 2235)
-                .attribute("tag2Humidity", 38)
-                .attribute("tag2Motion", false)
-                .attribute("tag2MotionCount", 174)
-                .attribute("tag2Pitch", 5)
-                .attribute("tag2AngleRoll", 9)
-                .attribute("tag2Voltage", 3080));
     }
 
     @Test
