@@ -18,6 +18,7 @@ package org.traccar.api.security;
 import com.google.inject.Provider;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
@@ -115,7 +116,7 @@ public class LoginService {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
             return new LoginResult(new ServiceAccountUser());
         }
-        TokenManager.TokenData tokenData = tokenManager.verifyToken(token);
+        TokenManager.TokenData tokenData = tokenManager.verifyToken(token, TokenPurpose.ACCESS);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", tokenData.getUserId())));
         if (user != null) {

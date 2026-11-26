@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
@@ -119,7 +120,8 @@ public class ShareResource extends BaseResource {
 
     private ShareLink createLink(User share) throws StorageException, GeneralSecurityException, IOException {
         return new ShareLink(
-                tokenManager.generateToken(share.getId(), share.getExpirationTime()), share.getExpirationTime());
+                tokenManager.generateToken(share.getId(), share.getExpirationTime(), TokenPurpose.ACCESS),
+                share.getExpirationTime());
     }
 
     @Path("device")

@@ -20,6 +20,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.api.security.OidcSessionManager;
 import org.traccar.api.security.OidcSessionManager.AuthorizationCode;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
@@ -133,7 +134,7 @@ public class OidcResource extends BaseResource {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        String token = tokenManager.generateToken(authCode.userId());
+        String token = tokenManager.generateToken(authCode.userId(), null, TokenPurpose.ACCESS);
         TokenManager.TokenData tokenData = tokenManager.decodeToken(token);
         long expiresIn = Math.max(0, (tokenData.getExpiration().getTime() - System.currentTimeMillis()) / 1000);
         Set<String> scopes = sessionManager.parseScopes(authCode.scope());

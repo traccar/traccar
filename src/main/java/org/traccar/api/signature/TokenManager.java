@@ -51,6 +51,8 @@ public class TokenManager {
         private long userId;
         @JsonProperty("e")
         private Date expiration;
+        @JsonProperty("p")
+        private TokenPurpose purpose;
 
         public long getId() {
             return id;
@@ -63,6 +65,10 @@ public class TokenManager {
         public Date getExpiration() {
             return expiration;
         }
+
+        public TokenPurpose getPurpose() {
+            return purpose != null ? purpose : TokenPurpose.ACCESS;
+        }
     }
 
     @Inject
@@ -72,14 +78,11 @@ public class TokenManager {
         this.storage = storage;
     }
 
-    public String generateToken(long userId) throws IOException, GeneralSecurityException, StorageException {
-        return generateToken(userId, null);
-    }
-
-    public String generateToken(
-            long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
+    public String generateToken(long userId, Date expiration, TokenPurpose purpose)
+            throws IOException, GeneralSecurityException, StorageException {
         TokenData data = new TokenData();
         data.userId = userId;
+        data.purpose = purpose;
         data.id = random.nextLong() & Long.MAX_VALUE;
         if (expiration != null) {
             data.expiration = expiration;
@@ -90,8 +93,12 @@ public class TokenManager {
         return Base64.encodeBase64URLSafeString(cryptoManager.sign(encoded));
     }
 
-    public TokenData verifyToken(String token) throws IOException, GeneralSecurityException, StorageException {
+    public TokenData verifyToken(String token, TokenPurpose purpose)
+            throws IOException, GeneralSecurityException, StorageException {
         TokenData data = decodeToken(token);
+        if (data.getPurpose() != purpose) {
+            throw new SecurityException("Invalid token purpose");
+        }
         if (data.expiration.before(new Date())) {
             throw new SecurityException("Token has expired");
         }

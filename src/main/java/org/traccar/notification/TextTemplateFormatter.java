@@ -24,6 +24,7 @@ import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LocaleManager;
@@ -68,7 +69,7 @@ public class TextTemplateFormatter {
             velocityContext.put("user", user);
             velocityContext.put("timezone", UserUtil.getTimezone(server, user));
             try {
-                velocityContext.put("token", tokenManager.generateToken(user.getId()));
+                velocityContext.put("token", tokenManager.generateToken(user.getId(), null, TokenPurpose.ACCESS));
             } catch (IOException | GeneralSecurityException | StorageException e) {
                 LOGGER.warn("Token generation failed", e);
             }
