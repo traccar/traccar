@@ -189,7 +189,7 @@ public class PermissionsService {
         }
         User user = userId > 0 ? getUser(userId) : null;
         if (user != null && user.getExpirationTime() != null
-                && !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
+                && (before.getId() == 0 || !Objects.equals(before.getExpirationTime(), after.getExpirationTime()))
                 && (after.getExpirationTime() == null
                 || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
             checkAdmin(userId);
