@@ -1032,9 +1032,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xE3:
-                    buf.readUnsignedByte(); // reserved
-                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                    if (length >= 4) {
+                        buf.readUnsignedByte(); // reserved
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                    }
                     break;
                 case 0xE4:
                     if (buf.readUnsignedByte() == 0) {
@@ -1372,10 +1374,13 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xEC:
                 case 0xF4:
-                    while (buf.readerIndex() < endIndex) {
-                        String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-                        network.addWifiAccessPoint(WifiAccessPoint.from(
-                                mac.substring(0, mac.length() - 1), buf.readByte()));
+                    while (endIndex - buf.readerIndex() >= 7) {
+                        String hex = ByteBufUtil.hexDump(buf.readSlice(6));
+                        int rssi = buf.readByte();
+                        if (!hex.equals("000000000000")) {
+                            String mac = hex.replaceAll("(..)", "$1:");
+                            network.addWifiAccessPoint(WifiAccessPoint.from(mac.substring(0, mac.length() - 1), rssi));
+                        }
                     }
                     break;
                 case 0xF5:
