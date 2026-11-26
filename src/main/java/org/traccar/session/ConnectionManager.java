@@ -30,6 +30,7 @@ import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Group;
 import org.traccar.model.LogRecord;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
@@ -373,20 +374,46 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     @Override
+    public synchronized <T extends BaseModel> void invalidateObject(
+            boolean local, Class<T> clazz, long id, ObjectOperation operation) throws StorageException {
+        if ((clazz.equals(Device.class) || clazz.equals(Group.class)) && operation != ObjectOperation.ADD) {
+            updateAllUserDevices();
+        }
+    }
+
+    @Override
     public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
-            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
-        if (clazz1.equals(User.class) && clazz2.equals(Device.class) && listeners.containsKey(id1)) {
-            if (link) {
-                userDevices.get(id1).add(id2);
-                deviceUsers.computeIfAbsent(id2, id -> new HashSet<>()).add(id1);
-            } else {
-                userDevices.get(id1).remove(id2);
-                deviceUsers.computeIfPresent(id2, (x, userIds) -> {
-                    userIds.remove(id1);
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link)
+            throws StorageException {
+        if (clazz1.equals(User.class) && clazz2.equals(Group.class)) {
+            updateAllUserDevices();
+        } else if (clazz1.equals(User.class) && clazz2.equals(Device.class) && listeners.containsKey(id1)) {
+            updateUserDevices(id1);
+        }
+    }
+
+    private void updateAllUserDevices() throws StorageException {
+        for (var entry : listeners.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                updateUserDevices(entry.getKey());
+            }
+        }
+    }
+
+    private void updateUserDevices(long userId) throws StorageException {
+        var devices = storage.getObjects(Device.class, new Request(
+                new Columns.Include("id"), new Condition.Permission(User.class, userId, Device.class)));
+        var deviceIds = devices.stream().map(BaseModel::getId).collect(Collectors.toSet());
+        for (long deviceId : userDevices.getOrDefault(userId, Collections.emptySet())) {
+            if (!deviceIds.contains(deviceId)) {
+                deviceUsers.computeIfPresent(deviceId, (id, userIds) -> {
+                    userIds.remove(userId);
                     return userIds.isEmpty() ? null : userIds;
                 });
             }
         }
+        deviceIds.forEach(deviceId -> deviceUsers.computeIfAbsent(deviceId, id -> new HashSet<>()).add(userId));
+        userDevices.put(userId, deviceIds);
     }
 
     public synchronized void updateLog(LogRecord record) {
@@ -429,10 +456,7 @@ public class ConnectionManager implements BroadcastInterface {
             set = new CopyOnWriteArraySet<>();
             listeners.put(userId, set);
 
-            var devices = storage.getObjects(Device.class, new Request(
-                    new Columns.Include("id"), new Condition.Permission(User.class, userId, Device.class)));
-            userDevices.put(userId, devices.stream().map(BaseModel::getId).collect(Collectors.toSet()));
-            devices.forEach(device -> deviceUsers.computeIfAbsent(device.getId(), id -> new HashSet<>()).add(userId));
+            updateUserDevices(userId);
         }
         set.add(listener);
     }

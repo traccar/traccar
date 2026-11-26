@@ -70,14 +70,19 @@ public abstract class BaseBroadcastService implements BroadcastService {
 
     @Override
     public <T extends BaseModel> void invalidateObject(
-            boolean local, Class<T> clazz, long id, ObjectOperation operation) {
-        BroadcastMessage message = new BroadcastMessage();
-        var invalidateObject = new BroadcastMessage.InvalidateObject();
-        invalidateObject.setClazz(Permission.getKey(clazz));
-        invalidateObject.setId(id);
-        invalidateObject.setOperation(operation);
-        message.setInvalidateObject(invalidateObject);
-        sendMessage(message);
+            boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
+        for (BroadcastInterface listener : listeners) {
+            listener.invalidateObject(false, clazz, id, operation);
+        }
+        if (local) {
+            BroadcastMessage message = new BroadcastMessage();
+            var invalidateObject = new BroadcastMessage.InvalidateObject();
+            invalidateObject.setClazz(Permission.getKey(clazz));
+            invalidateObject.setId(id);
+            invalidateObject.setOperation(operation);
+            message.setInvalidateObject(invalidateObject);
+            sendMessage(message);
+        }
     }
 
     @Override
@@ -112,12 +117,10 @@ public abstract class BaseBroadcastService implements BroadcastService {
             listeners.forEach(listener -> listener.updateCommand(false, message.getCommandDeviceId()));
         } else if (message.getInvalidateObject() != null) {
             var invalidateObject = message.getInvalidateObject();
-            for (BroadcastInterface listener : listeners) {
-                listener.invalidateObject(
-                        false,
-                        Permission.getKeyClass(invalidateObject.getClazz()), invalidateObject.getId(),
-                        invalidateObject.getOperation());
-            }
+            invalidateObject(
+                    false,
+                    Permission.getKeyClass(invalidateObject.getClazz()), invalidateObject.getId(),
+                    invalidateObject.getOperation());
         } else if (message.getInvalidatePermission() != null) {
             var invalidatePermission = message.getInvalidatePermission();
             invalidatePermission(
