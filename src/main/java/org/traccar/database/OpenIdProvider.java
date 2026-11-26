@@ -60,6 +60,9 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class OpenIdProvider {
+
+    private static final String STATE_KEY = "openidState";
+
     private final Boolean force;
     private final ClientID clientId;
     private final ClientAuthentication clientAuth;
@@ -107,14 +110,16 @@ public class OpenIdProvider {
         groupsClaimName = config.getString(Keys.OPENID_GROUPS_CLAIM_NAME);
     }
 
-    public URI createAuthUri() {
+    public URI createAuthUri(HttpServletRequest request) {
+        State state = new State();
+        request.getSession().setAttribute(STATE_KEY, state.getValue());
         Scope scope = new Scope("openid", "profile", "email");
         if (adminGroup != null) {
             scope.add(groupsClaimName);
         }
         return new AuthenticationRequest.Builder(new ResponseType("code"), scope, clientId, callbackUrl)
                 .endpointURI(authUrl)
-                .state(new State())
+                .state(state)
                 .build()
                 .toURI();
     }
@@ -165,6 +170,13 @@ public class OpenIdProvider {
         }
         AuthorizationResponse response = AuthorizationResponse.parse(
                 redirectUri, URLUtils.parseParameters(queryParameters));
+
+        var session = request.getSession();
+        String state = (String) session.getAttribute(STATE_KEY);
+        session.removeAttribute(STATE_KEY);
+        if (response.getState() == null || !response.getState().getValue().equals(state)) {
+            throw new GeneralSecurityException("Invalid OpenID state");
+        }
 
         if (!response.indicatesSuccess()) {
             throw new GeneralSecurityException(response.toErrorResponse().getErrorObject().getDescription());

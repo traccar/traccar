@@ -186,7 +186,7 @@ public class SessionResource extends BaseResource {
         if (openIdProvider == null) {
             throw new UnsupportedOperationException("OpenID not enabled");
         }
-        return Response.seeOther(openIdProvider.createAuthUri()).build();
+        return Response.seeOther(openIdProvider.createAuthUri(request)).build();
     }
 
     @PermitAll
