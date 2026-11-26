@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 
 public final class DateUtil {
@@ -29,10 +28,12 @@ public final class DateUtil {
     private static final DateTimeFormatter LOCAL_DATE_TIME = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    private static final Comparator<Date> DATE_COMPARATOR = Comparator.nullsLast(Comparator.naturalOrder());
-
     public static Date min(Date first, Date second) {
-        return DATE_COMPARATOR.compare(first, second) <= 0 ? first : second;
+        return getTimeOrMax(first) <= getTimeOrMax(second) ? first : second;
+    }
+
+    public static long getTimeOrMax(Date date) {
+        return date != null ? date.getTime() : Long.MAX_VALUE;
     }
 
     public static Date correctDay(Date guess) {

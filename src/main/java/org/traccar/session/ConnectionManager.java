@@ -378,6 +378,15 @@ public class ConnectionManager implements BroadcastInterface {
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws StorageException {
         if ((clazz.equals(Device.class) || clazz.equals(Group.class)) && operation != ObjectOperation.ADD) {
             updateAllUserDevices();
+        } else if (clazz.equals(User.class) && operation != ObjectOperation.ADD) {
+            var userListeners = listeners.get(id);
+            if (userListeners != null && !userListeners.isEmpty()) {
+                User user = operation == ObjectOperation.DELETE ? null : storage.getObject(User.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", id)));
+                for (UpdateListener listener : userListeners) {
+                    listener.onUpdateUser(user);
+                }
+            }
         }
     }
 
@@ -440,6 +449,8 @@ public class ConnectionManager implements BroadcastInterface {
 
     public interface UpdateListener {
         void onKeepalive();
+
+        void onUpdateUser(User user);
 
         void onUpdateDevice(Device device);
 

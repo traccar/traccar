@@ -23,11 +23,13 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -52,8 +54,9 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     private final ConnectionManager connectionManager;
     private final Storage storage;
     private final long userId;
-    private final long expiration;
 
+    private volatile long expiration;
+    private volatile boolean invalidated;
     private boolean includeLogs;
     private Session session;
 
@@ -64,7 +67,7 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
         this.connectionManager = connectionManager;
         this.storage = storage;
         this.userId = userId;
-        this.expiration = expiration != null ? expiration.getTime() : Long.MAX_VALUE;
+        this.expiration = DateUtil.getTimeOrMax(expiration);
     }
 
     @Override
@@ -112,6 +115,18 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     }
 
     @Override
+    public void onUpdateUser(User user) {
+        if (user == null || user.getDisabled()) {
+            invalidated = true;
+            if (session != null && session.isOpen()) {
+                session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
+            }
+        } else {
+            expiration = Math.min(expiration, DateUtil.getTimeOrMax(user.getExpirationTime()));
+        }
+    }
+
+    @Override
     public void onUpdateDevice(Device device) {
         sendData(Map.of(KEY_DEVICES, List.of(device)));
     }
@@ -135,7 +150,7 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
 
     private void sendData(Map<String, Collection<?>> data) {
         if (session != null && session.isOpen()) {
-            if (System.currentTimeMillis() < expiration) {
+            if (!invalidated && System.currentTimeMillis() < expiration) {
                 try {
                     session.sendText(objectMapper.writeValueAsString(data), Callback.NOOP);
                 } catch (JsonProcessingException e) {
