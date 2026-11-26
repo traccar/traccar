@@ -192,6 +192,10 @@ public class OpenIdProvider {
         BearerAccessToken bearerToken = tokens.getOIDCTokens().getBearerAccessToken();
 
         UserInfo userInfo = getUserInfo(bearerToken);
+        Object emailVerified = userInfo.getClaim(UserInfo.EMAIL_VERIFIED_CLAIM_NAME);
+        if (Boolean.FALSE.equals(emailVerified) || "false".equals(emailVerified)) {
+            throw new GeneralSecurityException("OpenID email is not verified");
+        }
 
         List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
         Boolean administrator = adminGroup != null && userGroups != null ? userGroups.contains(adminGroup) : null;
