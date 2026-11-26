@@ -17,6 +17,7 @@
 package org.traccar.api;
 
 import org.traccar.api.security.ServiceAccountUser;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -24,7 +25,6 @@ import org.traccar.model.Group;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
-import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -51,7 +51,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     private CacheManager cacheManager;
 
     @Inject
-    private ConnectionManager connectionManager;
+    private BroadcastService broadcastService;
 
     @Inject
     private LogAction actionLogger;
@@ -94,8 +94,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (getUserId() != ServiceAccountUser.ID) {
             storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
-            cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
-            connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
+            broadcastService.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
             actionLogger.link(request, getUserId(), User.class, getUserId(), baseClass, entity.getId());
         }
 

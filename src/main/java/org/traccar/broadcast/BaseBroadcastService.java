@@ -81,17 +81,22 @@ public abstract class BaseBroadcastService implements BroadcastService {
     }
 
     @Override
-    public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
-            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
-        BroadcastMessage message = new BroadcastMessage();
-        var invalidatePermission = new BroadcastMessage.InvalidatePermission();
-        invalidatePermission.setClazz1(Permission.getKey(clazz1));
-        invalidatePermission.setId1(id1);
-        invalidatePermission.setClazz2(Permission.getKey(clazz2));
-        invalidatePermission.setId2(id2);
-        invalidatePermission.setLink(link);
-        message.setInvalidatePermission(invalidatePermission);
-        sendMessage(message);
+    public <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) throws Exception {
+        for (BroadcastInterface listener : listeners) {
+            listener.invalidatePermission(false, clazz1, id1, clazz2, id2, link);
+        }
+        if (local) {
+            BroadcastMessage message = new BroadcastMessage();
+            var invalidatePermission = new BroadcastMessage.InvalidatePermission();
+            invalidatePermission.setClazz1(Permission.getKey(clazz1));
+            invalidatePermission.setId1(id1);
+            invalidatePermission.setClazz2(Permission.getKey(clazz2));
+            invalidatePermission.setId2(id2);
+            invalidatePermission.setLink(link);
+            message.setInvalidatePermission(invalidatePermission);
+            sendMessage(message);
+        }
     }
 
     protected abstract void sendMessage(BroadcastMessage message);
@@ -115,13 +120,11 @@ public abstract class BaseBroadcastService implements BroadcastService {
             }
         } else if (message.getInvalidatePermission() != null) {
             var invalidatePermission = message.getInvalidatePermission();
-            for (BroadcastInterface listener : listeners) {
-                listener.invalidatePermission(
-                        false,
-                        Permission.getKeyClass(invalidatePermission.getClazz1()), invalidatePermission.getId1(),
-                        Permission.getKeyClass(invalidatePermission.getClazz2()), invalidatePermission.getId2(),
-                        invalidatePermission.getLink());
-            }
+            invalidatePermission(
+                    false,
+                    Permission.getKeyClass(invalidatePermission.getClazz1()), invalidatePermission.getId1(),
+                    Permission.getKeyClass(invalidatePermission.getClazz2()), invalidatePermission.getId2(),
+                    invalidatePermission.getLink());
         }
     }
 

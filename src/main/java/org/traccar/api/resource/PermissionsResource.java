@@ -17,13 +17,13 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.LinkedDevice;
 import org.traccar.model.Permission;
 import org.traccar.model.UserRestrictions;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
@@ -52,7 +52,7 @@ import java.util.Set;
 public class PermissionsResource extends BaseResource {
 
     @Inject
-    private CacheManager cacheManager;
+    private BroadcastService broadcastService;
 
     @Inject
     private LogAction actionLogger;
@@ -120,7 +120,7 @@ public class PermissionsResource extends BaseResource {
                 checkDeviceHierarchy(permission.getOwnerId(), permission.getPropertyId());
             }
             storage.addPermission(permission);
-            cacheManager.invalidatePermission(
+            broadcastService.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),
@@ -146,7 +146,7 @@ public class PermissionsResource extends BaseResource {
             Permission permission = new Permission(entity);
             checkPermission(permission);
             storage.removePermission(permission);
-            cacheManager.invalidatePermission(
+            broadcastService.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),

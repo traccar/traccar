@@ -15,15 +15,10 @@
  */
 package org.traccar.broadcast;
 
-public class NullBroadcastService implements BroadcastService {
+public class NullBroadcastService extends BaseBroadcastService {
 
     @Override
-    public boolean singleInstance() {
-        return true;
-    }
-
-    @Override
-    public void registerListener(BroadcastInterface listener) {}
+    protected void sendMessage(BroadcastMessage message) {}
 
     @Override
     public void start() throws Exception {}
