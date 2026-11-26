@@ -25,6 +25,7 @@ import org.traccar.model.Group;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -49,6 +50,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Inject
     private CacheManager cacheManager;
+
+    @Inject
+    private ConnectionManager connectionManager;
 
     @Inject
     private BroadcastService broadcastService;
@@ -132,6 +136,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
         cacheManager.invalidateObject(true, entity.getClass(), entity.getId(), ObjectOperation.UPDATE);
+        connectionManager.invalidateObject(true, entity.getClass(), entity.getId(), ObjectOperation.UPDATE);
         actionLogger.edit(request, getUserId(), entity);
 
         return Response.ok(entity).build();

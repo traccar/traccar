@@ -152,6 +152,37 @@ public class DeviceResource extends BaseObjectResource<Device> {
         }
     }
 
+    @Path("{id}/disconnect")
+    @POST
+    public Response disconnect(@PathParam("id") long deviceId) throws Exception {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
+
+        boolean closed = connectionManager.closeDeviceSession(deviceId);
+
+        Device device = new Device();
+        device.setId(deviceId);
+        actionLogger.edit(request, getUserId(), device);
+
+        return Response.ok(Map.of("closed", closed)).build();
+    }
+
+    @Path("disconnect")
+    @POST
+    public Response disconnect(@QueryParam("id") List<Long> deviceIds) throws Exception {
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
+
+        List<Long> closed = new LinkedList<>();
+        for (long deviceId : deviceIds) {
+            permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+            if (connectionManager.closeDeviceSession(deviceId)) {
+                closed.add(deviceId);
+            }
+        }
+
+        return Response.ok(Map.of("closed", closed)).build();
+    }
+
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {

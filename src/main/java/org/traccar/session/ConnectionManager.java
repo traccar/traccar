@@ -16,6 +16,7 @@
 package org.traccar.session;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Protocol;
@@ -249,6 +250,41 @@ public class ConnectionManager implements BroadcastInterface {
         }
     }
 
+    public boolean closeDeviceSession(long deviceId) {
+        DeviceSession deviceSession = sessionsByDeviceId.get(deviceId);
+        if (deviceSession == null) {
+            return false;
+        }
+        removeDeviceSession(deviceId);
+        Channel channel = deviceSession.getChannel();
+        if (!(channel instanceof DatagramChannel)) {
+            channel.close();
+        }
+        updateDevice(deviceId, Device.STATUS_OFFLINE, null);
+        LOGGER.info("Closed session for device {}", deviceId);
+        return true;
+    }
+
+    private void closeDeviceSessionIfDisabled(long deviceId) {
+        if (!sessionsByDeviceId.containsKey(deviceId)) {
+            return;
+        }
+        try {
+            Device device = storage.getObject(Device.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", deviceId)));
+            if (device != null) {
+                try {
+                    device.checkDisabled();
+                } catch (SecurityException e) {
+                    LOGGER.info("Closing session for device {} - {}", deviceId, e.getMessage());
+                    closeDeviceSession(deviceId);
+                }
+            }
+        } catch (StorageException e) {
+            LOGGER.warn("Failed to check device disabled state", e);
+        }
+    }
+
     public void updateDevice(long deviceId, String status, Date time) {
         Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
@@ -377,6 +413,9 @@ public class ConnectionManager implements BroadcastInterface {
     @Override
     public synchronized <T extends BaseModel> void invalidateObject(
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws StorageException {
+        if (clazz.equals(Device.class) && operation == ObjectOperation.UPDATE) {
+            closeDeviceSessionIfDisabled(id);
+        }
         if (clazz.equals(RevokedToken.class) && operation == ObjectOperation.ADD) {
             listeners.values().stream().flatMap(Set::stream).forEach(listener -> listener.onRevokeToken(id));
         } else if ((clazz.equals(Device.class) || clazz.equals(Group.class)) && operation != ObjectOperation.ADD) {
