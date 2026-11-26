@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 package org.traccar.session;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
+import io.netty.channel.socket.DatagramChannel;
 
 import java.net.SocketAddress;
 
-public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
+public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress, ChannelId channelId) {
     public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
-        this(channel.localAddress(), remoteAddress);
+        this(channel.localAddress(), remoteAddress, channel instanceof DatagramChannel ? null : channel.id());
     }
 }

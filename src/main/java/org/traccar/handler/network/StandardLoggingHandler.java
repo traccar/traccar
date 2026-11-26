@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
     private LogRecord createLogRecord(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof NetworkMessage networkMessage) {
             if (networkMessage.getMessage() instanceof ByteBuf data) {
-                LogRecord record = new LogRecord(ctx.channel().localAddress(), networkMessage.getRemoteAddress());
+                LogRecord record = new LogRecord(ctx.channel(), networkMessage.getRemoteAddress());
                 record.setProtocol(protocol);
                 if (decodeTextData && BufferUtil.isPrintable(data, data.readableBytes())) {
                     record.setData(data.getCharSequence(

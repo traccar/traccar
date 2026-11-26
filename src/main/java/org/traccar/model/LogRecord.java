@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.netty.channel.Channel;
 import org.traccar.session.ConnectionKey;
 
 import java.net.InetSocketAddress;
@@ -23,11 +24,11 @@ import java.net.SocketAddress;
 
 public class LogRecord {
 
-    private final InetSocketAddress localAddress;
+    private final ConnectionKey connectionKey;
     private final InetSocketAddress remoteAddress;
 
-    public LogRecord(SocketAddress localAddress, SocketAddress remoteAddress) {
-        this.localAddress = (InetSocketAddress) localAddress;
+    public LogRecord(Channel channel, SocketAddress remoteAddress) {
+        this.connectionKey = new ConnectionKey(channel, remoteAddress);
         this.remoteAddress = (InetSocketAddress) remoteAddress;
     }
 
@@ -38,7 +39,7 @@ public class LogRecord {
 
     @JsonIgnore
     public ConnectionKey getConnectionKey() {
-        return new ConnectionKey(localAddress, remoteAddress);
+        return connectionKey;
     }
 
     public String getHost() {
