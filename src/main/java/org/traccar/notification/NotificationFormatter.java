@@ -55,7 +55,8 @@ public class NotificationFormatter {
         Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user, TokenPurpose.ACCESS);
+        VelocityContext velocityContext = textTemplateFormatter.prepareContext(
+                server, user, TokenPurpose.NOTIFICATIONS);
 
         velocityContext.put("notification", notification);
         velocityContext.put("device", device);

@@ -72,7 +72,7 @@ public class ReportMailer {
         executorService.submit(() -> {
             try {
                 var velocityContext = textTemplateFormatter.prepareContext(
-                        permissionsService.getServer(), user, TokenPurpose.ACCESS);
+                        permissionsService.getServer(), user, TokenPurpose.NOTIFICATIONS);
                 velocityContext.put("reportUrl", url);
                 var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "scheduledReport", false);
                 mailManager.sendMessage(user, false, fullMessage.subject(), fullMessage.body()).get();
