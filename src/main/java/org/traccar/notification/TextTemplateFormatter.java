@@ -61,7 +61,7 @@ public class TextTemplateFormatter {
         templatesRoot = config.getString(Keys.TEMPLATES_ROOT);
     }
 
-    public VelocityContext prepareContext(Server server, User user) {
+    public VelocityContext prepareContext(Server server, User user, TokenPurpose purpose) {
 
         VelocityContext velocityContext = new VelocityContext();
 
@@ -69,7 +69,7 @@ public class TextTemplateFormatter {
             velocityContext.put("user", user);
             velocityContext.put("timezone", UserUtil.getTimezone(server, user));
             try {
-                velocityContext.put("token", tokenManager.generateToken(user.getId(), null, TokenPurpose.ACCESS));
+                velocityContext.put("token", tokenManager.generateToken(user.getId(), null, purpose));
             } catch (IOException | GeneralSecurityException | StorageException e) {
                 LOGGER.warn("Token generation failed", e);
             }

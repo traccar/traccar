@@ -17,6 +17,7 @@ package org.traccar.schedule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.mail.MailManager;
@@ -69,7 +70,7 @@ public class TaskExpirations extends SingleScheduleTask {
     }
 
     private void sendUserExpiration(Server server, User user, String template) throws Exception {
-        var velocityContext = textTemplateFormatter.prepareContext(server, user);
+        var velocityContext = textTemplateFormatter.prepareContext(server, user, TokenPurpose.ACCESS);
         velocityContext.put("expiration", user.getExpirationTime());
         var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, false);
         mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body()).get();
@@ -79,7 +80,7 @@ public class TaskExpirations extends SingleScheduleTask {
         var users = storage.getObjects(User.class, new Request(
                 new Columns.All(), new Condition.Permission(User.class, Device.class, device.getId())));
         for (User user : users) {
-            var velocityContext = textTemplateFormatter.prepareContext(server, user);
+            var velocityContext = textTemplateFormatter.prepareContext(server, user, TokenPurpose.ACCESS);
             velocityContext.put("expiration", device.getExpirationTime());
             velocityContext.put("device", device);
             var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, false);

@@ -17,6 +17,7 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.database.LocaleManager;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
@@ -54,7 +55,7 @@ public class NotificationFormatter {
         Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user);
+        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user, TokenPurpose.ACCESS);
 
         velocityContext.put("notification", notification);
         velocityContext.put("device", device);

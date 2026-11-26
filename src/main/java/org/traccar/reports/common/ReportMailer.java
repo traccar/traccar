@@ -18,6 +18,7 @@ package org.traccar.reports.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.security.PermissionsService;
+import org.traccar.api.signature.TokenPurpose;
 import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
@@ -70,7 +71,8 @@ public class ReportMailer {
     public void sendAsync(User user, String url) {
         executorService.submit(() -> {
             try {
-                var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
+                var velocityContext = textTemplateFormatter.prepareContext(
+                        permissionsService.getServer(), user, TokenPurpose.ACCESS);
                 velocityContext.put("reportUrl", url);
                 var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "scheduledReport", false);
                 mailManager.sendMessage(user, false, fullMessage.subject(), fullMessage.body()).get();
