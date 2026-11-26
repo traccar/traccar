@@ -42,8 +42,13 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class JimiPhotoProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final Set<String> MEDIA_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif", "mp4", "ts", "avi", "h264", "h265", "aac", "mp3", "amr", "txt");
 
     public JimiPhotoProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -74,7 +79,12 @@ public class JimiPhotoProtocolDecoder extends BaseHttpProtocolDecoder {
             }
 
             String filename = file.getFilename();
-            String extension = filename.substring(filename.lastIndexOf('.') + 1);
+            String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+            if (!MEDIA_EXTENSIONS.contains(extension)) {
+                sendJsonResponse(channel, HttpResponseStatus.BAD_REQUEST, 400, null, null);
+                return null;
+            }
+
             String savedName = writeMediaFile(deviceSession.getUniqueId(), file.content(), extension);
 
             Position position = new Position(getProtocolName());
@@ -117,7 +127,10 @@ public class JimiPhotoProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private void sendJsonResponse(Channel channel, HttpResponseStatus status, int code, String message, String data) {
         if (channel != null) {
-            JsonObjectBuilder builder = Json.createObjectBuilder().add("code", code).add("message", message);
+            JsonObjectBuilder builder = Json.createObjectBuilder().add("code", code);
+            if (message != null) {
+                builder.add("message", message);
+            }
             if (data != null) {
                 builder.add("data", data);
             }
