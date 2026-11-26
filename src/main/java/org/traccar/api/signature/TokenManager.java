@@ -96,7 +96,7 @@ public class TokenManager {
     public TokenData verifyToken(String token, TokenPurpose purpose)
             throws IOException, GeneralSecurityException, StorageException {
         TokenData data = decodeToken(token);
-        if (data.getPurpose() != purpose) {
+        if (data.getPurpose() != TokenPurpose.ACCESS && data.getPurpose() != purpose) {
             throw new SecurityException("Invalid token purpose");
         }
         if (data.expiration.before(new Date())) {
