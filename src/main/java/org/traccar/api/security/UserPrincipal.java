@@ -22,10 +22,12 @@ public class UserPrincipal implements Principal {
 
     private final long userId;
     private final Date expiration;
+    private final Long tokenId;
 
-    public UserPrincipal(long userId, Date expiration) {
+    public UserPrincipal(long userId, Date expiration, Long tokenId) {
         this.userId = userId;
         this.expiration = expiration;
+        this.tokenId = tokenId;
     }
 
     public Long getUserId() {
@@ -34,6 +36,10 @@ public class UserPrincipal implements Principal {
 
     public Date getExpiration() {
         return expiration;
+    }
+
+    public Long getTokenId() {
+        return tokenId;
     }
 
     @Override

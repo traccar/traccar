@@ -8,14 +8,16 @@ public class LoginResult {
 
     private final User user;
     private final Date expiration;
+    private final Long tokenId;
 
     public LoginResult(User user) {
-        this(user, null);
+        this(user, null, null);
     }
 
-    public LoginResult(User user, Date expiration) {
+    public LoginResult(User user, Date expiration, Long tokenId) {
         this.user = user;
         this.expiration = expiration;
+        this.tokenId = tokenId;
     }
 
     public User getUser() {
@@ -24,6 +26,10 @@ public class LoginResult {
 
     public Date getExpiration() {
         return expiration;
+    }
+
+    public Long getTokenId() {
+        return tokenId;
     }
 
 }

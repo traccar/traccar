@@ -29,10 +29,14 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
+import org.traccar.model.RevokedToken;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
@@ -54,6 +58,7 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     private final ConnectionManager connectionManager;
     private final Storage storage;
     private final long userId;
+    private final Long tokenId;
 
     private volatile long expiration;
     private volatile boolean invalidated;
@@ -62,11 +67,12 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
 
     public AsyncSocket(
             ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage,
-            long userId, Date expiration) {
+            long userId, Date expiration, Long tokenId) {
         this.objectMapper = objectMapper;
         this.connectionManager = connectionManager;
         this.storage = storage;
         this.userId = userId;
+        this.tokenId = tokenId;
         this.expiration = DateUtil.getTimeOrMax(expiration);
     }
 
@@ -77,6 +83,10 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
             Map<String, Collection<?>> data = new HashMap<>();
             data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
             connectionManager.addListener(userId, this);
+            if (tokenId != null && storage.getObject(RevokedToken.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", tokenId))) != null) {
+                invalidate();
+            }
             sendData(data);
         } catch (StorageException e) {
             throw new RuntimeException(e);
@@ -117,12 +127,23 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     @Override
     public void onUpdateUser(User user) {
         if (user == null || user.getDisabled()) {
-            invalidated = true;
-            if (session != null && session.isOpen()) {
-                session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
-            }
+            invalidate();
         } else {
             expiration = Math.min(expiration, DateUtil.getTimeOrMax(user.getExpirationTime()));
+        }
+    }
+
+    @Override
+    public void onRevokeToken(long tokenId) {
+        if (this.tokenId != null && this.tokenId == tokenId) {
+            invalidate();
+        }
+    }
+
+    private void invalidate() {
+        invalidated = true;
+        if (session != null && session.isOpen()) {
+            session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
         }
     }
 

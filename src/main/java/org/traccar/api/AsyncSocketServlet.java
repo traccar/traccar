@@ -66,7 +66,8 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                 if (loginResult != null && loginResult.getUser() != null) {
                     return new AsyncSocket(
                             objectMapper, connectionManager, storage, loginResult.getUser().getId(),
-                            DateUtil.min(loginResult.getExpiration(), loginResult.getUser().getExpirationTime()));
+                            DateUtil.min(loginResult.getExpiration(), loginResult.getUser().getExpirationTime()),
+                            loginResult.getTokenId());
                 }
             } catch (SecurityException e) {
                 return null;

@@ -35,7 +35,8 @@ public class Permission {
         for (Class<? extends BaseModel> clazz : List.of(
                 Attribute.class, Calendar.class, Command.class, Device.class, Driver.class,
                 Geofence.class, Group.class, LinkedDevice.class, Maintenance.class, ManagedUser.class,
-                Notification.class, Order.class, Point.class, Report.class, Server.class, User.class)) {
+                Notification.class, Order.class, Point.class, Report.class, RevokedToken.class,
+                Server.class, User.class)) {
             CLASSES.put(clazz.getSimpleName(), clazz);
         }
     }

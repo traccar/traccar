@@ -192,7 +192,7 @@ public class OpenIdProvider {
         User user = loginService.login(
                 userInfo.getEmailAddress(), userInfo.getName(), administrator).getUser();
 
-        SessionHelper.userLogin(actionLogger, request, user, null);
+        SessionHelper.userLogin(actionLogger, request, user, null, null);
 
         return baseUrl.resolve("?openid=success");
     }

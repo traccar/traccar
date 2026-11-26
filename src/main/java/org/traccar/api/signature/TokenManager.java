@@ -95,12 +95,16 @@ public class TokenManager {
         if (data.expiration.before(new Date())) {
             throw new SecurityException("Token has expired");
         }
+        checkRevoked(data.getId());
+        return data;
+    }
+
+    public void checkRevoked(long tokenId) throws StorageException {
         var revoked = storage.getObject(RevokedToken.class, new Request(
-                new Columns.All(), new Condition.Equals("id", data.getId())));
+                new Columns.All(), new Condition.Equals("id", tokenId)));
         if (revoked != null) {
             throw new SecurityException("Token has been revoked");
         }
-        return data;
     }
 
     public TokenData decodeToken(String token) throws IOException, GeneralSecurityException, StorageException {

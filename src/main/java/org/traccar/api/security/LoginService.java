@@ -85,7 +85,11 @@ public class LoginService {
                     User user = permissionsServiceProvider.get().getUser(userId);
                     if (user != null) {
                         checkUserEnabled(user);
-                        return new LoginResult(user, expiration);
+                        Long tokenId = (Long) session.getAttribute(SessionHelper.TOKEN_ID_KEY);
+                        if (tokenId != null) {
+                            tokenManager.checkRevoked(tokenId);
+                        }
+                        return new LoginResult(user, expiration, tokenId);
                     }
                 }
             }
@@ -117,7 +121,7 @@ public class LoginService {
         if (user != null) {
             checkUserEnabled(user);
         }
-        return new LoginResult(user, tokenData.getExpiration());
+        return new LoginResult(user, tokenData.getExpiration(), tokenData.getId());
     }
 
     public LoginResult login(String email, String password, Integer code) throws StorageException {

@@ -28,16 +28,21 @@ public final class SessionHelper {
 
     public static final String USER_ID_KEY = "userId";
     public static final String EXPIRATION_KEY = "expiration";
+    public static final String TOKEN_ID_KEY = "tokenId";
     public static final String ORIGIN_KEY = "origin";
 
     private SessionHelper() {}
 
-    public static void userLogin(LogAction actionLogger, HttpServletRequest request, User user, Date expiration) {
+    public static void userLogin(
+            LogAction actionLogger, HttpServletRequest request, User user, Date expiration, Long tokenId) {
         request.getSession().invalidate();
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
 
         if (expiration != null) {
             request.getSession().setAttribute(EXPIRATION_KEY, expiration);
+        }
+        if (tokenId != null) {
+            request.getSession().setAttribute(TOKEN_ID_KEY, tokenId);
         }
 
         String origin = request.getHeader(HttpHeaderNames.ORIGIN.toString());

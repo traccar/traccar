@@ -21,10 +21,12 @@ import org.traccar.api.security.CodeRequiredException;
 import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.SessionHelper;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.RevokedToken;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
@@ -70,6 +72,9 @@ public class SessionResource extends BaseResource {
     private TokenManager tokenManager;
 
     @Inject
+    private BroadcastService broadcastService;
+
+    @Inject
     private LogAction actionLogger;
 
     @Context
@@ -88,7 +93,8 @@ public class SessionResource extends BaseResource {
             }
             if (loginResult != null) {
                 User user = loginResult.getUser();
-                SessionHelper.userLogin(actionLogger, request, user, loginResult.getExpiration());
+                SessionHelper.userLogin(
+                        actionLogger, request, user, loginResult.getExpiration(), loginResult.getTokenId());
                 return user;
             }
         }
@@ -111,7 +117,8 @@ public class SessionResource extends BaseResource {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
-        SessionHelper.userLogin(actionLogger, request, user, getUserPrincipal().getExpiration());
+        SessionHelper.userLogin(
+                actionLogger, request, user, getUserPrincipal().getExpiration(), getUserPrincipal().getTokenId());
         return user;
     }
 
@@ -133,7 +140,7 @@ public class SessionResource extends BaseResource {
         }
         if (loginResult != null) {
             User user = loginResult.getUser();
-            SessionHelper.userLogin(actionLogger, request, user, null);
+            SessionHelper.userLogin(actionLogger, request, user, null, null);
             return user;
         } else {
             actionLogger.failedLogin(request);
@@ -162,11 +169,12 @@ public class SessionResource extends BaseResource {
     @Path("token/revoke")
     @POST
     public Response revokeToken(
-            @FormParam("token") String token) throws StorageException, GeneralSecurityException, IOException {
+            @FormParam("token") String token) throws Exception {
         TokenManager.TokenData data = tokenManager.decodeToken(token);
         RevokedToken revokedToken = new RevokedToken();
         revokedToken.setId(data.getId());
         storage.addObject(revokedToken, new Request(new Columns.Include("id")));
+        broadcastService.invalidateObject(true, RevokedToken.class, data.getId(), ObjectOperation.ADD);
         return Response.noContent().build();
     }
 

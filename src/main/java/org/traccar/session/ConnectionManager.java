@@ -34,6 +34,7 @@ import org.traccar.model.Group;
 import org.traccar.model.LogRecord;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
+import org.traccar.model.RevokedToken;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
@@ -376,7 +377,9 @@ public class ConnectionManager implements BroadcastInterface {
     @Override
     public synchronized <T extends BaseModel> void invalidateObject(
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws StorageException {
-        if ((clazz.equals(Device.class) || clazz.equals(Group.class)) && operation != ObjectOperation.ADD) {
+        if (clazz.equals(RevokedToken.class) && operation == ObjectOperation.ADD) {
+            listeners.values().stream().flatMap(Set::stream).forEach(listener -> listener.onRevokeToken(id));
+        } else if ((clazz.equals(Device.class) || clazz.equals(Group.class)) && operation != ObjectOperation.ADD) {
             updateAllUserDevices();
         } else if (clazz.equals(User.class) && operation != ObjectOperation.ADD) {
             var userListeners = listeners.get(id);
@@ -451,6 +454,8 @@ public class ConnectionManager implements BroadcastInterface {
         void onKeepalive();
 
         void onUpdateUser(User user);
+
+        void onRevokeToken(long tokenId);
 
         void onUpdateDevice(Device device);
 
