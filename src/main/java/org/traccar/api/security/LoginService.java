@@ -1,0 +1,219 @@
+/*
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.api.security;
+
+import com.google.inject.Provider;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.LdapProvider;
+import org.traccar.helper.DataConverter;
+import org.traccar.helper.SessionHelper;
+import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Server;
+import org.traccar.model.User;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
+
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
+
+@Singleton
+public class LoginService {
+
+    private final Config config;
+    private final Storage storage;
+    private final TokenManager tokenManager;
+    private final LdapProvider ldapProvider;
+    private final Provider<PermissionsService> permissionsServiceProvider;
+
+    private final String serviceAccountToken;
+    private final boolean forceLdap;
+    private final boolean forceOpenId;
+    private final boolean allowOpenIdRegistration;
+
+    @Inject
+    public LoginService(
+            Config config, Storage storage, TokenManager tokenManager, @Nullable LdapProvider ldapProvider,
+            Provider<PermissionsService> permissionsServiceProvider) {
+        this.storage = storage;
+        this.config = config;
+        this.tokenManager = tokenManager;
+        this.ldapProvider = ldapProvider;
+        this.permissionsServiceProvider = permissionsServiceProvider;
+        serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
+        forceLdap = config.getBoolean(Keys.LDAP_FORCE);
+        forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
+        allowOpenIdRegistration = config.getBoolean(Keys.OPENID_ALLOW_REGISTRATION);
+    }
+
+    public LoginResult login(HttpServletRequest request) throws StorageException {
+        if (SessionHelper.isSessionOriginValid(request)) {
+            HttpSession session = request.getSession(false);
+            Date expiration = (Date) session.getAttribute(SessionHelper.EXPIRATION_KEY);
+            if (expiration != null && expiration.before(new Date())) {
+                session.invalidate();
+            } else {
+                Long userId = (Long) session.getAttribute(SessionHelper.USER_ID_KEY);
+                if (userId != null) {
+                    User user = permissionsServiceProvider.get().getUser(userId);
+                    if (user != null) {
+                        checkUserEnabled(user);
+                        Long tokenId = (Long) session.getAttribute(SessionHelper.TOKEN_ID_KEY);
+                        if (tokenId != null) {
+                            tokenManager.checkRevoked(tokenId);
+                        }
+                        return new LoginResult(user, expiration, tokenId);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public LoginResult login(
+            String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
+        switch (scheme.toLowerCase(Locale.ROOT)) {
+            case "bearer":
+                return login(credentials);
+            case "basic":
+                byte[] decodedBytes = DataConverter.parseBase64(credentials);
+                String[] auth = new String(decodedBytes, StandardCharsets.US_ASCII).split(":", 2);
+                return login(auth[0], auth[1], (Integer) null);
+            default:
+                throw new SecurityException("Unsupported authorization scheme");
+        }
+    }
+
+    public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {
+        if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
+            return new LoginResult(new ServiceAccountUser());
+        }
+        TokenManager.TokenData tokenData = tokenManager.verifyToken(token, TokenPurpose.ACCESS);
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("id", tokenData.getUserId())));
+        if (user != null) {
+            checkUserEnabled(user);
+        }
+        return new LoginResult(user, tokenData.getExpiration(), tokenData.getId());
+    }
+
+    public LoginResult login(String email, String password, Integer code) throws StorageException {
+        if (forceOpenId) {
+            return null;
+        }
+
+        email = email.trim().toLowerCase(Locale.ROOT);
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("email", email)));
+        if (user == null) {
+            user = storage.getObject(User.class, new Request(
+                    new Columns.All(), new Condition.Equals("login", email)));
+        }
+        if (user != null) {
+            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
+                    || !forceLdap && user.isPasswordValid(password)) {
+                checkUserCode(user, code);
+                checkUserEnabled(user);
+                return new LoginResult(user);
+            }
+        } else {
+            if (ldapProvider != null && ldapProvider.login(email, password)) {
+                user = ldapProvider.getUser(email);
+                user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
+                checkUserEnabled(user);
+                return new LoginResult(user);
+            }
+        }
+        return null;
+    }
+
+    public LoginResult login(String email, String name, Boolean administrator) throws StorageException {
+
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(),
+                new Condition.Equals("email", email.toLowerCase(Locale.ROOT))));
+
+        if (user == null) {
+
+            if (!allowOpenIdRegistration && !UserUtil.isEmpty(storage)) {
+                Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+                if (!server.getRegistration()) {
+                    throw new SecurityException("Registration disabled");
+                }
+            }
+
+            user = new User();
+            UserUtil.setUserDefaults(user, config);
+            user.setName(name);
+            user.setEmail(email);
+            user.setFixedEmail(true);
+            if (administrator != null) {
+                user.setAdministrator(administrator);
+            }
+            user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
+
+        } else if (!Objects.equals(name, user.getName())
+                || administrator != null && user.getFixedEmail() && user.getAdministrator() != administrator) {
+
+            user.setName(name);
+            if (administrator != null && user.getFixedEmail()) {
+                user.setAdministrator(administrator);
+            }
+            storage.updateObject(user, new Request(
+                    new Columns.Include("name", "administrator"),
+                    new Condition.Equals("id", user.getId())));
+        }
+
+        checkUserEnabled(user);
+        return new LoginResult(user);
+    }
+
+    private void checkUserEnabled(User user) throws SecurityException {
+        if (user == null) {
+            throw new SecurityException("Unknown account");
+        }
+        user.checkDisabled();
+    }
+
+    private void checkUserCode(User user, Integer code) throws SecurityException {
+        String key = user.getTotpKey();
+        if (key != null && !key.isEmpty()) {
+            if (code == null) {
+                throw new CodeRequiredException();
+            }
+            GoogleAuthenticator authenticator = new GoogleAuthenticator();
+            if (!authenticator.authorize(key, code)) {
+                throw new SecurityException("User authorization failed");
+            }
+        }
+    }
+
+}

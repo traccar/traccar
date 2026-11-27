@@ -1,0 +1,8 @@
+#set($subject = "Kontolaufzeit abgelaufen")
+#set($digest = "Konto ist abgelaufen")
+<!DOCTYPE html>
+<html>
+<body>
+Dein Benutzerkonto ist abgelaufen.
+</body>
+</html>

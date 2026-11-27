@@ -1,0 +1,37 @@
+package org.traccar.protocol;
+
+import org.junit.jupiter.api.Test;
+import org.traccar.ProtocolTest;
+import org.traccar.model.Command;
+
+public class PortmanProtocolEncoderTest extends ProtocolTest {
+
+    @Test
+    public void testEncodeEngineStop() throws Exception {
+
+        var channel = channel(inject(new PortmanProtocolEncoder(null)));
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_ENGINE_STOP);
+
+        verifyEncode(channel, command,
+                text("&&123456789012345,XA5\r\n"));
+
+    }
+
+    @Test
+    public void testEncodeEngineResume() throws Exception {
+
+        var channel = channel(inject(new PortmanProtocolEncoder(null)));
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_ENGINE_RESUME);
+
+        verifyEncode(channel, command,
+                text("&&123456789012345,XA6\r\n"));
+
+    }
+
+}

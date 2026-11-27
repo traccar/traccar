@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT" />
+  </Match>
+  <Match>
+    <Method name="~get.*Time" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <Method name="~set.*Time" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="org.traccar.notification.PropertiesProvider" />
+    <Method name="getBoolean" />
+    <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
+  </Match>
+  <Match>
+    <Class name="org.traccar.protocol.TrvProtocolDecoder" />
+    <Method name="decodeOptionalValue" />
+    <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
+  </Match>
+  <Match>
+    <Class name="org.traccar.protocol.Gps056ProtocolDecoder" />
+    <Method name="decodeCoordinate" />
+    <Bug pattern="ICAST_IDIV_CAST_TO_DOUBLE" />
+  </Match>
+  <Match>
+    <Class name="org.traccar.protocol.PricolProtocolDecoder" />
+    <Method name="decode" />
+    <Bug pattern="ICAST_IDIV_CAST_TO_DOUBLE" />
+  </Match>
+</FindBugsFilter>

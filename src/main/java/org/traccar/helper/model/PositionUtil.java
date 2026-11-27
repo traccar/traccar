@@ -1,0 +1,106 @@
+/*
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.helper.model;
+
+import org.traccar.model.Device;
+import org.traccar.model.Position;
+import org.traccar.model.User;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
+
+public final class PositionUtil {
+
+    private PositionUtil() {}
+
+    public static double calculateDistance(Position first, Position last, boolean useOdometer) {
+        double distance;
+        double firstOdometer = first.getDouble(Position.KEY_ODOMETER);
+        double lastOdometer = last.getDouble(Position.KEY_ODOMETER);
+
+        if (useOdometer && firstOdometer != 0.0 && lastOdometer != 0.0) {
+            distance = lastOdometer - firstOdometer;
+        } else {
+            distance = last.getDouble(Position.KEY_TOTAL_DISTANCE) - first.getDouble(Position.KEY_TOTAL_DISTANCE);
+        }
+        return distance;
+    }
+
+    public static Stream<Position> getPositionsStreamWithExtra(
+            Storage storage, long deviceId, Date from, Date to, Date minTime) throws StorageException {
+        if (minTime != null && from.before(minTime)) {
+            from = minTime;
+        }
+        var conditions = new ArrayList<Condition>();
+        conditions.add(new Condition.Equals("deviceId", deviceId));
+        conditions.add(new Condition.Compare("fixTime", "<", from));
+        if (minTime != null) {
+            conditions.add(new Condition.Compare("fixTime", ">", minTime));
+        }
+        Position extra = storage.getObject(Position.class, new Request(
+                new Columns.Include("fixTime"),
+                Condition.merge(conditions),
+                new Order("fixTime", true, 1)));
+        return getPositionsStream(storage, deviceId, extra != null ? extra.getFixTime() : from, to, 0, 0);
+    }
+
+    public static Stream<Position> getPositionsStream(
+            Storage storage, long deviceId, Date from, Date to, int limit, int offset) throws StorageException {
+        return storage.getObjectsStream(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Between("fixTime", from, to)),
+                new Order("fixTime", false, limit, offset)));
+    }
+
+    public static Position getEdgePosition(
+            Storage storage, long deviceId, Date from, Date to, boolean end) throws StorageException {
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Between("fixTime", from, to)),
+                new Order("fixTime", end, 1)));
+    }
+
+    public static Position getLatestPosition(Storage storage, long deviceId) throws StorageException {
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.Include("positionId"), new Condition.Equals("id", deviceId)));
+        if (device == null || device.getPositionId() == 0) {
+            return null;
+        }
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Equals("id", device.getPositionId()))));
+    }
+
+    public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {
+        return storage.getObjects(Position.class, new Request(
+                new Columns.All(),
+                new Condition.LatestPositions(new Condition.Permission(User.class, userId, Device.class))));
+    }
+
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.18.0">
+
+  <changeSet author="author" id="changelog-6.18.0">
+
+    <update tableName="tc_users">
+      <column name="email" valueComputed="LOWER(email)" />
+      <column name="login" valueComputed="LOWER(login)" />
+    </update>
+
+    <dropIndex indexName="idx_devices_uniqueid" tableName="tc_devices" />
+    <dropIndex indexName="idx_users_email" tableName="tc_users" />
+
+    <createTable tableName="tc_points">
+      <column autoIncrement="true" name="id" type="BIGINT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(4000)" />
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_point">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="pointid" type="BIGINT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_user_point" baseColumnNames="userid" constraintName="fk_user_point_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+    <addForeignKeyConstraint baseTableName="tc_user_point" baseColumnNames="pointid" constraintName="fk_user_point_pointid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_points" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.18.0-timescale">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="postgresql" />
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_extension WHERE extname = 'timescaledb';
+      </sqlCheck>
+    </preConditions>
+
+    <sql splitStatements="false">
+      DO $$
+      BEGIN
+        EXECUTE format('ALTER DATABASE %I SET timescaledb.enable_chunk_skipping = on', current_database());
+        SET LOCAL timescaledb.enable_chunk_skipping = on;
+        PERFORM enable_chunk_skipping('tc_positions', 'id', true);
+        PERFORM enable_chunk_skipping('tc_events', 'id', true);
+        PERFORM enable_chunk_skipping('tc_actions', 'id', true);
+      END
+      $$;
+    </sql>
+
+  </changeSet>
+
+</databaseChangeLog>

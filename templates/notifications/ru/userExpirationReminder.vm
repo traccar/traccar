@@ -1,0 +1,8 @@
+#set($subject = "Напоминание об истечении срока действия учетной записи")
+#set($digest = "Срок действия учетной записи истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Срок действия вашей учетной записи истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

@@ -1,0 +1,18 @@
+package org.traccar.protocol;
+
+import org.junit.jupiter.api.Test;
+import org.traccar.ProtocolTest;
+
+public class CellocatorFrameDecoderTest extends ProtocolTest {
+
+    @Test
+    public void testDecode() throws Exception {
+
+        var channel = channel(inject(new CellocatorFrameDecoder()));
+
+        verifyDecode(channel, binary("4D4347500BA9880B00C80A7E003800000000000806000001210A14000613000000000D4457A5F71442AC02E80300000100040707000011171408060E1C08000100000200020000FD"),
+                binary("4D4347500BA9880B00C80A7E003800000000000806000001210A14000613000000000D4457A5F71442AC02E80300000100040707000011171408060E1C08000100000200020000FD"));
+
+    }
+
+}

@@ -1,0 +1,8 @@
+#set($subject = "Υπενθύμιση λήξης λογαριασμού")
+#set($digest = "Ο Λογαριασμός λήγει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Ο λογαριασμός σας θα λήξει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

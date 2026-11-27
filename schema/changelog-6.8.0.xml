@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.8.0">
+
+  <changeSet author="author" id="changelog-6.8.0-timescale" runInTransaction="false">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="postgresql"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_available_extensions WHERE name = 'timescaledb';
+      </sqlCheck>
+    </preConditions>
+
+    <sql splitStatements="true" endDelimiter=";">
+      CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+      ALTER TABLE tc_positions DROP CONSTRAINT IF EXISTS tc_positions_pkey;
+      ALTER TABLE tc_events DROP CONSTRAINT IF EXISTS tc_events_pkey;
+
+      DROP INDEX IF EXISTS position_deviceid_fixtime;
+      DROP INDEX IF EXISTS event_deviceid_servertime;
+
+      SELECT create_hypertable(
+        'tc_positions',
+        'fixtime',
+        partitioning_column => 'deviceid',
+        number_partitions => 8,
+        migrate_data => TRUE
+      );
+
+      SELECT create_hypertable(
+        'tc_events',
+        'eventtime',
+        partitioning_column => 'deviceid',
+        number_partitions => 8,
+        migrate_data => TRUE
+      );
+
+      CREATE INDEX IF NOT EXISTS tc_positions_id_idx ON tc_positions(id);
+      CREATE INDEX IF NOT EXISTS tc_events_id_idx ON tc_events(id);
+    </sql>
+
+  </changeSet>
+
+</databaseChangeLog>

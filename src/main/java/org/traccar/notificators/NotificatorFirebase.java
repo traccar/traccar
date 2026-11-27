@@ -1,0 +1,199 @@
+/*
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.notificators;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.core.ApiFutureCallback;
+import com.google.api.core.ApiFutures;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.MulticastMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
+import org.traccar.model.Position;
+import org.traccar.model.User;
+import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+@Singleton
+public class NotificatorFirebase extends Notificator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
+
+    private final Storage storage;
+    private final CacheManager cacheManager;
+    private final ObjectMapper objectMapper;
+    private final String mode;
+    private final FirebaseMessaging firebaseMessaging;
+
+    @Inject
+    public NotificatorFirebase(
+            Config config, NotificationFormatter notificationFormatter,
+            Storage storage, CacheManager cacheManager, ObjectMapper objectMapper) throws IOException {
+        super(notificationFormatter);
+        this.storage = storage;
+        this.cacheManager = cacheManager;
+        this.objectMapper = objectMapper;
+        this.mode = config.getString(Keys.NOTIFICATOR_FIREBASE_MODE);
+
+        InputStream serviceAccount = new ByteArrayInputStream(
+                config.getString(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT).getBytes(StandardCharsets.UTF_8));
+
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+
+        firebaseMessaging = FirebaseMessaging.getInstance(
+                FirebaseApp.initializeApp(options, "manager"));
+    }
+
+    @Override
+    public CompletableFuture<Void> sendAsync(User user, NotificationMessage message, Event event, Position position) {
+        if (!user.hasAttribute("notificationTokens")) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        List<String> registrationTokens = new ArrayList<>(
+                Arrays.asList(user.getString("notificationTokens").split("[, ]")));
+        registrationTokens.sort(Comparator.comparing(token -> token.length() == 22));
+
+        var androidConfig = AndroidConfig.builder()
+                .setNotification(AndroidNotification.builder().setSound("default").build());
+
+        var apnsConfig = ApnsConfig.builder()
+                .setAps(Aps.builder().setSound("default").build());
+
+        if (message.priority()) {
+            androidConfig.setPriority(AndroidConfig.Priority.HIGH);
+            apnsConfig.putHeader("apns-priority", "10");
+        }
+
+        var messageBuilder = MulticastMessage.builder()
+                .setAndroidConfig(androidConfig.build())
+                .setApnsConfig(apnsConfig.build());
+        for (String token : registrationTokens) {
+            if (token.length() == 22) {
+                messageBuilder.addFid(token);
+            } else {
+                messageBuilder.addToken(token);
+            }
+        }
+
+        if (!"data".equals(mode)) {
+            messageBuilder.setNotification(com.google.firebase.messaging.Notification.builder()
+                    .setTitle(message.subject())
+                    .setBody(message.digest())
+                    .build());
+        }
+
+        if (event != null) {
+            messageBuilder.putData("eventId", String.valueOf(event.getId()));
+            if (!"direct".equals(mode)) {
+                try {
+                    messageBuilder.putData("event", objectMapper.writeValueAsString(event));
+                    if (position != null) {
+                        messageBuilder.putData("position", objectMapper.writeValueAsString(position));
+                    }
+                } catch (JsonProcessingException e) {
+                    LOGGER.warn("Firebase data serialization error", e);
+                }
+            }
+        }
+
+        var future = new CompletableFuture<Void>();
+        var apiFuture = firebaseMessaging.sendEachForMulticastAsync(messageBuilder.build());
+        ApiFutures.addCallback(apiFuture, new ApiFutureCallback<>() {
+            @Override
+            public void onSuccess(BatchResponse result) {
+                try {
+                    List<String> failedTokens = new LinkedList<>();
+                    var iterator = result.getResponses().listIterator();
+                    while (iterator.hasNext()) {
+                        int index = iterator.nextIndex();
+                        var response = iterator.next();
+                        if (!response.isSuccessful()) {
+                            MessagingErrorCode error = response.getException().getMessagingErrorCode();
+                            if (error == MessagingErrorCode.INVALID_ARGUMENT
+                                    || error == MessagingErrorCode.UNREGISTERED) {
+                                failedTokens.add(registrationTokens.get(index));
+                            }
+                            LOGGER.warn("Firebase user {} error", user.getId(), response.getException());
+                        }
+                    }
+                    if (!failedTokens.isEmpty()) {
+                        registrationTokens.removeAll(failedTokens);
+                        if (registrationTokens.isEmpty()) {
+                            user.removeAttribute("notificationTokens");
+                        } else {
+                            user.set("notificationTokens", String.join(",", registrationTokens));
+                        }
+                        try {
+                            storage.updateObject(user, new Request(
+                                    new Columns.Include("attributes"),
+                                    new Condition.Equals("id", user.getId())));
+                            cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
+                        } catch (Exception e) {
+                            LOGGER.warn("Firebase token cleanup error", e);
+                        }
+                    }
+                    future.complete(null);
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        }, MoreExecutors.directExecutor());
+        return future;
+    }
+
+}

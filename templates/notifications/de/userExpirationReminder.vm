@@ -1,0 +1,8 @@
+#set($subject = "Erinnerung an Kontoablauf")
+#set($digest = "Benutzerkonto wird am $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone) ablaufen")
+<!DOCTYPE html>
+<html>
+<body>
+Dein Benutzerkonto wird am $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone) ablaufen.
+</body>
+</html>

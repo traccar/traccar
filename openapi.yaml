@@ -1,0 +1,5012 @@
+openapi: 3.1.0
+info:
+  title: Traccar
+  description: Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).
+  contact:
+    name: Traccar Support
+    url: https://www.traccar.org/
+    email: support@traccar.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: '6.17.0'
+servers:
+  - url: https://demo.traccar.org/api
+    description: Demo Server 1
+  - url: https://demo2.traccar.org/api
+    description: Demo Server 2
+  - url: https://demo3.traccar.org/api
+    description: Demo Server 3
+  - url: https://demo4.traccar.org/api
+    description: Demo Server 4
+  - url: https://server.traccar.org/api
+    description: Subscription Server
+  - url: http://{host}:{port}/api
+    description: Other Server
+    variables:
+      host:
+        default: localhost
+      port:
+        enum:
+          - '8082'
+          - '80'
+        default: '8082'
+security:
+  - BasicAuth: []
+  - ApiKey: []
+tags:
+  - name: Server
+    description: Server information
+  - name: Session
+    description: User session management
+  - name: Devices
+    description: Device management
+  - name: Groups
+    description: Group management
+  - name: Share
+    description: Share devices and groups
+  - name: Users
+    description: User management
+  - name: Permissions
+    description: User permissions and other object linking
+  - name: Positions
+    description: Retrieving raw location information
+  - name: Events
+    description: Retrieving event information
+  - name: Reports
+    description: Reports generation
+  - name: Notifications
+    description: User notifications management
+  - name: Points
+    description: Points of interest management
+  - name: Geofences
+    description: Geofence management
+  - name: Commands
+    description: Sending commands to devices and stored command management
+  - name: Attributes
+    description: Computed attributes management
+  - name: Drivers
+    description: Drivers management
+  - name: Maintenance
+    description: Maintenance management
+  - name: Calendars
+    description: Calendar management
+  - name: Statistics
+    description: Retrieving server statistics
+  - name: Health
+    description: Checking server health status
+  - name: Orders
+    description: Order management
+  - name: Audit
+    description: Audit log access
+  - name: Password
+    description: Password reset flow
+  - name: Stream
+    description: Live video streaming
+paths:
+  /audit:
+    get:
+      operationId: getAudit
+      summary: Fetch audit log Actions
+      description: Admin only. Returns Actions performed in the given time window.
+      tags:
+        - Audit
+      parameters:
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Action'
+        '401':
+          description: Unauthorized
+          content: {}
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check server health
+      description: Return plain text status for basic uptime monitoring
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: OK
+        '500':
+          description: Service is unavailable
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /commands:
+    get:
+      operationId: getCommands
+      summary: Fetch a list of Saved Commands
+      x-mcp: true
+      tags:
+        - Commands
+      description: Without params, it returns a list of Saved Commands the user has access to
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: Standard users can use this only with _deviceId_s, they have access to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postCommands
+      summary: Create a Saved Command
+      tags:
+        - Commands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /commands/{id}:
+    get:
+      operationId: getCommandsId
+      summary: Fetch a Saved Command
+      tags:
+        - Commands
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putCommandsId
+      summary: Update a Saved Command
+      tags:
+        - Commands
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteCommandsId
+      summary: Delete a Saved Command
+      tags:
+        - Commands
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /commands/send:
+    get:
+      operationId: getCommandsSend
+      summary: Fetch a list of Saved Commands supported by Device at the moment
+      description: >-
+        Return a list of saved commands linked to Device and its groups,
+        filtered by current Device protocol support
+      tags:
+        - Commands
+      parameters:
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Command'
+        '400':
+          description: Could happen when the user doesn't have permission for the device
+          content: {}
+    post:
+      operationId: postCommandsSend
+      summary: Dispatch commands to device
+      description: Dispatch a new command or Saved Command if _body.id_ set
+      tags:
+        - Commands
+      parameters:
+        - name: groupId
+          in: query
+          description: Send the command to all devices in the group
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        '200':
+          description: Command sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        '202':
+          description: Command queued
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/QueuedCommand'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/QueuedCommand'
+        '400':
+          description: >-
+            Could happen when the user doesn't have permission or an incorrect
+            command _type_ for the device
+          content: {}
+  /commands/types:
+    get:
+      operationId: getCommandsTypes
+      summary: >-
+        Fetch a list of available Commands for the Device or all possible
+        Commands if Device ommited
+      tags:
+        - Commands
+      parameters:
+        - name: deviceId
+          in: query
+          description: >-
+            Internal device identifier. Only works if device has already
+            reported some locations
+          schema:
+            type: integer
+        - name: textChannel
+          in: query
+          description: >-
+            When `true` return SMS commands. If not specified or `false` return
+            data commands
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommandType'
+        '400':
+          description: >-
+            Could happen when trying to fetch from a device the user does not
+            have permission
+          content: {}
+  /orders:
+    get:
+      operationId: getOrders
+      summary: Fetch a list of Orders
+      description: Without params, it returns a list of Orders the user has access to
+      x-mcp: true
+      tags:
+        - Orders
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: excludeAttributes
+          in: query
+          description: Skip returning the attributes map
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postOrders
+      summary: Create an Order
+      tags:
+        - Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /orders/{id}:
+    get:
+      operationId: getOrdersId
+      summary: Fetch an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putOrdersId
+      summary: Update an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteOrdersId
+      summary: Delete an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /devices:
+    get:
+      operationId: getDevices
+      summary: Fetch a list of Devices
+      description: Without any params, returns a list of the user's devices
+      x-mcp: true
+      tags:
+        - Devices
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: id
+          in: query
+          description: >-
+            To fetch one or more devices. Multiple params can be passed like
+            `id=31&id=42`
+          schema:
+            type: integer
+        - name: uniqueId
+          in: query
+          description: >-
+            To fetch one or more devices. Multiple params can be passed like
+            `uniqueId=333331&uniqieId=44442`
+          schema:
+            type: string
+        - name: excludeAttributes
+          in: query
+          description: Exclude attributes field from device payload
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, uniqueId, phone, model, contact)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+        '400':
+          description: No permission
+          content: {}
+    post:
+      operationId: postDevices
+      summary: Create a Device
+      tags:
+        - Devices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /devices/{id}:
+    get:
+      operationId: getDevicesId
+      summary: Fetch a Device
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putDevicesId
+      summary: Update a Device
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteDevicesId
+      summary: Delete a Device
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /devices/{id}/accumulators:
+    put:
+      operationId: putDevicesIdAccumulators
+      summary: Update total distance and hours of the Device
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceAccumulators'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /devices/{id}/image:
+    post:
+      operationId: postDevicesIdImage
+      summary: Upload/Update Device image
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: device.png
+        '400':
+          description: Invalid image type or size
+          content: {}
+        '404':
+          description: Device not found
+          content: {}
+  /devices/{id}/icon:
+    post:
+      operationId: postDevicesIdIcon
+      summary: Upload Device icon
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: icon.png
+        '400':
+          description: Invalid image type or size
+          content: {}
+        '404':
+          description: Device not found
+          content: {}
+  /share/device:
+    get:
+      operationId: getShareDevice
+      summary: Fetch a link for an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+    post:
+      operationId: postShareDevice
+      summary: Share device location
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - deviceId
+                - expiration
+              properties:
+                deviceId:
+                  type: integer
+                expiration:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+  /share/group:
+    get:
+      operationId: getShareGroup
+      summary: Fetch a link for an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Existing share with a newly generated token and its original expiration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+    post:
+      operationId: postShareGroup
+      summary: Share group devices
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - groupId
+                - expiration
+              properties:
+                groupId:
+                  type: integer
+                expiration:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+  /share/device/{id}:
+    delete:
+      operationId: deleteShareDevice
+      summary: Delete an existing device share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+  /share/group/{id}:
+    delete:
+      operationId: deleteShareGroup
+      summary: Delete an existing group share
+      tags:
+        - Share
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+        '404':
+          description: Share not found
+          content: {}
+  /groups:
+    get:
+      operationId: getGroups
+      summary: Fetch a list of Groups
+      description: Without any params, returns a list of the Groups the user belongs to
+      x-mcp: true
+      tags:
+        - Groups
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postGroups
+      summary: Create a Group
+      tags:
+        - Groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: No permission
+          content: {}
+  /groups/{id}:
+    get:
+      operationId: getGroupsId
+      summary: Fetch a Group
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putGroupsId
+      summary: Update a Group
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteGroupsId
+      summary: Delete a Group
+      tags:
+        - Groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /password/reset:
+    post:
+      operationId: postPasswordReset
+      summary: Send password reset email
+      description: Always responds with `200` regardless of whether the email matches a user.
+      tags:
+        - Password
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /password/update:
+    post:
+      operationId: postPasswordUpdate
+      summary: Set a new password using a reset token
+      tags:
+        - Password
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - token
+                - password
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '404':
+          description: User not found
+          content: {}
+  /permissions:
+    get:
+      operationId: getPermissions
+      summary: Fetch permission links between Objects
+      description: >-
+        Provide exactly two `*Id` query parameters matching the Permission body
+        shape (e.g. `reportId` and `deviceId`). Use `0` on a side to mean
+        "any", e.g. `?reportId=5&deviceId=0` lists all devices linked to
+        report 5. At least one side must be non-zero.
+      tags:
+        - Permissions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+        '400':
+          description: Bad request
+          content: {}
+    post:
+      operationId: postPermissions
+      summary: Link an Object to another Object
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: No permission
+          content: {}
+    delete:
+      operationId: deletePermissions
+      summary: Unlink an Object from another Object
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /permissions/bulk:
+    post:
+      operationId: postPermissionsBulk
+      summary: Link multiple Objects in a single request
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deletePermissionsBulk
+      summary: Unlink multiple Objects in a single request
+      tags:
+        - Permissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /positions:
+    get:
+      operationId: getPositions
+      summary: Fetch a list of Positions
+      description: >-
+        We strongly recommend using [Traccar WebSocket
+        API](https://www.traccar.org/traccar-api/) instead of periodically
+        polling positions endpoint. Without any params, it returns a list of
+        last known positions for all the user's Devices. _from_ and _to_ fields
+        are not required with _id_. Historical queries with _from_ and _to_ can
+        return a large number of results; use _limit_ to control the response
+        size.
+      x-mcp: true
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          description: >-
+            _deviceId_ is optional, but requires the _from_ and _to_ parameters
+            when used
+          schema:
+            type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          schema:
+            type: string
+            format: date-time
+        - name: id
+          in: query
+          description: >-
+            To fetch one or more positions. Multiple params can be passed like
+            `id=31&id=42`
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: >-
+            Maximum number of positions to return. If not specified, the server
+            configuration limit applies.
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: >-
+            Offset for pagination. Only applies to date-range queries. Default is 0.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+            application/gpx+xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+        '401':
+          description: Unauthorized
+          content: {}
+    delete:
+      operationId: deletePositions
+      summary: Deletes all the Positions of a device in the time span specified
+      description: ''
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          description: ''
+          schema:
+            type: integer
+          required: true
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          schema:
+            type: string
+            format: date-time
+          required: true
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          schema:
+            type: string
+            format: date-time
+          required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /positions/{id}:
+    delete:
+      operationId: deletePositionsId
+      summary: Delete a Position
+      tags:
+        - Positions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /positions/kml:
+    get:
+      operationId: getPositionsKml
+      summary: Export Positions as KML
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.google-earth.kml+xml:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+          content: {}
+  /positions/csv:
+    get:
+      operationId: getPositionsCsv
+      summary: Export Positions as CSV
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: geofenceId
+          in: query
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+          content: {}
+  /positions/gpx:
+    get:
+      operationId: getPositionsGpx
+      summary: Export Positions as GPX
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/gpx+xml:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+          content: {}
+  /server:
+    get:
+      operationId: getServer
+      summary: Fetch Server information
+      x-mcp: true
+      tags:
+        - Server
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '400':
+          description: Bad request
+          content: {}
+    put:
+      operationId: putServer
+      summary: Update Server information
+      tags:
+        - Server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Server'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /server/geocode:
+    get:
+      operationId: getServerGeocode
+      summary: Reverse geocode coordinates
+      tags:
+        - Server
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Reverse geocoding is not enabled
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /server/timezones:
+    get:
+      operationId: getServerTimezones
+      summary: Fetch available timezones
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          description: Unauthorized
+          content: {}
+  /server/file:
+    get:
+      operationId: getServerFiles
+      summary: List server files (administrator only)
+      tags:
+        - Server
+      responses:
+        '200':
+          description: Files sorted by name, excluding directories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /server/file/{path}:
+    delete:
+      operationId: deleteServerFilePath
+      summary: Delete a server file (administrator only)
+      tags:
+        - Server
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: File deleted
+        '400':
+          description: Invalid file path
+    post:
+      operationId: postServerFilePath
+      summary: Upload a server file
+      tags:
+        - Server
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /server/gc:
+    get:
+      operationId: getServerGc
+      summary: Trigger garbage collection
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /server/cache:
+    get:
+      operationId: getServerCache
+      summary: Fetch cache diagnostics
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content: {}
+  /server/reboot:
+    post:
+      operationId: postServerReboot
+      summary: Reboot the server process
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /session:
+    get:
+      operationId: getSession
+      summary: Fetch Session information
+      tags:
+        - Session
+      security: []
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not found
+          content: {}
+    post:
+      operationId: postSession
+      summary: Create a new Session
+      tags:
+        - Session
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+    delete:
+      operationId: deleteSession
+      summary: Close the Session
+      tags:
+        - Session
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /session/{id}:
+    get:
+      operationId: getSessionId
+      summary: Open a Session as another User
+      description: Admin or manager only. Establishes a session impersonating the specified user.
+      tags:
+        - Session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /session/token:
+    post:
+      operationId: postSessionToken
+      summary: Generate Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                expiration:
+                  type: string
+                  format: date-time
+        required: false
+      responses:
+        '200':
+          description: Token string
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /session/token/revoke:
+    post:
+      operationId: postSessionTokenRevoke
+      summary: Revoke Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /session/openid/auth:
+    get:
+      operationId: getSessionOpenidAuth
+      summary: Begin OpenID Connect authentication
+      tags:
+        - Session
+      responses:
+        '303':
+          description: Redirect to OpenID Connect identity provider
+          content: {}
+        '400':
+          description: OpenID Connect is not configured
+          content: {}
+        default:
+          description: Unexpected error
+          content: {}
+  /session/openid/callback:
+    get:
+      operationId: getSessionOpenidCallback
+      summary: OpenID Callback
+      tags:
+        - Session
+      responses:
+        '303':
+          description: Successful authentication, redirect to homepage
+          content: {}
+        '400':
+          description: Invalid or expired callback parameters
+          content: {}
+        default:
+          description: Unexpected error
+          content: {}
+  /users:
+    get:
+      operationId: getUsers
+      summary: Fetch a list of Users
+      x-mcp: true
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: query
+          description: Can only be used by admin or manager users
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, email)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: No Permission
+          content: {}
+    post:
+      operationId: postUsers
+      summary: Create a User
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /users/totp:
+    post:
+      operationId: postUsersTotp
+      summary: Generate TOTP secret
+      tags:
+        - Users
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content: {}
+  /users/{id}:
+    get:
+      operationId: getUsersId
+      summary: Fetch a User
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putUsersId
+      summary: Update a User
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteUsersId
+      summary: Delete a User
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /notifications:
+    get:
+      operationId: getNotifications
+      summary: Fetch a list of Notifications
+      description: >-
+        Without params, it returns a list of Notifications the user has access
+        to
+      x-mcp: true
+      tags:
+        - Notifications
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postNotifications
+      summary: Create a Notification
+      tags:
+        - Notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /notifications/{id}:
+    get:
+      operationId: getNotificationsId
+      summary: Fetch a Notification
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putNotificationsId
+      summary: Update a Notification
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteNotificationsId
+      summary: Delete a Notification
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /notifications/types:
+    get:
+      operationId: getNotificationsTypes
+      summary: Fetch a list of available Notification types
+      tags:
+        - Notifications
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationType'
+        '401':
+          description: Unauthorized
+          content: {}
+  /notifications/notificators:
+    get:
+      operationId: getNotificationsNotificators
+      summary: Fetch a list of available Notificators
+      tags:
+        - Notifications
+      parameters:
+        - name: announcement
+          in: query
+          description: When `true`, exclude notificators that cannot deliver announcements
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationType'
+        '401':
+          description: Unauthorized
+          content: {}
+  /notifications/test:
+    post:
+      operationId: postNotificationsTest
+      summary: Send test notification to current user via Email and SMS
+      tags:
+        - Notifications
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
+  /notifications/test/{notificator}:
+    post:
+      operationId: postNotificationsTestNotificator
+      summary: Send a test notification to the current User using the specified notificator
+      tags:
+        - Notifications
+      parameters:
+        - name: notificator
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
+  /notifications/send/{notificator}:
+    post:
+      operationId: postNotificationsSendNotificator
+      summary: Send a custom notification to selected users using the specified notificator
+      tags:
+        - Notifications
+      parameters:
+        - name: notificator
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: Optional list of user ids to send the notification to; if omitted, sends to all permitted users
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationMessage'
+        required: true
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
+  /points:
+    get:
+      operationId: getPoints
+      summary: Fetch a list of points of interest
+      description: Without params, it returns a list of points of interest the user has access to
+      x-mcp: true
+      tags:
+        - Points
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postPoints
+      summary: Create a point of interest
+      tags:
+        - Points
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Point'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /points/kml:
+    get:
+      operationId: getPointsKml
+      summary: Fetch points of interest as a KML layer
+      description: Returns points linked to the current user, with names, descriptions, and coordinates. Placemark IDs use the format point-{id}.
+      tags:
+        - Points
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.google-earth.kml+xml:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content: {}
+  /points/{id}:
+    get:
+      operationId: getPointsId
+      summary: Fetch a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putPointsId
+      summary: Update a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Point'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deletePointsId
+      summary: Delete a point of interest
+      tags:
+        - Points
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /geofences:
+    get:
+      operationId: getGeofences
+      summary: Fetch a list of Geofences
+      description: Without params, it returns a list of Geofences the user has access to
+      x-mcp: true
+      tags:
+        - Geofences
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postGeofences
+      summary: Create a Geofence
+      tags:
+        - Geofences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Geofence'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /geofences/{id}:
+    get:
+      operationId: getGeofencesId
+      summary: Fetch a Geofence
+      tags:
+        - Geofences
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putGeofencesId
+      summary: Update a Geofence
+      tags:
+        - Geofences
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Geofence'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteGeofencesId
+      summary: Delete a Geofence
+      tags:
+        - Geofences
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /events/{id}:
+    get:
+      operationId: getEventsId
+      summary: Fetch an Event
+      description: Returns a single Event record with full context for the specified identifier
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/combined:
+    get:
+      operationId: getReportsCombined
+      summary: Fetch a combined route, Events and Positions report for the Devices or Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CombinedReportItem'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/route:
+    get:
+      operationId: getReportsRoute
+      summary: >-
+        Fetch a list of Positions within the time period for the Devices or
+        Groups
+      deprecated: true
+      description: >-
+        Deprecated. Use _/positions_ with _deviceId_, _from_, _to_, and _limit_
+        instead. At least one _deviceId_ or one _groupId_ must be passed.
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/route/{type}:
+    get:
+      operationId: getReportsRouteType
+      summary: Download the route report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/events:
+    get:
+      operationId: getReportsEvents
+      summary: Fetch a list of Events within the time period for the Devices or Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: type
+          in: query
+          description: '% can be used to return events of all types'
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/events/{type}:
+    get:
+      operationId: getReportsEventsType
+      summary: Download the events report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: type
+          in: query
+          description: Event types to include; `%` matches all
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: alarm
+          in: query
+          description: Alarm types to include
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/geofences:
+    get:
+      operationId: getReportsGeofences
+      summary: >-
+        Fetch geofence enter/exit intervals within the time period for Devices
+        or Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: geofenceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportGeofences'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/summary:
+    get:
+      operationId: getReportsSummary
+      summary: >-
+        Fetch a list of ReportSummary within the time period for the Devices or
+        Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportSummary'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportSummary'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/summary/{type}:
+    get:
+      operationId: getReportsSummaryType
+      summary: Download the summary report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: daily
+          in: query
+          description: Aggregate values by day instead of the full period
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/trips:
+    get:
+      operationId: getReportsTrips
+      summary: >-
+        Fetch a list of ReportTrips within the time period for the Devices or
+        Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportTrips'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportTrips'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/trips/{type}:
+    get:
+      operationId: getReportsTripsType
+      summary: Download the trips report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/stops:
+    get:
+      operationId: getReportsStops
+      summary: >-
+        Fetch a list of ReportStops within the time period for the Devices or
+        Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      x-mcp: true
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportStops'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportStops'
+        '401':
+          description: Unauthorized
+          content: {}
+  /reports/stops/{type}:
+    get:
+      operationId: getReportsStopsType
+      summary: Download the stops report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+        - name: deviceId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /reports/devices/{type}:
+    get:
+      operationId: getReportsDevicesType
+      summary: Download the devices report as a spreadsheet or send it by email
+      description: Use `type=xlsx` to download the report, `type=mail` to deliver it by email asynchronously.
+      tags:
+        - Reports
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - mail
+      responses:
+        '200':
+          description: Spreadsheet attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '204':
+          description: Report queued for email delivery
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+  /statistics:
+    get:
+      operationId: getStatistics
+      summary: Fetch Server Statistics
+      tags:
+        - Statistics
+      parameters:
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Statistics'
+        '401':
+          description: Unauthorized
+          content: {}
+  /stream/{deviceId}/{channel}/live.m3u8:
+    get:
+      operationId: getStreamDeviceIdChannelLiveM3u8
+      summary: Fetch the HLS playlist for a Device camera channel
+      tags:
+        - Stream
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: channel
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.apple.mpegurl:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content: {}
+  /stream/{deviceId}/{channel}/{index}.ts:
+    get:
+      operationId: getStreamDeviceIdChannelIndexTs
+      summary: Fetch an HLS video segment for a Device camera channel
+      tags:
+        - Stream
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: channel
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            video/mp2t:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+          content: {}
+  /calendars:
+    get:
+      operationId: getCalendars
+      summary: Fetch a list of Calendars
+      description: Without params, it returns a list of Calendars the user has access to
+      x-mcp: true
+      tags:
+        - Calendars
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postCalendars
+      summary: Create a Calendar
+      tags:
+        - Calendars
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Calendar'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /calendars/{id}:
+    get:
+      operationId: getCalendarsId
+      summary: Fetch a Calendar
+      tags:
+        - Calendars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putCalendarsId
+      summary: Update a Calendar
+      tags:
+        - Calendars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Calendar'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteCalendarsId
+      summary: Delete a Calendar
+      tags:
+        - Calendars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /attributes/computed:
+    get:
+      operationId: getAttributesComputed
+      summary: Fetch a list of Attributes
+      description: Without params, it returns a list of Attributes the user has access to
+      x-mcp: true
+      tags:
+        - Attributes
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postAttributesComputed
+      summary: Create an Attribute
+      tags:
+        - Attributes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /attributes/computed/test:
+    post:
+      operationId: postAttributesComputedTest
+      summary: Evaluate a Computed Attribute against the latest Device Position
+      description: Admin only. Returns the computed value without persisting the attribute.
+      tags:
+        - Attributes
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: number
+                  - type: boolean
+                  - type: string
+        '204':
+          description: Computation produced no value
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /attributes/computed/{id}:
+    get:
+      operationId: getAttributesComputedId
+      summary: Fetch an Attribute
+      tags:
+        - Attributes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putAttributesComputedId
+      summary: Update an Attribute
+      tags:
+        - Attributes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attribute'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteAttributesComputedId
+      summary: Delete an Attribute
+      tags:
+        - Attributes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /drivers:
+    get:
+      operationId: getDrivers
+      summary: Fetch a list of Drivers
+      description: Without params, it returns a list of Drivers the user has access to
+      x-mcp: true
+      tags:
+        - Drivers
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postDrivers
+      summary: Create a Driver
+      tags:
+        - Drivers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Driver'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /drivers/{id}:
+    get:
+      operationId: getDriversId
+      summary: Fetch a Driver
+      tags:
+        - Drivers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putDriversId
+      summary: Update a Driver
+      tags:
+        - Drivers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Driver'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteDriversId
+      summary: Delete a Driver
+      tags:
+        - Drivers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+  /maintenance:
+    get:
+      operationId: getMaintenance
+      summary: Fetch a list of Maintenance tasks
+      description: Without params, it returns a list of Maintenance tasks the user has access to
+      x-mcp: true
+      tags:
+        - Maintenance
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: deviceId
+          in: query
+          description: >-
+            Standard users can use this only with _deviceId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: groupId
+          in: query
+          description: >-
+            Standard users can use this only with _groupId_s, they have access
+            to
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
+    post:
+      operationId: postMaintenance
+      summary: Create a Maintenance task
+      tags:
+        - Maintenance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Maintenance'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+  /maintenance/{id}:
+    get:
+      operationId: getMaintenanceId
+      summary: Fetch a Maintenance task
+      tags:
+        - Maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
+        '404':
+          description: Not found
+          content: {}
+    put:
+      operationId: putMaintenanceId
+      summary: Update a Maintenance task
+      tags:
+        - Maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Maintenance'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+        '401':
+          description: Unauthorized
+          content: {}
+        '400':
+          description: Bad request
+          content: {}
+    delete:
+      operationId: deleteMaintenanceId
+      summary: Delete a Maintenance task
+      tags:
+        - Maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '401':
+          description: Unauthorized
+          content: {}
+components:
+  schemas:
+    ShareLink:
+      type: object
+      properties:
+        token:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+    Position:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique position record identifier
+        deviceId:
+          type: integer
+          format: int64
+          description: Identifier of the device that reported this position
+        protocol:
+          type: string
+          description: Device protocol name that produced the message
+        deviceTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        fixTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        serverTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        valid:
+          type: boolean
+          description: Indicates whether the position was marked as valid by the device
+        latitude:
+          type: number
+          description: Latitude in decimal degrees
+        longitude:
+          type: number
+          description: Longitude in decimal degrees
+        altitude:
+          type: number
+          description: Altitude above sea level in meters
+        speed:
+          type: number
+          description: in knots
+        course:
+          type: number
+          description: Heading in degrees (0-360) where 0 is true north
+        address:
+          type: string
+          description: Resolved reverse-geocoded address if available
+        accuracy:
+          type: number
+          description: Estimated positional accuracy in meters when provided
+        network:
+          type: object
+          description: Network metadata (e.g. cell or Wi‑Fi data) supplied by the device
+          properties: {}
+        geofenceIds:
+          type: array
+          items:
+            type: integer
+          description: List of geofence ids applicable to this position
+        attributes:
+          type: object
+          description: Custom key-value attributes sent by the device or enrichments
+          properties: {}
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique user identifier
+        name:
+          type: string
+          description: User display name
+        email:
+          type: string
+          description: Email address used for login and notifications
+        phone:
+          type: [string, 'null']
+          description: Contact phone number for alerts
+        readonly:
+          type: boolean
+          description: When true, the user cannot change settings
+        administrator:
+          type: boolean
+          description: Grants full administrative privileges when enabled
+        map:
+          type: [string, 'null']
+          description: Preferred default map layer for the user
+        latitude:
+          type: number
+          description: Default map center latitude for this user
+        longitude:
+          type: number
+          description: Default map center longitude for this user
+        zoom:
+          type: integer
+          description: Default map zoom level on login
+        password:
+          type: string
+          description: Password for user authentication
+        coordinateFormat:
+          type: [string, 'null']
+          description: Preferred coordinate display format
+        disabled:
+          type: boolean
+          description: Indicates whether the user account is disabled
+        expirationTime:
+          type: [string, 'null']
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        deviceLimit:
+          type: integer
+          description: Maximum number of devices the user can manage
+        userLimit:
+          type: integer
+          description: Maximum number of subordinate users
+        deviceReadonly:
+          type: boolean
+          description: Restricts user from modifying device attributes
+        limitCommands:
+          type: boolean
+          description: Prevents user from sending unsupported commands
+        fixedEmail:
+          type: boolean
+          description: Locks the email field to avoid changes
+        poiLayer:
+          type: [string, 'null']
+          description: External POI layer configured for the user
+        attributes:
+          type: object
+          description: Additional custom user attributes
+          properties: {}
+    Server:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique server configuration identifier
+        registration:
+          type: boolean
+          description: Whether new user registrations are allowed
+        readonly:
+          type: boolean
+          description: When true only administrators can modify server-wide settings
+        deviceReadonly:
+          type: boolean
+          description: Disallow device attribute changes for non-admins
+        limitCommands:
+          type: boolean
+          description: Restrict command execution to supported protocol commands
+        map:
+          type: string
+          description: Default map layer identifier
+        bingKey:
+          type: string
+          description: Bing Maps API key used when Bing is selected as a provider
+        mapUrl:
+          type: string
+          description: Custom tile server URL template if configured
+        poiLayer:
+          type: string
+          description: External point-of-interest layer configuration
+        announcement:
+          type: string
+          description: Message displayed to all users in the web application
+        latitude:
+          type: number
+          description: Default map center latitude
+        longitude:
+          type: number
+          description: Default map center longitude
+        zoom:
+          type: integer
+          description: Default map zoom level
+        version:
+          type: string
+          description: Traccar server version string
+        forceSettings:
+          type: boolean
+          description: Forces users to use the server-wide settings instead of their own
+        coordinateFormat:
+          type: string
+          description: Default coordinate format for displaying positions
+        openIdEnabled:
+          type: boolean
+          description: Indicates whether OpenID authentication is available
+        openIdForce:
+          type: boolean
+          description: Require OpenID authentication for all users when enabled
+        attributes:
+          type: object
+          description: Additional server-level configuration values
+          properties: {}
+    Command:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique saved command identifier
+        deviceId:
+          type: integer
+          format: int64
+          description: Target device identifier when the command is bound to one device
+        description:
+          type: string
+          description: User friendly label displayed in the UI
+        type:
+          type: string
+          description: Command type as defined by the device protocol
+        textChannel:
+          type: boolean
+          description: Whether to send the command using the SMS channel
+        attributes:
+          type: object
+          description: Additional parameters required by the command type
+          properties: {}
+    QueuedCommand:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identifier of the queued command job
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier the queued command will be delivered to
+        type:
+          type: string
+          description: Command type that will be executed
+        textChannel:
+          type: boolean
+          description: Indicates whether the queued command uses SMS delivery
+        attributes:
+          type: object
+          description: Stored parameters for the queued command
+          properties: {}
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier assigned by Traccar
+        name:
+          type: string
+          description: Human friendly device label
+        uniqueId:
+          type: string
+          description: Hardware or protocol specific unique identifier
+        status:
+          type: string
+          description: Current connection status such as `online`, `offline`, or `unknown`
+        disabled:
+          type: boolean
+          description: Whether the device is disabled by an administrator
+        lastUpdate:
+          type: [string, 'null']
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        positionId:
+          type: [integer, 'null']
+          format: int64
+          description: Identifier of the last known position
+        groupId:
+          type: [integer, 'null']
+          format: int64
+          description: Parent group identifier when the device is assigned to a group
+        phone:
+          type: [string, 'null']
+          description: Contact phone number used for SMS commands
+        model:
+          type: [string, 'null']
+          description: Device model or hardware revision
+        contact:
+          type: [string, 'null']
+          description: Responsible person's contact information
+        category:
+          type: [string, 'null']
+          description: Free form category used for grouping devices in the UI
+        attributes:
+          type: object
+          description: Custom attributes for protocol or business specific data
+          properties: {}
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique group identifier
+        name:
+          type: string
+          description: Group display name
+        groupId:
+          type: integer
+          format: int64
+          description: Parent group identifier for nested grouping
+        attributes:
+          type: object
+          description: Arbitrary metadata attached to the group
+          properties: {}
+    Permission:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          description: User id, can be only first parameter
+        deviceId:
+          type: integer
+          format: int64
+          description: >-
+            Device id, can be first parameter or second only in combination with
+            userId
+        groupId:
+          type: integer
+          format: int64
+          description: >-
+            Group id, can be first parameter or second only in combination with
+            userId
+        pointId:
+          type: integer
+          format: int64
+          description: Point of interest id, can be second parameter only in combination with userId
+        geofenceId:
+          type: integer
+          format: int64
+          description: Geofence id, can be second parameter only
+        notificationId:
+          type: integer
+          format: int64
+          description: Notification id, can be second parameter only
+        calendarId:
+          type: integer
+          format: int64
+          description: >-
+            Calendar id, can be second parameter only and only in combination
+            with userId
+        attributeId:
+          type: integer
+          format: int64
+          description: Computed attribute id, can be second parameter only
+        driverId:
+          type: integer
+          format: int64
+          description: Driver id, can be second parameter only
+        managedUserId:
+          type: integer
+          format: int64
+          description: >-
+            User id, can be second parameter only and only in combination with
+            userId
+        commandId:
+          type: integer
+          format: int64
+          description: Saved command id, can be second parameter only
+      description: >-
+        This is a permission map that contain two object indexes. It is used to
+        link/unlink objects. Order is important. Example: { deviceId:8,
+        geofenceId: 16 }
+    CommandType:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Command type identifier
+    Point:
+      type: object
+      description: A point of interest at a geographic location
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique point of interest identifier
+        name:
+          type: string
+          description: Point of interest display name
+        description:
+          type: string
+          description: Details about the point of interest
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees
+        attributes:
+          type: object
+          properties: {}
+          description: Custom point of interest attributes
+    Geofence:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the geofence
+        name:
+          type: string
+          description: Human-readable name shown in lists and maps
+        description:
+          type: string
+          description: Details about the geofence for display in the UI
+        area:
+          type: string
+          description: Geofence area definition encoded as a WKT string
+        calendarId:
+          type: integer
+          format: int64
+          description: Calendar identifier limiting when the geofence is active
+        attributes:
+          type: object
+          properties: {}
+          description: Custom key-value pairs for integrations or UI overrides
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the notification
+        type:
+          type: string
+          description: Notification category such as geofenceEnter or ignitionOn
+        description:
+          type: [string, 'null']
+          description: User-defined text describing the notification
+        always:
+          type: boolean
+          description: Whether the notification triggers regardless of schedule
+        commandId:
+          type: integer
+          format: int64
+          description: Identifier of the command to send when the notification triggers
+        notificators:
+          type: string
+          description: Comma-separated delivery channels (for example, web, mail)
+        calendarId:
+          type: integer
+          format: int64
+          description: Calendar identifier restricting when the notification is active
+        attributes:
+          type: object
+          properties: {}
+          description: Additional custom attributes used by notificators or templates
+    NotificationMessage:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Subject or title of the notification
+        digest:
+          type: string
+          description: Short summary shown in compact contexts; defaults to the body when omitted
+        body:
+          type: string
+          description: Full notification text
+        priority:
+          type: boolean
+          description: Whether the message should be treated as high priority
+      required:
+        - body
+    NotificationType:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Notification type identifier
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique event identifier
+        type:
+          type: string
+          description: Event type name
+        eventTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        deviceId:
+          type: integer
+          format: int64
+          description: Device associated with the event
+        positionId:
+          type: integer
+          format: int64
+          description: Position record linked to the event when applicable
+        geofenceId:
+          type: integer
+          format: int64
+          description: Geofence referenced by the event if any
+        maintenanceId:
+          type: integer
+          description: Maintenance record tied to the event
+        attributes:
+          type: object
+          properties: {}
+          description: Additional event-specific attributes
+    CombinedReportItem:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the report item
+        route:
+          type: array
+          description: Simplified route as `[longitude, latitude]` pairs
+          items:
+            type: array
+            items:
+              type: number
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+    ReportSummary:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the summary row
+        deviceName:
+          type: string
+          description: Human readable device name
+        maxSpeed:
+          type: number
+          description: in knots
+        averageSpeed:
+          type: number
+          description: in knots
+        distance:
+          type: number
+          description: in meters
+        spentFuel:
+          type: number
+          description: in liters
+        engineHours:
+          type: integer
+          description: Engine hours accumulated for the report period
+    ReportGeofences:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the geofence interval
+        deviceName:
+          type: string
+          description: Human readable device name
+        geofenceId:
+          type: integer
+          format: int64
+          description: Geofence identifier
+        startTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        endTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+    ReportTrips:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the trip
+        deviceName:
+          type: string
+          description: Human readable device name
+        business:
+          type: boolean
+          description: Business attribute from the trip's starting position. False if absent.
+        maxSpeed:
+          type: number
+          description: in knots
+        averageSpeed:
+          type: number
+          description: in knots
+        distance:
+          type: number
+          description: in meters
+        spentFuel:
+          type: number
+          description: in liters
+        duration:
+          type: integer
+          description: Trip duration in seconds
+        startTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        startAddress:
+          type: string
+          description: Address where the trip started
+        startLat:
+          type: number
+          description: Starting latitude in decimal degrees
+        startLon:
+          type: number
+          description: Starting longitude in decimal degrees
+        endTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        endAddress:
+          type: string
+          description: Address where the trip ended
+        endLat:
+          type: number
+          description: Ending latitude in decimal degrees
+        endLon:
+          type: number
+          description: Ending longitude in decimal degrees
+        driverUniqueId:
+          type: string
+          description: Unique identifier of the driver assigned to the trip
+        driverName:
+          type: string
+          description: Name of the driver assigned to the trip
+    ReportStops:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the stop
+        deviceName:
+          type: string
+          description: Human readable device name
+        duration:
+          type: integer
+          description: Stop duration in seconds
+        startTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        address:
+          type: string
+          description: Address where the stop occurred
+        lat:
+          type: number
+          description: Stop latitude in decimal degrees
+        lon:
+          type: number
+          description: Stop longitude in decimal degrees
+        endTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        spentFuel:
+          type: number
+          description: in liters
+        engineHours:
+          type: integer
+          description: Engine hours accumulated during the stop
+    Statistics:
+      type: object
+      properties:
+        captureTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        activeUsers:
+          type: integer
+          description: Number of active users in the capture period
+        activeDevices:
+          type: integer
+          description: Number of active devices in the capture period
+        requests:
+          type: integer
+          description: Total API requests processed
+        messagesReceived:
+          type: integer
+          description: Number of device messages received
+        messagesStored:
+          type: integer
+          description: Number of device messages stored to the database
+    DeviceAccumulators:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the accumulator entry
+        totalDistance:
+          type: number
+          description: in meters
+        hours:
+          type: number
+          description: Total engine hours recorded by the device
+    Calendar:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique calendar identifier
+        name:
+          type: string
+          description: Calendar display name
+        data:
+          type: string
+          description: base64 encoded in iCalendar format
+        attributes:
+          type: object
+          properties: {}
+          description: Custom calendar attributes
+    Attribute:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique computed attribute identifier
+        description:
+          type: string
+          description: Human readable name of the attribute
+        attribute:
+          type: string
+          description: Attribute name used in expressions
+        expression:
+          type: string
+          description: Expression that defines how the attribute is calculated
+        type:
+          type: string
+          description: String|Number|Boolean
+    Driver:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique driver identifier
+        name:
+          type: string
+          description: Driver full name
+        uniqueId:
+          type: string
+          description: Unique external identifier for the driver
+        attributes:
+          type: object
+          properties: {}
+          description: Custom driver attributes
+    Maintenance:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique maintenance item identifier
+        name:
+          type: string
+          description: Maintenance task name
+        type:
+          type: string
+          description: Metric the maintenance is based on
+        start:
+          type: number
+          description: Current accumulated value when maintenance tracking starts
+        period:
+          type: number
+          description: Threshold value after which maintenance is due
+        attributes:
+          type: object
+          properties: {}
+          description: Custom maintenance attributes
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique order identifier
+        uniqueId:
+          type: string
+          description: External order identifier used by clients
+        description:
+          type: string
+          description: Additional details about the order assignment
+        fromAddress:
+          type: string
+          description: Pickup location address
+        toAddress:
+          type: string
+          description: Destination address
+        attributes:
+          type: object
+          properties: {}
+          description: Custom order attributes
+    Action:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique action identifier
+        actionTime:
+          type: string
+          format: date-time
+          description: When the action was recorded
+        address:
+          type: string
+          description: Client address that initiated the action
+        userId:
+          type: integer
+          format: int64
+          description: Identifier of the User who performed the action
+        userEmail:
+          type: string
+          description: Email of the User who performed the action
+        actionType:
+          type: string
+          description: Action category (e.g. login, edit, link)
+        objectType:
+          type: string
+          description: Type of object affected by the action
+        objectId:
+          type: integer
+          format: int64
+          description: Identifier of the affected object
+        attributes:
+          type: object
+          properties: {}
+          description: Additional action attributes
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKey:
+      type: http
+      scheme: bearer

@@ -1,0 +1,9 @@
+#set($subject = "Bericht")
+#set($digest = "Der geplante Bericht steht bereit: $webUrl$reportUrl")
+<!DOCTYPE html>
+<html>
+<body>
+Der geplante Bericht steht bereit:<br>
+<a href="$webUrl$reportUrl">$webUrl$reportUrl</a><br>
+</body>
+</html>

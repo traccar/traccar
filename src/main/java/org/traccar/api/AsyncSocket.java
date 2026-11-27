@@ -1,0 +1,185 @@
+/*
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.api;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.websocket.api.Callback;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.helper.DateUtil;
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.model.Device;
+import org.traccar.model.Event;
+import org.traccar.model.LogRecord;
+import org.traccar.model.Position;
+import org.traccar.model.RevokedToken;
+import org.traccar.model.User;
+import org.traccar.session.ConnectionManager;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
+
+import java.nio.channels.ClosedChannelException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionManager.UpdateListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSocket.class);
+
+    private static final String KEY_DEVICES = "devices";
+    private static final String KEY_POSITIONS = "positions";
+    private static final String KEY_EVENTS = "events";
+    private static final String KEY_LOGS = "logs";
+
+    private final ObjectMapper objectMapper;
+    private final ConnectionManager connectionManager;
+    private final Storage storage;
+    private final long userId;
+    private final Long tokenId;
+
+    private volatile long expiration;
+    private volatile boolean invalidated;
+    private boolean includeLogs;
+    private Session session;
+
+    public AsyncSocket(
+            ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage,
+            long userId, Date expiration, Long tokenId) {
+        this.objectMapper = objectMapper;
+        this.connectionManager = connectionManager;
+        this.storage = storage;
+        this.userId = userId;
+        this.tokenId = tokenId;
+        this.expiration = DateUtil.getTimeOrMax(expiration);
+    }
+
+    @Override
+    public void onWebSocketOpen(Session session) {
+        this.session = session;
+        try {
+            Map<String, Collection<?>> data = new HashMap<>();
+            data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
+            connectionManager.addListener(userId, this);
+            if (tokenId != null && storage.getObject(RevokedToken.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", tokenId))) != null) {
+                invalidate();
+            }
+            sendData(data);
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onWebSocketClose(int statusCode, String reason, Callback callback) {
+        connectionManager.removeListener(userId, this);
+        session = null;
+        callback.succeed();
+    }
+
+    @Override
+    public void onWebSocketText(String message) {
+        try {
+            JsonNode json = objectMapper.readTree(message);
+            if (json.hasNonNull("logs")) {
+                includeLogs = json.get("logs").asBoolean();
+            }
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Socket JSON parsing error", e);
+        }
+    }
+
+    @Override
+    public void onWebSocketError(Throwable cause) {
+        if (!(cause instanceof ClosedChannelException)) {
+            LOGGER.warn("WebSocket error", cause);
+        }
+    }
+
+    @Override
+    public void onKeepalive() {
+        sendData(new HashMap<>());
+    }
+
+    @Override
+    public void onUpdateUser(User user) {
+        if (user == null || user.getDisabled()) {
+            invalidate();
+        } else {
+            expiration = Math.min(expiration, DateUtil.getTimeOrMax(user.getExpirationTime()));
+        }
+    }
+
+    @Override
+    public void onRevokeToken(long tokenId) {
+        if (this.tokenId != null && this.tokenId == tokenId) {
+            invalidate();
+        }
+    }
+
+    private void invalidate() {
+        invalidated = true;
+        if (session != null && session.isOpen()) {
+            session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
+        }
+    }
+
+    @Override
+    public void onUpdateDevice(Device device) {
+        sendData(Map.of(KEY_DEVICES, List.of(device)));
+    }
+
+    @Override
+    public void onUpdatePosition(Position position) {
+        sendData(Map.of(KEY_POSITIONS, List.of(position)));
+    }
+
+    @Override
+    public void onUpdateEvent(Event event) {
+        sendData(Map.of(KEY_EVENTS, List.of(event)));
+    }
+
+    @Override
+    public void onUpdateLog(LogRecord record) {
+        if (includeLogs) {
+            sendData(Map.of(KEY_LOGS, List.of(record)));
+        }
+    }
+
+    private void sendData(Map<String, Collection<?>> data) {
+        if (session != null && session.isOpen()) {
+            if (!invalidated && System.currentTimeMillis() < expiration) {
+                try {
+                    session.sendText(objectMapper.writeValueAsString(data), Callback.NOOP);
+                } catch (JsonProcessingException e) {
+                    LOGGER.warn("Socket JSON formatting error", e);
+                }
+            } else {
+                session.close(StatusCode.POLICY_VIOLATION, null, Callback.NOOP);
+            }
+        }
+    }
+}

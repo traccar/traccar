@@ -1,0 +1,9 @@
+#set($subject = "Αναφορά")
+#set($digest = "Η προγραμματισμένη αναφορά είναι έτοιμη: $webUrl$reportUrl")
+<!DOCTYPE html>
+<html>
+<body>
+Η προγραμματισμένη αναφορά είναι έτοιμη:<br>
+<a href="$webUrl$reportUrl">$webUrl$reportUrl</a><br>
+</body>
+</html>

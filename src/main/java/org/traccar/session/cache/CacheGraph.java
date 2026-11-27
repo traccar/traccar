@@ -1,0 +1,155 @@
+/*
+ * Copyright 2023 - 2026 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.session.cache;
+
+import com.google.common.base.Suppliers;
+import com.google.common.collect.MapMaker;
+import org.traccar.model.BaseModel;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+public class CacheGraph {
+
+    private final Map<CacheKey, CacheNode> roots = new ConcurrentHashMap<>();
+    private final Map<CacheKey, CacheNode> nodes = new MapMaker().weakValues().makeMap();
+
+    void addObject(BaseModel value) {
+        CacheKey key = new CacheKey(value);
+        CacheNode node = new CacheNode(() -> value);
+        roots.put(key, node);
+        nodes.put(key, node);
+    }
+
+    void removeObject(Class<? extends BaseModel> clazz, long id) {
+        CacheKey key = new CacheKey(clazz, id);
+        CacheNode node = nodes.remove(key);
+        if (node != null) {
+            node.getAllLinks(true).forEach(child -> child.removeLink(key.clazz(), false, node));
+            node.getAllLinks(false).forEach(parent -> parent.removeLink(key.clazz(), true, node));
+        }
+        roots.remove(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends BaseModel> T getObject(Class<T> clazz, long id) {
+        CacheNode node = nodes.get(new CacheKey(clazz, id));
+        return node != null ? (T) node.getValue() : null;
+    }
+
+    <T extends BaseModel> Stream<T> getObjects(
+            Class<? extends BaseModel> fromClass, long fromId,
+            Class<T> clazz, Set<Class<? extends BaseModel>> proxies, boolean forward) {
+
+        CacheNode rootNode = nodes.get(new CacheKey(fromClass, fromId));
+        if (rootNode != null) {
+            return getObjectStream(rootNode, clazz, proxies, forward, new HashSet<>());
+        } else {
+            return Stream.empty();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends BaseModel> Stream<T> getObjectStream(
+            CacheNode rootNode, Class<T> clazz, Set<Class<? extends BaseModel>> proxies, boolean forward,
+            Set<CacheNode> visited) {
+
+        if (proxies.contains(clazz) || !visited.add(rootNode)) {
+            return Stream.empty();
+        }
+
+        var directSteam = rootNode.linkStream(clazz, forward)
+                .map(node -> (T) node.getValue()).filter(Objects::nonNull);
+
+        var proxyStream = proxies.stream()
+                .flatMap(proxyClass -> rootNode.linkStream(proxyClass, forward)
+                        .flatMap(node -> getObjectStream(node, clazz, proxies, forward, visited)));
+
+        return Stream.concat(directSteam, proxyStream);
+    }
+
+    void updateObject(BaseModel value) {
+        CacheNode node = nodes.get(new CacheKey(value));
+        if (node != null) {
+            node.setValue(value);
+        }
+    }
+
+    BaseModel addLink(
+            Class<? extends BaseModel> fromClazz, long fromId,
+            Class<? extends BaseModel> toClazz, long toId,
+            Supplier<? extends BaseModel> objectSupplier, boolean lazy) {
+        BaseModel loaded = null;
+        CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
+        if (fromNode != null) {
+            CacheKey toKey = new CacheKey(toClazz, toId);
+            CacheNode toNode = nodes.get(toKey);
+            if (toNode == null) {
+                toNode = new CacheNode(Suppliers.memoize(objectSupplier::get));
+                if (!lazy) {
+                    loaded = toNode.getValue();
+                }
+                nodes.put(toKey, toNode);
+            }
+            fromNode.addLink(toClazz, true, toNode);
+            toNode.addLink(fromClazz, false, fromNode);
+        }
+        return loaded;
+    }
+
+    void removeLink(
+            Class<? extends BaseModel> fromClazz, long fromId,
+            Class<? extends BaseModel> toClazz, long toId) {
+        CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
+        if (fromNode != null) {
+            CacheNode toNode = nodes.get(new CacheKey(toClazz, toId));
+            if (toNode != null) {
+                fromNode.removeLink(toClazz, true, toNode);
+                toNode.removeLink(fromClazz, false, fromNode);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (CacheNode node : roots.values()) {
+            printNode(stringBuilder, node, "", new HashSet<>());
+        }
+        return stringBuilder.toString().trim();
+    }
+
+    private void printNode(StringBuilder stringBuilder, CacheNode node, String indentation, Set<CacheNode> visited) {
+        if (!visited.add(node)) {
+            return;
+        }
+        var value = node.getValue();
+        if (value != null) {
+            stringBuilder
+                    .append('\n')
+                    .append(indentation)
+                    .append(value.getClass().getSimpleName())
+                    .append('(').append(value.getId()).append(')');
+            node.getAllLinks(true).forEach(child -> printNode(stringBuilder, child, indentation + "  ", visited));
+        }
+    }
+
+}

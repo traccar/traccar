@@ -1,0 +1,178 @@
+/*
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.api.resource;
+
+import org.traccar.api.BaseResource;
+import org.traccar.api.signature.TokenManager;
+import org.traccar.api.signature.TokenPurpose;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.DateUtil;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.model.ObjectOperation;
+import org.traccar.model.Permission;
+import org.traccar.model.User;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Date;
+import java.util.Locale;
+
+@Path("share")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ShareResource extends BaseResource {
+
+    @Inject
+    private Config config;
+
+    @Inject
+    private TokenManager tokenManager;
+
+    @Inject
+    private CacheManager cacheManager;
+
+    public record ShareLink(String token, Date expiration) {
+    }
+
+    private User share(User user, Class<? extends BaseModel> clazz, long id, Date expiration, boolean create)
+            throws StorageException {
+
+        if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
+            throw new SecurityException("Sharing is disabled");
+        }
+        if (user.getTemporary()) {
+            throw new SecurityException("Temporary user");
+        }
+
+        BaseModel object = storage.getObject(clazz, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("id", id),
+                        new Condition.Permission(User.class, user.getId(), clazz))));
+
+        String shareEmail;
+        if (clazz == Device.class) {
+            shareEmail = user.getEmail() + ":" + ((Device) object).getUniqueId();
+        } else {
+            shareEmail = user.getEmail() + ":" + clazz.getSimpleName().toLowerCase(Locale.ROOT) + ":" + object.getId();
+        }
+
+        User share = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("email", shareEmail.toLowerCase(Locale.ROOT))));
+
+        if (share == null) {
+            if (!create) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+            expiration = DateUtil.min(expiration, user.getExpirationTime());
+            share = new User();
+            share.setName(clazz == Device.class ? ((Device) object).getName() : ((Group) object).getName());
+            share.setEmail(shareEmail);
+            share.setExpirationTime(expiration);
+            share.setTemporary(true);
+            share.setReadonly(true);
+            share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
+            share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
+
+            share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
+
+            storage.addPermission(new Permission(User.class, share.getId(), clazz, id));
+        } else if (create) {
+            throw new WebApplicationException(Response.Status.CONFLICT);
+        }
+
+        return share;
+    }
+
+    private ShareLink createLink(User share) throws StorageException, GeneralSecurityException, IOException {
+        return new ShareLink(
+                tokenManager.generateToken(share.getId(), share.getExpirationTime(), TokenPurpose.ACCESS),
+                share.getExpirationTime());
+    }
+
+    @Path("device")
+    @GET
+    public ShareLink getDeviceShare(@QueryParam("deviceId") long deviceId)
+            throws StorageException, GeneralSecurityException, IOException {
+        return createLink(share(permissionsService.getUser(getUserId()), Device.class, deviceId, null, false));
+    }
+
+    @Path("group")
+    @GET
+    public ShareLink getGroupShare(@QueryParam("groupId") long groupId)
+            throws StorageException, GeneralSecurityException, IOException {
+        return createLink(share(permissionsService.getUser(getUserId()), Group.class, groupId, null, false));
+    }
+
+    @Path("device")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @POST
+    public ShareLink shareDevice(
+            @FormParam("deviceId") long deviceId,
+            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+        return createLink(share(permissionsService.getUser(getUserId()), Device.class, deviceId, expiration, true));
+    }
+
+    @Path("group")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @POST
+    public ShareLink shareGroup(
+            @FormParam("groupId") long groupId,
+            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+        return createLink(share(permissionsService.getUser(getUserId()), Group.class, groupId, expiration, true));
+    }
+
+    private Response removeShare(Class<? extends BaseModel> clazz, long id) throws Exception {
+        User share = share(permissionsService.getUser(getUserId()), clazz, id, null, false);
+        storage.removeObject(User.class, new Request(new Condition.Equals("id", share.getId())));
+        cacheManager.invalidateObject(true, User.class, share.getId(), ObjectOperation.DELETE);
+        return Response.noContent().build();
+    }
+
+    @Path("device/{id}")
+    @DELETE
+    public Response removeDeviceShare(@PathParam("id") long deviceId) throws Exception {
+        return removeShare(Device.class, deviceId);
+    }
+
+    @Path("group/{id}")
+    @DELETE
+    public Response removeGroupShare(@PathParam("id") long groupId) throws Exception {
+        return removeShare(Group.class, groupId);
+    }
+
+}

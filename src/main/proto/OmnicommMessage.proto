@@ -1,0 +1,464 @@
+syntax = "proto2";
+
+package org.traccar.protobuf.omnicomm;
+
+message OmnicommMessage {
+
+    repeated uint32 mID = 1 [packed=true]; // идентификатор события (возможно несколько событий в одном сообщении.)
+
+    optional group General = 2 { // Основные параметры
+        optional uint32 Time = 1;//[4] Время/дата события (в OmnicommTime)
+        optional uint32 IDFAS = 2;//[4] Идентификатор бортового оборудования
+        optional bytes  IDDrv = 3;//[8] ID iButton (8 байт)
+        optional uint32 FLG = 4;//[1] Общие флаги состояния
+            /* Битовая маска:
+                 0 бит = Положение ключа зажигания
+                     0 – зажигание выключено, 
+                     1 – зажигание включено.
+                 1 бит = Наличие связи GSM	
+                     0 – Нет связи,
+                     1 – Есть связь.
+                 2 бит = Корректность данных GPS	
+                     0 – Данные некорректны, 
+                     1 – Данные корректны.
+                 3 бит = Нахождение в роуминге	
+                     0 – В домашней сети, 
+                     1 – В роуминге.
+                 4 бит = Состояние питания	
+                     0 – Внешнее питание, 
+                     1 – Резервное питание.
+                 5 бит = Тревожная кнопка (текущее состояние кнопки)	
+                     0 – Кнопка отжата, 
+                     1 – Кнопка нажата.
+                 6 бит = Вскрытие устройства	
+                     0 – Устройство закрыто, 
+                     1 – Устройство открыто.
+                 7 бит = Состояние дискретного выхода	
+                     0 – Выключен, 
+                     1 – Включен.
+                 8 бит = Кнопка голосового вызова
+                     0 - Кнопка отжата
+                     1 - Кнопка нажата
+                 9 бит = глушение GPS
+                     0 – Выключен, 
+                     1 – Включен.                    
+                 10 бит = глушение GSM
+                     0 – Выключен, 
+                     1 – Включен.
+                 11 бит = неисправность аккумулятора
+                     0 – Нет, 
+                     1 – Да.
+            */
+        optional uint32 Mileage = 5;//[4] Пробег (1LSB = 0.1 метр)
+        optional uint32 VImp = 6;//[2] Скорость по датчику (1LSB = 1км/ч)
+        optional uint32 TImp = 7;//[2] Обороты по датчику (1LSB = 1об./мин.)
+        optional uint32 Uboard = 8;//[4] Напряжение питания (1LSB = 0.1В)
+        optional uint32 BatLife =9;//[4] Уровень заряда аккумулятора (1LSB = 1%)
+        optional sint32 SumAcc = 10;//[4] Корень суммы квадратов ускорений осей x,y,z (1LSB = 0.01g)
+        optional bytes Phone = 11;//[6] Номер вызывающего или вызываемого абонента
+        optional sint32 AmtrX = 12;//[4] Ускорение по оси X
+        optional sint32 AmtrY = 13;//[4] Ускорение по оси Y
+        optional sint32 AmtrZ = 14;//[4] Ускорение по оси Z
+		optional bytes TachoCardID = 15;//[16] ID карты тахографа (16 байт)
+		optional uint32 AccelStatus = 16;//[1] Статус калибровки акселерометра: 0 - не используется, 1 - калибруется, 2 - откалиброван, 3 - Ошибка определения осей
+		optional uint32 HoursKoef = 17;// Моточасы с использование коэффициента
+		optional uint32 GsmSignalQuality = 18;// Уровень сигнала GSM, усл.ед.: 0 - нет сигнала, 1 - плохой, 2 - слабый, 3 - удовлетворительный, 4 - хороший, 5 - отличный
+		optional uint32 WifiSignalQuality = 19;// Уровень сигнала Wi-Fi, усл.ед? 0 - нет сигнала, 1 - плохой, 2 - слабый, 3 - удовлетворительный, 4 - хороший, 5 - отличный
+    }
+
+    optional group Photo = 4 { // Описание блока передачи части изображения
+        optional uint32 POSBLK=1;//[4] Позиция текущего блока (в байтах от начала фотографии)
+        optional uint32 SZPHOTO=2; //[4] Размер всей фотографии (в байтах)
+        optional uint32 SIZEBLK=3;//[4] Размер текущего блока фотографии (в байтах)
+        optional bytes IMGDAT=4;//[2048] Буфер фотографии (данные фотографии)
+        optional uint32 IDPH=5;//[4] Идентификатор фотографии
+        optional uint32 IMGSTAT=6;//[1] Статус изображения, см. Таблицу "Коды состояния фотокамеры".
+    }
+
+    optional group NAV = 5 { // Навигация
+        required sint32 LAT=1;//[4] Широта (1LSB = 0,0000001гр.)
+        required sint32 LON=2;//[4] Долгота (1LSB = 0,0000001гр.)
+        required uint32 GPSVel=3;//[2] Скорость по GPS (1LSB = 0.1км/ч)
+        required uint32 GPSDir=4;//[2] Направление (1LSB = 1гр.)
+        required uint32 GPSNSat=5;//[1] Количество спутников
+        required sint32 GPSAlt=6;//[2] Высота над уровнем моря (1LSB = 0.1м)
+		optional uint32 GPSTime = 7;//[4] Время/дата события по GPS (в OmnicommTime)
+    }
+
+    optional group UniDt = 6 { // Универсальные входы
+        optional sint32 UniVal0 = 1;//[4] Данные универсального входа 1
+        optional sint32 UniVal1 = 2;//[4] Данные универсального входа 2
+        optional sint32 UniVal2 = 3;//[4] Данные универсального входа 3
+        optional sint32 UniVal3 = 4;//[4] Данные универсального входа 4
+        optional sint32 UniVal4 = 5;//[4] Данные универсального входа 5
+        optional sint32 UniVal5 = 6;//[4] Данные универсального входа 6
+    }
+
+    optional group CanDt_J1939 = 7 { // Данные шины CAN (протокол J1939)
+        optional uint32 SPN70 = 70;//[1] Cостояние парковочного тормоза
+                /* Возможные значения
+                    00 - Parking brake not set 
+                    01 - Parking brake set 
+                    10 - Error 
+                    11 - Not available
+                */
+        optional uint32 SPN91 = 91;//[1] Пположение педали акселерометра (0.4%)
+				/* Ошибки:
+					254 = Error
+					255 = Not available
+				*/
+		optional uint32 SPN96 = 96; // Уровень топлива 1 бак.(0.4 %) Если есть SPN38, то первый бак, если нет, общий уровень
+                /* Ошибки:
+                    251=Error
+                    252= Not available
+                */
+        
+        optional uint32 SPN100 = 100;//[1] Давление масла двигателя (1 LSB=4 kPa)
+				/* Ошибки:
+					254 = Error
+					255 = Not available
+				*/				
+        optional uint32 SPN110 = 110;//[1] температура ОЖ двигателя. Cмещение -40 (диапазон данных от -40 до 210°C)
+				/* Ошибки:
+					254 = Error
+					255 = Not available
+				*/
+        optional uint32 SPN174 = 174;//[1] температура топлива. Cмещение -40 (диапазон данных от -40 до 210°C)
+				/* Ошибки:
+					254=Error
+					255= Not available
+				*/
+        optional uint32 SPN175 = 175;//[2] температура масла двигателя. Cмещение - 273 (диапазон данных от -273 до 1735 deg C)	
+        optional uint32 SPN182 = 182;//[4] суточный расход топлива (0.5 L)
+				/* Ошибки:
+					4 261 412 864 .. 4 278 190 079 =Error
+					4 278 190 080 .. 4 294 967 294 = Not available
+				*/
+        optional uint32 SPN184 = 184;//[2] мгновенная экономичность (1/512 km/L)
+				/* Ошибки:
+					65 024 .. 65 279 =Error
+					65 280 .. 65 535 = Not available
+				*/	
+        optional uint32 SPN190 = 190;//[2] обороты двигателя (0.125 rpm)
+				/* Ошибки:
+					65 024 .. 65 279 =Error
+					65 280 .. 65 535 = Not available
+				*/
+        optional uint32 SPN244 = 244;//[4] суточный пробег (0.125 km)
+				/* Ошибки:
+					4 261 412 864 .. 4 278 190 079 =Error
+					4 278 190 080 .. 4 294 967 294 = Not available
+				*/
+        optional uint32 SPN245 = 245;//[4] общий пробег (0.125 km)
+				/* Ошибки:
+					4 261 412 864 .. 4 278 190 079 =Error
+					4 278 190 080 .. 4 294 967 294 = Not available
+				*/
+        optional uint32 SPN247 = 247;//[4] общее время работы двигателя (0.05 hr)
+				/* Ошибки:
+					4 261 412 864 .. 4 278 190 079 =Error
+					4 278 190 080 .. 4 294 967 294 = Not available
+				*/
+        optional uint32 SPN250 = 250;//[4] общий расход топлива за все время (0.5 L)
+				/* Ошибки:
+					4 261 412 864 .. 4 278 190 079 =Error
+					4 278 190 080 .. 4 294 967 294 = Not available
+				*/
+        optional uint32 SPN521 = 521;//[1] положение педали рабочего тормоза (0.4 %)
+				/* Ошибки:
+					254=Error
+					255= Not available
+				*/	
+        optional uint32 SPN522 = 522;//[1] положение педали сцепления (0.4 %)
+				/* Ошибки:
+					254=Error
+					255= Not available
+				*/	
+        optional uint32 SPN527 = 527;//[1] состояние круиз-контроля
+				/* Возможные значения:
+					0 = Off/Disabled
+					1 = Hold
+					2 = Accelerate
+					3 = Decelerate
+					4 = Resume
+					5 = Set
+					6 = Accelerator Override
+					7 = Not available
+				*/
+        repeated uint32 SPN582 = 582 [packed=true]; /*PGN 65258 */  //[2*8] Нагрузка на ось
+        optional uint32 SPN597 = 597;//[1] состояние педали рабочего тормоза
+				/* Возможные значения:
+					0 = Brake pedal released
+					1 = Brake pedal depressed
+					2 = Error
+					3 = Not Available
+				*/
+        optional uint32 SPN598 = 598;//[1] состояние педали сцепления
+				/* Возможные значения:
+					0 = Clutch pedal released
+					1 = Clutch pedal depressed
+					2 = Error
+					3 = Not Available
+				*/
+        optional uint32 SPN914 = 914;//[2] пробег до следующего ТО. Cмещение -160635 km (5 km)
+				/* Ошибки:
+					65 024 .. 65 279 =Error
+					65 280 .. 65 535 = Not available
+				*/
+        optional uint32 SPN916 = 916;//[1] время работы двигателя до следующего ТО. Cмещение -32127 hr (1 hr)
+				/* Ошибки:
+					65 024 .. 65 279 =Error
+					65 280 .. 65 535 = Not available
+				*/	
+        repeated uint32 SPN928 = 928 [packed=true]; /*PGN 65258 */ //[1*8] индекс оси
+        optional uint32 SPN1624 = 1624;//[2] мгновенная скорость (1/256 km/h) 
+            // (по CAN это SPN 84, номер не менял чтобы конфликтов с предыдущими прошивками не возникло)
+				/* Ошибки:
+					65 024 .. 65 279 =Error
+					65 280 .. 65 535 = Not available
+				*/
+        optional uint32 SPN1821 = 1821;//[1] состояние дверей
+				/* Возможные значения:
+					0 = At least 1 door is open
+					1 = Closing last door
+					2 =  All doors closed
+					3..13 = Not defined
+					14 = Error
+					15 = Not available
+				*/
+        optional uint32 SPN1856 = 1856;//[1] состояние ремней безопасности
+				/* Возможные значения:
+					0 = NOT Buckled
+					1 = OK - Seat Belt is buckled
+					2 = Error - Switch state cannot be determined
+					3 = Not Available
+				*/	
+    }
+
+    optional group LLSDt = 8 { // Топливные датчики LLS/LLS-AF
+        optional sint32 TLLS1 = 1; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS1 = 2; //[2] уровень
+        optional sint32 FLLS1 = 3; //[1] код состояния см. Таблицу "Коды состояния LLS".
+
+        optional sint32 TLLS2 = 4; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS2 = 5; //[4] уровень
+        optional sint32 FLLS2 = 6; //[1] код состояния см. Таблицу "Коды состояния LLS".
+
+        optional sint32 TLLS3 = 7; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS3 = 8; //[4] уровень
+        optional sint32 FLLS3 = 9; //[1] код состояния см. Таблицу "Коды состояния LLS".
+
+        optional sint32 TLLS4 = 10; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS4 = 11; //[4] уровень
+        optional sint32 FLLS4 = 12; //[1] код состояния см. Таблицу "Коды состояния LLS".
+
+        optional sint32 TLLS5 = 13; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS5 = 14; //[4] уровень
+        optional sint32 FLLS5 = 15; //[1] код состояния см. "Коды состояния LLS".
+
+        optional sint32 TLLS6 = 16; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS6 = 17; //[4] уровень
+        optional sint32 FLLS6 = 18; //[1] код состояния см. "Коды состояния LLS".
+
+        optional sint32 TLLS7 = 19; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS7 = 20; //[4] уровень
+        optional sint32 FLLS7 = 21; //[1] код состояния см. "Коды состояния LLS".
+
+        optional sint32 TLLS8 = 22; //[1] температура (1LSB = 1гр.C)
+        optional uint32 CLLS8 = 23; //[4] уровень
+        optional sint32 FLLS8 = 24; //[1] код состояния см. "Коды состояния LLS".
+
+        repeated uint32 LLSRefKoef= 25 [packed=true]; //[8] набор из восьми поправочных коэффициентов ДУТ (поз. 0 - ДУТ1, поз. 1 - ДУТ2, ...)
+    }
+
+    optional group Other = 9 { // прочее оборудование
+        optional group OneWire = 1 {
+            // Температурные датчики 1-wire Присутствуют только температуры с настроенных датчиков
+            optional sint32 OneWire1 = 1; //[1] температура c датчика 1
+            optional sint32 OneWire2 = 2; //[1] температура c датчика 2
+            optional sint32 OneWire3 = 3; //[1] температура c датчика 3
+            optional sint32 OneWire4 = 4; //[1] температура c датчика 4
+            optional sint32 OneWire5 = 5; //[1] температура c датчика 5
+            optional sint32 OneWire6 = 6; //[1] температура c датчика 6
+            optional sint32 OneWire7 = 7; //[1] температура c датчика 7
+            optional sint32 OneWire8 = 8; //[1] температура c датчика 8
+        }
+        optional group Pherip = 2 { // Периферия кладется в архив только при данные с только подключенных и настроенных устройств
+            optional uint32 PassengerIn= 1; //[1] Количество вошедших пассажиров
+            optional uint32 PassengerOut= 2; //[1] Количество вышедших пассажиров
+            optional uint32 DoorMask= 3; //[1] маска дверей датчика пасажиропотока
+            optional uint32 DriverStatus= 4; //[1] Статус водителя
+            optional bytes TPMS = 5; //[92] Система контроля давления воздуха в шинах, всего возможно 46 датчика. Массив из 46 структур по 2 байта.
+			optional bytes iQFreeze = 6; //[512] Система контроля рефрижераторами iQFreeze.json - http://wiki.omnicomm.ru/pages/viewpage.action?pageId=11567726
+        }
+        optional group ExCAN = 3 { // Расширенные парметры CAN
+            repeated uint32 SPNid = 1; //[24] Коды SPN
+            repeated uint32 SPNval = 2; //[24] Зачения SPN
+            optional uint64 Adr64TEREX = 10;
+            optional uint64 Adr65TEREX = 11;
+            optional uint64 Adr66TEREX = 12;
+            optional uint64 Adr67TEREX = 13;
+            repeated uint64 Adr11TEREX = 14; //[10] Коды ошибок
+            optional uint64 Adr69TEREX = 15;
+		}
+        optional group Taho_DDD = 4 { // Описание блока передачи части DDD-файла
+            optional uint32 BLKPOS=1;// Позиция текущего блока (в байтах от начала файла)
+            optional bytes FILEDATA=2;//[1024] Данные блока
+            optional bytes CARDID=3;//[16] Идентификатор карты водителя
+            optional uint32 STATUS_DATA=4; // параметр равен 1 если данный блок последний в файле, 2 -  если ошибка чтения данных, 0 – если обычный блок данных
+        }
+		optional group APC = 5 { // Данные от ДПП IRMA. 
+            optional uint32 APCStatus1 = 1; //[1] Статус ДПП IRMA #1: 0 – ок, 1 – «саботаж», 2 – «дефект», 3 – «датчик не отвечает»
+            optional uint32 APCStatus2 = 2; //[1] Статус ДПП IRMA #2: 0 – ок, 1 – «саботаж», 2 – «дефект», 3 – «датчик не отвечает»
+            optional uint32 APCStatus3 = 3; //[1] Статус ДПП IRMA #3: 0 – ок, 1 – «саботаж», 2 – «дефект», 3 – «датчик не отвечает»
+            optional uint32 APCStatus4 = 4; //[1] Статус ДПП IRMA #4: 0 – ок, 1 – «саботаж», 2 – «дефект», 3 – «датчик не отвечает»
+            optional uint32 APCNumberIn1 = 5; //[2] Количество вошедших пассажиров подсчитанное на  ДПП IRMA #1
+            optional uint32 APCNumberOut1 = 6; //[2] Количество вышедших пассажиров подсчитанное на  ДПП IRMA #1
+            optional uint32 APCNumberIn2 = 7; //[2] Количество вошедших пассажиров подсчитанное на  ДПП IRMA #2
+            optional uint32 APCNumberOut2 = 8; //[2] Количество вышедших пассажиров подсчитанное на  ДПП IRMA #2
+            optional uint32 APCNumberIn3 = 9; //[2] Количество вошедших пассажиров подсчитанное на  ДПП IRMA #3
+            optional uint32 APCNumberOut31 = 10; //[2] Количество вышедших пассажиров подсчитанное на  ДПП IRMA #3
+            optional uint32 APCNumberIn4 = 11; //[2] Количество вошедших пассажиров подсчитанное на  ДПП IRMA #4
+            optional uint32 APCNumberOut4 = 12; //[2] Количество вышедших пассажиров подсчитанное на  ДПП IRMA #4
+        }
+		optional group MobileEye = 6 { // Данные от MobileEye 
+            optional uint32 MobileEyeStatus = 1; //[1] Статус MobileEye (битовая маска событий)
+            repeated bytes CAN700 = 2; // Данные с MobileEye адресс кэн 700
+            repeated bytes CAN727 = 3; // Данные с MobileEye адресс кэн 727
+            repeated bytes CAN760 = 4; // Данные с MobileEye адресс кэн 760
+        }
+		optional group SafeDriving = 7 { // Данные о безопасном вождении 
+            optional uint32 EventMask = 1; //[4] Инициатор посылки события (Битовая маска) 0 – Скорость, 1 – Обороты, 2 – Ускорение, 3 – Боковое ускорение, 4 - Ускорение торможения, 5 - Вертикальное ускорение
+            optional uint32 SpeedThreshold = 2; //[4] Порог Скорости, поле присутствует если EventMask/Бит 0 = 1
+            optional uint32 RPMThreshold = 3; //[4] Порог Оборотов, поле присутствует если EventMask/Бит 1 = 1
+			repeated float AccelDangThs = 4 [packed=true]; //[4]
+        }
+		optional group GenComm= 8{ // Данные о GenComm генераторе
+	            optional uint32 GEN_OILPRESS1 = 1; 
+	            optional sint32 GEN_TEMP1 = 2; 
+	            optional float GEN_VOLT1 = 3; 
+	            optional uint32 GEN_RPM1 = 4; 
+	            optional float GEN_UL1_1 = 5; 
+	            optional float GEN_UL2_1 = 6; 
+	            optional float GEN_UL3_1 = 7; 
+	            optional float GEN_IL1_1 = 8; 
+	            optional float GEN_IL2_1 = 9; 
+	            optional float GEN_IL3_1 = 10; 
+	            optional uint32 GEN_STATUS1 = 11; 
+	            optional uint32 GEN_HOURS1 = 12; 
+				repeated bytes GEN_ALARM1 = 13; //[28]
+
+	            optional uint32 GEN_OILPRESS2 = 14; 
+	            optional sint32 GEN_TEMP2 = 15; 
+	            optional float GEN_VOLT2 = 16; 
+	            optional uint32 GEN_RPM2 = 17; 
+	            optional float GEN_UL1_2 = 18; 
+	            optional float GEN_UL2_2 = 19; 
+	            optional float GEN_UL3_2 = 20; 
+	            optional float GEN_IL1_2 = 21; 
+	            optional float GEN_IL2_2 = 22; 
+	            optional float GEN_IL3_2 = 23; 
+	            optional uint32 GEN_STATUS2 = 24; 
+	            optional uint32 GEN_HOURS2 = 25; 
+				repeated bytes GEN_ALARM2 = 26; //[28]
+
+	            optional uint32 GEN_OILPRESS3 = 27; 
+	            optional sint32 GEN_TEMP3 = 28; 
+	            optional float GEN_VOLT3 = 29; 
+	            optional uint32 GEN_RPM3 = 30; 
+	            optional float GEN_UL1_3 = 31; 
+	            optional float GEN_UL2_3 = 32; 
+	            optional float GEN_UL3_3 = 33; 
+	            optional float GEN_IL1_3 = 34; 
+	            optional float GEN_IL2_3 = 35; 
+	            optional float GEN_IL3_3 = 36; 
+	            optional uint32 GEN_STATUS3 = 37; 
+	            optional uint32 GEN_HOURS3 = 38; 
+				repeated bytes GEN_ALARM3 = 39; //[28]
+                optional float GEN_UC = 40; // величина напряжения зарядного генератора 
+				optional uint32 GEN_IC = 41; // ток заряда стартерных АКБ 
+                optional float GEN_FREQ = 42; // частота выдаваемого напряжения 
+				optional float GEN_UL1L2 = 43; // напряжения линейные 
+				optional float GEN_UL2L3 = 44; // --
+				optional float GEN_UL1L3 = 45; // --
+				optional uint32 POW_ACT_L1 = 46; // активная мощность 
+				optional uint32 POW_ACT_L2 = 47; // --
+				optional uint32 POW_ACT_L3 = 48; // --
+				optional uint32 POW_FULL_L1 = 49; // полная мощность
+				optional uint32 POW_FULL_L2 = 50; // --
+				optional uint32 POW_FULL_L3 = 51; // --
+				optional uint32 POW_REACT_L1 = 52; // реактивная мощность 
+				optional uint32 POW_REACT_L2 = 53; // --
+				optional uint32 POW_REACT_L3 = 54; // --
+				optional float POW_KOEF = 55; // коэффициент мощности
+				optional uint32 POW_GEN_TOTAL = 56; // общая выработка электроэнергии 
+				optional uint32 FUEL_LEVEL = 57; // текущий объём топлива
+
+				optional uint32 SMS_REGS_0 = 60; // состояние регистра состояния 0 для SMS-оповещений (для отладки)
+				optional uint32 SMS_REGS_1 = 61; // состояние регистра состояния 1 для SMS-оповещений (для отладки)
+				optional uint32 SMS_REGS_2 = 62; // состояние регистра состояния 2 для SMS-оповещений (для отладки)
+				optional uint32 SMS_REGS_3 = 63; // состояние регистра состояния 3 для SMS-оповещений (для отладки)
+				optional uint32 SMS_REGS_4 = 64; // состояние регистра состояния 4 для SMS-оповещений (для отладки)
+        }
+		optional group FuelSensorModbus= 9 { // Данные о сторонних датчиках уровня топлива
+	            optional float FuelLevel = 1; 
+	            optional float MedianLevel = 2; 
+	            optional uint32 LevelPercent = 3; 
+	            optional float FuelVolume = 4; 
+	            optional sint32 FuelTemp = 5; 
+	            optional float FuelWeight = 6; 
+	            optional float FuelDensity = 7; 
+	            optional sint32 VaporTemp = 8; 
+	            optional float VaporWeight = 9; 
+	            optional float LiquidWeight = 10; 
+	            repeated sint32 PointTemp = 11; 
+        }
+		optional group WeightControl= 10 { // Данные о весовом контроле
+	            repeated float AxelWeight = 1; 
+	            repeated float AxelLimit = 2; 
+	            optional float TotalWeight = 3; 
+	            optional float TotalWeightLimit = 4; 
+        }
+    }
+    
+    optional group ICONDt = 10 { // данные ICON
+        optional bytes VehicleStatus = 1; //[24] строка статуса ТС. Сейчас от ICON передаётся 20 символов+NULL. [Hex2ASCII]
+        optional uint32 VehicleStatusID = 2; //[1] ID статуса ТС. [Hex2Dec]
+        optional uint32 VehicleStatusGroupID = 3; //[1] ID группы статусов ТС. Резерв. [Hex2Dec]
+        optional uint64 MsgID = 4; //[8] UID сообщения
+        optional uint32 MsgStatus = 5; //[4] флаг статуса сообщения, см CMDPBF.proto
+        optional uint32 StatDate = 6; //[4] Время/дата изменения статуса сообщения (в OmnicommTime)
+        optional bytes VehicleStatusPrev = 7; //[24] строка предыдущего статуса ТС. Сейчас от ICON передаётся 20 символов+NULL. [Hex2ASCII]
+        optional uint32 VehicleStatusFlags = 8; // флаг активности текущего статуса ТС (0x1 - активен, 0x0 - завершен)
+    }
+    optional group OBDDt_J1979 = 11 { // Данные шины CAN (протокол J1979)
+        // в формулах расчёта значений OBD используются обозначения A, B, C, D
+        // uint32 data = [D | C | B | A], где А - младший байт, D - старший байт
+        optional uint32 SID_0x01_PID_0x0D = 1;// Скорость ТС = A (km/h) - Vehicle Speed Sensor       
+        optional uint32 SID_0x01_PID_0x31 = 2;// Пробег после сброса ошибок = (256 * A + B), (km) - Distance travelled since DTCs cleared
+        optional uint32 SID_0x01_PID_0x4E = 3;// Время работы двинателя после сброса ошибок = (A*256)+B (минуты) - Engine Run Time since diagnostic trouble codes cleare
+        optional uint32 SID_0x01_PID_0x42 = 4;// Напряжение борта, В = ((A*256) + B)/1000 (В) - Control module voltage 
+        optional uint32 SID_0x01_PID_0x0C = 5;// Обороты = (256 * A + B) / 4 (rpm) - Engine RPM
+        optional uint32 SID_0x01_PID_0x2F = 6;// Объема топлива = (100 * A / 255) (%) - Fuel Level Input
+        optional uint32 SID_0x01_PID_0x5E = 7;// Среднее значение мгновенного расхода = (256 * A + B) *0,05 (L/h) - Engine Fuel Rate
+             // Терминал получает несколько значений мгновенного расхода по OBD, рассчитывает и отправляет среднее
+        optional uint32 SID_0x01_PID_0x5C = 8;// Температура масла = (A - 40) (°C)- Engine Oil Temperature
+        optional uint32 SID_0x01_PID_0x05 = 9;// Температура ОЖ = (A - 40) (°C) - Engine Coolant Temperature
+        optional uint32 SID_0x01_PID_0x01 = 10;// Статус неисправности Check Engine - Monitor status since DTCs cleared
+				/* Malfunction Indicator Lamp (MIL) Status:
+                     Если A/бит 7 = 0, то ошибки нет
+                     Если A/бит 7 = 1, то ошибка есть
+				*/	
+		optional bytes SID_0x09_PID_0x02 = 11;// [18] VIN ТС = ASCII null-terminated string. Идут значащие символы, потом нулевой байт. Если перый байт нулувой, то строка пустая.
+		optional uint32 SID_0x01_PID_0x5E_quantity = 12; // Кол-во успешно полученных ответов при расчёте среднего значения мгновенного расхода (optional uint32 SID_0x01_PID_0x5E = 7)
+    }
+    optional group LOG = 16 {
+        repeated string Debug = 1; //[1024] Отладочный лог
+		optional uint32 LLSRefNum= 2; // признак наличия подключенных датчиков REF к терминалу – битовая маска. бит 0 соответсвует подключенному 1-ому датчику и т.д.
+		repeated uint32 LLSRefLevelBef= 3 [packed=true];
+		repeated uint32 LLSRefLevelAfter= 4 [packed=true];
+		repeated uint32 LLSRefKoef= 5 [packed=true];
+		repeated uint32 LLSRefSens= 6 [packed=true];
+		repeated uint32 LLSRefTemp= 7 [packed=true];
+    }
+}

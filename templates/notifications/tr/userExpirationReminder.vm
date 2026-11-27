@@ -1,0 +1,8 @@
+#set($subject = "Hesap Geçerlilik Tarihi Hatırlatması")
+#set($digest = "Hesabınızın geçerliliği $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone) tarihinde sona erecektir.")
+<!DOCTYPE html>
+<html>
+<body>
+Hesabınızın geçerliliği şu tarihte sona erecektir. $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>
