@@ -463,15 +463,20 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("priority", buf.readUnsignedByte());
 
-            position.setLongitude(buf.readInt() / 10000000.0);
-            position.setLatitude(buf.readInt() / 10000000.0);
+            double longitude = buf.readInt() / 10000000.0;
+            double latitude = buf.readInt() / 10000000.0;
+            boolean valid = Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+            if (valid) {
+                position.setLongitude(longitude);
+                position.setLatitude(latitude);
+            }
             position.setAltitude(buf.readShort());
             position.setCourse(buf.readUnsignedShort());
 
             int satellites = buf.readUnsignedByte();
             position.set(Position.KEY_SATELLITES, satellites);
 
-            position.setValid(satellites != 0);
+            position.setValid(valid && satellites != 0);
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
