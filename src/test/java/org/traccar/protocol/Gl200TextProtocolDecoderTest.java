@@ -252,6 +252,22 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 position(Checks.ATTRIBUTES));
 
         verifyDecode(decoder, buffer(
+                "+BUFF:GTFRI,8020060501,123456789012345,,51847,10,1,0,0.0,107,9.5,-46.633308,-23.550520,20261126111456,0724,0006,1A2B,01234567,00,0.0,,,,,100,1A0000,,,,20261126161629,DD37$"),
+                position().attribute(Position.KEY_BATTERY_LEVEL, 100).attribute(Position.KEY_IGNITION, false));
+
+        verifyDecode(decoder, buffer(
+                "+RESP:GTFRI,8020060501,123456789012345,,50738,10,1,1,0.0,190,27.5,-46.633308,-23.550520,20261126193923,0724,0006,1A2B,01234567,00,0.0,,,,,100,220000,,,,20261126193923,DE33$"),
+                position().attribute(Position.KEY_BATTERY_LEVEL, 100).attribute(Position.KEY_IGNITION, true));
+
+        verifyDecode(decoder, buffer(
+                "+BUFF:GTVGN,8020060501,123456789012345,,00,4,4181,1,0.0,190,27.3,-46.633308,-23.550520,20261126193922,0724,0006,1A2B,01234567,00,,0.0,20261126193922,DE31$"),
+                position().attribute(Position.KEY_IGNITION, true));
+
+        verifyDecode(decoder, buffer(
+                "+BUFF:GTVGF,8020060501,123456789012345,,00,4,617,1,0.0,190,21.0,-46.633308,-23.550520,20261126182940,0724,0006,1A2B,01234567,00,,0.0,20261126182941,DDE7$"),
+                position().attribute(Position.KEY_IGNITION, false));
+
+        verifyDecode(decoder, buffer(
                 "+RESP:GTFRI,8020040703,866314060299813,,,10,1,1,0.0,275,937.7,-68.891157,-33.008722,20260514010456,,,,,00,,,,,,100,110000,,,,20260514010458,BBCE$"),
                 position().attribute(Position.KEY_BATTERY_LEVEL, 100));
 
