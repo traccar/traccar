@@ -36,6 +36,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -107,6 +108,26 @@ public class PositionResource extends BaseResource {
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId()).stream();
         }
+    }
+
+    @Path("{id}/business")
+    @PUT
+    public Response updateBusiness(
+            @PathParam("id") long positionId, @QueryParam("business") boolean business) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.Equals("id", positionId)));
+        permissionsService.checkPermission(Device.class, getUserId(), position.getDeviceId());
+
+        if (business) {
+            position.set(Position.KEY_BUSINESS, true);
+        } else {
+            position.getAttributes().remove(Position.KEY_BUSINESS);
+        }
+        storage.updateObject(position, new Request(
+                new Columns.Include("attributes"), new Condition.Equals("id", positionId)));
+        return Response.noContent().build();
     }
 
     @Path("{id}")

@@ -1389,6 +1389,29 @@ paths:
         '404':
           description: Not found
           content: {}
+  /positions/{id}/business:
+    put:
+      operationId: updatePositionBusiness
+      summary: Update a Position's business status
+      description: Trip reports use the business status of the starting position.
+      tags:
+        - Positions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: business
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: No Content
+        '403':
+          description: Forbidden
   /positions/kml:
     get:
       operationId: getPositionsKml
