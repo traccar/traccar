@@ -117,6 +117,12 @@ public class ConnectionManager implements BroadcastInterface {
         return sessionsByDeviceId.get(deviceId);
     }
 
+    private DeviceSession checkDeviceSession(DeviceSession deviceSession) {
+        deviceSession.setLastUpdate(System.currentTimeMillis());
+        cacheManager.getObject(Device.class, deviceSession.getDeviceId()).checkDisabled();
+        return deviceSession;
+    }
+
     public DeviceSession getDeviceSession(
             Protocol protocol, Channel channel, SocketAddress remoteAddress,
             String... uniqueIds) throws Exception {
@@ -130,8 +136,7 @@ public class ConnectionManager implements BroadcastInterface {
                 for (String uniqueId : uniqueIds) {
                     DeviceSession deviceSession = endpointSessions.get(uniqueId);
                     if (deviceSession != null) {
-                        deviceSession.setLastUpdate(System.currentTimeMillis());
-                        return deviceSession;
+                        return checkDeviceSession(deviceSession);
                     }
                 }
             }
@@ -139,9 +144,9 @@ public class ConnectionManager implements BroadcastInterface {
             if (endpointSessions != null) {
                 DeviceSession deviceSession = endpointSessions.values().stream().findAny().orElse(null);
                 if (deviceSession != null) {
-                    deviceSession.setLastUpdate(System.currentTimeMillis());
+                    return checkDeviceSession(deviceSession);
                 }
-                return deviceSession;
+                return null;
             }
             return null;
         }
