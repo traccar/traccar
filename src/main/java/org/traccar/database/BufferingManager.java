@@ -92,9 +92,7 @@ public class BufferingManager {
                     synchronized (buffer) {
                         buffer.get(holder.position.getDeviceId()).remove(holder);
                     }
-                    holder.context.executor().execute(() -> {
-                        callback.onReleased(holder.context, holder.position);
-                    });
+                    callback.onReleased(holder.context, holder.position);
                 },
                 threshold, TimeUnit.MILLISECONDS);
     }

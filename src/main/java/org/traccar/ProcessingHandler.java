@@ -162,7 +162,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             queue.offer(new QueuedPosition(context, position));
         }
         if (!queued) {
-            processPositionHandlers(context, position);
+            if (context.executor().inEventLoop()) {
+                processPositionHandlers(context, position);
+            } else {
+                context.executor().execute(() -> processPositionHandlers(context, position));
+            }
         }
     }
 
