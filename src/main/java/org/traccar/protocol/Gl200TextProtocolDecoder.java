@@ -104,6 +104,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("FE", "GV50M"),
             Map.entry("802004", "GV58LAU"),
             Map.entry("802005", "GV355CEU"),
+            Map.entry("802006", "GV57CG"),
             Map.entry("80201E", "GV30CEU"));
 
     private boolean ignoreFixTime;
@@ -1007,7 +1008,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 decodeAnalog(position, 3, v[index - 1]);
             }
         } else if (model.startsWith("GV3") && model.endsWith("CEU")
-                || model.startsWith("GV600M") || model.equals("GV58LAU")) {
+                || model.startsWith("GV600M") || model.matches("GV58LAU|GV57CG")) {
             index += 1; // reserved
         }
 
@@ -1187,7 +1188,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         index += 1; // device name
         if (model.equals("CV200")
-                || type.startsWith("V") && model.matches("GV500MAP|GV55W|GV350CEU|GV355CEU")) {
+                || type.startsWith("V") && model.matches("GV500MAP|GV55W|GV350CEU|GV355CEU|GV57CG")) {
             index += 1; // reserved
             index += 1; // report type
         } else if (type.startsWith("V") && model.equals("GV50M")) {
