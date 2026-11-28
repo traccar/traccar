@@ -198,6 +198,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         };
     }
 
+    private void decodeAlertId(Position position, int alertId) {
+        position.set(Position.KEY_EVENT, alertId);
+        position.addAlarm(decodeAlert(alertId));
+        if ((alertId == 33 || alertId == 34) && !position.hasAttribute(Position.KEY_IGNITION)) {
+            position.set(Position.KEY_IGNITION, alertId == 33);
+        }
+    }
+
     private Position decode4(
             Channel channel, SocketAddress remoteAddress, String[] values) {
         int index = 0;
@@ -407,7 +415,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             }
             case "EMG" -> position.addAlarm(decodeEmergency(Integer.parseInt(values[index++])));
             case "EVT" -> position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
-            case "ALT" -> position.addAlarm(decodeAlert(Integer.parseInt(values[index++])));
+            case "ALT" -> decodeAlertId(position, Integer.parseInt(values[index++]));
             case "UEX" -> index = decodeSerialData(position, values, index);
         }
 

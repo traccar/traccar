@@ -361,6 +361,76 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     }
 
     @Test
+    public void testDecodeAlert() throws Exception {
+
+        var decoder = inject(new SuntechProtocolDecoder(null));
+
+        decoder.setHbm(1);
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000002;40;323;20261025;21:04:13;fcdef;+19.042778;-098.198333;000.000;289.87;18;1;36509298;13.93;110000;33;060482;4.1;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 33)
+                        .attribute(Position.KEY_IGNITION, true)
+                        .attribute(Position.KEY_ALARM, null));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000002;40;323;20261025;21:06:40;fcdef;+19.042778;-098.198333;000.000;210.02;19;1;36509824;12.46;010000;34;060484;4.1;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 34)
+                        .attribute(Position.KEY_IGNITION, false));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000001;40;323;20261025;20:51:46;fbcdef;+19.042778;-098.198333;000.185;267.01;5;1;2139285;12.57;000000;33;004592;4.0;0"),
+                position()
+                        .attribute(Position.KEY_EVENT, 33)
+                        .attribute(Position.KEY_IGNITION, false));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000001;40;323;20261025;20:55:49;fbcdef;+19.042778;-098.198333;000.000;317.73;11;1;2139338;12.75;000000;9;004596;4.0;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 9)
+                        .attribute(Position.KEY_ALARM, null));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000001;40;323;20261025;20:57:09;fbcdef;+19.042778;-098.198333;000.000;022.34;6;1;2139338;12.71;100000;10;004597;4.0;0"),
+                position()
+                        .attribute(Position.KEY_EVENT, 10)
+                        .attribute(Position.KEY_ALARM, null));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000003;40;318;20261031;13:22:14;fef01;+19.042778;-098.198333;000.000;205.98;17;1;69098118;12.32;000000;13"),
+                position()
+                        .attribute(Position.KEY_EVENT, 13)
+                        .attribute(Position.KEY_ALARM, null));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000004;40;318;20261026;16:34:49;f0123;+19.042778;-098.198333;000.000;000.00;0;0;12727586;0.00;010000;44;270602;0.0;0"),
+                position()
+                        .attribute(Position.KEY_EVENT, 44)
+                        .attribute(Position.KEY_ALARM, null));
+
+        verifyDecode(decoder, buffer(
+                "ST300ALT;100000004;40;318;20261026;17:39:24;f0123;+19.042778;-098.198333;000.000;301.14;22;1;12728970;0.00;010000;41;270661;3.9;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 41)
+                        .attribute(Position.KEY_ALARM, Position.ALARM_POWER_CUT));
+
+        verifyDecode(decoder, buffer(
+                "ST600ALT;008084783;20;419;20180308;18:00:36;0032cc3e;736;3;445c;41;-16.530023;-068.084267;018.640;267.99;10;1;11655;13.33;;33;000061;4.5;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 33)
+                        .attribute(Position.KEY_IGNITION, true));
+
+        verifyDecode(decoder, buffer(
+                "ST600ALT;008084783;20;419;20180308;18:10:36;0032cc3e;736;3;445c;41;-16.530023;-068.084267;000.000;267.99;10;1;11655;13.33;;34;000071;4.5;1"),
+                position()
+                        .attribute(Position.KEY_EVENT, 34)
+                        .attribute(Position.KEY_IGNITION, false));
+
+    }
+
+    @Test
     public void testDecodeDriver() throws Exception {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
