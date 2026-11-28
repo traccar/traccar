@@ -58,6 +58,8 @@ public class Event extends Message {
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
     public static final String TYPE_GEOFENCE_CROSSED = "geofenceCrossed";
 
+    public static final String TYPE_ORDER_VISIT = "orderVisit";
+
     public static final String TYPE_PROXIMITY_ENTER = "proximityEnter";
     public static final String TYPE_PROXIMITY_EXIT = "proximityExit";
     public static final String TYPE_UNACCOMPANIED_MOTION = "unaccompaniedMotion";
@@ -109,6 +111,16 @@ public class Event extends Message {
 
     public void setMaintenanceId(long maintenanceId) {
         this.maintenanceId = maintenanceId;
+    }
+
+    private long orderId = 0;
+
+    public long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(long orderId) {
+        this.orderId = orderId;
     }
 
 }
