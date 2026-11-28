@@ -49,8 +49,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI|RUV[0-9]{2}),?") // type
-            .number("(d+)?")                     // event
+            .expression("(?:RGP|RC[PQRTUV]|RB[QRV]|RH[QRV]|RUS00|RPI|RUV[0-9]{2}),?") // type
+            .number("(d+|xx(?=d{12}))?")         // event
             .expression(",?")
             .expression("(?:[A-Z][A-Z0-9]*,)?")  // protocol
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
@@ -67,6 +67,28 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
             .groupBegin()
+            .number("(xx)")                      // input
+            .number("(xx)")                      // outputs
+            .number("(ddd)")                     // power
+            .number("(x{8})")                    // odometer
+            .number("[01]")                      // gps power
+            .number("([0-3])")                   // fix mode
+            .number("(dd)")                      // pdop
+            .number("(dd)")                      // satellites
+            .number("xxxx")                      // data age
+            .number("[01]")                      // modem power
+            .number("[0-5]")                     // gsm status
+            .number("(dd)")                      // rssi
+            .number("(ddd)?")                    // battery
+            .number("(x{8})?")                   // hours
+            .groupBegin()
+            .number("([-+]dddd)")                // temperature 1
+            .number("(xx)")                      // seconds from last
+            .number("(?:([-+]dddd)(xx))?")       // temperature 2
+            .groupEnd("?")
+            .number("[01]?")                     // driver session
+            .number("(?:;(x{16})(?=[;<]))?")     // driver id
+            .or()
             .number("(d)")                       // fix mode
             .number("xx")                        // data age
             .number("(xx)")                      // input
@@ -84,30 +106,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)")                      // event
             .number("(dd)")                      // hdop
             .groupEnd()
-            .or()
-            .groupBegin()
-            .number("(xx)")                      // input
-            .number("xx")                        // satellites / outputs
-            .number("(ddd)")                     // battery
-            .number("(x{8})")                    // odometer
-            .number("[01]")                      // gps power
-            .groupBegin()
-            .number("([023])")                   // fix mode
-            .number("(dd)")                      // pdop
-            .number("dd")                        // satellites
-            .number("xxxx")                      // data age
-            .number("[01]")                      // modem power
-            .number("[0-5]")                     // gsm status
-            .number("(dd)")                      // rssi
-            .groupBegin()
-            .number("([-+]dddd)")                // temperature 1
-            .number("xx")                        // seconds from last
-            .number("([-+]dddd)")                // temperature 2
-            .number("xx")                        // seconds from last
             .groupEnd("?")
-            .groupEnd("?")
-            .groupEnd("?")
-            .groupEnd()
             .groupEnd("?")
             .any()
             .compile();
@@ -177,7 +176,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         boolean isAkroz = sentence.startsWith("RUV");
-        boolean isRinho = sentence.startsWith("RCQ") || sentence.startsWith("RCV") || sentence.startsWith("RBR");
+        boolean isRinho = sentence.startsWith("RC") || sentence.startsWith("RB") || sentence.startsWith("RH");
 
         Position position = new Position(getProtocolName());
 
@@ -192,7 +191,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            event = parser.nextInt();
+            event = isRinho ? parser.nextHexInt() : parser.nextInt();
         }
 
         if (parser.hasNext(6)) {
@@ -213,6 +212,39 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(convertSpeed(parser.nextDouble(0), isAkroz || isRinho ? "kmh" : "mph"));
         position.setCourse(parser.nextDouble(0));
+
+        if (parser.hasNext(8)) {
+            int input = parser.nextHexInt();
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 7));
+            position.set(Position.KEY_INPUT, input);
+            position.set(Position.KEY_OUTPUT, parser.nextHexInt());
+            position.set(Position.KEY_POWER, parser.nextInt() / 10.0);
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
+            valid = parser.nextInt() >= 2;
+            position.set(Position.KEY_PDOP, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.nextInt() / 100.0);
+        }
+        if (parser.hasNext()) {
+            long hours = parser.nextHexLong();
+            if (hours > 0) {
+                position.set(Position.KEY_HOURS, hours * 1000);
+            }
+        }
+        for (int i = 1; i <= 2; i++) {
+            if (parser.hasNext(2)) {
+                int temperature = parser.nextInt();
+                if (!parser.next().equals("FF")) {
+                    position.set(Position.PREFIX_TEMP + i, temperature / 100.0);
+                }
+            }
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+        }
 
         if (parser.hasNext(2)) {
             int fixMode = parser.nextInt();
@@ -241,22 +273,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 event = value;
             }
             position.set(Position.KEY_HDOP, parser.nextInt());
-        }
-
-        if (parser.hasNext(3)) {
-            position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-            position.set(Position.KEY_BATTERY, parser.nextInt(0));
-            position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
-        }
-
-        if (parser.hasNext(3)) {
-            valid = parser.nextInt() > 0;
-            position.set(Position.KEY_PDOP, parser.nextInt());
-            position.set(Position.KEY_RSSI, parser.nextInt());
-        }
-        if (parser.hasNext(2)) {
-            position.set(Position.PREFIX_TEMP + 1, parser.nextInt() / 100.0);
-            position.set(Position.PREFIX_TEMP + 2, parser.nextInt() / 100.0);
         }
 
         position.setValid(valid == null || valid);
@@ -326,7 +342,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(decodeAlarmAkroz(event));
             } else if (sentence.charAt(5) == ',') {
                 position.addAlarm(decodeAlarm2(event));
-            } else {
+            } else if (!isRinho) {
                 position.addAlarm(decodeAlarm(event));
             }
         }
