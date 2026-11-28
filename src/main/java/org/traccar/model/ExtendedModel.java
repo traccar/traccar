@@ -160,7 +160,11 @@ public class ExtendedModel extends BaseModel {
         } else if (value instanceof Number numberValue) {
             return numberValue.doubleValue();
         } else {
-            return Double.parseDouble(value.toString());
+            try {
+                return Double.parseDouble(value.toString());
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
         }
     }
 
@@ -190,7 +194,11 @@ public class ExtendedModel extends BaseModel {
         } else if (value instanceof Number numberValue) {
             return numberValue.longValue();
         } else {
-            return Long.parseLong(value.toString());
+            try {
+                return Long.parseLong(value.toString());
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
         }
     }
 }
