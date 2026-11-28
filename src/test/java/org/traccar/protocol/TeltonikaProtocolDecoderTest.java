@@ -21,7 +21,19 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         verifyDecode(decoder, binary(
                 "000000000000010e8e020000019769de9f9800015299f718b278040018007708000000000013000b00ef0100f00000150500c80000450100010100b30000020000030000b401017c00000500b5001a00b6000c004238d40043000000440000000200f10000539b00100000efc70001004e000000000000000000000000019769de5d3b00015299f718b27804001800770800002c350001000000000000000000012c3500700124050f4e65766572615f33000000000000000f067cd9f4110c4006020c8f0701340e020c1c24050f4e65766572615f31000000000000000f067cd9f411334606020c380701340e020c2624050f4e65766572615f32000000000000000f067cd9f411464706020c240701360e020c26020000a8b0"),
                 position(),
-                position());
+                position()
+                        .attribute("tag1Mac", "7cd9f4110c40")
+                        .attribute("tag1Temp", 3215)
+                        .attribute("tag1Humidity", 52)
+                        .attribute("tag1Battery", 3100)
+                        .attribute("tag2Mac", "7cd9f4113346")
+                        .attribute("tag2Temp", 3128)
+                        .attribute("tag2Humidity", 52)
+                        .attribute("tag2Battery", 3110)
+                        .attribute("tag3Mac", "7cd9f4114647")
+                        .attribute("tag3Temp", 3108)
+                        .attribute("tag3Humidity", 54)
+                        .attribute("tag3Battery", 3110));
 
         verifyDecode(decoder, binary(
                 "00000000000000768e010000018fdc4b27cb015b3e33ceefa529030009013f0e0000022400010000000000000000000102240049010f0001c60106babbf36300550202806d0f0001ca01063456555565690202806b0f0001d10106467975425450020280690b0001c90106fa54ba8d00550b0001cf0106cabbf36300550100005455"),
@@ -29,7 +41,27 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
         verifyDecode(decoder, binary(
                 "00000000000000728e010000018b23dd796300fbf7263c24f9e11a0000000000000002240001000000000000000000010224004501210001e50110cde39f7e42bb55aa788e4a29ed650055020ab70a8f264c6000ffff6b210001b00110f89b907e42bb55aaa3463b29ed650055020ab708bb2600ae0500096c01000051d4"),
-                position());
+                position()
+                        .attribute("tag1Id", "cde39f7e42bb55aa788e4a29ed650055")
+                        .attribute("tag1Rssi", -27)
+                        .attribute("tag1Temp", 2703)
+                        .attribute("tag1Humidity", 38)
+                        .attribute("tag1Motion", false)
+                        .attribute("tag1MotionCount", 19552)
+                        .attribute("tag1Pitch", 0)
+                        .attribute("tag1AngleRoll", -1)
+                        .attribute("tag1LowBattery", false)
+                        .attribute("tag1Voltage", 3070)
+                        .attribute("tag1Magnet", false)
+                        .attribute("tag1Mac", null)
+                        .attribute("tag2Id", "f89b907e42bb55aaa3463b29ed650055")
+                        .attribute("tag2Temp", 2235)
+                        .attribute("tag2Humidity", 38)
+                        .attribute("tag2Motion", false)
+                        .attribute("tag2MotionCount", 174)
+                        .attribute("tag2Pitch", 5)
+                        .attribute("tag2AngleRoll", 9)
+                        .attribute("tag2Voltage", 3080));
 
         verifyDecode(decoder, binary(
                 "000000000000004b8e010000018368952793000f0e54fc209ab05800b300b40e00002a4f0001000000000000000000012a4f001e011c0001a40110eb47706aa38255aa96f21a154e2d00550d01000e020bd6010000823f"),

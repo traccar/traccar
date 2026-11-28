@@ -565,29 +565,43 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         index += 1;
                     }
                 } else if (id == 548 || id == 10828 || id == 10829 || id == 10831 || id == 11317) {
+                    if (!buf.isReadable(length)) {
+                        break;
+                    }
                     ByteBuf data = buf.readSlice(length);
-                    data.readUnsignedByte(); // header
+                    if (!data.isReadable() || data.readUnsignedByte() != 1) {
+                        continue;
+                    }
                     for (int i = 1; data.isReadable(); i++) {
-                        ByteBuf beacon = data.readSlice(data.readUnsignedByte());
-                        while (beacon.isReadable()) {
+                        int beaconLength = data.readUnsignedByte();
+                        if (beaconLength > data.readableBytes()) {
+                            break;
+                        }
+                        ByteBuf beacon = data.readSlice(beaconLength);
+                        while (beacon.readableBytes() >= 2) {
                             int parameterId = beacon.readUnsignedByte();
                             int parameterLength = beacon.readUnsignedByte();
+                            if (parameterLength > beacon.readableBytes()) {
+                                break;
+                            }
+                            int expectedLength = switch (parameterId) {
+                                case 0, 7, 8, 9, 11, 13 -> 1;
+                                case 6, 10, 12, 14 -> 2;
+                                case 15 -> 6;
+                                default -> -1;
+                            };
+                            if (expectedLength >= 0 && parameterLength != expectedLength) {
+                                beacon.skipBytes(parameterLength);
+                                continue;
+                            }
                             switch (parameterId) {
                                 case 0 -> position.set("tag" + i + "Rssi", (int) beacon.readByte());
                                 case 1 -> {
                                     String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
                                     position.set("tag" + i + "Id", beaconId);
                                 }
-                                case 2 -> {
-                                    ByteBuf beaconData = beacon.readSlice(parameterLength);
-                                    int flag = beaconData.readUnsignedByte();
-                                    if (BitUtil.check(flag, 6)) {
-                                        position.set("tag" + i + "LowBattery", true);
-                                    }
-                                    if (BitUtil.check(flag, 7)) {
-                                        position.set("tag" + i + "Voltage", beaconData.readUnsignedByte() * 10 + 2000);
-                                    }
-                                }
+                                case 2 -> decodeAdditionalData(
+                                        position, "tag" + i, beacon.readSlice(parameterLength));
                                 case 5 -> {
                                     String name = beacon.readCharSequence(
                                             parameterLength, StandardCharsets.UTF_8).toString();
@@ -622,6 +636,98 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 String driver = new String(ByteBuffer.allocate(16).putLong(driverMsb).putLong(driverLsb).array());
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, driver);
             }
+        }
+    }
+
+    private void decodeEyeData(Position position, String prefix, ByteBuf data) {
+        if (!data.isReadable()) {
+            return;
+        }
+        int flags = data.readUnsignedByte();
+        int length = (BitUtil.check(flags, 0) ? 2 : 0)
+                + (BitUtil.check(flags, 1) ? 1 : 0)
+                + (BitUtil.check(flags, 4) ? 2 : 0)
+                + (BitUtil.check(flags, 5) ? 3 : 0)
+                + (BitUtil.check(flags, 7) ? 1 : 0);
+        // Validate the whole slice before publishing any readings, including flag-only states.
+        if (data.readableBytes() != length) {
+            return;
+        }
+        if (BitUtil.check(flags, 0)) {
+            position.set(prefix + "Temp", data.readShort());
+        }
+        if (BitUtil.check(flags, 1)) {
+            position.set(prefix + "Humidity", data.readUnsignedByte());
+        }
+        if (BitUtil.check(flags, 2)) {
+            position.set(prefix + "Magnet", BitUtil.check(flags, 3));
+        }
+        if (BitUtil.check(flags, 4)) {
+            int motion = data.readUnsignedShort();
+            position.set(prefix + "Motion", BitUtil.check(motion, 15));
+            position.set(prefix + "MotionCount", motion & 0x7fff);
+        }
+        if (BitUtil.check(flags, 5)) {
+            position.set(prefix + "Pitch", (int) data.readByte());
+            position.set(prefix + "AngleRoll", (int) data.readShort());
+        }
+        position.set(prefix + "LowBattery", BitUtil.check(flags, 6));
+        if (BitUtil.check(flags, 7)) {
+            position.set(prefix + "Voltage", data.readUnsignedByte() * 10 + 2000);
+        }
+    }
+
+    private boolean decodeEyeAdvertisement(Position position, String prefix, ByteBuf data) {
+        ByteBuf eyeData = null;
+        boolean advertisement = false;
+        while (data.isReadable()) {
+            int length = data.readUnsignedByte();
+            if (length == 0) {
+                while (data.isReadable()) {
+                    if (data.readUnsignedByte() != 0) {
+                        return advertisement;
+                    }
+                }
+                break;
+            }
+            if (length > data.readableBytes()) {
+                return advertisement;
+            }
+            ByteBuf field = data.readSlice(length);
+            int type = field.readUnsignedByte();
+            boolean valid = field.isReadable() && switch (type) {
+                case 0 -> false;
+                case 1, 0x0a -> field.readableBytes() == 1;
+                case 2, 3 -> field.readableBytes() % 2 == 0;
+                case 4, 5 -> field.readableBytes() % 4 == 0;
+                case 6, 7 -> field.readableBytes() % 16 == 0;
+                case 8, 9 -> ByteBufUtil.isText(field, StandardCharsets.UTF_8);
+                case 0xff -> field.readableBytes() >= 2;
+                default -> true;
+            };
+            if (!valid) {
+                return advertisement;
+            }
+            advertisement = true;
+            if (type == 0xff && field.readableBytes() >= 3
+                    && field.readUnsignedShortLE() == 0x089a && field.readUnsignedByte() == 1) {
+                if (eyeData != null) {
+                    return true; // Ambiguous manufacturer data.
+                }
+                eyeData = field.readSlice(field.readableBytes());
+            }
+        }
+        if (eyeData != null) {
+            decodeEyeData(position, prefix, eyeData);
+        }
+        return advertisement;
+    }
+
+    private void decodeAdditionalData(Position position, String prefix, ByteBuf data) {
+        // Advertisements take precedence, including foreign manufacturers and unknown versions.
+        // Bare EYE flags have no manufacturer identity; accept only their exact optional-field layout.
+        if (!decodeEyeAdvertisement(position, prefix, data.duplicate())) {
+            decodeEyeData(position, prefix, data);
         }
     }
 
