@@ -12,11 +12,11 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new EelinkProtocolDecoder(null));
 
         verifyDecode(decoder, binary(
-                "28280100180002035532209441038701f402101213000109b0008833b5"));
+                "282801000a00010869137082327123"));
 
         verifyDecode(decoder, binary(
-                "2828030004005f046b"),
-                position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, false));
+                "282803000400010007"),
+                position(Checks.ATTRIBUTES).attribute(Position.KEY_IGNITION, true));
 
         verifyDecode(decoder, binary(
                 "282815003200406af517fb03fd47cdb2fab8958c03d60000007b0d02d400052739000051572102066b000000240000ec67104504aa0000"),
@@ -31,7 +31,7 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
                 position(Checks.ATTRIBUTES).attribute("idleTime", 30));
 
         verifyDecode(decoder, binary(
-                "282880001400010100000006534c4545503a302c302c313830"),
+                "28288000120001010000000656455253494f4e3a312e30"),
                 position(Checks.ATTRIBUTES).attribute(Position.KEY_INDEX, 6L));
 
         verifyDecode(decoder, binary(

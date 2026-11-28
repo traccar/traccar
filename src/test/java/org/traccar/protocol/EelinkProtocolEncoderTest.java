@@ -12,11 +12,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeTcp() throws Exception {
 
-        var decoder = mock(EelinkProtocolDecoder.class);
-        var encoder = inject(new EelinkProtocolEncoder(null, false));
-        var channel = channel(decoder, encoder);
-
-        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
+        var channel = channel(inject(new EelinkProtocolEncoder(null, false)));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -30,11 +26,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeUdp() throws Exception {
 
-        var decoder = mock(EelinkProtocolDecoder.class);
-        var encoder = inject(new EelinkProtocolEncoder(null, true));
-        var channel = channel(decoder, encoder);
-
-        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_EELINK);
+        var channel = channel(inject(new EelinkProtocolEncoder(null, true)));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -52,7 +44,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, false));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
+        when(decoder.getHeader()).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -70,7 +62,7 @@ public class EelinkProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new EelinkProtocolEncoder(null, true));
         var channel = channel(decoder, encoder);
 
-        when(decoder.getHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
+        when(decoder.getUdpHeader(1)).thenReturn(EelinkProtocolDecoder.HEADER_ITER);
 
         Command command = new Command();
         command.setDeviceId(1);

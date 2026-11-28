@@ -52,7 +52,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{4}),")                   // course
             .number("(x{8}),")                   // status
             .number("(x+),")                     // signal
-            .number("(d+),")                     // power
+            .number("(d+),")                     // battery level
             .number("(x+),")                     // fuel / index
             .number("(x+)")                      // odometer
             .groupBegin()
@@ -226,7 +226,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextHexInt());
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         if ("E3+4G".equals(model)) {
             position.set(Position.KEY_INDEX, parser.nextHexInt());
@@ -246,7 +246,8 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() / 100.0);
-            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 1, position.getDouble(Position.KEY_POWER));
             position.set(Position.KEY_SATELLITES, parser.nextInt());
         }
 
