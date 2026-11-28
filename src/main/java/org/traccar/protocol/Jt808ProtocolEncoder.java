@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
 
@@ -42,6 +43,78 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
 
     public Jt808ProtocolEncoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private static int readBoundedInteger(Command command, String key, int defaultValue, int minimum, int maximum) {
+        String text = command.getString(key);
+        int value = text != null ? Integer.parseInt(text) : defaultValue;
+        if (value < minimum || value > maximum) {
+            throw new IllegalArgumentException("Value out of range: " + key);
+        }
+        return value;
+    }
+
+    private static byte[] readFtpString(Command command, String key) {
+        String value = command.getString(key);
+        if (value == null || !StandardCharsets.US_ASCII.newEncoder().canEncode(value)
+                || value.indexOf('\r') >= 0 || value.indexOf('\n') >= 0 || value.indexOf('\0') >= 0
+                || value.length() > 255) {
+            throw new IllegalArgumentException("Missing or unsupported FTP string: " + key);
+        }
+        return value.getBytes(StandardCharsets.US_ASCII);
+    }
+
+    private void encodeVideoFileDownload(ByteBuf data, Command command) {
+        byte[] server = readFtpString(command, Command.KEY_SERVER);
+        byte[] username = readFtpString(command, "username");
+        byte[] password = readFtpString(command, "password");
+        byte[] path = readFtpString(command, "path");
+        if (server.length == 0 || 31 + server.length + username.length + password.length + path.length > 1023) {
+            throw new IllegalArgumentException("Empty FTP server or request exceeds the maximum payload length");
+        }
+        int port = readBoundedInteger(command, Command.KEY_PORT, 21, 1, 65535);
+        int channel = readBoundedInteger(command, Command.KEY_INDEX, 1, 1, 31);
+        int resourceType = readBoundedInteger(command, "resourceType", 3, 0, 3);
+        int streamType = readBoundedInteger(command, "streamType", 0, 0, 2);
+        int storageType = readBoundedInteger(command, "storageType", 0, 0, 2);
+        int networkConditions = readBoundedInteger(command, "networkConditions", 7, 1, 7);
+        String alarmMask = command.getString("alarmMask", "0");
+        if (!alarmMask.matches("[0-9a-fA-F]{1,16}")) {
+            throw new IllegalArgumentException("Alarm mask must be a hexadecimal value of up to 64 bits");
+        }
+        long alarmMaskValue = Long.parseUnsignedLong(alarmMask, 16);
+        Instant from = Instant.parse(command.getString("from"));
+        Instant to = Instant.parse(command.getString("to"));
+        String configuredTimezone = AttributeUtil.lookup(
+                getCacheManager(), Keys.DECODER_TIMEZONE, command.getDeviceId());
+        var timezone = TimeZone.getTimeZone(configuredTimezone != null ? configuredTimezone : "GMT+8").toZoneId();
+        var localStart = from.atZone(timezone).toLocalDateTime();
+        var localEnd = to.atZone(timezone).toLocalDateTime();
+        if (!from.isBefore(to) || !localStart.isBefore(localEnd)
+                || localStart.getYear() < 2000 || localEnd.getYear() > 2099
+                || from.getNano() != 0 || to.getNano() != 0
+                || timezone.getRules().getValidOffsets(localStart).size() != 1
+                || timezone.getRules().getValidOffsets(localEnd).size() != 1) {
+            throw new IllegalArgumentException("Interval cannot be represented in device local time");
+        }
+        var formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss").withZone(timezone);
+        data.writeByte(server.length);
+        data.writeBytes(server);
+        data.writeShort(port);
+        data.writeByte(username.length);
+        data.writeBytes(username);
+        data.writeByte(password.length);
+        data.writeBytes(password);
+        data.writeByte(path.length);
+        data.writeBytes(path);
+        data.writeByte(channel);
+        data.writeBytes(DataConverter.parseHex(formatter.format(from)));
+        data.writeBytes(DataConverter.parseHex(formatter.format(to)));
+        data.writeLong(alarmMaskValue);
+        data.writeByte(resourceType);
+        data.writeByte(streamType);
+        data.writeByte(storageType);
+        data.writeByte(networkConditions);
     }
 
     @Override
@@ -216,6 +289,15 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                     data.writeByte(0); // main stream
                     return decoder.formatMessage(
                             Jt808ProtocolDecoder.MSG_VIDEO_CONTROL, id, false, data);
+                case Command.TYPE_VIDEO_FILE_DOWNLOAD:
+                    try {
+                        encodeVideoFileDownload(data, command);
+                    } catch (RuntimeException error) {
+                        data.release();
+                        throw error;
+                    }
+                    return decoder.formatMessage(
+                            Jt808ProtocolDecoder.MSG_VIDEO_FILE_UPLOAD, id, false, data);
                 default:
                     return null;
             }
